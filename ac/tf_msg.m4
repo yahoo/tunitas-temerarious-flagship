@@ -8,7 +8,11 @@ dnl
 dnl Also for compatibility with Autoconf, which inexplicably does not use the
 dnl gerund form of "warning," but rather prefers "error" and "warn" but "notice"
 dnl
-dnl TF_MSG_WARN(message)
+dnl Deprecated:
+dnl
+dnl    TF_MSG_WARN(message)
+dnl
+dnl whereas "warn" is always a surprise, we all expect the gerund form "warning."
 dnl
 
 AC_DEFUN([TF_MSG_ERROR],   [AC_MSG_ERROR([$1])])
