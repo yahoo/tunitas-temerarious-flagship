@@ -1,5 +1,10 @@
 dnl
-dnl TF_ENABLE_<that>
+dnl TD_EHABLE_<that> for GNU, GDB, GCC, MOCK_BUILD
+dnl
+dnl TF_ENABLE_GNU           -D_GNU_SOURCE
+dnl TF_ENABLE_GDB           -ggdb
+dnl TF_ENABLE_GCC           C++17, C++2a, etc.
+dnl TF_ENABLE_MOCK_BUILD    /etc/mock, /build/mock for the rpm package(s)
 dnl
 dnl Some basic well-understood enablements
 dnl
@@ -17,7 +22,7 @@ AC_DEFUN([TF_ENABLE_MOCK_BUILD], [
     AC_REQUIRE([SCOLD_ENABLE_CONFIGURE_VERBOSE])
     AC_REQUIRE([TF_WITH_HYPOGEAL_TWILIGHT])
     AC_REQUIRE([TF_WITH_TEMERARIOUS_FLAGSHIP])
-    SCOLD_MSG_VERBOSE([[TF]_[ENABLE]_[MOCK]_[BUILD] is unimplemented, do you really need mock building at this point?])
+    TF_MSG_VERBOSE([[TF]_[ENABLE]_[MOCK]_[BUILD] is unimplemented, do you really need mock building at this point?])
     dnl
     dnl ENABLE_MOCK_BUILD__ACTIONS_WHEN_DISABLED
     dnl ... still responsible for creating ./mk/configured.mk with stub entries
@@ -34,5 +39,3 @@ AC_DEFUN([TF_ENABLE_MOCK_BUILD], [
 #
 __EOF__
 ])
-
-dnl end

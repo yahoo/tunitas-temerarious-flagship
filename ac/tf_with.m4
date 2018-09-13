@@ -1,13 +1,18 @@
 dnl
-dnl TF_WITH_MODULE(name-dashes, name_underscores, explanation)
+dnl TF_WITH_MODULE(name-dashes, name-underscores, description)
+dnl TF_WITH_NONSTD(name-dashes, name-underscores, description)
+dnl TF_WITH_STD(name-dashes, name-underscores, description)
+dnl TF_WITH_SUBSYSTEM(name-dashes, name-underscores, description)
 dnl
-dnl $1 = name_dashes as appears on the command line
-dnl $2 = name_underscores as appears in a bash variable
-dnl $3 = explanation, may be empty
+dnl TF_WITH_STD_TUNITAS             (no arguments)
+dnl TF_WITH_HYPOGEAL_TWILIGHT       (no arguments)
+dnl TF_WITH_TEMERARIOUS_FLAGSHIP    (no arguments)
+dnl 
+dnl TF_DEFAULT_STD_VALUES           (no arguments)
 dnl
 
 dnl
-dnl TF_DEFAULT_STD_VALUES -- [[FIXTHIS - document this exported function]]
+dnl TF_DEFAULT_STD_VALUES            (no arguments)
 dnl
 AC_DEFUN([TF_DEFAULT_STD_VALUES], [
     AC_REQUIRE([SCOLD_DEFAULT_STD_VALUES])
@@ -16,10 +21,12 @@ AC_DEFUN([TF_DEFAULT_STD_VALUES], [
 ])
 
 dnl
+dnl TF_WITH_MODULE(name-dashes)
+dnl TF_WITH_MODULE(name-dashes, name_underscores)
 dnl TF_WITH_MODULE(name-dashes, name_underscores, explanation)
 dnl
 dnl $1 = name_dashes as appears on the command line
-dnl      the syntax "module-" is prefixed to $1
+dnl      the syntax "module-" is prefixed (added) to $1
 dnl $2 = name_underscores as appears in a bash variable
 dnl      the prefix 'module_' is prefixed to $2
 dnl $3 = explanation, may be empty
@@ -36,7 +43,9 @@ AC_DEFUN([TF_WITH_MODULE], [
 ]) 
  
 dnl
-dnl TF_WITH_SUBSYSTEM -- [[FIXTHIS - document this exported function]]
+dnl TF_WITH_SUBSYSTEM(name-dashes)
+dnl TF_WITH_SUBSYSTEM(name-dashes, name_underscores)
+dnl TF_WITH_SUBSYSTEM(name-dashes, name_underscores, explanation)
 dnl
 AC_DEFUN([TF_WITH_SUBSYSTEM], [
     AC_REQUIRE([TF_DEFAULT_STD_VALUES])
@@ -52,7 +61,13 @@ AC_DEFUN([TF_WITH_SUBSYSTEM], [
 ]) 
 
 dnl
-dnl TF_WITH_NONSTD -- [[FIXTHIS - document this exported function]]
+dnl TF_WITH_NONSTD(name-dashes)
+dnl TF_WITH_NONSTD(name-dashes, name-underscores)
+dnl TF_WITH_NONSTD(name-dashes, name-underscores, description)
+dnl
+dnl $1 = name_dashes as appears on the command line
+dnl $2 = name_underscores as appears in a bash variable, may be empty
+dnl $3 = explanation, may be empty
 dnl
 AC_DEFUN([TF_WITH_NONSTD], [
     SCOLD_WITH_NONSTD([$1],
@@ -72,7 +87,7 @@ AC_DEFUN([TF_WITH_STD_TUNITAS], [
 ])
 
 dnl
-dnl TF_WITH_STD -- [[FIXTHIS - document this exported function]]
+dnl TF_WITH_STD                  (no arguments)
 dnl
 AC_DEFUN([TF_WITH_STD], [    
     AC_REQUIRE([TF_DEFAULT_STD_VALUES])
@@ -85,12 +100,12 @@ AC_DEFUN([TF_WITH_STD], [
 
 
 dnl
-dnl TF_WITH_HYPOGEAL_TWILIGHT -- [[FIXTHIS - document this exported function]]
+dnl TF_WITH_HYPOGEAL_TWILIGHT      (no arguments)
 dnl
 AC_DEFUN([TF_WITH_HYPOGEAL_TWILIGHT], [SCOLD_WITH_HYPOGEAL_TWILIGHT])
 
 dnl
-dnl TF_WITH_TEMERARIOUS_FLAGSHIP -- [[FIXTHIS - document this exported function]]
+dnl TF_WITH_TEMERARIOUS_FLAGSHIP         (no arguments)
 dnl
 dnl So it can be used in an AC_REQUIRES clause, elsewhere
 dnl
