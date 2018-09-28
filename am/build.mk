@@ -1,32 +1,6 @@
-# -*- Makefile -*-
-# Buy them all, one call does it all.
-#
-# Usage:  (the Makefile.am)
-#     
-#    default:
-#    SUBDIRS = @subdirs@
-#    DEVELOPMENT_AREAS = ...
-#    TESTING_AREAS = ...
-#    INSTALLATION_AREAS = ...
-#    default: all
-#    module_SOURCE_SET = ...
-#    .PHONY: clean-local mostlyclean-local distclean-local
-#    clean-local mostlyclean-local distclean-local::
-#    include @temerarious_flagship_datarootdir@/am/build.mk <------------------------------------------- here
-#    include src/.../Makefrag.am
-#    include src/.../Makefrag.am
-#    bin_PROGRAMS = ...
-#    lib_LTLIBRARIES = ...
-#    noinst_LTLIBRARIES = ...
-#    check_PROGRAMS = ...
-#    include tests/.../Makefrag.am
-#    TESTS = ...
-#    ACLOCAL_AMFLAGS = -I m4 -I $(temerarious_flagship_datadir)/ac -I $(temerarious_flagship_datadir)/m4
-#    AUTOMAKE_OPTIONS = no-define subdir-objects foreign
-#    ...etc...
-#    
-include $(hypogeal_twilight_datadir)/am/EXTERNAL-PATHS.mk
-include $(hypogeal_twilight_datadir)/am/compile.mk
-include $(hypogeal_twilight_datadir)/am/install.mk
-include $(hypogeal_twilight_datadir)/am/distclean.mk
-
+# A GNU_make-included -*- Makefile -*- fragment.
+included_temerarious_flagship_am_build_mk_included := 1
+ifeq "" :$(included_temerarious_flagship_am_build_am)"
+$(warning instead include $(temerarious_flagship_datadir)/am/build.am - the 'am' directory, the 'am' suffix)
+include $(temerarious_flagship_datadir)/am/build.am
+endif

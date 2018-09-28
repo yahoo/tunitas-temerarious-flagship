@@ -51,14 +51,20 @@ AC_DEFUN([TF_WITH_SUBSYSTEM], [
     AC_REQUIRE([TF_DEFAULT_STD_VALUES])
     AC_REQUIRE([TF_WITH_STD_TUNITAS])
     AC_REQUIRE([SCOLD_COMPONENT_METADIRECTORY_TIERS])
-    SCOLD_WITH_AMBIENT_COMPONENT_WITHIN([$1],
-                                        ifelse([$2], [], 
-                                               m4_bpatsubst([$1], m4_changequote([{], [}]){[^a-zA-Z0-9_]}m4_changequote({[}, {]}), [_]),
-                                               [$2]),
-                                        ifelse([$3], [], [Subsystem $1 Development Area], [$3]),
-                                        dnl ${std_tunitas_prefix} may be empty|undefined if --without-std-tunitas
-                                        [${submodules_metadir:+$submodules_metadir/$1} ${external_metadir:+$external_metadir/$1} ${std_tunitas_prefix?} ${prefix?}])
-]) 
+    ifelse([$1], [temerarious-flagship], [
+        TF_WITH_TEMERARIOUS_FLAGSHIP
+    ], [ifelse([$1], [hypogeal-twilight], [
+        TF_WITH_HYPOGEAL_TWILIGHT
+    ], [
+        SCOLD_WITH_AMBIENT_COMPONENT_WITHIN([$1],
+                                            ifelse([$2], [], 
+                                                   m4_bpatsubst([$1], m4_changequote([{], [}]){[^a-zA-Z0-9_]}m4_changequote({[}, {]}), [_]),
+                                                   [$2]),
+                                            ifelse([$3], [], [Subsystem $1 Development Area], [$3]),
+                                            dnl ${std_tunitas_prefix} may be empty|undefined if --without-std-tunitas
+                                            [${submodules_metadir:+$submodules_metadir/$1} ${external_metadir:+$external_metadir/$1} ${std_tunitas_prefix?} ${prefix?}])
+    ]) ])
+])
 
 dnl
 dnl TF_WITH_NONSTD(name-dashes)
@@ -87,7 +93,12 @@ AC_DEFUN([TF_WITH_STD_TUNITAS], [
 ])
 
 dnl
-dnl TF_WITH_STD                  (no arguments)
+dnl TF_WITH_STD(name-dashes, name_underscores)
+dnl TF_WITH_STD(name-dashes, name_underscores, explanation)
+dnl
+dnl $1 = name_dashes as appears on the command line
+dnl $2 = name_underscores as appears in a bash variable, may be empty
+dnl $3 = explanation, may be empty
 dnl
 AC_DEFUN([TF_WITH_STD], [    
     AC_REQUIRE([TF_DEFAULT_STD_VALUES])
@@ -116,7 +127,7 @@ AC_DEFUN([TF_WITH_TEMERARIOUS_FLAGSHIP], [
                                  [${submodules_metadir:+$submodules_metadir/$1} ${external_metadir:+$external_metadir/$1} ${std_tunitas_prefix} ${prefix}])
     if test unset != "${temerarious_flagship_prefix:-unset}"; then
         # You are already using temerarious-flagship, so why did you want to say --without-temerarious-flagship?
-        temerarious_flagship_datadir='$(temerarious_flagship_datarootdir)'
+        temerarious_flagship_datadir="\$(temerarious_flagship_datarootdir)"
         if temerarious_flagship_datarootdir=${temerarious_flagship_prefix?}; test -d "${temerarious_flagship_datarootdir?}/ac" ; then
             #
             # using temerarious-flagship out of its development location where

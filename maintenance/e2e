@@ -1,0 +1,9 @@
+#!/bin/sh
+cd ${0%/*}/.. || exit 70
+: ${prefix:=/opt/tunitas}
+export prefix
+./buildconf &&
+./configure ${prefix:+--prefix=$prefix} &&
+make &&
+make check &&
+echo OK DONE

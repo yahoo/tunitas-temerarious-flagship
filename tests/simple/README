@@ -1,0 +1,7 @@
+A tester for the simplest package build
+
+./buildconf &&
+./configure &&
+make &&
+make check &&
+echo OK DONE

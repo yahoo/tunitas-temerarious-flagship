@@ -1,0 +1,49 @@
+#!/bin/bash
+
+#
+# Usage:
+#
+#   ./buildconf &&
+#   ./configure --prefix=DIRECTORY &&  <-------------------- this
+#   make &&
+#   make check &&
+#   make install &&
+#   echo OK DONE
+#
+
+function generate_configured_mk() {
+    echo "prefix = ${prefix?}"
+}
+
+function usage() {
+    local e=$1
+    cat <<EOF
+usage: ${0##*/} [ --prefix=DIRECTORY ]
+EOF
+    exit ${e:-1}
+}
+
+prefix=/usr/local
+while ((0 != $#)); do
+    case $1 in
+    ( --prefix=* )
+        prefix=$(expr "x$1" : 'x--prefix=\(.*\)')
+        shift
+        ;;
+    ( * )
+        usage 1 1>&2
+        ;;
+    esac
+done
+
+mk=./mk
+CONFIGURED="${mk?}/configured.mk"
+tCONFIGURED="${CONFIGURED%/*}/t99.$$.${CONFIGURED##*/}~"
+mkdir -p ${mk?} && generate_configured_mk > ${tCONFIGURED} && chmod a-w ${tCONFIGURED} && mv -f ${tCONFIGURED} ${CONFIGURED}
+e=$?
+if ((0 == e)); then
+    echo "OK (now run: make && make check && make install)"
+    exit 0
+else
+    exit ${e?}
+fi

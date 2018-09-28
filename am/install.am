@@ -1,0 +1,26 @@
+# An automake-included -*- Makefile -*- fragment.
+included_temerarious_flagship_am_install_am := 1
+
+ifeq "" "$(included_temerarious_flagship_am_compile_am)"
+$(error $(temerarious_flagship_datadir)/am/compile.am must be included before install.am)
+endif
+
+included_temerarious_flagship_am_install_am := 1
+
+modulesdir = $(prefix)/modules
+
+# These will be installed into $(DESTDIR)/$(modulesdir)
+module_INTERFACES = \
+  $(patsubst $(scold_cxx_modulesdir)/%,%, \
+             $(call SCOLD_SOURCEStoMODULES,$(module_SOURCE_SET))) \
+  $(end)
+# DO NOT install hang off of 'install' (that causes automake to drop the install rule)
+install-data-am: install-module_INTERFACES
+INSTALLED_module_INTERFACES = \
+  $(foreach slash,/ /ipp/ /hpp/ /fpp/, \
+            $(addprefix $(DESTDIR)$(modulesdir)$(slash),$(module_INTERFACES))) \
+  $(end)
+install-module_INTERFACES: $(INSTALLED_module_INTERFACES)
+$(INSTALLED_module_INTERFACES) : MODE=444
+$(INSTALLED_module_INTERFACES) : $(DESTDIR)$(modulesdir)/% : $(scold_cxx_modulesdir)/%
+	$(V_INSTALL) install -D -m $(MODE) $< $@

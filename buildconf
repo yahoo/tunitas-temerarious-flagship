@@ -1,0 +1,2 @@
+#!/bin/bash
+echo "OK DONE (now run: ./configure --prefix=DIRECTORY)"

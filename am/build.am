@@ -1,0 +1,36 @@
+# An automake-included -*- Makefile -*- fragment.
+included_temerarious_flagship_am_build_am := 1
+# Buy them all, one call does it all.
+#
+# Usage:  (the Makefile.am)
+#     
+#    ACLOCAL_AMFLAGS = -I m4 -I $(temerarious_flagship_datadir)/ac -I $(temerarious_flagship_datadir)/m4
+#    AUTOMAKE_OPTIONS = no-define subdir-objects foreign
+#    default:
+#    SUBDIRS = @subdirs@ <------------------------ if you have sub-building submodules, else skip
+#    DEVELOPMENT_AREAS = ...
+#    TESTING_AREAS = ...
+#    INSTALLATION_AREAS = ...
+#    default: all
+#    module_SOURCE_SET = ...
+#    .PHONY: clean-local mostlyclean-local distclean-local
+#    clean-local mostlyclean-local distclean-local::
+#    include @temerarious_flagship_datarootdir@/am/build.mk <------------------------------------------- here
+#    include src/.../Makefrag.am
+#    include src/.../Makefrag.am
+#    bin_PROGRAMS = ...
+#    lib_LTLIBRARIES = ...
+#    noinst_LTLIBRARIES = ...
+#    check_PROGRAMS = ...
+#    include tests/.../Makefrag.am
+#    TESTS = ...
+#    ...etc...
+#    
+ifeq "" "$(temerarious_flagship_indirect)"
+include $(temerarious_flagship_datadir)/am/compile.am
+include $(temerarious_flagship_datadir)/am/install.am
+else
+include $($(temerarious_flagship_indirect)_datadir)/am/compile.mk
+include $($(temerarious_flagship_indirect)_datadir)/am/install.mk
+include $($(temerarious_flagship_indirect)_datadir)/am/distclean.mk
+endif

@@ -1,0 +1,40 @@
+#!/bin/bash
+#
+# this is a test rig
+#
+# Usage (full)
+#
+#   ./buildconf &&
+#   ./configure ...arguments... &&
+#   make && make check && echo OK DONE
+#
+# Usage (simple)
+#
+#   ./maintenance/e2e
+# 
+: ${with_std_scold:=/opt/scold}
+: ${with_std_tunitas:=/opt/tunitas}
+: ${with_nearby:=/build/master}
+: ${with_temerarious_flagship:=${PWD%/*/*}}
+: ${with_hypogeal_twilight=${with_nearby}/hypogeal-twilight}
+# autoreconf cannot tolerate directories that do not exist
+declare -a SEARCHPATH
+for candidate in \
+    ${with_temerarious_flagship:+$with_temerarious_flagship/ac} \
+    ${with_std_tunitas:+$with_std_tunitas/temerarious-flagship/ac} \
+    ${with_hypogeal_twilight:+$with_hypogeal_twilight/ac} \
+    ${with_std_scold:+$with_std_scold/hypogeal-twilight/ac}
+do
+    if [[ -d $candidate ]] ; then
+        SEARCHPATH=( ${SEARCHPATH[@]} $candidate )
+    fi
+done
+if [[ 0 != ${FORCE:-0} ]] || ! [[ -f configure ]]
+then
+    aclocal --force --install -I m4 ${SEARCHPATH[@]/#/-I} &&
+        autoconf &&
+        automake
+else
+    eval autoreconf --force --verbose --install ${SEARCHPATH[@]/#/-I}
+fi &&
+echo "OK done (now run ./configure)"

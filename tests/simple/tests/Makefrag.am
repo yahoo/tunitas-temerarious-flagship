@@ -1,0 +1,1 @@
+tests_TESTS = tests/run1.test

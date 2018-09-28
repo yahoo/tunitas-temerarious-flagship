@@ -1,0 +1,3 @@
+# This is a GNU -*- Makefile -*- which is managed by automake
+bin_hello_world_SOURCES = src/main.cpp
+# this is simple here, but in the more complex cases there is more

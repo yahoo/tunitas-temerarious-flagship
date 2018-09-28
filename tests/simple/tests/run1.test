@@ -1,0 +1,3 @@
+#!/bin/sh
+${0%/*}/../bin/hello-world
+# the exit code is the success indiciator

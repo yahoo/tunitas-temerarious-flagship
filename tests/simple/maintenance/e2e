@@ -1,0 +1,18 @@
+#!/bin/sh
+cd ${0%/*}/.. || exit 70
+: ${with_std_scold:=/opt/scold}
+: ${with_std_tunitas:=/opt/tunitas}
+: ${with_nearby:=/build/master}
+: ${with_temerarious_flagship:=${PWD%/*/*}}
+: ${with_hypogeal_twilight=${with_nearby}/hypogeal-twilight}
+export with_std_scold
+export with_std_tunitas
+export with_nearby
+export with_temerarious_flagship
+export with_hypogeal_twilight
+export FORCE=1
+./buildconf &&
+./configure &&
+make &&
+make check &&
+echo OK DONE

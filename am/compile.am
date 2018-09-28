@@ -1,0 +1,91 @@
+# An automake-included -*- Makefile -*- fragment.
+included_temerarious_flagship_am_compile_am := 1
+
+scold_srcdir = src
+scold_objdir = obj
+scold_cxxdir = obj/src
+scold_cxx_modulesdir = $(scold_objdir)/modules
+scold_cxx_includedir = $(scold_objdir)/include
+
+DC = remonstrate
+# $(DC_FLAGS) is reserved to the command line.
+# $(Makefile_DC_FLAGS) is reserved to the top-level Makefile.
+# $(SUBDIRS) is that certain automake variable from Makefile.am.
+DC_OPTIONS = \
+  $(DC_FLAGS) $(Makefile_DC_FLAGS) \
+  $(comment --verbose) \
+  --make-directories \
+  $(addprefix --submodule=, $(SUBDIRS)) \
+  $(DC_SEARCHPATH) \
+  --modulesdir-directory=$(scold_cxx_modulesdir) \
+  --modulesdir-variable='$$(scold_cxx_modulesdir)' \
+  --objdir-directory=$(scold_cxxdir) \
+  --objdir-variable='$$(scold_cxxdir)' \
+  $(comment WATCHOUT - the source may be in $(scold_cxxdir) so this is wrong for .../CONFIG.xcpp) \
+  --srcdir-directory=$(scold_srcdir) \
+  --srcdir-variable='$$(scold_srcdir)' \
+  $(end)
+
+# %.cpp -> package.subpackage.Class  (the word)
+TF_SOURCEStoMODULENAMES = \
+  $(subst /,., \
+	  $(patsubst %/namespace,%, \
+	  $(patsubst $(scold_cxxdir)/%,%, \
+	  $(patsubst $(scold_srcdir)/%,%, \
+	  $(patsubst %.xcpp,%, \
+          $1))))) \
+  $(end)
+# %.cpp -> <package.subpackage.Class>  (the path to the lead include file)
+# e.g. obj/src/package/subpackage/Class.cpp -> obj/modules/package.subpackage.Class
+TF_SOURCEStoMODULES = \
+  $(addprefix $(scold_cxx_modulesdir)/, \
+              $(call TF_SOURCEStoMODULENAMES, $1)) \
+  $(end)
+# %.scold -> <package.subpackage.Class>  (the path to the lead include file)
+TF_IMPORTStoMODULES = \
+  $(call TF_SOURCEStoMODULES, \
+         $(patsubst %.scold, %.cpp, $1)) \
+  $(end)
+# %.cpp -> %.xcpp
+TF_SOURCEStoSOURCES = \
+  $(patsubst $(scold_cxxdir)/%.cpp, $(scold_srcdir)/%.xcpp, $1) \
+  $(end)
+# %.cpp -> %.mk
+TF_SOURCEStoMAKEFILES = \
+  $(patsubst %.cpp, %.mk, $1) \
+  $(end)
+
+#
+# Usage (in a .../Makefrag.am):
+#
+# .../dependencies.mk:
+#     $(TF_1ST) $(call TF_DISAGGREGATE_COMPILE, ...*.xcpp sources...)
+#     $(TF_2ND) $(call TF_DEPENDENCIES_COMPILE, ...*.xcpp sources...)
+#
+define TF_DISAGGREGATE_COMPILE =
+  $(DC) $(DC_OPTIONS) $(call TF_SOURCEStoSOURCES, $1)
+endef
+define TF_DEPENDENCIES_COMPILE =
+  mkdir -p $(@D) && \
+  for mk in $(call TF_SOURCEStoMAKEFILES, $1) ; do echo "-include $$mk" ; done > $@
+endef
+
+# The chatter is the first eleven (!!) characters.
+#
+# 123456789ab
+# <--------->
+#   CXX      obj/src/posix/shell/namespace.lo
+#
+TF1ST = $(tf__v_1ST_$(V))
+tf__v_1ST_ = $(tf__v_1ST_$(AM_DEFAULT_VERBOSITY))
+# .....................123456789ab
+tf__v_1ST_0 = @echo "  EXPLODES $@";
+tf__v_1ST_0 = @echo "  DESCOLD  $@";
+tf__v_1ST_1 = 
+
+TF2ND = $(tf__v_2ND_$(V))
+tf__v_2ND_ = $(tf__v_2ND_$(AM_DEFAULT_VERBOSITY))
+# .....................123456789ab
+tf__v_2ND_0 = @echo "  INCLUDES $@";
+tf__v_2ND_0 = @echo "  MAKEFRAG $@";
+tf__v_2ND_1 = 
