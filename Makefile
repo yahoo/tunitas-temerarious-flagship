@@ -52,6 +52,9 @@ INSTALL_FILES = \
 check-am:
 check-ac:
 check-mk:
+check-tests: check-tests-simple
+check-tests-simple:
+	cd tests/simple && ./maintenance/e2e
 
 $(INSTALL_ac_FILES) : $(pkgdatadir)/% : %
 	install -D -c -m 444 $< $@
@@ -60,7 +63,7 @@ $(INSTALL_am_FILES) : $(pkgdatadir)/% : %
 
 all: $(FILES)
 clean:
-check: check-ac check-am check-mk
+check: check-ac check-am check-mk check-tests
 distlean:
 install: $(INSTALL_FILES)
 default: all

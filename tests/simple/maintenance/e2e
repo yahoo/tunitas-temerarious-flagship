@@ -5,14 +5,17 @@ cd ${0%/*}/.. || exit 70
 : ${with_nearby:=/build/master}
 : ${with_temerarious_flagship:=${PWD%/*/*}}
 : ${with_hypogeal_twilight=${with_nearby}/hypogeal-twilight}
-export with_std_scold
-export with_std_tunitas
-export with_nearby
-export with_temerarious_flagship
-export with_hypogeal_twilight
-export FORCE=1
-./buildconf &&
-./configure &&
+eval \
+    ${with_temerarious_flagship:+with_temerarious_flagship=$with_temerarious_flagship} \
+    ${with_hypogeal_twilight:+with_hypogeal_twilight=$with_hypogeal_twilight} \
+    FORCE=1 \
+    ./buildconf &&
+./configure \
+    ${with_std_scold:+--with-std-scold=$with_std_scold} \
+    ${with_std_tunitas:+--with-std-tunitas=$with_std_tunitas} \
+    ${with_temerarious_flagship:+--with-temerarious-flagship=$with_temerarious_flagship} \
+    ${with_hypogeal_twilight:+--with-hypogeal-twilight=$with_hypogeal_twilight} \
+    ${end} &&
 make &&
 make check &&
 echo OK DONE
