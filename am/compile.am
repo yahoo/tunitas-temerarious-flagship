@@ -69,6 +69,8 @@ define TF_DEPENDENCIES_COMPILE =
   mkdir -p $(@D) && \
   for mk in $(call TF_SOURCEStoMAKEFILES, $1) ; do echo "-include $$mk" ; done > $@
 endef
+SCOLD_DISAGGREGATE_COMPILE = $(error instead use TF_DISAGGREGATE_COMPILE)
+SCOLD_DEPENDENCIES_COMPILE = $(error instead use TF_DEPENDENCIES_COMPILE)
 
 # The chatter is the first eleven (!!) characters.
 #
