@@ -6,10 +6,20 @@ dnl
 
 AC_DEFUN([TF_CHECK_APACHE_HTTPD], [SCOLD_CHECK_APACHE_HTTPD])
 AC_DEFUN([TF_CHECK_BOOST],        [SCOLD_CHECK_BOOST])
+AC_DEFUN([TF_CHECK_CPPUNIT],      [SCOLD_CHECK_CPPUNIT])
 AC_DEFUN([TF_CHECK_JSONCPP],      [SCOLD_CHECK_JSONCPP])
 AC_DEFUN([TF_CHECK_MYSQLPP],      [SCOLD_CHECK_MYSQLPP])
 AC_DEFUN([TF_CHECK_SQLITE],       [SCOLD_CHECK_SQLITE])
 AC_DEFUN([TF_CHECK_UUID],         [SCOLD_CHECK_UUID])
+
+AC_DEFUN([TF_CHECK_STD_FILESYSTEM], [
+   # Any reasonable and recent version of gcc needs this
+   # e.g.
+   #   /usr/lib/gcc/x86_64-redhat-linux/8/libstdc++fs.a
+   #   /usr/lib/gcc/x86_64-redhat-linux/8/32/libstdc++fs.a
+   #
+   AC_SUBST([libstd_filesystem], [-lstdc++fs])
+])
 
 # Reminder, and documenting "uuid" vs "libuuid" ...
 #

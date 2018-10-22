@@ -27,6 +27,16 @@
 #    
 include $(hypogeal_twilight_datadir)/am/EXTERNAL-PATHS.mk
 include $(hypogeal_twilight_datadir)/am/compile.mk
+$(if $(DC),$(__OK),$(error DC is not set, you should call TF_PROG_DC in configure.ac))
+# temerarious-flagship uses $(DC)
+# hypogeal-twilight still uses $(bbDC) but will use $(DC) one day soon
+ifeq "remonstrate" "$(bbDC)"
+ifeq "1" "$(words $(DC))"
+bbDC = $(DC)
+endif
+endif
+TF_DISAGGREGATE_COMPILE = $(call bbSCOLD_DISAGGREGATE_COMPILE,$1)
+TF_DEPENDENCIES_COMPILE = $(call bbSCOLD_DEPENDENCIES_COMPILE,$1)
 include $(hypogeal_twilight_datadir)/am/install.mk
 include $(hypogeal_twilight_datadir)/am/distclean.mk
 

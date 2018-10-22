@@ -51,13 +51,26 @@ AC_DEFUN([TF_WITH_SUBSYSTEM], [
     AC_REQUIRE([TF_DEFAULT_STD_VALUES])
     AC_REQUIRE([TF_WITH_STD_TUNITAS])
     AC_REQUIRE([SCOLD_COMPONENT_METADIRECTORY_TIERS])
-    SCOLD_WITH_AMBIENT_COMPONENT_WITHIN([$1],
-                                        ifelse([$2], [], 
-                                               m4_bpatsubst([$1], m4_changequote([{], [}]){[^a-zA-Z0-9_]}m4_changequote({[}, {]}), [_]),
-                                               [$2]),
-                                        ifelse([$3], [], [Subsystem $1 Development Area], [$3]),
-                                        dnl ${std_tunitas_prefix} may be empty|undefined if --without-std-tunitas
-                                        [${submodules_metadir:+$submodules_metadir/$1} ${external_metadir:+$external_metadir/$1} ${std_tunitas_prefix?} ${prefix?}])
+    ifdef([SCOLD_WITH_AMBIENT_COMPONENT_WITHIN], [
+        dnl hypogeal-twilight 0.43 and newer
+	SCOLD_WITH_AMBIENT_COMPONENT_WITHIN([$1],
+					    ifelse([$2], [],
+						   m4_bpatsubst([$1], m4_changequote([{], [}]){[^a-zA-Z0-9_]}m4_changequote({[}, {]}), [_]),
+						   [$2]),
+					    ifelse([$3], [], [Subsystem $1 Development Area], [$3]),
+					    dnl ${std_tunitas_prefix} may be empty|undefined if --without-std-tunitas
+					    [${submodules_metadir:+$submodules_metadir/$1} ${external_metadir:+$external_metadir/$1} ${std_tunitas_prefix?} ${prefix?}])
+    ], [ifdef([SCOLD_WITH_AMBIENT_COMPONENT], [
+        dnl hypogeal-twilight 0.42
+	SCOLD_WITH_AMBIENT_COMPONENT([$1],
+				     ifelse([$2], [],
+				   	    m4_bpatsubst([$1], m4_changequote([{], [}]){[^a-zA-Z0-9_]}m4_changequote({[}, {]}), [_]),
+				            [$2]),
+                                     ifelse([$3], [], [Subsystem $1 Development Area], [$3]))
+    ], [
+        AC_MSG_NOTICE([hypogeal-twilight is too old (or unprobably, too new)])
+        AC_MSG_ERROR([neither [SCOLD]_[AMBIENT]_[COMPONENT]_[WITHIN] nor [SCOLD]_[AMBIENT]_[COMPONENT] is available])
+    ])])
 ]) 
 
 dnl
