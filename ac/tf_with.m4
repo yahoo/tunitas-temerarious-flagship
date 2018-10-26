@@ -43,11 +43,41 @@ AC_DEFUN([TF_WITH_MODULE], [
 ]) 
  
 dnl
+dnl TF_WITH_TEMERARIOUS_FLAGSHIP
+dnl
+dnl does the definition but also AC_SUBST for ancillary variables
+dnl
+AC_DEFUN([TF_WITH_TEMERARIOUS_FLAGSHIP], [
+    AC_REQUIRE([TF_DEFAULT_STD_VALUES])
+    AC_REQUIRE([TF_WITH_STD_TUNITAS])
+    AC_REQUIRE([SCOLD_COMPONENT_METADIRECTORY_TIERS])
+    set -xv
+    TFinternal_WITH_SUBSYSTEM([temerarious-flagship], [temerarious_flagship], [The Tunitas Build System])
+set +xv
+    temerarious_flagship_datadir="\$(temerarious_flagship_datarootdir)"
+    AC_SUBST([temerarious_flagship_datadir])
+    temerarious_flagship_datarootdir=${temerarious_flagship_prefix}/share/temerarious-flagship
+    AC_SUBST([temerarious_flagship_datarootdir])
+    temerarious_flagship_libexecdir=${temerarious_flagship_prefix}/libexec/temerarious-flagship
+    AC_SUBST([temerarious_flagship_libexecdir])
+])
+
+dnl
 dnl TF_WITH_SUBSYSTEM(name-dashes)
 dnl TF_WITH_SUBSYSTEM(name-dashes, name_underscores)
 dnl TF_WITH_SUBSYSTEM(name-dashes, name_underscores, explanation)
 dnl
 AC_DEFUN([TF_WITH_SUBSYSTEM], [
+    AC_REQUIRE([TF_DEFAULT_STD_VALUES])
+    AC_REQUIRE([TF_WITH_STD_TUNITAS])
+    AC_REQUIRE([SCOLD_COMPONENT_METADIRECTORY_TIERS])
+    ifelse([$1], [temerarious-flagship], [
+        TF_WITH_TEMERARIOUS_FLAGSHIP
+    ], [
+        TFinternal_WITH_SUBSYSTEM([$1], [$2], [$3])
+    ])
+])
+AC_DEFUN([TFinternal_WITH_SUBSYSTEM], [
     AC_REQUIRE([TF_DEFAULT_STD_VALUES])
     AC_REQUIRE([TF_WITH_STD_TUNITAS])
     AC_REQUIRE([SCOLD_COMPONENT_METADIRECTORY_TIERS])
@@ -70,8 +100,8 @@ AC_DEFUN([TF_WITH_SUBSYSTEM], [
     ], [
         AC_MSG_NOTICE([hypogeal-twilight is too old (or unprobably, too new)])
         AC_MSG_ERROR([neither [SCOLD]_[AMBIENT]_[COMPONENT]_[WITHIN] nor [SCOLD]_[AMBIENT]_[COMPONENT] is available])
-    ])])
-]) 
+    ]) ])
+])
 
 dnl
 dnl TF_WITH_NONSTD(name-dashes)

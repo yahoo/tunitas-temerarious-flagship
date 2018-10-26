@@ -199,15 +199,6 @@ else
         --include=${temerarious_flagship_datadir_ac?} \
         --include=${hypogeal_twilight_datadir_ac?} \
         ${end} || exit $?
-    if [[ -f config.settings.in ]] ; then
-        # config.settings is the "standard one" ... which is always instantiated.
-        # the caller has the option of choosing another one (but that would be unwise) 
-        export CONFIG_SITE=${CONFIG_SITE:-config.settings}
-        # provides its own chatter
-        run establish-config-settings
-        # provides its own chatter
-        run insert-config-settings-in-configure
-    fi
 fi
 
 echo "${NAME}: notice, good."
