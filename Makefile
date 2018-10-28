@@ -21,6 +21,7 @@ ac_FILES = \
   ac/tf_finalize.m4 \
   ac/tf_init.m4 \
   ac/tf_msg.m4 \
+  ac/tf_prog.m4 \
   ac/tf_submodules.m4 \
   ac/tf_tiers.m4 \
   ac/tf_with.m4 \

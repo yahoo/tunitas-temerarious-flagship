@@ -1,13 +1,21 @@
-# An automake-included -*- Makefile -*- fragment.
-included_temerarious_flagship_am_build_am := 1
-# Buy them all, one call does it all.
+# This GNU -*- Makefile -*- fragment may be included directly by automake
+# with .../am/build.am (suffix matches directory)
+#
+# Buy everything needed to build all, one call does it all.
+#
+# Reminder: the ACLOCAL and AUTOMAKE options are both Makefile variables
+# and locations for the declarations which are interpreted before make is run
+# they are ibnterpreted in a shell eval line, so $(...) is the same as `...`
 #
 # Usage:  (the Makefile.am)
 #     
+#    default:
 #    ACLOCAL_AMFLAGS = -I m4 -I $(temerarious_flagship_datadir)/ac -I $(temerarious_flagship_datadir)/m4
 #    AUTOMAKE_OPTIONS = no-define subdir-objects foreign
-#    default:
-#    SUBDIRS = @subdirs@ <------------------------ if you have sub-building submodules, else skip
+#    SUBDIRS = @subdirs@
+#    include @temerarious_flagship_datarootdir@/am/build.mk <------------------------------------------- here
+#
+#    # and more definitions as you learned to do with automake
 #    DEVELOPMENT_AREAS = ...
 #    TESTING_AREAS = ...
 #    INSTALLATION_AREAS = ...
@@ -15,9 +23,9 @@ included_temerarious_flagship_am_build_am := 1
 #    module_SOURCE_SET = ...
 #    .PHONY: clean-local mostlyclean-local distclean-local
 #    clean-local mostlyclean-local distclean-local::
-#    include @temerarious_flagship_datarootdir@/am/build.mk <------------------------------------------- here
-#    include src/.../Makefrag.am
-#    include src/.../Makefrag.am
+#    include src/.../...this.../Makefrag.am
+#    include src/.../...that.../Makefrag.am
+#    include src/.../...other.../Makefrag.am
 #    bin_PROGRAMS = ...
 #    lib_LTLIBRARIES = ...
 #    noinst_LTLIBRARIES = ...
@@ -30,7 +38,47 @@ ifeq "" "$(temerarious_flagship_indirect)"
 include $(temerarious_flagship_datadir)/am/compile.am
 include $(temerarious_flagship_datadir)/am/install.am
 else
+temerarious_flagship_indirect ?= $(hypogeal_twilight_prefix)
+# implementation details
+include $($(temerarious_flagship_indirect)_datadir)/am/EXTERNAL-PATHS.mk
 include $($(temerarious_flagship_indirect)_datadir)/am/compile.mk
+$(if $(DC),$(__OK),$(error DC is not set, you should call TF_PROG_DC in configure.ac))
+ifeq "FAIL" "$(shell type -p $(DC) 2>/dev/null || echo FAIL)"
+$(warning DC=$(DC) and $(DC) is not in your PATH)
+ifneq "0" "$(words $(wildcard $(std_scold_prefix)/bin/$(DC)))"
+$(warning yet $(std_scold_prefix)$(DC) exists so as a temporary hack, the build system will use that.)
+$(warning SUGGEST adding 'export PATH=$(std_scold_prefix)/bin:$${PATH}' to your build environment or ~/.bash_profile)
+DC := $(std_scold_prefix)/bin/$(DC)
+$(warning have reset DC=$(DC))
+endif
+endif
+# temerarious-flagship uses $(DC)
+# hypogeal-twilight still uses $(bbDC) but will use $(DC) one day soon
+ifeq "remonstrate" "$(bbDC)"
+ifeq "1" "$(words $(DC))"
+bbDC = $(DC)
+endif
+endif
+TF_DISAGGREGATE_COMPILE = $(if $(VERBOSITY_CONDITION),echo $1, : unverbose); $(call bbSCOLD_DISAGGREGATE_COMPILE,$1)
+TF_DEPENDENCIES_COMPILE = $(call bbSCOLD_DEPENDENCIES_COMPILE,$1)
 include $($(temerarious_flagship_indirect)_datadir)/am/install.mk
 include $($(temerarious_flagship_indirect)_datadir)/am/distclean.mk
+
+# [[FIXTHIS]] in later incarnations use $(DEBUGGING_CONDITION)
+$(if $(VERBOSITY_CONDITION),\
+$(info DEBUG DC=$(DC))\
+$(info DEBUG DEVELOPMENT_AREAS=$(DEVELOPMENT_AREAS))\
+$(comment the SCOLD_MODULES series is deprecated, the EXTERNAL_MODULES series is splitting & some are deprecating) \
+\
+$(info DEBUG SEARCHPATH_SCOLD_MODULES=$(SEARCHPATH_SCOLD_MODULES))\
+$(info DEBUG LOADPATHPATH_SCOLD_MODULES=$(LOADPATHPATH_SCOLD_MODULES))\
+\
+$(info DEBUG SEARCHPATH_EXTERNAL_MODULES=$(SEARCHPATH_EXTERNAL_MODULES))\
+$(info DEBUG LOADPATHPATH_EXTERNAL_MODULES=$(LOADPATHPATH_EXTERNAL_MODULES))\
+\
+$(info DEBUG SEARCHPATH_EXTERNAL_MODULES_NEAR=$(SEARCHPATH_EXTERNAL_MODULES_NEAR))\
+$(info DEBUG LOADPATHPATH_EXTERNAL_MODULES_NEAR=$(LOADPATHPATH_EXTERNAL_MODULES_NEAR))\
+\
+$(info DEBUG SEARCHPATH_EXTERNAL_MODULES_THERE=$(SEARCHPATH_EXTERNAL_MODULES_THERE))\
+$(info DEBUG LOADPATHPATH_EXTERNAL_MODULES_THERE=$(LOADPATHPATH_EXTERNAL_MODULES_THERE)))
 endif

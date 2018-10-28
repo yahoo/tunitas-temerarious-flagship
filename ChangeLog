@@ -1,5 +1,10 @@
+2018-10-27  Wendell Baker  <wbaker@oath.com>
+
+	* Version 1.0.0, operational, packagable
+	* ac, am, bc, mk
+	* separate package-from-project, see ../packaging
+
 2018-09-28  Wendell Craig Baker  <wbaker@oath.com>
 
 	* v1.0.0-0.devel, assembled and formalized for Release 01 (Famous Oak)
 	Still in development, still polishing.
-
