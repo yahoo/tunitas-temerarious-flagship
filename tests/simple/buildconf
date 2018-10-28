@@ -19,11 +19,21 @@
 : ${with_hypogeal_twilight=${with_nearby}/hypogeal-twilight}
 # autoreconf cannot tolerate directories that do not exist
 declare -a SEARCHPATH
+# wildly flailing to work with old and new ocde
+# with_temerarious_flagship could reference a dev or prod tree
+# with_hypogeal_twilight could reference a dev or prod tree
+# hypogeal_twilight could be v0.42 with .../m4 or later with .../ac
 for candidate in \
     ${with_temerarious_flagship:+$with_temerarious_flagship/ac} \
-    ${with_std_tunitas:+$with_std_tunitas/temerarious-flagship/ac} \
+    ${with_temerarious_flagship:+$with_temerarious_flagship/share/temerarious-flagship/ac} \
+    ${with_std_tunitas:+$with_std_tunitas/share/temerarious-flagship/ac} \
     ${with_hypogeal_twilight:+$with_hypogeal_twilight/ac} \
-    ${with_std_scold:+$with_std_scold/hypogeal-twilight/ac}
+    ${with_hypogeal_twilight:+$with_hypogeal_twilight/share/hypogeal-twilight/ac} \
+    ${with_std_scold:+$with_std_scold/share/hypogeal-twilight/ac} \
+    ${comment_old_code_follows:+} \
+    ${with_hypogeal_twilight:+$with_hypogeal_twilight/m4} \
+    ${with_hypogeal_twilight:+$with_hypogeal_twilight/share/hypogeal-twilight/m4} \
+    ${with_std_scold:+$with_std_scold/share/hypogeal-twilight/m4}
 do
     if [[ -d $candidate ]] ; then
         SEARCHPATH=( ${SEARCHPATH[@]} $candidate )
@@ -31,9 +41,11 @@ do
 done
 if [[ 0 != ${FORCE:-0} ]] || ! [[ -f configure ]]
 then
+    libtoolize &&
     aclocal --force --install -I m4 ${SEARCHPATH[@]/#/-I} &&
+        autoheader &&
         autoconf &&
-        automake
+        automake --add-missing
 else
     eval autoreconf --force --verbose --install ${SEARCHPATH[@]/#/-I}
 fi &&

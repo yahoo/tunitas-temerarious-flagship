@@ -51,9 +51,7 @@ AC_DEFUN([TF_WITH_TEMERARIOUS_FLAGSHIP], [
     AC_REQUIRE([TF_DEFAULT_STD_VALUES])
     AC_REQUIRE([TF_WITH_STD_TUNITAS])
     AC_REQUIRE([SCOLD_COMPONENT_METADIRECTORY_TIERS])
-    set -xv
     TFinternal_WITH_SUBSYSTEM([temerarious-flagship], [temerarious_flagship], [The Tunitas Build System])
-set +xv
     temerarious_flagship_datadir="\$(temerarious_flagship_datarootdir)"
     AC_SUBST([temerarious_flagship_datadir])
     temerarious_flagship_datarootdir=${temerarious_flagship_prefix}/share/temerarious-flagship
@@ -161,6 +159,7 @@ dnl So it can be used in an AC_REQUIRES clause, elsewhere
 dnl
 AC_DEFUN([TF_WITH_TEMERARIOUS_FLAGSHIP], [
     AC_REQUIRE([TF_COMPONENT_METADIRECTORY_TIERS])
+    AC_REQUIRE([TF_WITH_STD_TUNITAS])
     AC_REQUIRE([TF_WITH_HYPOGEAL_TWILIGHT])
     SCOLD_WITH_AMBIENT_COMPONENT([temerarious-flagship], [temerarious_flagship], [Tunitas autotools build scaffolding],
                                  [${submodules_metadir:+$submodules_metadir/$1} ${external_metadir:+$external_metadir/$1} ${std_tunitas_prefix} ${prefix}])

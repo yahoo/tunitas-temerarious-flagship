@@ -2,9 +2,12 @@
 cd ${0%/*}/.. || exit 70
 : ${with_std_scold:=/opt/scold}
 : ${with_std_tunitas:=/opt/tunitas}
-: ${with_nearby:=/build/master}
 : ${with_temerarious_flagship:=${PWD%/*/*}}
-: ${with_hypogeal_twilight=${with_nearby}/hypogeal-twilight}
+if [[ set == ${with_nearby:+set} ]]; then
+    : ${with_hypogeal_twilight=${with_nearby?}/hypogeal-twilight}
+else
+    : ${with_hypogeal_twilight=${with_std_scold?}}
+fi
 eval \
     ${with_temerarious_flagship:+with_temerarious_flagship=$with_temerarious_flagship} \
     ${with_hypogeal_twilight:+with_hypogeal_twilight=$with_hypogeal_twilight} \

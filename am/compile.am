@@ -1,4 +1,12 @@
 # An automake-included -*- Makefile -*- fragment.
+#
+# Avoid including this file directly (there is no need)
+# This include file will be included by automake (at configure time), not by GNU make (at run time)
+#
+# Usage (in a Makefile.am)
+#
+#     include @temerarious_flagship_datadir@/am/build.am
+#
 included_temerarious_flagship_am_compile_am := 1
 
 scold_srcdir = src
@@ -7,7 +15,19 @@ scold_cxxdir = obj/src
 scold_cxx_modulesdir = $(scold_objdir)/modules
 scold_cxx_includedir = $(scold_objdir)/include
 
-DC = remonstrate
+# TF_PROG_DC ----> DC = remonstrate
+#
+$(if $(DC),$(__OK),$(error DC is not set, you should call TF_PROG_DC in configure.ac))
+ifeq "FAIL" "$(shell type -p $(DC) 2>/dev/null || echo FAIL)"
+$(warning DC=$(DC) and $(DC) is not in your PATH)
+ifneq "0" "$(words $(wildcard $(std_scold_prefix)/bin/$(DC)))"
+$(warning yet $(std_scold_prefix)$(DC) exists so as a temporary hack, the build system will use that.)
+$(warning SUGGEST adding 'export PATH=$(std_scold_prefix)/bin:$${PATH}' to your build environment or ~/.bash_profile)
+DC := $(std_scold_prefix)/bin/$(DC)
+$(warning have reset DC=$(DC))
+endif
+endif
+
 # $(DC_FLAGS) is reserved to the command line.
 # $(Makefile_DC_FLAGS) is reserved to the top-level Makefile.
 # $(SUBDIRS) is that certain automake variable from Makefile.am.
@@ -58,10 +78,12 @@ TF_SOURCEStoMAKEFILES = \
 #
 # Usage (in a .../Makefrag.am):
 #
-# .../dependencies.mk:
-#     $(TF_1ST) $(call TF_DISAGGREGATE_COMPILE, ...*.xcpp sources...)
-#     $(TF_2ND) $(call TF_DEPENDENCIES_COMPILE, ...*.xcpp sources...)
+# /dependencies.mk:
+#     $(TF_1ST) $(call TF_DISAGGREGATE_COMPILE, ...*.cpp sources...)
+#     $(TF_2ND) $(call TF_DEPENDENCIES_COMPILE, ...*.cpp sources...)
 #
+SCOLD_DISAGGREGATE_COMPILE = $(error instead use TF_DISAGGREGATE_COMPILE)
+SCOLD_DEPENDENCIES_COMPILE = $(error instead use TF_DEPENDENCIES_COMPILE)
 define TF_DISAGGREGATE_COMPILE =
   $(DC) $(DC_OPTIONS) $(call TF_SOURCEStoSOURCES, $1)
 endef
@@ -69,8 +91,19 @@ define TF_DEPENDENCIES_COMPILE =
   mkdir -p $(@D) && \
   for mk in $(call TF_SOURCEStoMAKEFILES, $1) ; do echo "-include $$mk" ; done > $@
 endef
-SCOLD_DISAGGREGATE_COMPILE = $(error instead use TF_DISAGGREGATE_COMPILE)
-SCOLD_DEPENDENCIES_COMPILE = $(error instead use TF_DEPENDENCIES_COMPILE)
+#
+# An alternateive to the two-step
+#
+# Usage (in a .../Makefrag.am)
+#
+# $(scold_cxxdir)/.../space/subspace/.../dependencies.mk:
+#     $(TF_1ST) $(call TF_DISAGGREGATE, ...*.cpp sources...)
+#     test -e $@
+#
+define TF_DISAGGREGATE =
+  $(call TF_DISAGGREGATE_COMPILE, $1); \
+  $(call TF_DEPENDENCIES_COMPILE, $1)
+endef
 
 # The chatter is the first eleven (!!) characters.
 #
@@ -81,13 +114,18 @@ SCOLD_DEPENDENCIES_COMPILE = $(error instead use TF_DEPENDENCIES_COMPILE)
 TF1ST = $(tf__v_1ST_$(V))
 tf__v_1ST_ = $(tf__v_1ST_$(AM_DEFAULT_VERBOSITY))
 # .....................123456789ab
-tf__v_1ST_0 = @echo "  EXPLODES $@";
-tf__v_1ST_0 = @echo "  DESCOLD  $@";
+
+tf__v_1ST_0 = @echo "  DECONSTRUCT $@";
 tf__v_1ST_1 = 
 
 TF2ND = $(tf__v_2ND_$(V))
 tf__v_2ND_ = $(tf__v_2ND_$(AM_DEFAULT_VERBOSITY))
 # .....................123456789ab
-tf__v_2ND_0 = @echo "  INCLUDES $@";
-tf__v_2ND_0 = @echo "  MAKEFRAG $@";
+tf__v_2ND_0 = @echo "  MAKEFRAG    $@";
 tf__v_2ND_1 = 
+
+TFDC = $(tf__v_DC_$(V))
+tf__v_DC_ = $(tf__v_DC_$(AM_DEFAULT_VERBOSITY))
+# .....................123456789ab
+tf__v_DC_0 = @echo "   DECONSTRUCT $@";
+tf__v_DC_1 = 

@@ -16,6 +16,8 @@ AC_DEFUN([TF_OUTPUT], [
 ])
 
 AC_DEFUN([TF_FINALIZE], [
+    AC_REQUIRE([TF_WITH_STD_TUNITAS])
+    AC_REQUIRE([TF_WITH_TEMERARIOUS_FLAGSHIP])
     if test NONE = $prefix ; then
        AC_MSG_WARN([prefix was not set so the default ${ac_default_prefix:-(unset)} will obtain])
     fi

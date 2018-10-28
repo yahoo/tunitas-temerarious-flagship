@@ -1,24 +1,39 @@
 # An automake-included -*- Makefile -*- fragment.
+#
+# Do Not include this file directly (there is no need)
+# This include file will be included by automake (at configure time), not by GNU make (at run time)
+#
+# Usage (in a Makefile.am)
+#
+#     include @temerarious_flagship_datadir@/am/build.am
+#
 included_temerarious_flagship_am_install_am := 1
-
 ifeq "" "$(included_temerarious_flagship_am_compile_am)"
 $(error $(temerarious_flagship_datadir)/am/compile.am must be included before install.am)
 endif
 
-included_temerarious_flagship_am_install_am := 1
-
 modulesdir = $(prefix)/modules
+
+#
+# To install the the modules (C++ header set) of the external interface
+# the Makefile.am must contgain a variable definition announcing which sources
+# have interfaces to be exported.
+#
+# Usage (in the Makefile.am)
+#
+#    module_SOURCE_SET = $(lib_libthis_la_SOURCES) $(lib_libwant_la_SOURCES)
+#
 
 # These will be installed into $(DESTDIR)/$(modulesdir)
 module_INTERFACES = \
   $(patsubst $(scold_cxx_modulesdir)/%,%, \
-             $(call SCOLD_SOURCEStoMODULES,$(module_SOURCE_SET))) \
+             $(call TF_SOURCEStoMODULES,$(module_SOURCE_SET))) \
   $(end)
 # DO NOT install hang off of 'install' (that causes automake to drop the install rule)
 install-data-am: install-module_INTERFACES
 INSTALLED_module_INTERFACES = \
   $(foreach slash,/ /ipp/ /hpp/ /fpp/, \
-            $(addprefix $(DESTDIR)$(modulesdir)$(slash),$(module_INTERFACES))) \
+            $(addprefix $(addsuffix $(slash),$(DESTDIR)$(modulesdir)$(slash)),$(module_INTERFACES))) \
   $(end)
 install-module_INTERFACES: $(INSTALLED_module_INTERFACES)
 $(INSTALLED_module_INTERFACES) : MODE=444

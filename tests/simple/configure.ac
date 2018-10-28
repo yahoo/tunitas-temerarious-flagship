@@ -42,6 +42,7 @@ LT_INIT    dnl mut be second
 AC_PROG_CC
 AC_PROG_CXX
 AM_PROG_CC_C_O
+TF_PROG_DC
 
 datarootdir="${prefix}/share/tunitas"
 AC_DEFINE_UNQUOTED([PACKAGE_DATADIR], ["$datarootdir"], [Tunitas read-only architecture-independent area])

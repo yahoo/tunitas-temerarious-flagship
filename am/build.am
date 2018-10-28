@@ -1,7 +1,7 @@
 # This GNU -*- Makefile -*- fragment may be included directly by automake
 # with .../am/build.am (suffix matches directory)
 #
-# Buy everything needed to build all, one call does it all.
+# Buy everything needed to build & install all; one call does it all.
 #
 # Reminder: the ACLOCAL and AUTOMAKE options are both Makefile variables
 # and locations for the declarations which are interpreted before make is run
@@ -13,14 +13,14 @@
 #    ACLOCAL_AMFLAGS = -I m4 -I $(temerarious_flagship_datadir)/ac -I $(temerarious_flagship_datadir)/m4
 #    AUTOMAKE_OPTIONS = no-define subdir-objects foreign
 #    SUBDIRS = @subdirs@
-#    include @temerarious_flagship_datarootdir@/am/build.mk <------------------------------------------- here
+#    include @temerarious_flagship_datarootdir@/am/build.am <----------------------------------------- here
 #
 #    # and more definitions as you learned to do with automake
 #    DEVELOPMENT_AREAS = ...
 #    TESTING_AREAS = ...
 #    INSTALLATION_AREAS = ...
 #    default: all
-#    module_SOURCE_SET = ...
+#    module_SOURCE_SET = ...list-of-*.cpp
 #    .PHONY: clean-local mostlyclean-local distclean-local
 #    clean-local mostlyclean-local distclean-local::
 #    include src/.../...this.../Makefrag.am
@@ -34,12 +34,16 @@
 #    TESTS = ...
 #    ...etc...
 #    
-ifeq "" "$(temerarious_flagship_indirect)"
+# not merely alphabetical, the include order matters.
 include $(temerarious_flagship_datadir)/am/compile.am
 include $(temerarious_flagship_datadir)/am/install.am
-else
-temerarious_flagship_indirect ?= $(hypogeal_twilight_prefix)
-# implementation details
+
+# e.g. temerarious_flagship_indirect ?= $(hypogeal_twilight_prefix)
+ifneq "" "$(temerarious_flagship_indirect)"
+#
+# [[REMOVEWHEN]] temerarious-flagship is complete enough
+# implementation details which one day will be properly within temerarious-flagship
+#
 include $($(temerarious_flagship_indirect)_datadir)/am/EXTERNAL-PATHS.mk
 include $($(temerarious_flagship_indirect)_datadir)/am/compile.mk
 $(if $(DC),$(__OK),$(error DC is not set, you should call TF_PROG_DC in configure.ac))
@@ -61,7 +65,6 @@ endif
 endif
 TF_DISAGGREGATE_COMPILE = $(if $(VERBOSITY_CONDITION),echo $1, : unverbose); $(call bbSCOLD_DISAGGREGATE_COMPILE,$1)
 TF_DEPENDENCIES_COMPILE = $(call bbSCOLD_DEPENDENCIES_COMPILE,$1)
-include $($(temerarious_flagship_indirect)_datadir)/am/install.mk
 include $($(temerarious_flagship_indirect)_datadir)/am/distclean.mk
 
 # [[FIXTHIS]] in later incarnations use $(DEBUGGING_CONDITION)
