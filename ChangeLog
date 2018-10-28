@@ -1,0 +1,5 @@
+2018-10-27  Wendell Baker  <wbaker@oath.com>
+
+	* Version 1.0.0, operational
+	* ac, am, bc, mk
+	* separate package-from-project, see ../packaging
