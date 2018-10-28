@@ -1,5 +1,9 @@
 2018-10-28  Wendell Baker  <wbaker@oath.com>
 
+	* Version v1.1.3, usability and diagnostics for user misconfiguration scenarios
+	* am/compile.am provides an tf-friendly --make-depend-script within DC_OPTIONS
+	  __compile_DC_MAKE_DEPEND_SCRIPT_APPROPRIATELY_QUOTED
+
 	* Version v1.1.2, usability and diagnostics for user misconfiguration scenarios
 	* am/compile.am: include .../mk/toolflags.mk to aggregate the available flags in Makefile.am
 	PACKAGE_{CPP,C,CXX,LD}FLAGS_SET, CHECK_{CPP,C,CXX,LD}FLAGS_SET, etc.
