@@ -128,3 +128,36 @@ tf__v_DC_ = $(tf__v_DC_$(AM_DEFAULT_VERBOSITY))
 # .....................123456789ab
 tf__v_DC_0 = @echo "   DECONSTRUCT $@";
 tf__v_DC_1 = 
+
+# Acquire the aggregations:
+#   PACKAGE_{CPP,C,CXX,LD}FLAGS_SET,
+#   CHECK_{CPP,C,CXX,LD}FLAGS_SET, etc.
+include $(if $(hypogeal_twilight_datadir),$(hypogeal_twilight_datadir),$(error hypogeal_twilight_datadir is undefined))/mk/toolflags.mk
+#
+# Usage (at the bottom of Makefile.am)
+#
+#   # configure.ac:  TF_ENABLE_GCC
+#   Makefile_COMPILER_CPPFLAGS_SET = @CPPFLAGS_gcc@
+#   Makefile_COMPILER_CFLAGS_SET   = @CFLAGS_gcc@
+#   Makefile_COMPILER_CXXFLAGS_SET = @CXXFLAGS_gcc@ -Wno-attributes
+#   Makefile_COMPILER_LDFLAGS_SET  = @LDFLAGS_gcc@  @libstd_filesystem@
+#   
+#   # configure.ac: TF_WITH_NONSTD([nonstd-something])
+#   Makefile_nonstd_CPPFLAGS_SET = @nonstd_something_CPPFLAGS@
+#   Makefile_nonstd_CFLAGS_SET   = @nonstd_something_CFLAGS@
+#   Makefile_nonstd_CXXLAGS_SET  = @nonstd_something_CXXFLAGS@
+#   Makefile_nonstd_LDFLAGS_SET  = @nonstd_something_LDFLAGS@
+#   
+#   # extras not otherwise covered by the TF_WITH_MODULE([...]) declarations
+#   Makefile_PACKAGE_CPPFLAGS_SET = 
+#   Makefile_PACKAGE_CFLAGS_SET   = 
+#   Makefile_PACKAGE_CXXLAGS_SET  = 
+#   Makefile_PACKAGE_LDFLAGS_SET  = 
+#   
+#   AM_CPPFLAGS = $(PACKAGE_CPPFLAGS_SET)
+#   AM_CXXFLAGS = $(PACKAGE_CXXFLAGS_SET)
+#   WATCHOUT - AM_LDFLAGS is not normally included in libtool final-link lines
+#              (whereas AM_CPPFLAGS, AM_CXXFLAGS are)
+#   AM_LDFLAGS = $(PACKAGE_LDFLAGS_SET)
+#   AM_LIBTOOLFLAGS = --silent
+#

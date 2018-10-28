@@ -33,7 +33,7 @@ module_INTERFACES = \
 install-data-am: install-module_INTERFACES
 INSTALLED_module_INTERFACES = \
   $(foreach slash,/ /ipp/ /hpp/ /fpp/, \
-            $(addprefix $(addsuffix $(slash),$(DESTDIR)$(modulesdir)$(slash)),$(module_INTERFACES))) \
+            $(addprefix $(addsuffix $(slash),$(DESTDIR)$(modulesdir)),$(module_INTERFACES))) \
   $(end)
 install-module_INTERFACES: $(INSTALLED_module_INTERFACES)
 $(INSTALLED_module_INTERFACES) : MODE=444

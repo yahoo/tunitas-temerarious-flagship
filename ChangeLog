@@ -1,6 +1,11 @@
 2018-10-28  Wendell Baker  <wbaker@oath.com>
 
-	* Version v1.1.0, usability and diagnostics for user misconfiguration scenarios
+	* Version v1.1.2, usability and diagnostics for user misconfiguration scenarios
+	* am/compile.am: include .../mk/toolflags.mk to aggregate the available flags in Makefile.am
+	PACKAGE_{CPP,C,CXX,LD}FLAGS_SET, CHECK_{CPP,C,CXX,LD}FLAGS_SET, etc.
+	* am/install.am: INSTALLED_module_INTERFACES corrected, too much $(slash)
+
+	* Version v1.1.1, usability and diagnostics for user misconfiguration scenarios
 	am/compile.am: TF_SOURCEStoMODULENAMES accepts *.cpp and *.xcpp
 
 	* Version v1.1.0, usability and diagnostics for user misconfiguration scenarios
