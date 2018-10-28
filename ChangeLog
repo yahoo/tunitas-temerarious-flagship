@@ -1,6 +1,9 @@
 2018-10-28  Wendell Baker  <wbaker@oath.com>
 
 	* Version v1.1.0, usability and diagnostics for user misconfiguration scenarios
+	am/compile.am: TF_SOURCEStoMODULENAMES accepts *.cpp and *.xcpp
+
+	* Version v1.1.0, usability and diagnostics for user misconfiguration scenarios
 	  --with-std-tunitas, --with-temerarious-flagship indicated on the command line or defaulted.
 	* ac/tf_finalize.m4: consistency checks before exit; require TF_WITH_STD_TUNITAS,
 	  require TF_WITH_TEMERARIOUS_FLAGSHIP.

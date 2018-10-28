@@ -46,25 +46,24 @@ DC_OPTIONS = \
   --srcdir-variable='$$(scold_srcdir)' \
   $(end)
 
-# %.cpp -> package.subpackage.Class  (the word)
+# %.xcpp -> package.subpackage.Class  (the module name as a dotted word)
+# %.cpp  -> package.subpackage.Class  (same)
+# e.g. obj/src/package/subpackage/Class.cpp -> package.subpackage.Class
 TF_SOURCEStoMODULENAMES = \
   $(subst /,., \
 	  $(patsubst %/namespace,%, \
 	  $(patsubst $(scold_cxxdir)/%,%, \
 	  $(patsubst $(scold_srcdir)/%,%, \
+	  $(patsubst %.cpp,%, \
 	  $(patsubst %.xcpp,%, \
-          $1))))) \
+          $1))))))\
   $(end)
-# %.cpp -> <package.subpackage.Class>  (the path to the lead include file)
+# %.xcpp -> <package.subpackage.Class>  (the path to the lead include file)
+# %.cpp  -> <package.subpackage.Class>  (same)
 # e.g. obj/src/package/subpackage/Class.cpp -> obj/modules/package.subpackage.Class
 TF_SOURCEStoMODULES = \
   $(addprefix $(scold_cxx_modulesdir)/, \
               $(call TF_SOURCEStoMODULENAMES, $1)) \
-  $(end)
-# %.scold -> <package.subpackage.Class>  (the path to the lead include file)
-TF_IMPORTStoMODULES = \
-  $(call TF_SOURCEStoMODULES, \
-         $(patsubst %.scold, %.cpp, $1)) \
   $(end)
 # %.cpp -> %.xcpp
 TF_SOURCEStoSOURCES = \
