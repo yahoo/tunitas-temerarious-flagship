@@ -37,12 +37,12 @@ endif
 #   $(scold_cxx_modulesdir)/hpp/tests.unit.tunitas.Fixture : $(scold_cxx_modulesdir)/fpp/tests.unit.tunitas.Fixture
 #   $(scold_cxx_modulesdir)/fpp/tests.unit.tunitas.Fixture : $(scold_cxxdir)/tests/unit/tunitas.Fixture.mk
 #   $(scold_cxxdir)/tests/unit/tunitas.Fixture.mk : $(scold_srcdir)/tests/unit/tunitas.Fixture.xcpp
-#   	: make-depend-script ; $(AM_V_TFDC) $(DC) $(DC_OPTIONS) $(DC_SEARCHPATH) $<
+#   	: make-depend-script ; $(TF_V_DIS) $(DC) $(DC_OPTIONS) $(DC_SEARCHPATH) $<
 #   $(scold_cxxdir)/tests/unit/tunitas.Fixture.cpp : $(scold_srcdir)/tests/unit/tunitas.Fixture.xcpp
-#   	: make-depend-script ; $(AM_V_TFDC) $(DC) $(DC_OPTIONS) $(DC_SEARCHPATH) $<
+#   	: make-depend-script ; $(TF_V_DIS) $(DC) $(DC_OPTIONS) $(DC_SEARCHPATH) $<
 #
 __compile_DC_MAKE_DEPEND_SCRIPT_APPROPRIATELY_QUOTED = \
---make-depend-script='$$(AM_V_TFDC) $$(DC) $$(DC_OPTIONS) $$(DC_SEARCHPATH) $$<'
+--make-depend-script='$$(TF_V_DIS) $$(DC) $$(DC_OPTIONS) $$(DC_SEARCHPATH) $$<'
 
 # $(DC_FLAGS) is reserved to the command line.
 # $(Makefile_DC_FLAGS) is reserved to the top-level Makefile.
@@ -127,23 +127,23 @@ endef
 # <--------->
 #   CXX      obj/src/posix/shell/namespace.lo
 #
-TF1ST = $(tf__v_1ST_$(V))
+TF_V_1ST = $(tf__v_1ST_$(V))
 tf__v_1ST_ = $(tf__v_1ST_$(AM_DEFAULT_VERBOSITY))
 # .....................123456789ab
 
 tf__v_1ST_0 = @echo "  DECONSTRUCT $@";
 tf__v_1ST_1 = 
 
-TF2ND = $(tf__v_2ND_$(V))
+TF_V_2ND = $(tf__v_2ND_$(V))
 tf__v_2ND_ = $(tf__v_2ND_$(AM_DEFAULT_VERBOSITY))
 # .....................123456789ab
 tf__v_2ND_0 = @echo "  MAKEFRAG    $@";
 tf__v_2ND_1 = 
 
-TFDC = $(tf__v_DC_$(V))
+TF_V_DIS = $(tf__v_DC_$(V))
 tf__v_DC_ = $(tf__v_DC_$(AM_DEFAULT_VERBOSITY))
 # .....................123456789ab
-tf__v_DC_0 = @echo "   DECONSTRUCT $@";
+tf__v_DC_0 = @echo "  DISAGGREGATE $@";
 tf__v_DC_1 = 
 
 # Acquire the aggregations:

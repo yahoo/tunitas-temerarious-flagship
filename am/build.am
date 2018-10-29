@@ -38,10 +38,63 @@
 include $(temerarious_flagship_datadir)/am/compile.am
 include $(temerarious_flagship_datadir)/am/install.am
 
+ifneq "no" "$(enable_temerarious_flagship_remove_near_from_there)"
+#
+# [[REMOVEWHEN]] temerarious-flagship does this or hypogeal-twilight is fixed.
+# hypogeal-twilight does not filter THERE from NEAR_and_THERE correctly
+# This is only needed when the nearby area contains a source-built package
+# which is also installed in the standard area.  The override requires
+# that the NEAR areas appear first in the searchpath, before the THERE areas.
+#
+# The delicate issues ...
+#
+# remove the THERE list from the NEAR list
+# (a) there will be lots of -I/opt/scold/modules in the NEAR list
+#     when specification of an explicit development tree is declined
+#     and if left in the NEAR list the "old" implementations in THERE
+#     will be found in the searchpath up prior to the "new" ones in NEAR
+# (b) same pattern applies to the LOADPATH, but the widening does not need to occur
+#
+__toolflags_SEARCHPATH_EXTERNAL_MODULES_NEAR = \
+  $(filter-out \
+    $(__toolflags_SEARCHPATH_EXTERNAL_MODULES_THERE_widened), \
+    $(__toolflags_SEARCHPATH_EXTERNAL_MODULES_NEAR_and_THERE))
+__toolflags_SEARCHPATH_EXTERNAL_MODULES_NEAR_and_THERE = \
+  $(addprefix -I, \
+              $(foreach area, $(DEVELOPMENT_AREAS) $(TESTING_AREAS), \
+                        $(area)/modules $(area)/obj/modules \
+                        $(area)/include $(area)/obj/include $(comment indeed... include files can be synthetic too)))
+  $(end)
+__toolflags_SEARCHPATH_EXTERNAL_MODULES_THERE = \
+  $(addprefix -I, \
+              $(foreach area, $(INSTALLATION_AREAS), \
+                        $(area)/modules \
+                        $(area)/include)) \
+  $(end)
+__toolflags_SEARCHPATH_EXTERNAL_MODULES_THERE_widened = \
+  $(addprefix -I, \
+              $(foreach area, $(INSTALLATION_AREAS), \
+                        $(area)/modules \
+                        $(area)/include \
+                        $(area)/obj/modules \
+                        $(area)/obj/include)) \
+  $(end)
+__toolflags_SEARCHPATH_EXTERNAL_MODULES = \
+  $(__toolflags_SEARCHPATH_EXTERNAL_MODULES_NEAR) \
+  $(__toolflags_SEARCHPATH_EXTERNAL_MODULES_THERE) \
+  $(end)
+# [[FIXTHIS]] in later incarnations use $(DEBUGGING_CONDITION) D=1; here we use VERBOSITY_CONDITION for V=1
+$(if $(VERBOSITY_CONDITION),\
+$(info DEBUG __toolflags_SEARCHPATH_EXTERNAL_MODULES=$(__toolflags_SEARCHPATH_EXTERNAL_MODULES))\
+$(info DEBUG __toolflags_SEARCHPATH_EXTERNAL_MODULES_NEAR=$(__toolflags_SEARCHPATH_EXTERNAL_MODULES_NEAR))\
+$(info DEBUG __toolflags_SEARCHPATH_EXTERNAL_MODULES_THERE=$(__toolflags_SEARCHPATH_EXTERNAL_MODULES_THERE))\
+$(info DEBUG __toolflags_SEARCHPATH_EXTERNAL_MODULES_THERE_widened=$(__toolflags_SEARCHPATH_EXTERNAL_MODULES_THERE_widened)))
+endif
+
 # e.g. temerarious_flagship_indirect ?= $(hypogeal_twilight_prefix)
 ifneq "" "$(temerarious_flagship_indirect)"
 #
-# [[REMOVEWHEN]] temerarious-flagship is complete enough
+# [[REMOVEWHEN]] temerarious-flagship is complete enough.
 # implementation details which one day will be properly within temerarious-flagship
 #
 include $($(temerarious_flagship_indirect)_datadir)/am/EXTERNAL-PATHS.mk
@@ -66,8 +119,7 @@ endif
 TF_DISAGGREGATE_COMPILE = $(if $(VERBOSITY_CONDITION),echo $1, : unverbose); $(call bbSCOLD_DISAGGREGATE_COMPILE,$1)
 TF_DEPENDENCIES_COMPILE = $(call bbSCOLD_DEPENDENCIES_COMPILE,$1)
 include $($(temerarious_flagship_indirect)_datadir)/am/distclean.mk
-
-# [[FIXTHIS]] in later incarnations use $(DEBUGGING_CONDITION)
+# [[FIXTHIS]] in later incarnations use $(DEBUGGING_CONDITION) D=1; here we use VERBOSITY_CONDITION for V=1
 $(if $(VERBOSITY_CONDITION),\
 $(info DEBUG DC=$(DC))\
 $(info DEBUG DEVELOPMENT_AREAS=$(DEVELOPMENT_AREAS))\

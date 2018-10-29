@@ -1,3 +1,12 @@
+2018-10-29  Wendell Baker  <wbaker@oath.com>
+
+	* Version v1.2.0, formalize the verbosity chatter particles
+	  following the pattern of automake with AM_V_CXX, AM_V_CXXLD, etc.
+	* am/compile.am: TF_V_DIS, TF_V_1ST, TF_V_2ND
+	* am/build.am: override .../mk/toolflags.mk filtration computation to organize SEARCHPATH
+	  __toolflags_SEARCHPATH_EXTERNAL_MODULES_NEAR and __toolflags_SEARCHPATH_EXTERNAL_MODULES_THERE
+	  enable_temerarious_flagship_remove_near_from_there=no disables the workaround
+
 2018-10-28  Wendell Baker  <wbaker@oath.com>
 
 	* Version v1.1.4, template buildconf corrections
