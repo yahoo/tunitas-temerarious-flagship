@@ -1,6 +1,6 @@
 #!/bin/sh
 
-cd ${0%/*} || exit 255
+cd ${0%/*} || exit 70
 # the minimum needed to get autotools to allow configure to check the rest
 declare -a REQUIRED_RPMS=(autoconf automake libtool)
 
@@ -170,7 +170,7 @@ if [[ -d ${with_temerarious_flagship?}/ac ]] ; then
     # in devel, paths are crushed up by one
     temerarious_flagship_prefix=${with_temerarious_flagship?}
     temerarious_flagship_datadir=${with_temerarious_flagship?}
-    temerarious_flagship_datadir_ac=${with_temerarious_flagship?}/ac
+    temerarious_flagship_datadir_ac=${temerarious_flagship_datadir?}/ac
 else
     # assume installed, in production
     temerarious_flagship_prefix=${with_temerarious_flagship?}
