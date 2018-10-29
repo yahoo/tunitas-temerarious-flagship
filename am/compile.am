@@ -113,8 +113,8 @@ endef
 # Usage (in a .../Makefrag.am)
 #
 # $(scold_cxxdir)/.../space/subspace/.../dependencies.mk:
-#     $(TF_1ST) $(call TF_DISAGGREGATE, ...*.cpp sources...)
-#     test -e $@
+#     $(TF_V_DC) $(call TF_DISAGGREGATE, ...*.cpp sources...)
+#     $(TF_V_DONE) test -e $@
 #
 define TF_DISAGGREGATE =
   $(call TF_DISAGGREGATE_COMPILE, $1); \
@@ -129,22 +129,39 @@ endef
 #
 TF_V_1ST = $(tf__v_1ST_$(V))
 tf__v_1ST_ = $(tf__v_1ST_$(AM_DEFAULT_VERBOSITY))
-# .....................123456789ab
-
-tf__v_1ST_0 = @echo "  DECONSTRUCT $@";
+# ...................123456789ab
+tf__v_1ST_0 = @echo "  XCPP2CPP $@";
 tf__v_1ST_1 = 
 
 TF_V_2ND = $(tf__v_2ND_$(V))
 tf__v_2ND_ = $(tf__v_2ND_$(AM_DEFAULT_VERBOSITY))
-# .....................123456789ab
-tf__v_2ND_0 = @echo "  MAKEFRAG    $@";
+# ...................123456789ab
+tf__v_2ND_0 = @echo "  MAKEFRAG $@";
 tf__v_2ND_1 = 
 
 TF_V_DIS = $(tf__v_DC_$(V))
 tf__v_DC_ = $(tf__v_DC_$(AM_DEFAULT_VERBOSITY))
-# .....................123456789ab
-tf__v_DC_0 = @echo "  DISAGGREGATE $@";
+# ..................123456789ab
+tf__v_DC_0 = @echo "  XCPP2CPP $@";
 tf__v_DC_1 = 
+
+TF_V_DONE = $(tf__v_DONE_$(V))
+tf__v_DONE_ = $(tf__v_DONE_$(AM_DEFAULT_VERBOSITY))
+# ...................123456789ab
+tf__v_DONE_0 = @echo "  EXISTS   $@";
+tf__v_DONE_1 = 
+
+TF_V_DONE = $(tf__v_DONE_$(V))
+tf__v_DONE_ = $(tf__v_DONE_$(AM_DEFAULT_VERBOSITY))
+# ...................123456789ab
+tf__v_DONE_0 = @echo "  EXISTS   $@";
+tf__v_DONE_1 = 
+
+# Specimen:
+#
+#123456789ab
+#  CXX      obj/src/tunitas/grabtown/exception/URN.lo
+#  XCPP2CPP obj/src/tunitas/grabtown/select/Query.ATTRIBUTES_FLOAT_OF_SELECTOR.cpp
 
 # Acquire the aggregations:
 #   PACKAGE_{CPP,C,CXX,LD}FLAGS_SET,
