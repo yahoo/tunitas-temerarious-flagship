@@ -57,6 +57,7 @@ endif
 TF_DISAGGREGATE_COMPILE = $(if $(VERBOSITY_CONDITION),echo $1, : unverbose); $(call bbSCOLD_DISAGGREGATE_COMPILE,$1)
 TF_DEPENDENCIES_COMPILE = $(call bbSCOLD_DEPENDENCIES_COMPILE,$1)
 TF_DISAGGREGATE = $(call TF_DISAGGREGATE_COMPILE, $1); $(call TF_DEPENDENCIES_COMPILE, $1)
+TF_SOURCEStoMODULES = $(call SCOLD_SOURCEStoMODULES, $1)
 include $(hypogeal_twilight_datadir)/am/install.mk
 include $(hypogeal_twilight_datadir)/am/distclean.mk
 
