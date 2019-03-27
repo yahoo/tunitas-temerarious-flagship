@@ -1,3 +1,4 @@
+dnl Copyright 2019, Oath Inc. Licensed under the terms of the Apache-2.0 license. See LICENSE file in https://github.com/yahoo/temerarious-flagship/blob/master/LICENSE for terms.
 dnl
 dnl TF_CONFIG_SUBMODULES(submodulesdir, submodules-list)
 dnl

@@ -20,18 +20,12 @@ Most (almost all) projects use the Scalable Object Location Disaggregation (S.C.
 
 ## Installation
 
-To build and install this project, use the recipe shown following.  This will install the build system into `/opt/tunitas.`
+There is no automated installation for this project.  The installation recipe is in the `packaging` which will install the 
+build system into `/opt/tunitas.`
 
-``` bash
-./buildconf &&
-./configure &&
-make &&
-make check &&
-make install &&
-echo OK DONE
-```
+Other packages, may reference this development tree directly.  Examples may be found in `./maintenance/nearby` in the other Tunitas-family of packages.  This is shown in the next section.
 
-Alternatively, if available, you can install from your organization's DNF repository with the following recipe:
+If available, you can install from your organization's DNF repository with the following recipe
 
 ``` bash
 sudo dnf install temerarious-flagship
@@ -51,11 +45,18 @@ echo OK DONE
 ```
 
 This is a standard autotools build recipe where `buildconf` is done once, `configure` is done rarely and `make` is done frequently.
-
 The `buildconf` script is a standard boilerplate script which generates the `configure`.
-
 Most of the sibling projects are able to build when configured to use the development tree.
-  
+
+To point the other project's build tree at _this_ copy of temerarious-flagship, the following recipe would be used:
+
+``` bash
+with_temerarious_flagship=/build/tunitas/temerarious-flagship ./buildconf &&
+./configure --with-temerarious-flagship=/build/tunitas/temerarious-flagship &&
+make &&
+echo OK DONE
+```
+
 ### The Maintenance Recipe
 
 For many projects the `./maintenance` directory contains artifices for the project maintainer.
