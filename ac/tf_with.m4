@@ -191,3 +191,28 @@ AC_DEFUN([TF_WITH_TEMERARIOUS_FLAGSHIP], [
     AC_SUBST([temerarious_flagship_libexecdir])
     AC_SUBST(scold_temerarious_flagship_prefix, $temerarious_flagship_prefix)
 ])
+
+dnl
+dnl TF_WITH_USR_LOCAL         (no arguments)
+dnl
+dnl Usage in configure.ac
+dnl   TF_WITH_USR_LOCAL
+dnl
+dnl Usage in Makefile.am
+dnl   Makefile_nonstd_PACKAGE_CPPFLAGS_SET = @usr_local_CPPFLAGS_SET@
+dnl   Makefile_nonstd_PACKAGE_CFLAGS_SET   = @usr_local_CFLAGS_SET@
+dnl   Makefile_nonstd_PACKAGE_CXXFLAGS_SET = @usr_local_CXXFLAGS_SET@
+dnl   Makefile_nonstd_PACKAGE_LDFLAGS_SET  = @usr_local_LDFLAGS_SET@
+dnl
+AC_DEFUN([TF_WITH_USR_LOCAL], [
+    ifdef([HGTW_WITH_USR_LOCAL], [
+        # Arrives in hypogeal-twilight 0.46 or maybe 0.45
+        HGTW_WITH_USR_LOCAL
+    ], [
+        # hack just what we need...
+        AC_SUBST([usr_local_CPPFLAGS], [-I/usr/local/include])
+        AC_SUBST([usr_local_CFLAGS], [])
+        AC_SUBST([usr_local_CXXFLAGS], [])
+        AC_SUBST([usr_local_LDFLAGS], [-Wl,-rpath=/usr/local/lib64])
+    ])
+])
