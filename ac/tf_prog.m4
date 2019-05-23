@@ -1,4 +1,17 @@
-dnl Copyright 2019, Oath Inc. Licensed under the terms of the Apache-2.0 license. See LICENSE file in https://github.com/yahoo/temerarious-flagship/blob/master/LICENSE for terms.
+dnl This is a GNU -*- autoconf -*- specification that is processed by Autoconf.
+dnl Copyright 2018-2019, Oath Inc.
+dnl Licensed under the terms of the Apache-2.0 license.
+dnl See the LICENSE file in https://github.com/yahoo/temerarious-flagship/blob/master/LICENSE for terms.
+
+dnl
+dnl For <that> in DC (the SCOLD Disaggregation Compiler, DC)
+dnl    ... there is at present but one member of this distinguished set
+dnl
+dnl TF_PROG_<that>
+dnl
+
+dnl ----------------------------------------------------------------------------------------------------
+
 dnl
 dnl TF_PROG_<that>
 dnl for <that> in DC (the SCOLD Disaggregation Compiler, DC)
@@ -6,7 +19,6 @@ dnl
 dnl Some basic well-understood checkification of tools (programs).
 dnl Following the paradigm of AC_PROG_CXX, etc.
 dnl
-
 AC_DEFUN([TF_PROG_DC], [
     AC_ARG_VAR([DC], [The SCOLD CPP Language Disaggregation Compiler (DC)])
     : ${DC:=remonstrate}

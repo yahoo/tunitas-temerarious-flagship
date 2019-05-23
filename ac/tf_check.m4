@@ -1,9 +1,28 @@
-dnl Copyright 2019, Oath Inc. Licensed under the terms of the Apache-2.0 license. See LICENSE file in https://github.com/yahoo/temerarious-flagship/blob/master/LICENSE for terms.
+dnl This is a GNU -*- autoconf -*- specification that is processed by Autoconf.
+dnl Copyright 2018-2019, Oath Inc.
+dnl Licensed under the terms of the Apache-2.0 license.
+dnl See the LICENSE file in https://github.com/yahoo/temerarious-flagship/blob/master/LICENSE for terms.
+
+dnl
+dnl TF_CHECK_<that> for BOOST, JSONCPP, MYSQLPP, UUID
+dnl         ... there are at present quite a few members of this set
+dnl
+dnl TF_CHECK_STD_FILESYSTEM  sets up -lstdc++fs, needed since gcc5
+dnl
+
+dnl ----------------------------------------------------------------------------------------------------
+
 dnl
 dnl TF_CHECK_<that> for BOOST, JSONCPP, MYSQLPP, UUID
 dnl
 dnl Some basic well-understood checkification.
 dnl
+
+AC_DEFUN([TF_CHECK_GCC], [
+  ifdef([SCOLD_ENABLE_GCC],
+        [SCOLD_ENABLE_GCC],
+        [TF_MSG_WARNING([[TF]_[ENABLE]_[GCC] is not implemented, ignoring it])])
+])
 
 AC_DEFUN([TF_CHECK_APACHE_HTTPD], [SCOLD_CHECK_APACHE_HTTPD])
 AC_DEFUN([TF_CHECK_BOOST],        [SCOLD_CHECK_BOOST])
@@ -13,6 +32,18 @@ AC_DEFUN([TF_CHECK_MYSQLPP],      [SCOLD_CHECK_MYSQLPP])
 AC_DEFUN([TF_CHECK_SQLITE],       [SCOLD_CHECK_SQLITE])
 AC_DEFUN([TF_CHECK_UUID],         [SCOLD_CHECK_UUID])
 
+dnl
+dnl TF_CHECK_STD_FILESYSTEM  sets up -lstdc++fs, needed since gcc5
+dnl
+dnl Usage:
+dnl
+dnl   In Makefile.am (the top level), set the variables
+dnl
+dnl   Makefile_COMPILER_CPPFLAGS_SET = @CPPFLAGS_gcc@ 
+dnl   Makefile_COMPILER_CFLAGS_SET   =   @CFLAGS_gcc@   @CFLAGS_gdb@
+dnl   Makefile_COMPILER_CXXFLAGS_SET = @CXXFLAGS_gcc@ @CXXFLAGS_gdb@
+dnl   Makefile_COMPILER_LDFLAGS_SET  =  @LDFLAGS_gcc@  @LDFLAGS_gdb@ @libstd_filesystem@ <------------- this
+dnl
 AC_DEFUN([TF_CHECK_STD_FILESYSTEM], [
    # Any reasonable and recent version of gcc needs this
    # e.g.

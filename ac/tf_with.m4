@@ -1,4 +1,8 @@
-dnl Copyright 2019, Oath Inc. Licensed under the terms of the Apache-2.0 license. See LICENSE file in https://github.com/yahoo/temerarious-flagship/blob/master/LICENSE for terms.
+dnl This is a GNU -*- autoconf -*- specification that is processed by Autoconf.
+dnl Copyright 2018-2019, Oath Inc.
+dnl Licensed under the terms of the Apache-2.0 license.
+dnl See the LICENSE file in https://github.com/yahoo/temerarious-flagship/blob/master/LICENSE for terms.
+
 dnl
 dnl TF_WITH_MODULE(name-dashes, name-underscores, description)
 dnl TF_WITH_NONSTD(name-dashes, name-underscores, description)
@@ -11,6 +15,8 @@ dnl TF_WITH_TEMERARIOUS_FLAGSHIP    (no arguments)
 dnl 
 dnl TF_DEFAULT_STD_VALUES           (no arguments)
 dnl
+
+dnl ----------------------------------------------------------------------------------------------------
 
 dnl
 dnl TF_DEFAULT_STD_VALUES            (no arguments)
