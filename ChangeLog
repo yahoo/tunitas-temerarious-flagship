@@ -1,7 +1,10 @@
 2019-06-26  Wendell Craig Baker  <wbaker@verizonmedia.com>
 
-	* Version v1.2.0-0.devel, rebadged v0.2 for ongoing development
-	- wherein v1.1 is launched and for Tunitas Release 01, Famous Oak; herein continuing on
+	* Version v1.3.0-0.devel, rebadged v1.3 for ongoing development
+	- need some immediate version separation to allow for Tunitas Release 01, Famous Oak
+	- VERSION: is corrected
+
+	* Version v1.2.0-0.devel, rebadged v1.2 for ongoing development
 	* VERSION: because there is no configure.ac, and no ./configure step
 
 2019-04-22  Wendell Craig Baker  <wbaker@verizonmedia.com>
