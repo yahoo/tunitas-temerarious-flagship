@@ -9,6 +9,7 @@ dnl    ... there is at present but one member of this distinguished set
 dnl
 dnl TF_PROG_<that>
 dnl
+dnl Tests for DC, PRTOC and others
 
 dnl ----------------------------------------------------------------------------------------------------
 
@@ -39,3 +40,10 @@ AC_DEFUN([TF_PROG_DC], [
 	fi			    
     fi
 ])
+
+AC_DEFUN([TF_PROG_PROTOC], [
+    AC_ARG_VAR(PROTOC, [The Protocol Buffer Compiler])
+    AC_CHECK_PROG(PROTOC, protoc, protoc)
+])
+
+dnl end
