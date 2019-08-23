@@ -1,3 +1,9 @@
+2019-08-22  Wendell Craig Baker  <wbaker@verizonmedia.com>
+
+	* Version 1.3.1, fix the buildconf template against the error
+	aclocal: error: couldn't open directory '/opt/tunitas/ac': No such file or directory
+	* bc/template.autotools-buildconf: ibidem.
+
 2019-06-26  Wendell Craig Baker  <wbaker@verizonmedia.com>
 
 	* Version v1.3.0-0.devel, rebadged v1.3 for ongoing development
@@ -18,3 +24,4 @@
 	* Version 1.0.0, operational
 	* ac, am, bc, mk
 	* separate package-from-project, see ../packaging
+<
