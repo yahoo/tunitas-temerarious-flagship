@@ -3,7 +3,7 @@ Whereas semantic versioning is used, a new minor release number is necesasry whe
 
 The <strike>markup</strike> markdown document preparation language used herein is more like MediaWiki, less like Markdown (whatever that standard is).  You should be able to see this file <strike>pasted</strike> performed directly into https://wiki.tunitas.technology with reasonable results.
 
-= Version 1.4.0 =
+= Version 1.4-Series =
 
 * TF_CHECK_LEVELDB added
 * TF_WITH_NONSTD_LEVELDB added

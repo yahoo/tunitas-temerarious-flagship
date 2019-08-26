@@ -25,11 +25,11 @@ dnl     CFLAGS_leveldb
 dnl     CXXFLAGS_leveldb
 dnl     LDFLAGS_leveldb
 dnl
-AC_DEFUN([TF_CHECK_LEVELDB],
+AC_DEFUN([TF_CHECK_LEVELDB], [
     ifdef([HGTW_CHECK_LEVELDB], [HGTW_CHECK_LEVELDB], [
         AC_REQUIRE([HGTW_ENABLE_CONFIGURE_VERBOSE])
         AC_REQUIRE([HGTW_ENABLE_RPM_PACKAGE_CHECKING])
-        AC_REQUIRE([HGTW_WITH_NONSTD_LEVELDB])
+        AC_REQUIRE([TF_WITH_NONSTD_LEVELDB])
         if test xNONE != "x$nonstd_leveldb_prefix" && test x != "x$nonstd_leveldb_prefix"; then
             #
             # e.g.
@@ -42,7 +42,7 @@ AC_DEFUN([TF_CHECK_LEVELDB],
                 if test -d $nonstd_leveldb_libdir ; then
                     __pkgconfigdir="${nonstd_leveldb_libdir}/pkgconfig"
                     HGTW_MSG_VERBOSE([using the leveldb libraries in ${nonstd_leveldb_libdir?} via ${__pkgconfigdir?}])
-                    HGTWinternal_CHECK_LEVELDB_PKG_CONFIG_INSTALLED_LEVELDB([PKG_CONFIG_PATH=${__pkgconfigdir?}])
+                    TFinternal_CHECK_LEVELDB_PKG_CONFIG_INSTALLED_LEVELDB([PKG_CONFIG_PATH=${__pkgconfigdir?}])
                     break
                 fi
             done
@@ -77,7 +77,7 @@ AC_DEFUN([TF_CHECK_LEVELDB],
             #                   leveldb-1.19 is unknown
             #                   leveldb-1.18 will not do work
             #
-            HGTWinternal_CHECK_LEVELDB_PKG_CONFIG_INSTALLED_LEVELDB([])
+            TFinternal_CHECK_LEVELDB_PKG_CONFIG_INSTALLED_LEVELDB([])
         fi
         # [[current]]
         AC_SUBST(CPPFLAGS_leveldb) 
