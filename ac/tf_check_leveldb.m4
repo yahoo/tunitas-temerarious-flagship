@@ -8,7 +8,13 @@ dnl
 
 dnl ----------------------------------------------------------------------------------------------------
 AC_DEFUN([TF_WITH_NONSTD_LEVELDB], [
-    ifdef([HGTW_WITH_NONSTD_LEVELDB], [HGTW_WITH_NONSTD_LEVELDB], [
+    dnl
+    dnl The definition of HGTW_WITH_NONSTD_LEVELDB arrives in hypogeal-twilight >= 0.45.0, likely SCOLDing Release 05 (Purple Tin Partridge)
+    dnl It is not yet available in the Tunitas "Ahead Release" ahead of SCOLDing Release 04 (Green Copper Heron)
+    dnl Do some magical polyfill to make something look like it works
+    dnl
+    ifdef([HGTW_WITH_NONSTD_LEVELDB], [echo fully quoted
+    HGTW_WITH_NONSTD_LEVELDB], [
         HGTW_WITH_NONSTD([leveldb], [leveldb], [non-standard LevelDB, something beyond 1.20])
     ])
 ])

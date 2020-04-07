@@ -38,8 +38,17 @@
 #    ...etc...
 #    
 # implementation details
+ifneq "0" "$(words $(wildcard $(hypogeal_twilight_datadir)/am/compile.am))"
+# current as of hypogeal-twilight >= 0.45.0-0.devel (mainline, Epoch:0)
+# WATCHOUT because this idiom MAY NOT be in the "ahead release" series Epoch:2 viz hypogeal-twilight >= 2:0.45
+include $(hypogeal_twilight_datadir)/am/compile.am
+else
+# compatibility with older hypogeal-twilight 0.44 & prior
+# note the two includes, where one is required nowadays
+# note the .../am/compile.mk which is a deprecated idiom in favor of .../am/compile.am
 include $(hypogeal_twilight_datadir)/am/EXTERNAL-PATHS.mk
 include $(hypogeal_twilight_datadir)/am/compile.mk
+endif
 $(if $(DC),$(__OK),$(error DC is not set, you should call TF_PROG_DC in configure.ac))
 ifeq "FAIL" "$(shell type -p $(DC) 2>/dev/null || echo FAIL)"
 $(warning DC=$(DC) and $(DC) is not in your PATH)
@@ -64,23 +73,25 @@ endef
 TF_DEPENDENCIES_COMPILE = $(call bbSCOLD_DEPENDENCIES_COMPILE,$1)
 TF_DISAGGREGATE = { $(call TF_DISAGGREGATE_COMPILE, $1) ; } && { $(call TF_DEPENDENCIES_COMPILE, $1) ; }
 TF_SOURCEStoMODULES = $(call SCOLD_SOURCEStoMODULES, $1)
+include $(hypogeal_twilight_datadir)/mk/distclean.mk
+
+# WATCHOUT - this acts upon module_SOURCES_SET as already defined in prior includes or in the top-level Makefile.am
 include $(hypogeal_twilight_datadir)/am/install.mk
-include $(hypogeal_twilight_datadir)/am/distclean.mk
 
 # [[FIXTHIS]] in later incarnations use $(DEBUGGING_CONDITION)
 $(if $(VERBOSITY_CONDITION),\
-$(info DEBUG DC=$(DC))\
-$(info DEBUG DEVELOPMENT_AREAS=$(DEVELOPMENT_AREAS))\
+$(info .../am/build.am: DEBUG DC=$(DC))\
+$(info .../am/build.am: DEBUG DEVELOPMENT_AREAS=$(DEVELOPMENT_AREAS))\
 $(comment the SCOLD_MODULES series is deprecated, the EXTERNAL_MODULES series is splitting & some are deprecating) \
 \
-$(info DEBUG SEARCHPATH_SCOLD_MODULES=$(SEARCHPATH_SCOLD_MODULES))\
-$(info DEBUG LOADPATHPATH_SCOLD_MODULES=$(LOADPATHPATH_SCOLD_MODULES))\
+$(info .../am/build.am: DEBUG SEARCHPATH_SCOLD_MODULES=$(SEARCHPATH_SCOLD_MODULES))\
+$(info .../am/build.am: DEBUG LOADPATHPATH_SCOLD_MODULES=$(LOADPATHPATH_SCOLD_MODULES))\
 \
-$(info DEBUG SEARCHPATH_EXTERNAL_MODULES=$(SEARCHPATH_EXTERNAL_MODULES))\
-$(info DEBUG LOADPATHPATH_EXTERNAL_MODULES=$(LOADPATHPATH_EXTERNAL_MODULES))\
+$(info .../am/build.am: DEBUG SEARCHPATH_EXTERNAL_MODULES=$(SEARCHPATH_EXTERNAL_MODULES))\
+$(info .../am/build.am: DEBUG LOADPATHPATH_EXTERNAL_MODULES=$(LOADPATHPATH_EXTERNAL_MODULES))\
 \
-$(info DEBUG SEARCHPATH_EXTERNAL_MODULES_NEAR=$(SEARCHPATH_EXTERNAL_MODULES_NEAR))\
-$(info DEBUG LOADPATHPATH_EXTERNAL_MODULES_NEAR=$(LOADPATHPATH_EXTERNAL_MODULES_NEAR))\
+$(info .../am/build.am: DEBUG SEARCHPATH_EXTERNAL_MODULES_NEAR=$(SEARCHPATH_EXTERNAL_MODULES_NEAR))\
+$(info .../am/build.am: DEBUG LOADPATHPATH_EXTERNAL_MODULES_NEAR=$(LOADPATHPATH_EXTERNAL_MODULES_NEAR))\
 \
-$(info DEBUG SEARCHPATH_EXTERNAL_MODULES_THERE=$(SEARCHPATH_EXTERNAL_MODULES_THERE))\
-$(info DEBUG LOADPATHPATH_EXTERNAL_MODULES_THERE=$(LOADPATHPATH_EXTERNAL_MODULES_THERE)))
+$(info .../am/build.am: DEBUG SEARCHPATH_EXTERNAL_MODULES_THERE=$(SEARCHPATH_EXTERNAL_MODULES_THERE))\
+$(info .../am/build.am: DEBUG LOADPATHPATH_EXTERNAL_MODULES_THERE=$(LOADPATHPATH_EXTERNAL_MODULES_THERE)))

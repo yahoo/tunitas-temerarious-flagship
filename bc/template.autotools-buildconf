@@ -2,7 +2,7 @@
 # Copyright 2019, Oath Inc.
 # Licensed under the terms of the Apache-2.0 license. See the LICENSE file in https://github.com/yahoo/temerarious-flagship/blob/master/LICENSE for terms.
 
-cd ${0%/*} || exit 255
+cd ${0%/*} || exit 70
 # the minimum needed to get autotools to allow configure to check the rest
 declare -a REQUIRED_RPMS=(autoconf automake libtool)
 
@@ -79,6 +79,13 @@ examples:
 EOF
     exit ${e:-3}
 }
+function warn_of_missing_package() {
+    local -a packages=( "$@" )
+    # This will fail, and its error message is what we intend you to see
+    # Of course this is only going to be helpful on rpm-based systems; it will fail benignly on the others
+    echo -n "${NAME}: info, probing for packages: ${packages[@]}"
+    rpm -q ${packages[@]}
+}
 
 if ((0 != $#)) && { [[ x--usage == x$1 ]] || [[ x--help == x$1 ]] || [[ x-h == x$1 ]] ; } ; then
     do_usage 0
@@ -102,6 +109,7 @@ if [[ -n ${prefix} ]] ; then
     echo "${NAME}: notice, default value of with_hypogeal_twilight is ${with_hypogeal_twilight?} (is that what was intended?)"
     if [[ ! -d ${with_hypogeal_twilight} ]] ; then
         echo "${NAME}: error, the directory does not exist, for with_hypogeal_twilight=${with_hypogeal_twilight?}"
+        warn_of_missing_package hypogeal-twilight
         exit 1
     fi 1>&2
     if [[ -n ${with_temerarious_flagship} ]] ; then
@@ -118,6 +126,7 @@ if [[ -n ${prefix} ]] ; then
     echo "${NAME}: notice, default value of with_temerarious_flagship is ${with_temerarious_flagship?} (is that what was intended?)"
     if [[ ! -d ${with_temerarious_flagship} ]] ; then
         echo "${NAME}: error, the directory does not exist, for with_temerarious_flagship=${with_temerarious_flagship?}"
+        warn_of_missing_package temerarious-flagship
         exit 1
     fi 1>&2
 fi

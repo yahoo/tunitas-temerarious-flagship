@@ -5,5 +5,6 @@
 # moved to .../am/build.am (suffix matches directory)
 # deprecating .../am/build.mk (suffix DOES NOT match directory)
 # 
+$(info included from $(word $(shell expr $(words $(MAKEFILE_LIST)) - 1), $(MAKEFILE_LIST)))
 $(warning temerarious flagship .../am/build.mk is deprecated in favor of .../am/build.am (suffix matches directory))
 include $(temerarious_flagship_datadir)/am/build.am

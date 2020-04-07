@@ -137,7 +137,12 @@ AC_DEFUN([TF_WITH_STD_TUNITAS], [
 ])
 
 dnl
-dnl TF_WITH_STD                  (no arguments)
+dnl TF_WITH_STD(subsystem)
+dnl $1 - subsystem, e.g. scold, tunitas, state-space, hyperledger, hyperledger/fabric, hyperledger/sawtooth, hyperledger/iroha, etc.
+dnl
+dnl Usage:
+dnl
+dnl   TF_WITH_STD([scold])
 dnl
 AC_DEFUN([TF_WITH_STD], [    
     AC_REQUIRE([TF_DEFAULT_STD_VALUES])
