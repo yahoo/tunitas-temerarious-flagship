@@ -1,0 +1,17 @@
+#!/bin/bash --norc
+# Copyright, Verizon Media.
+# Licensed under the terms of the Apache-2.0 license.
+# See the LICENSE file in https://github.com/yahoo/temerarious-flagship/blob/master/LICENSE for terms.
+# See the LICENSE file at the top of this repository.
+cd ${0%/*} || exit 70
+source ../framework.sh
+prepare_buildconf
+prepare_Makefile_am
+
+prefix=${prefix?} \
+with_temerarious_flagship=${with_temerarious_flagship?} \
+with_hypogeal_twilight=${with_hypogeal_twilight?} \
+./buildconf
+
+# This is the test.  This is what we came to show.
+./configure

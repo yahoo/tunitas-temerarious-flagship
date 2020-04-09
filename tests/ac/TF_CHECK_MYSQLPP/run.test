@@ -1,0 +1,53 @@
+#!/bin/bash --norc
+# Copyright, Verizon Media.
+# Licensed under the terms of the Apache-2.0 license.
+# See the LICENSE file in https://github.com/yahoo/temerarious-flagship/blob/master/LICENSE for terms.
+# See the LICENSE file at the top of this repository.
+cd ${0%/*} || exit 70
+source ../framework.sh
+prepare_buildconf
+prepare_Makefile_am
+
+prefix=${prefix?} \
+with_temerarious_flagship=${with_temerarious_flagship?} \
+with_hypogeal_twilight=${with_hypogeal_twilight?} \
+./buildconf
+
+then=$(date +%s)
+# This is the test.  This is what we came to show.
+set +e
+./configure
+e=$?
+if ((0 == e)) ; then
+    exit 0
+else
+    set -xv
+    #
+    # The invocation of ./configure might succeed or fail depending upon mysql++-devel
+    #
+    # If mysql++-devel is not installed then the ./configure will exit nonzero.
+    # In that case, then guess whether we are being run from ../driver in which
+    # case the output was captured in the nearby ${0%/*}/run.log.  If so then
+    # examine that file for the teltale error message
+    #
+    # package mysql++-devel is not installed
+    # configure: error: mysql++-devel is required
+    #
+    logfile=./run.log # <-------- WATCHOUT ... framework.sh already did the chdir ${0%/*}/.
+    if test -e $logfile ; then
+        #
+        # [[FIXTHIS]] check that the mtime on $logfile is reasonably after near $then
+        if true ; then
+            #
+            # Good evidence exists that run.log was created by this invocation of run.test
+            # and was not left lying around from some previous invocation of run.log
+            #
+            if ((1 == e)); then
+                # OK
+                exit 0
+            fi
+        fi
+    fi
+    echo "Error: the test $(basename $(dirname $(pwd))) has failed inexplicably with exit ${e?}"
+    exit 1
+fi 1>&2

@@ -1,0 +1,46 @@
+#!/bin/sh
+# Copyright, Verizon Media.
+# Licensed under the terms of the Apache-2.0 license.
+# See the LICENSE file in https://github.com/yahoo/temerarious-flagship/blob/master/LICENSE for terms.
+# See the LICENSE file at the top of this repository.
+#
+# Called From:
+#
+# 1.  a command line, for debugging, from any directory at all
+#     e.g. ... you know ...
+#
+# 2.  from Makefile.am within 'make check' via the macrotization 'check_driver_stanza'
+#     e.g.
+#       some rule with the Makefile, referencing the directory .../tests/ac
+#   
+# Usage
+#
+#    ...from any directory at all...
+#    .../driver TF_WITH_THIS_OR_THAT ...etc...
+#
+cd ${0%/*}/../.. || exit 70
+set -o pipefail
+declare -i ecode=0
+for testpathy in $@; do
+    # therefore all test scripts have to be named 'run.test'
+    declare directory=${testpathy%/run.test} # remove */run.test if it was ever there
+    declare script=${directory?}/run.test # add it back */run.test
+    declare name=${directory##*/} #            recover the directory, e.g. TF_INIT
+    declare log=${script%.test}.log
+    declare state=${script%.test}.state
+    (
+        if $script >& ${log?}; then
+            status=PASS
+            ecode=0
+        else
+            status=FAIL
+            ecode=1
+        fi
+        echo "$status: $name"
+        exit $ecode
+    ) 2>&1 | tee $state
+    if ((0 != $?)); then
+        ecode=1
+    fi
+done
+exit $ecode
