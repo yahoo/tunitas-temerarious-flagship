@@ -58,9 +58,7 @@ AC_DEFUN([TF_WITH_TEMERARIOUS_FLAGSHIP], [
     AC_REQUIRE([TF_DEFAULT_STD_VALUES])
     AC_REQUIRE([TF_WITH_STD_TUNITAS])
     AC_REQUIRE([SCOLD_COMPONENT_METADIRECTORY_TIERS])
-    set -xv
     TFinternal_WITH_SUBSYSTEM([temerarious-flagship], [temerarious_flagship], [The Tunitas Build System])
-set +xv
     temerarious_flagship_datadir="\$(temerarious_flagship_datarootdir)"
     AC_SUBST([temerarious_flagship_datadir])
     temerarious_flagship_datarootdir=${temerarious_flagship_prefix}/share/temerarious-flagship

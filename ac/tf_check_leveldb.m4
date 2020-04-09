@@ -1,9 +1,9 @@
 dnl
-dnl [[FIXTHIS]] ... this belongs in hypogeal-twilight as part of the standard library of such techniques
-dnl [[FIXTHIS]] ... expect that will occur around hypogeal-twilight >= 0.46
-dnl
 dnl TF_CHECK_LEVELDB                    (no arguments)
 dnl TF_WITH_NONSTD_LEVELDB              (no arguments)
+dnl
+dnl [[FIXTHIS]] ... this belongs in hypogeal-twilight as part of the standard library of such techniques
+dnl [[FIXTHIS]] ... expect that will occur around hypogeal-twilight >= 0.46
 dnl
 
 dnl ----------------------------------------------------------------------------------------------------
@@ -13,8 +13,9 @@ AC_DEFUN([TF_WITH_NONSTD_LEVELDB], [
     dnl It is not yet available in the Tunitas "Ahead Release" ahead of SCOLDing Release 04 (Green Copper Heron)
     dnl Do some magical polyfill to make something look like it works
     dnl
-    ifdef([HGTW_WITH_NONSTD_LEVELDB], [echo fully quoted
-    HGTW_WITH_NONSTD_LEVELDB], [
+    ifdef([HGTW_WITH_NONSTD_LEVELDB], [
+        HGTW_WITH_NONSTD_LEVELDB
+    ], [
         HGTW_WITH_NONSTD([leveldb], [leveldb], [non-standard LevelDB, something beyond 1.20])
     ])
 ])
@@ -22,7 +23,7 @@ AC_DEFUN([TF_WITH_NONSTD_LEVELDB], [
 dnl TF_CHECK_LEVELDB      (and no arguments)
 dnl
 dnl Validates that leveldb-devel is available.
-dnl Does not ensure that at least version v1.x.y is used (that isn't hard)
+dnl Does not ensure that at least version v1.x.y is used (that isn't a hard requirement to satisfy)
 dnl
 dnl Postcondition: (the following are set)
 dnl
