@@ -20,5 +20,7 @@ dnl     AC_INIT([mypackage], [1.2.3], [/dev/null@example.com])
 dnl     TF_INIT(AC_PACKAGE_NAME, AC_PACKAGE_VERSION, AC_PACKAGE_BUGREPORT)
 dnl
 AC_DEFUN([TF_INIT], [
-    SCOLD_INIT([$1], [$2], [$3])
+    ifdef([HGTW_INIT], dnl shutup the deprecation warnings
+          [HGTW_INIT([$1], [$2], [$3])],
+          [SCOLD_INIT([$1], [$2], [$3])])
 ])

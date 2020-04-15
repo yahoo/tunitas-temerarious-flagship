@@ -6,6 +6,8 @@ dnl See the LICENSE file in https://github.com/yahoo/temerarious-flagship/blob/m
 dnl
 dnl TF_FINALIZE    (no arguments)
 dnl
+dnl Prefer TF_FINALIZE over AC_OUTPUT, but a call to AC_OUTPUT is required before EOF.
+dnl
 dnl Deprecations:
 dnl
 dnl   TF_OUTPUT - same thing, following the naming convention of AC_OUTPUT
@@ -34,6 +36,14 @@ AC_DEFUN([TF_FINALIZE], [
     if test NONE = $prefix ; then
        AC_MSG_WARN([prefix was not set so the default ${ac_default_prefix:-(unset)} will obtain])
     fi
-    SCOLD_MAKE_OBJ_DIRECTORIES
-    AC_OUTPUT
+    ifdef([HGTW_FINALIZE], [
+        dnl Use the new way when possible.
+        HGTW_FINALIZE
+    ], [
+        dnl Else open code it
+        ifdef([HGTW_MAKE_OBJ_DIRECTORIES], dnl but still shutup deprecation warnings
+              [HGTW_MAKE_OBJ_DIRECTORIES],
+              [SCOLD_MAKE_OBJ_DIRECTORIES])
+        AC_OUTPUT
+    ])
 ])

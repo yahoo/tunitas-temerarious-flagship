@@ -31,18 +31,21 @@ dnl Deprecated:
 dnl
 dnl    TF_MSG_WARN(message)
 dnl
-dnl whereas "warn" is always a surprise, we all expect the gerund form "warning."
+dnl whereas "warn" (a verb) is always a surprise, we all expect the gerund form "warning."
+dnl conjugation: the error, the warning, the notice, the verbose [message], the debug [message].
 dnl
 
-AC_DEFUN([TF_MSG_ERROR],   [AC_MSG_ERROR([$1])])
-AC_DEFUN([TF_MSG_WARNING], [AC_MSG_WARN([$1])])
-AC_DEFUN([TF_MSG_WARN],    [AC_MSG_WARN([$1])])
-AC_DEFUN([TF_MSG_NOTICE],  [AC_MSG_NOTICE([$1])])
+AC_DEFUN([TF_MSG_ERROR],   [ifdef([HGTW_MSG_ERROR],   [HGTW_MSG_ERROR([$1])],   [AC_MSG_ERROR([$1])])])
+AC_DEFUN([TF_MSG_WARNING], [ifdef([HGTW_MSG_WARNING], [HGTW_MSG_WARNING([$1])], [AC_MSG_WARN([$1])])])
+AC_DEFUN([TF_MSG_WARN],    [ifdef([HGTW_MSG_WARN],    [HGTW_MSG_WARN([$1])],    [AC_MSG_WARN([$1])])])
+AC_DEFUN([TF_MSG_NOTICE],  [ifdef([HGTW_MSG_NOTICE],  [HGTW_MSG_NOTICE([$1])],  [AC_MSG_NOTICE([$1])])])
 AC_DEFUN([TF_MSG_VERBOSE], [
-    AC_REQUIRE([SCOLD_ENABLE_CONFIGURE_VERBOSE])
-    SCOLD_MSG_VERBOSE([$1])
+    dnl prefer the new HGTW_-prefixed names to shut up the deprecation warnings
+    AC_REQUIRE([TF_ENABLE_CONFIGURE_VERBOSE])
+    ifdef([HGTW_MSG_VERBOSE], [HGTW_MSG_VERBOSE([$1])], [SCOLD_MSG_VERBOSE([$1])])
 ])
 AC_DEFUN([TF_MSG_DEBUG], [
-    AC_REQUIRE([SCOLD_ENABLE_CONFIGURE_DEBUG])
-    SCOLD_MSG_DEBUG([$1])
+    dnl prefer the new HGTW_-prefixed names to shut up the deprecation warnings
+    AC_REQUIRE([TF_ENABLE_CONFIGURE_DEBUG])
+    ifdef([HGTW_MSG_DEBUG], [HGTW_MSG_DEBUG([$1])], [SCOLD_MSG_DEBUG([$1])])
 ])

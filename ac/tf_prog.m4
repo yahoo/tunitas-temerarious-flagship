@@ -21,10 +21,10 @@ dnl Some basic well-understood checkification of tools (programs).
 dnl Following the paradigm of AC_PROG_CXX, etc.
 dnl
 AC_DEFUN([TF_PROG_DC], [
-    AC_ARG_VAR([DC], [The SCOLD CPP Language Disaggregation Compiler (DC)])
+    AC_ARG_VAR([DC], [The S.C.O.L.D. CPP Language Disaggregation Compiler (DC)])
     : ${DC:=remonstrate}
     if ! type -p ${DC?} ; then
-        AC_MSG_WARN([The SCOLD preprocessor ${DC} is not present or is not in your path])
+        AC_MSG_WARN([The S.C.O.L.D. preprocessor ${DC} is not present or is not in your path])
         DC=/opt/scold/bin/remonstrate
         AC_MSG_WARN([the default and expected location is ${DC?}])
         AC_MSG_WARN([the build process will use that in the absence of any other definition])
@@ -42,8 +42,10 @@ AC_DEFUN([TF_PROG_DC], [
 ])
 
 AC_DEFUN([TF_PROG_PROTOC], [
-    AC_ARG_VAR(PROTOC, [The Protocol Buffer Compiler])
-    AC_CHECK_PROG(PROTOC, protoc, protoc)
+    ifdef([HGTW_PROG_PROTOC], [HGTW_PROG_PROTOC], [
+        AC_ARG_VAR(PROTOC, [The Protocol Buffer Compiler])
+        AC_CHECK_PROG(PROTOC, protoc, protoc)
+    ])
 ])
 
 dnl end

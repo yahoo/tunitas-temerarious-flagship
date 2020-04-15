@@ -67,25 +67,30 @@ bbDC = $(DC)
 endif
 endif
 define TF_DISAGGREGATE_COMPILE =
-	$(if $(VERBOSITY_CONDITION),echo $1, : unverbose2) ; \
-	$(call bbSCOLD_DISAGGREGATE_COMPILE,$1)
+	$(if $(VERBOSITY_CONDITION),echo verbose dependencies $1, : unverbose shut-up) ; \
+	$(call bbHGTW_DISAGGREGATE_COMPILE,$1)
 endef
-TF_DEPENDENCIES_COMPILE = $(call bbSCOLD_DEPENDENCIES_COMPILE,$1)
-TF_DISAGGREGATE = { $(call TF_DISAGGREGATE_COMPILE, $1) ; } && { $(call TF_DEPENDENCIES_COMPILE, $1) ; }
-TF_SOURCEStoMODULES = $(call SCOLD_SOURCEStoMODULES, $1)
+define TF_DEPENDENCIES_COMPILE =
+	$(if $(VERBOSITY_CONDITION),echo verbose dependencies $1, : unverbose shut-up) ; \
+	$(call bbHGTW_DEPENDENCIES_COMPILE,$1)
+endef
+define TF_COMPILE =
+	{ $(call TF_DISAGGREGATE_COMPILE, $1) ; } && { $(call TF_DEPENDENCIES_COMPILE, $1) ; }
+endef
+TF_DISAGGREGATE = $(call TF_COMPILE, $1)$(warning TF_DISAGGREGATE is deprecated, instead prefer TF_COMPILE)
+TF_SOURCEStoMODULES = $(call HGTW_SOURCEStoMODULES, $1)
 include $(hypogeal_twilight_datadir)/mk/distclean.mk
 
 # WATCHOUT - this acts upon module_SOURCES_SET as already defined in prior includes or in the top-level Makefile.am
 include $(hypogeal_twilight_datadir)/am/install.mk
 
-# [[FIXTHIS]] in later incarnations use $(DEBUGGING_CONDITION)
-$(if $(VERBOSITY_CONDITION),\
+$(if $(DEBUGGING_CONDITION),\
 $(info .../am/build.am: DEBUG DC=$(DC))\
 $(info .../am/build.am: DEBUG DEVELOPMENT_AREAS=$(DEVELOPMENT_AREAS))\
-$(comment the SCOLD_MODULES series is deprecated, the EXTERNAL_MODULES series is splitting & some are deprecating) \
+$(comment the HGTW_MODULES series is deprecated, the EXTERNAL_MODULES series is splitting & some are deprecating) \
 \
-$(info .../am/build.am: DEBUG SEARCHPATH_SCOLD_MODULES=$(SEARCHPATH_SCOLD_MODULES))\
-$(info .../am/build.am: DEBUG LOADPATHPATH_SCOLD_MODULES=$(LOADPATHPATH_SCOLD_MODULES))\
+$(info .../am/build.am: DEBUG SEARCHPATH_HGTW_MODULES=$(SEARCHPATH_HGTW_MODULES))\
+$(info .../am/build.am: DEBUG LOADPATHPATH_HGTW_MODULES=$(LOADPATHPATH_HGTW_MODULES))\
 \
 $(info .../am/build.am: DEBUG SEARCHPATH_EXTERNAL_MODULES=$(SEARCHPATH_EXTERNAL_MODULES))\
 $(info .../am/build.am: DEBUG LOADPATHPATH_EXTERNAL_MODULES=$(LOADPATHPATH_EXTERNAL_MODULES))\
@@ -95,3 +100,31 @@ $(info .../am/build.am: DEBUG LOADPATHPATH_EXTERNAL_MODULES_NEAR=$(LOADPATHPATH_
 \
 $(info .../am/build.am: DEBUG SEARCHPATH_EXTERNAL_MODULES_THERE=$(SEARCHPATH_EXTERNAL_MODULES_THERE))\
 $(info .../am/build.am: DEBUG LOADPATHPATH_EXTERNAL_MODULES_THERE=$(LOADPATHPATH_EXTERNAL_MODULES_THERE)))
+
+TF_V_DCDIS = $(TF_V_DIS)$(warning TF_V_DCDIS is deprecated, instead use TF_V_DIS)
+TF_V_DC    = $(TF_V_COM)$(warning TF_V_DC is deprecated, instead use TF_V_COM)
+
+TF_V_DIS = $(__tf_DIS)
+__tf_DIS = $(__tf_DIS_$V)
+__tf_DIS_  = $(__tf_DIS_0)
+__tf_DIS_0 = @echo "  TF-DIS   $@";
+__tf_DIS_1 = 
+
+TF_V_DEP = $(__tf_DEP)
+__tf_DEP = $(__tf_DEP_$V)
+__tf_DEP_  = $(__tf_DEP_0)
+__tf_DEP_0 = @echo "  TF-DEP   $@";
+__tf_DEP_1 =
+
+TF_V_COM = $(__tf_COM)
+__tf_COM = $(__tf_COM_$V)
+__tf_COM_  = $(__tf_COM_0)
+__tf_COM_0 = @echo "  TF-COM   $@";
+__tf_COM_1 = 
+
+TF_V_DONE = $(__tf_DUN)
+TF_V_DUN = $(__tf_DUN)
+__tf_DUN = $(__tf_DUN_$V)
+__tf_DUN_  = $(__tf_DUN_0)
+__tf_DUN_0 = @echo "  TF-DONE  $@";
+__tf_DUN_1 = 

@@ -22,7 +22,9 @@ dnl
 dnl TF_DEFAULT_STD_VALUES            (no arguments)
 dnl
 AC_DEFUN([TF_DEFAULT_STD_VALUES], [
-    AC_REQUIRE([SCOLD_DEFAULT_STD_VALUES])
+    ifdef([HGTW_DEFAULT_STD_VALUES], dnl prefer the modern stylings, avoid the warning messages of the old
+          [AC_REQUIRE([HGTW_DEFAULT_STD_VALUES])],
+          [AC_REQUIRE([SCOLD_DEFAULT_STD_VALUES])])
     default_std_tunitas_prefix=/opt/tunitas
     : default_std_EXAMPLE_prefix=$default_default_prefix
 ])
@@ -42,12 +44,25 @@ dnl Whereas "modules" is a SCOLD-level concept, the default location is whatever
 dnl which respects --with-submodules and --with-external
 dnl
 AC_DEFUN([TF_WITH_MODULE], [
-    SCOLD_WITH_MODULE([module-$1],
-                       ifelse([$2], [],
-                              m4_bpatsubst([module_$1], m4_changequote([{], [}]){[^a-zA-Z0-9_]}m4_changequote({[}, {]}), [_]),
-                              [$2]),
-                       ifelse([$3], [], [Module $1 Development Area], [$3]))
-]) 
+    TFinternal_WITH_MODULE([$1], dnl no "module-" prefix and see the  WATCHOUT below
+                           ifelse([$2], [],
+                                  m4_bpatsubst([module_$1], m4_changequote([{], [}]){[^a-zA-Z0-9_]}m4_changequote({[}, {]}), [_]),
+                                  [$2]),
+                           ifelse([$3], [], [Module $1 Development Area], [$3]))
+])
+AC_DEFUN([TFinternal_WITH_MODULE], [
+    ifdef([HGTW_WITH_MODULE],
+          dnl 
+          dnl WATCHOUT the newer API does not accept $2 and $3, which are always synthesized from $1
+          dnl WATCHOUT the newer API does not accept "module-" prefix on $1
+          dnl
+          [HGTW_WITH_MODULE([$1])],
+          dnl
+          dnl WATCHOUT -------\
+          dnl                 |
+          dnl                 v
+          [SCOLD_WITH_MODULE([module-$1], [$2], [$3])])
+])
  
 dnl
 dnl TF_WITH_TEMERARIOUS_FLAGSHIP
@@ -57,7 +72,7 @@ dnl
 AC_DEFUN([TF_WITH_TEMERARIOUS_FLAGSHIP], [
     AC_REQUIRE([TF_DEFAULT_STD_VALUES])
     AC_REQUIRE([TF_WITH_STD_TUNITAS])
-    AC_REQUIRE([SCOLD_COMPONENT_METADIRECTORY_TIERS])
+    AC_REQUIRE([TF_COMPONENT_METADIRECTORY_TIERS])
     TFinternal_WITH_SUBSYSTEM([temerarious-flagship], [temerarious_flagship], [The Tunitas Build System])
     temerarious_flagship_datadir="\$(temerarious_flagship_datarootdir)"
     AC_SUBST([temerarious_flagship_datadir])
@@ -75,7 +90,7 @@ dnl
 AC_DEFUN([TF_WITH_SUBSYSTEM], [
     AC_REQUIRE([TF_DEFAULT_STD_VALUES])
     AC_REQUIRE([TF_WITH_STD_TUNITAS])
-    AC_REQUIRE([SCOLD_COMPONENT_METADIRECTORY_TIERS])
+    AC_REQUIRE([TF_COMPONENT_METADIRECTORY_TIERS])
     ifelse([$1], [temerarious-flagship], [
         TF_WITH_TEMERARIOUS_FLAGSHIP
     ], [
@@ -85,7 +100,7 @@ AC_DEFUN([TF_WITH_SUBSYSTEM], [
 AC_DEFUN([TFinternal_WITH_SUBSYSTEM], [
     AC_REQUIRE([TF_DEFAULT_STD_VALUES])
     AC_REQUIRE([TF_WITH_STD_TUNITAS])
-    AC_REQUIRE([SCOLD_COMPONENT_METADIRECTORY_TIERS])
+    AC_REQUIRE([TF_COMPONENT_METADIRECTORY_TIERS])
     ifdef([SCOLD_WITH_AMBIENT_COMPONENT_WITHIN], [
         dnl hypogeal-twilight 0.43 and newer
 	SCOLD_WITH_AMBIENT_COMPONENT_WITHIN([$1],
@@ -118,12 +133,15 @@ dnl $2 = name_underscores as appears in a bash variable, may be empty
 dnl $3 = explanation, may be empty
 dnl
 AC_DEFUN([TF_WITH_NONSTD], [
-    SCOLD_WITH_NONSTD([$1],
-                      ifelse([$2], [],
-                             m4_bpatsubst([$1], m4_changequote([{], [}]){[^a-zA-Z0-9_]}m4_changequote({[}, {]}), [_]),
-                             [$2]),
-                      ifelse([$3], [], [The Non-Standard $1 Area], [$3]))
+    TFinternal_WITH_NONSTD([$1],
+                           ifelse([$2], [],
+                                  m4_bpatsubst([$1], m4_changequote([{], [}]){[^a-zA-Z0-9_]}m4_changequote({[}, {]}), [_]),
+                                  [$2]),
+                           ifelse([$3], [], [The Non-Standard $1 Area], [$3]))
 ]) 
+AC_DEFUN([TFinternal_WITH_NONSTD], [
+    ifdef([HGTW_WITH_NONSTD], [HGTW_WITH_NONSTD([$1], [$2], [$3])], [SCOLD_WITH_NONSTD([$1], [$2], [$3])])
+])
 
 dnl
 dnl TF_WITH_STD_TUNITAS      (no arguments)
@@ -131,7 +149,7 @@ dnl
 dnl The preferred form.
 dnl
 AC_DEFUN([TF_WITH_STD_TUNITAS], [    
-    SCOLD_WITH_STD([tunitas], [tunitas], [The Standard Tunitas Area])
+    TF_WITH_STD([tunitas], [tunitas], [The Standard Tunitas Area])
 ])
 
 dnl
@@ -144,18 +162,22 @@ dnl   TF_WITH_STD([scold])
 dnl
 AC_DEFUN([TF_WITH_STD], [    
     AC_REQUIRE([TF_DEFAULT_STD_VALUES])
-    SCOLD_WITH_STD([$1],
-                   ifelse([$2], [],
-                          m4_bpatsubst([$1], m4_changequote([{], [}]){[^a-zA-Z0-9_]}m4_changequote({[}, {]}), [_]),
-                          [$2]),
-                   ifelse([$3], [], [The Standard $1 Area], [$3]))
+    TFinternal_WITH_STD([$1],
+                        ifelse([$2], [],
+                               m4_bpatsubst([$1], m4_changequote([{], [}]){[^a-zA-Z0-9_]}m4_changequote({[}, {]}), [_]),
+                               [$2]),
+                        ifelse([$3], [], [The Standard $1 Area], [$3]))
 ])
-
+AC_DEFUN([TFinternal_WITH_STD], [
+    ifdef([HGTW_WITH_STD],
+          [HGTW_WITH_STD([$1], [$2], [$3])],
+          [SCOLD_WITH_STD([$1], [$2], [$3])])
+])
 
 dnl
 dnl TF_WITH_HYPOGEAL_TWILIGHT      (no arguments)
 dnl
-AC_DEFUN([TF_WITH_HYPOGEAL_TWILIGHT], [SCOLD_WITH_HYPOGEAL_TWILIGHT])
+AC_DEFUN([TF_WITH_HYPOGEAL_TWILIGHT], [ifdef([HGTW_WITH_HYPOGEAL_TWILIGHT], [HGTW_WITH_HYPOGEAL_TWILIGHT], [SCOLD_WITH_HYPOGEAL_TWILIGHT])])
 
 dnl
 dnl TF_WITH_TEMERARIOUS_FLAGSHIP         (no arguments)
@@ -191,14 +213,19 @@ AC_DEFUN([TF_WITH_TEMERARIOUS_FLAGSHIP], [
             unset temerarious_flagship_libexecdir
         fi
     fi
-    SCOLD_MSG_VERBOSE([temerarious_flagship_prefix=${temerarious_flagship_prefix:-(unset)}])
-    SCOLD_MSG_VERBOSE([temerarious_flagship_datarootdir=${temerarious_flagship_datarootdir:-(unset)}])
-    SCOLD_MSG_VERBOSE([temerarious_flagship_datadir=${temerarious_flagship_datadir:-(unset)}])
-    SCOLD_MSG_VERBOSE([temerarious_flagship_libexecdir=${temerarious_flagship_libexecdir:-(unset)}])
+    TF_MSG_VERBOSE([temerarious_flagship_prefix=${temerarious_flagship_prefix:-(unset)}])
+    TF_MSG_VERBOSE([temerarious_flagship_datarootdir=${temerarious_flagship_datarootdir:-(unset)}])
+    TF_MSG_VERBOSE([temerarious_flagship_datadir=${temerarious_flagship_datadir:-(unset)}])
+    TF_MSG_VERBOSE([temerarious_flagship_libexecdir=${temerarious_flagship_libexecdir:-(unset)}])
     AC_SUBST([temerarious_flagship_datarootdir])
     AC_SUBST([temerarious_flagship_datadir])
     AC_SUBST([temerarious_flagship_libexecdir])
     AC_SUBST(scold_temerarious_flagship_prefix, $temerarious_flagship_prefix)
+])
+AC_DEFUN([TFinternal_WITH_AMBIENT_COMPONENT], [
+    ifdef([HGTW_WITH_AMBIENT_COMPONENT],
+          [HGTW_WITH_AMBIENT_COMPONENT([$1], [$2], [$3], [$4])], 
+          [SCOLD_WITH_AMBIENT_COMPONENT([$1], [$2], [$3], [$4])])
 ])
 
 dnl

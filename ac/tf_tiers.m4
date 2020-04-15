@@ -6,6 +6,17 @@ dnl See the LICENSE file in https://github.com/yahoo/temerarious-flagship/blob/m
 dnl
 dnl TF_COMPONENT_METADIRECTORY_TIERS             (no arguments)
 dnl
+dnl Arguments:
+dnl
+dnl     --with-submodules=DIRECTORY       e.g. ${PWD}/submodules       a directory of the current project
+dnl     --with-siblings=DIRECTORY         e.g. /build/tunitas
+dnl     --with-nearby=DIRECTORY           e.g. /build/something-something
+dnl     --with-std-scold=DIRECTORY        e.g. /opt/scold
+dnl
+dnl For Tunitas Technologies, you'll want to have
+dnl
+dnl     --with-std-tunitas=DIRECTORY      e.g. /opt/tunitas
+dnl
 
 dnl ----------------------------------------------------------------------------------------------------
 
@@ -22,5 +33,9 @@ dnl     --with-std-tunitas=<choice>
 dnl     --with-std-scold=<choice>
 dnl
 AC_DEFUN([TF_COMPONENT_METADIRECTORY_TIERS], [
-    SCOLD_COMPONENT_METADIRECTORY_TIERS
+    ifdef([HGTW_COMPONENT_METADIRECTORY_TIERS], [
+        HGTW_COMPONENT_METADIRECTORY_TIERS
+    ], [
+        SCOLD_COMPONENT_METADIRECTORY_TIERS
+    ])
 ])

@@ -6,6 +6,8 @@ dnl See the LICENSE file in https://github.com/yahoo/temerarious-flagship/blob/m
 dnl
 dnl TF_CONFIG_SUBMODULES(submodulesdir, submodules-list)
 dnl
+dnl [[advice]] It's worth avoiding the use of submodules.  They are usable, but clunky.
+dnl
 dnl Usage:
 dnl   Makefile.am:   SUBDIRS = @subdirs@
 dnl   configure.ac:  TF_CONFIG_SUBMODULES(submodulesdir, submodules-list)
@@ -22,4 +24,10 @@ dnl $2 - submodules-list is the list of submodules found within that directory
 dnl      as a single string, space separated, no commas, no commentariat
 dnl      e.g. [hypogeal-twilight module-std module-nonstd]
 dnl
-AC_DEFUN([TF_CONFIG_SUBMODULES], [SCOLD_CONFIG_SUBMODULES([$1], [$2])])
+AC_DEFUN([TF_CONFIG_SUBMODULES], [
+  ifdef([HGTW_CONFIG_SUBMODULES], [
+      HGTW_CONFIG_SUBMODULES([$1], [$2])
+  ], [
+      SCOLD_CONFIG_SUBMODULES([$1], [$2])
+  ])
+])

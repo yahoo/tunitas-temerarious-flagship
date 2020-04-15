@@ -19,18 +19,20 @@ dnl Some basic well-understood checkification.
 dnl
 
 AC_DEFUN([TF_CHECK_GCC], [
-  ifdef([SCOLD_ENABLE_GCC],
-        [SCOLD_ENABLE_GCC],
-        [TF_MSG_WARNING([[TF]_[ENABLE]_[GCC] is not implemented, ignoring it])])
+  ifdef([HGTW_ENABLE_GCC], dnl prefer this newer one
+        [HGTW_ENABLE_GCC],
+        [ifdef([SCOLD_ENABLE_GCC],
+               [SCOLD_ENABLE_GCC],
+               [TF_MSG_WARNING([[TF]_[ENABLE]_[GCC] is not implemented, ignoring it])])])
 ])
 
-AC_DEFUN([TF_CHECK_APACHE_HTTPD], [SCOLD_CHECK_APACHE_HTTPD])
-AC_DEFUN([TF_CHECK_BOOST],        [SCOLD_CHECK_BOOST])
-AC_DEFUN([TF_CHECK_CPPUNIT],      [SCOLD_CHECK_CPPUNIT])
-AC_DEFUN([TF_CHECK_JSONCPP],      [SCOLD_CHECK_JSONCPP])
-AC_DEFUN([TF_CHECK_MYSQLPP],      [SCOLD_CHECK_MYSQLPP])
-AC_DEFUN([TF_CHECK_SQLITE],       [SCOLD_CHECK_SQLITE])
-AC_DEFUN([TF_CHECK_UUID],         [SCOLD_CHECK_UUID])
+AC_DEFUN([TF_CHECK_APACHE_HTTPD], [ifdef([HGTW_CHECK_APACHE_HTTPD], [HGTW_CHECK_APACHE_HTTPD], [SCOLD_CHECK_APACHE_HTTPD])])
+AC_DEFUN([TF_CHECK_BOOST],        [ifdef([HGTW_CHECK_BOOST],        [HGTW_CHECK_BOOST],        [SCOLD_CHECK_BOOST])])
+AC_DEFUN([TF_CHECK_CPPUNIT],      [ifdef([HGTW_CHECK_CPPUNIT],      [HGTW_CHECK_CPPUNIT],      [SCOLD_CHECK_CPPUNIT])])
+AC_DEFUN([TF_CHECK_JSONCPP],      [ifdef([HGTW_CHECK_JSONCPP],      [HGTW_CHECK_JSONCPP],      [SCOLD_CHECK_JSONCPP])])
+AC_DEFUN([TF_CHECK_MYSQLPP],      [ifdef([HGTW_CHECK_MYSQLPP],      [HGTW_CHECK_MYSQLPP],      [SCOLD_CHECK_MYSQLPP])])
+AC_DEFUN([TF_CHECK_SQLITE],       [ifdef([HGTW_CHECK_SQLITE],       [HGTW_CHECK_SQLITE],       [SCOLD_CHECK_SQLITE])])
+AC_DEFUN([TF_CHECK_UUID],         [ifdef([HGTW_CHECK_UUID],         [HGTW_CHECK_UUID],         [SCOLD_CHECK_UUID])])
 
 dnl
 dnl TF_CHECK_STD_FILESYSTEM  sets up -lstdc++fs, needed since gcc5
@@ -45,15 +47,18 @@ dnl   Makefile_COMPILER_CXXFLAGS_SET = @CXXFLAGS_gcc@ @CXXFLAGS_gdb@
 dnl   Makefile_COMPILER_LDFLAGS_SET  =  @LDFLAGS_gcc@  @LDFLAGS_gdb@ @libstd_filesystem@ <------------- this
 dnl
 AC_DEFUN([TF_CHECK_STD_FILESYSTEM], [
-   # Any reasonable and recent version of gcc needs this
-   # e.g.
-   #   /usr/lib/gcc/x86_64-redhat-linux/8/libstdc++fs.a
-   #   /usr/lib/gcc/x86_64-redhat-linux/8/32/libstdc++fs.a
-   #
-   AC_SUBST([libstd_filesystem], [-lstdc++fs])
+   ifdef([HGTW_CHECK_STD_FILESYSTEM], [
+        HGTW_CHECK_STD_FILESYSTEM
+   ], [
+       # Any reasonable and recent version of gcc needs this
+       # e.g.
+       #   /usr/lib/gcc/x86_64-redhat-linux/8/libstdc++fs.a
+       #   /usr/lib/gcc/x86_64-redhat-linux/8/32/libstdc++fs.a
+       AC_SUBST([libstd_filesystem], [-lstdc++fs])
+    ])
 ])
 
-# Reminder, and documenting "uuid" vs "libuuid" ...
+# Reminder, and herein documenting "uuid" vs "libuuid" ...
 #
 # USE -----> libuuid-devel has uuid.pc
 # USE -----> libuuid-devel-2.24.2-1.fc20.x86_64
@@ -61,7 +66,7 @@ AC_DEFUN([TF_CHECK_STD_FILESYSTEM], [
 # AVOID ---> uuid-devel does not
 # AVOID ---> uuid-devel-1.6.2-21.fc20.x86_64
 #
-# WATCHOUT - package 'libuuid' has pkgconfig named 'uuid.pc'
+# WATCHOUT - package 'libuuid' has pkgconfig named 'uuid.pc' (not named 'libuuid.pc' as with many other libraries)
 # rpm -q -f /usr/lib64/pkgconfig/uuid.pc 
 # libuuid-devel-2.24.2-1.fc20.x86_64
 #
