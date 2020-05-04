@@ -70,3 +70,31 @@ AC_DEFUN([TF_ENABLE_MOCK_BUILD], [
 #
 __EOF__
 ])
+
+dnl
+dnl TF_ENABLE_LIBTOOL_NO_INSTALL                 (no macro) arguments
+dnl
+dnl Default: enabled
+dnl          (requires the overt action of --disable-libtool-no-install to disable)
+dnl
+dnl Interface: (in configure)
+dnl
+dnl   --enable-libtool-no-install=yes
+dnl   --enable-libtool-no-install=no
+dnl   --disable-libtool-no-install
+dnl
+dnl Enable / disable the -no-install option for libtool
+dnl This is really only useful for the CHECK builds.
+dnl
+dnl Deprecations:
+dnl   none
+dnl   This is new. There never was a SCOLD_ variant, so compatibility is not warranted
+dnl
+dnl Usage: (in Makefile.am)
+dnl
+dnl    Makefile_CHECK_CPPFLAGS_SET = @CPPFLAGS_no_install@
+dnl    Makefile_CHECK_CFLAGS_SET   =   @CFLAGS_no_install@
+dnl    Makefile_CHECK_CXXFLAGS_SET = @CXXFLAGS_no_install@
+dnl    Makefile_CHECK_LDFLAGS_SET  =  @LDFLAGS_no_install@
+dnl
+AC_DEFUN([TF_ENABLE_LIBTOOL_NO_INSTALL], [HGTW_ENABLE_LIBTOOL_NO_INSTALL])

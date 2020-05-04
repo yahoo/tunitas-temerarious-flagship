@@ -10,6 +10,7 @@ dnl TF_WITH_STD(name-dashes, name-underscores, description)
 dnl TF_WITH_SUBSYSTEM(name-dashes, name-underscores, description)
 dnl
 dnl TF_WITH_STD_TUNITAS             (no arguments)
+dnl TF_WITH_STD_SCOLD               (no arguments)
 dnl TF_WITH_HYPOGEAL_TWILIGHT       (no arguments)
 dnl TF_WITH_TEMERARIOUS_FLAGSHIP    (no arguments)
 dnl 
@@ -146,10 +147,18 @@ AC_DEFUN([TFinternal_WITH_NONSTD], [
 dnl
 dnl TF_WITH_STD_TUNITAS      (no arguments)
 dnl
-dnl The preferred form.
+dnl The preferred form, as zero-argument so it can be used in AC_REQUIRE
 dnl
-AC_DEFUN([TF_WITH_STD_TUNITAS], [    
+AC_DEFUN([TF_WITH_STD_TUNITAS], [
     TF_WITH_STD([tunitas], [tunitas], [The Standard Tunitas Area])
+])
+dnl
+dnl TF_WITH_STD_SCOLD      (no arguments)
+dnl
+dnl The preferred form, as zero-argument so it can be used in AC_REQUIRE
+dnl
+AC_DEFUN([TF_WITH_STD_SCOLD], [    
+    TF_WITH_STD([scold], [scold], [The Standard S.C.O.L.D. Area])
 ])
 
 dnl
@@ -182,7 +191,7 @@ AC_DEFUN([TF_WITH_HYPOGEAL_TWILIGHT], [ifdef([HGTW_WITH_HYPOGEAL_TWILIGHT], [HGT
 dnl
 dnl TF_WITH_TEMERARIOUS_FLAGSHIP         (no arguments)
 dnl
-dnl So it can be used in an AC_REQUIRES clause, elsewhere
+dnl So it can be used in an AC_REQUIRE clause, elsewhere
 dnl
 AC_DEFUN([TF_WITH_TEMERARIOUS_FLAGSHIP], [
     AC_REQUIRE([TF_COMPONENT_METADIRECTORY_TIERS])

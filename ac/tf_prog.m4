@@ -43,8 +43,8 @@ AC_DEFUN([TF_PROG_DC], [
 
 AC_DEFUN([TF_PROG_PROTOC], [
     ifdef([HGTW_PROG_PROTOC], [HGTW_PROG_PROTOC], [
-        AC_ARG_VAR(PROTOC, [The Protocol Buffer Compiler])
-        AC_CHECK_PROG(PROTOC, protoc, protoc)
+        AC_ARG_VAR([PROTOC], [The Protocol Buffer Compiler])
+        AC_CHECK_PROG([PROTOC], [protoc], [protoc])
     ])
 ])
 

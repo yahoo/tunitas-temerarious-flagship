@@ -58,6 +58,7 @@ AC_DEFUN([TF_CHECK_STD_FILESYSTEM], [
     ])
 ])
 
+########################################
 # Reminder, and herein documenting "uuid" vs "libuuid" ...
 #
 # USE -----> libuuid-devel has uuid.pc
@@ -70,3 +71,75 @@ AC_DEFUN([TF_CHECK_STD_FILESYSTEM], [
 # rpm -q -f /usr/lib64/pkgconfig/uuid.pc 
 # libuuid-devel-2.24.2-1.fc20.x86_64
 #
+########################################
+
+dnl
+dnl TF_CHECK_PACKAGES(module-name-list, devel-package-name)
+dnl TF_CHECK_PACKAGES(module-name-list, devel-package-name, package-title)
+dnl
+dnl Wherein
+dnl   module-name-list    ::= a list of S.C.O.L.D. type modules as you would name them in an #import statement
+dnl   devel-package-name  ::= a single RPM package name as you would install it with dnf
+dnl
+dnl Examples
+dnl
+dnl   module-name-list
+dnl     [std.is_same]                        ... a list of one S.C.O.L.D. module
+dnl     [nonstd]                             ... ibidem
+dnl     [sys.exits.Code sys.posix.open]      ... a list of two S.C.O.L.D. modules (both will have to be present appear)
+dnl
+dnl   devel-package-name
+dnl     [module-std-devel]                   ... the name of the rpm package that you should install
+dnl     [module-dnl-devel]                   ... ibidem
+dnl     [module-sys-devel]                   ... these names are used in messaging, they are not probed with rpm -q
+dnl
+dnl   package-title
+dnl
+dnl     The Standard Library
+dnl     The Non-Standard Library
+dnl     The Tunias Basic Components
+dnl     The MySQL C++ API
+dnl     The cURL C++ API
+dnl
+dnl For grammatical niceness, you will likely feel the need for an article in package-title
+dnl but that may not be relevant so we are not supplying it for you in $3 package-title
+dnl
+dnl The check does not test whether the named rpm package is actually installed.
+dnl The check attempts to compile a program that uses the S.C.O.L.D. module (its C++ #include header)
+dnl and based upon the failure of that test then emits the error and quits.
+dnl
+dnl Usage:
+dnl
+dnl                               dnf install module-std-devel
+dnl                                           |
+dnl                #import std                |
+dnl                #import std.is_same        |
+dnl                        |   |              |
+dnl                        v   v              v
+dnl   TF_CHECK_PACKAGES([std std.is_same], [module-std-devel], [The Standard C++ Library])
+dnl   TF_CHECK_PACKAGES([nonstd], [module-nonstd-devel], [The Non-Standard C++ Library])
+dnl   TF_CHECK_PACKAGES([mysqlpp], [module-mysql-devel]
+dnl   TF_CHECK_PACKAGES([curlpp], [module-curl-devel]
+dnl
+dnl
+dnl
+AC_DEFUN([TF_CHECK_PACKAGES], [
+    AC_REQUIRE([TF_COMPONENT_METADIRECTORY_TIERS])
+    AC_REQUIRE([TF_WITH_STD_SCOLD])
+    AC_REQUIRE([TF_WITH_STD_TUNITAS])
+    __CPPFLAGS="$CPPFLAGS"
+    dnl Reminder: this will not work out well if you are using the development options to specify locations other than --with-std-tunitas=DIR and --with-std-scold=DIR
+    dnl e.g. if you have a special feature in /build/tunitas/basics and you use --with-tunitas-basics=/build/tunitas/basics
+    CPPFLAGS="${std_tunitas_prefix:+-I$std_tunitas_prefix/modules -I$std_tunitas_prefix/include} ${std_scold_prefix:+-Istd_scold_prefix/modules -I$std_scold_prefix/include}"
+    AC_CHECK_HEADERS([$1],
+                     [ : ok found ],
+                     [
+                         dnl grammar here is difficult as $3 may be empty; but also $1 may be single or several (so plural).
+                         TF_MSG_WARNING([cannot find the modules ifelse([$3], [], [around $1], [of $3])])
+                         TF_MSG_WARNING([consider: dnf install $2])
+                         dnl [[FIXTHIS]] a way to disable this as a hard error from the command line
+                         TF_MSG_WARNING([cannot proceed without $2])
+                     ])
+    CPPFLAGS="$__CPPFLAGS"
+    unset __CPPFLAGS
+])
