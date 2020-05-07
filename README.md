@@ -25,7 +25,7 @@ There is no automated installation for this project.  The installation recipe is
 
 Other packages, may reference this development tree directly.  Examples may be found in `./maintenance/nearby` in the other Tunitas family of packages.  This is shown in the next section.
 
-If available, you can install from your organization's DNF repository with the following recipe
+If available, you can install from your organization's DNF repository with the following recipe:
 
 ``` bash
 sudo dnf install temerarious-flagship

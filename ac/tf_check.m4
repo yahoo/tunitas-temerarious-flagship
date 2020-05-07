@@ -1,7 +1,8 @@
 dnl This is a GNU -*- autoconf -*- specification that is processed by Autoconf.
-dnl Copyright 2018-2019, Oath Inc.
+dnl Copyright 2018, 2019, Oath Inc.; Copyright 2020, Verizon Media
 dnl Licensed under the terms of the Apache-2.0 license.
-dnl See the LICENSE file in https://github.com/yahoo/temerarious-flagship/blob/master/LICENSE for terms.
+dnl For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+dnl For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
 
 dnl
 dnl TF_CHECK_<that> for BOOST, JSONCPP, MYSQLPP, UUID

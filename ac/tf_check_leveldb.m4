@@ -1,3 +1,8 @@
+dnl This is a GNU -*- autoconf -*- specification that is processed by Autoconf.
+dnl Copyright 2018, 2019, Oath Inc.; Copyright 2020, Verizon Media
+dnl Licensed under the terms of the Apache-2.0 license.
+dnl For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+dnl For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
 dnl
 dnl TF_CHECK_LEVELDB                    (no arguments)
 dnl TF_WITH_NONSTD_LEVELDB              (no arguments)

@@ -1,6 +1,8 @@
-# This is a GNU -*- Makefile -*-
-# Copyright 2019, Oath Inc. Licensed under the terms of the Apache-2.0 license.
-# See the LICENSE file in https://github.com/yahoo/tunitas-basics/blob/master/LICENSE for terms.
+# This GNU -*- Makefile -*- fragment may be included directly by automake
+# Copyright 2018, 2019, Oath Inc.; Copyright 2020, Verizon Media
+# Licensed under the terms of the Apache-2.0 license.
+# For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+# For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
 #
 # moved to .../am/build.am (suffix matches directory)
 # deprecating .../am/build.mk (suffix DOES NOT match directory)
