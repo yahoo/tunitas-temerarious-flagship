@@ -27,6 +27,13 @@ TESTS_AC.that = $(patsubst %.test, %.that, $(TESTS_AC.test))
 .PHONY: check-ac
 check-ac: $(TESTS_AC.that)
 
-.PHONY: $(TESTS_AC.that)
+.PHONY: $(__TESTS_AC.that)
 $(TESTS_AC.that) : %.that : %.test
 	@tests/ac/driver $<
+
+__TESTS_AC.REQUIRED := $(shell tests/ac/generate-test-list ac/*.m4)
+__TESTS_AC.OBSERVED = $(patsubst %/,%, $(dir $(wildcard tests/ac/*/run.test)))
+__TESTS_AC.MISSING = $(filter-out $(__TESTS_AC_OBSERVED), $(__TESTS_AC_REQUIRED))
+$(if $(__TESTS_AC.MISSING),$(error the following m4 macro AC_DEFUN have no tests $(__TESTS_AC.MISSING)))
+debug.required-test-list: ; echo $(__TESTS_AC.REQUIRED)
+debug.observed-test-list: ; echo $(__TESTS_AC.OBSERVED)

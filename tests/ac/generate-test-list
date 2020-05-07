@@ -1,0 +1,16 @@
+#!/usr/bin/perl -wln
+#
+# Usage:
+#
+#   TESTS_AC.REQUIRED := $(shell tests/ac/generate-test-list ac/*.m4)
+#
+# [[FIXTHIS]] still need perl ... rewrite this with sed ... simpler dependency chain
+#
+# WATCHOUT - without any arguments, this will just read from stdin
+# or not.
+BEGIN {
+    die qq(cowardly refusing to read from stdin\n) unless @ARGV;
+}
+if (m/^AC_DEFUN\(\[([A-Z_0-9]+)\].*/) {
+    print $1;
+}

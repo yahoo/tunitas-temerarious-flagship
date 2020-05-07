@@ -1,0 +1,24 @@
+#!/bin/bash --norc
+# Copyright 2020, Verizon Media
+# Licensed under the terms of the Apache-2.0 license.
+# For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+# For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+# For terms, see the LICENSE file at the top of this repository
+#
+cd ${0%/*} || exit 70
+source ../framework.sh
+prepare_buildconf
+prepare_Makefile_am
+
+prefix=${prefix?} \
+with_temerarious_flagship=${with_temerarious_flagship?} \
+with_hypogeal_twilight=${with_hypogeal_twilight?} \
+./buildconf
+
+# This is the test.  This is what we came to show.
+#
+# WATCHOUT - we have to supply something for --with-std-tunitas
+#            because TF_CHECK_PACKAGE requires it
+#        ... so we lie and say /usr/local is that thing.
+#
+./configure --with-std-tunitas=/usr/local
