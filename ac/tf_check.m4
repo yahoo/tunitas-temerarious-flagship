@@ -27,6 +27,20 @@ AC_DEFUN([TF_CHECK_GCC], [
                [TF_MSG_WARNING([[TF]_[ENABLE]_[GCC] is not implemented, ignoring it])])])
 ])
 
+dnl
+dnl Defines the "toolflags" variables; e.g. cppflags, cflags, cxxflags, ldflags
+dnl e.g.
+dnl   for the case of TF_CHECK_CPPUNIT
+dnl
+dnl   @CPPFLAGS_cppunit@
+dnl   @CFLAGS_cppunit@
+dnl   @CXXFLAGS_cppunit@
+dnl   @LDFLAGS_cppunit@
+dnl
+dnl and so on
+dnl but Apache HTTPd is special because it comes with many different clusters of toolflags
+dnl [[FIXTHIS]] document apapche
+dnl
 AC_DEFUN([TF_CHECK_APACHE_HTTPD], [ifdef([HGTW_CHECK_APACHE_HTTPD], [HGTW_CHECK_APACHE_HTTPD], [SCOLD_CHECK_APACHE_HTTPD])])
 AC_DEFUN([TF_CHECK_BOOST],        [ifdef([HGTW_CHECK_BOOST],        [HGTW_CHECK_BOOST],        [SCOLD_CHECK_BOOST])])
 AC_DEFUN([TF_CHECK_CPPUNIT],      [ifdef([HGTW_CHECK_CPPUNIT],      [HGTW_CHECK_CPPUNIT],      [SCOLD_CHECK_CPPUNIT])])
