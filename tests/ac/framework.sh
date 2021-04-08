@@ -1,5 +1,5 @@
 # this is -*- sh -*- but should be sourced from the nearby */run.test definitions in the directories below
-# Copyright, Verizon Media.
+# Copyright Verizon Media.
 # Licensed under the terms of the Apache-2.0 license.
 # See the LICENSE file in https://github.com/yahoo/temerarious-flagship/blob/master/LICENSE for terms.
 # See the LICENSE file at the top of this repository.

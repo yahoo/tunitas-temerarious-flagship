@@ -1,5 +1,5 @@
 dnl -*- autoconf -*-test code; but see the LICENSE file nearby.
-dnl Copyright, Verizon Media.
+dnl Copyright Verizon Media.
 dnl Licensed under the terms of the Apache-2.0 license.
 dnl See the LICENSE file in https://github.com/yahoo/temerarious-flagship/blob/master/LICENSE for terms.
 dnl See the LICENSE file at the top of this repository.
