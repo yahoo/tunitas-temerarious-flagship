@@ -1,5 +1,5 @@
 # This is a -*- Makefile -*- which will be used by GNU Make
-# Copyright, Verizon Media.
+# Copyright Verizon Media.
 # Licensed under the terms of the Apache-2.0 license.
 # See the LICENSE file in https://github.com/yahoo/temerarious-flagship/blob/master/LICENSE for terms.
 # See the LICENSE file at the top of this repository.

@@ -1,0 +1,64 @@
+#!/bin/bash
+# For terms and provenance see the LICENSE file at the top of this repository.
+#
+# Usage:
+#
+#   ./maintenance/nearby     (no options)
+#
+#   prefix=/usr/local \
+#   ./maintenance/nearby
+#
+# the full end-to-end build using the "nearby" development trees
+#
+#   buildconf
+#   configure
+#   make [all]
+#   make check
+#
+cd ${0%/*}/.. || exit 70
+: ${prefix:=/exp/tunitas}
+if ! [[ -d ${prefix} ]] ; then
+    # no /exp/tunitas, maybe no /opt/tunitas either, we'll take that risk
+    : ${with_std_tunitas:=/opt/tunitas}
+elif [[ -z ${with_std_tunitas} ]] ; then
+    # no /opt/tunitas, but yes /exp/tunitas
+    if [[ -d /opt/tunitas ]] ; then
+        : ${with_std_tunitas:=/opt/tunitas}
+    else
+        : ${with_std_tunitas:=${prefix}}
+    fi
+fi
+: ${with_siblings:=${PWD%/*}}
+#
+# What is in the "nearby" area?
+# but priority for anything below us in the submodules?
+#
+if [[ -d ${PWD%/*}/nearby ]] ; then
+    : ${with_nearby:=${PWD%/*}/nearby}
+    : ${with_tunitas_nearby:=${with_nearby?}}
+    : ${with_scold_nearby:=${with_nearby?}}
+elif [[ -d /build/tunitas ]] && [[ -d /build/scold ]] ; then
+    : ${with_nearby:=/build}
+    : ${with_tunitas_nearby:=${with_nearby?}/tunitas}
+    : ${with_scold_nearby:=${with_nearby?}/scold}
+else
+    : ${with_nearby:=no}
+    : ${with_tunitas_nearby:=${with_nearby?}}
+    : ${with_scold_nearby:=${with_nearby?}}
+fi
+#
+# [[TODO]] presently, very little of this is used.
+# [[TODO]] none of these options are recognized by buildconf or configure
+#
+eval \
+    ${prefix:+prefix=$prefix} \
+    ${with_temerarious_flagship:+with_temerarious_flagship=$with_temerarious_flagship} \
+    ./buildconf &&
+./configure \
+    ${prefix:+--prefix=$prefix} \
+    ${with_nearby:+--with-nearby=$with_nearby} ${with_external:+--with-external=$with_external} \
+    ${with_temerarious_flagship:+--with-temerarious-flagship=$with_temerarious_flagship} \
+    ${end} &&
+make &&
+make check &&
+echo OK DONE
