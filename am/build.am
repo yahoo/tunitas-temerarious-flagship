@@ -69,21 +69,27 @@ bbDC = $(DC)
 endif
 endif
 define TF_DISAGGREGATE_COMPILE =
+	: AVOID instead use TF_XCPP2CPP in the dependency-tracing style
 	$(if $(VERBOSITY_CONDITION),echo verbose dependencies $1, : unverbose shut-up) ; \
 	$(call bbHGTW_DISAGGREGATE_COMPILE,$1)
 endef
 define TF_DEPENDENCIES_COMPILE =
+	: AVOID instead use TF_DEPENDENCIES in the dependency-tracing style
 	$(if $(VERBOSITY_CONDITION),echo verbose dependencies $1, : unverbose shut-up) ; \
 	$(call bbHGTW_DEPENDENCIES_COMPILE,$1)
 endef
 define TF_COMPILE =
+	: AVOID instead use TF_DEPENDENCIES in the dependency-tracing style
 	{ $(call TF_DISAGGREGATE_COMPILE, $1) ; } && { $(call TF_DEPENDENCIES_COMPILE, $1) ; }
 endef
 TF_DISAGGREGATE = $(call TF_COMPILE, $1)$(warning TF_DISAGGREGATE is deprecated, instead prefer TF_COMPILE)
 TF_SOURCEStoMODULES = $(call HGTW_SOURCEStoMODULES, $1)
-include $(hypogeal_twilight_datadir)/mk/distclean.mk
+TF_XCPP2CPP = $(call HT_XCPP2CPP,$1)
+TF_DEPENDENCIES = $(call HT_DEPENDENCIES,$1)
 
-# WATCHOUT - this acts upon module_SOURCES_SET as already defined in prior includes or in the top-level Makefile.am
+include $(hypogeal_twilight_datadir)/mk/distclean.mk
+# WATCHOUT - [[deprecated]] this acts upon module_SOURCES_SET as already defined in prior includes or in the top-level Makefile.am
+# WATCHOUT - instead prefer INSTALL_MODULES
 include $(hypogeal_twilight_datadir)/am/install.mk
 
 $(if $(DEBUGGING_CONDITION),\
@@ -128,5 +134,6 @@ TF_V_DONE = $(__tf_DUN)
 TF_V_DUN = $(__tf_DUN)
 __tf_DUN = $(__tf_DUN_$V)
 __tf_DUN_  = $(__tf_DUN_0)
-__tf_DUN_0 = @echo "  TF-DONE  $@";
+__tf_DUN_0_LOUD = @echo "  TF-DONE  $@";
+__tf_DUN_0 = @
 __tf_DUN_1 = 

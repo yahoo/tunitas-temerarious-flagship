@@ -5,7 +5,9 @@
 */run.state
 #
 # Below here all these files are synthetic.
-# Normally they are versioned objects, but below here they are trash.
+# Normally they are versioned objects, but below here they are synthetic trash.
 */mk
 */Makefile.am
+*/Makefile.in
+*/Makefile
 */buildconf
