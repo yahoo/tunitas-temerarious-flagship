@@ -1,0 +1,22 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+#import tunitas.string
+#import tunitas.string.literals
+namespace tests {
+  namespace string = ::tunitas::string;
+  using namespace ::tunitas::string::literals;
+}
+#endiv
+#divert <hpp>
+// Because every test fixture will need these
+#import cppunit.Test // ........... [[TODO, FIXTHIS]] use rigging::Test when module-rigging >= 2.0 is ready
+#import cppunit.test.Fixture // ... [[TODO, FIXTHIS]] ibidem.
+#endiv
+#divert <ipp>
+#import tunitas.string.literals
+#import rigging.suite.io // ibidem.
+#endiv

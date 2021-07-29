@@ -1,0 +1,32 @@
+# This is a GNU -*- Makefile -*- which is managed by automake.
+# Copyright Verizon Media
+# Licensed under the terms of the Apache-2.0 license.
+# For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+# For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#
+bin_tf = bin/tf
+bin_tf_LDADD = $(lib_libapp_tf_la)
+bin_tf_LDFLAGS = $(PACKAGE_LDFLAGS_SET)
+bin_tf_MODULES = $(none)
+bin_tf_SOURCES = obj/src/app/tf/c.main.cpp
+#
+lib_libapp_tf_la = lib/libapp-tf.la
+lib_libapp_tf_la_LIBADD = -ltunitas
+lib_libapp_tf_la_LDFLAGS = $(PACKAGE_LDFLAGS_SET)
+lib_libapp_tf_la_MODULES = $(call TF_SOURCEStoMODULES, $(lib_libapp_tf_la_SOURCES))
+lib_libapp_tf_la_SOURCES = \
+  obj/src/app/tf/namespace.cpp \
+  obj/src/app/tf/main.cpp \
+  $(end)
+
+#
+$(scold_cxxdir)/app/tf/dependencies.mk: $(bin_tf_SOURCES) $(lib_libapp_tf_la_SOURCES)
+$(bin_tf_SOURCES) $(lib_libapp_tf_la_SOURCES) : obj/src/%.cpp : src/%.xcpp
+	$(TF_V_DIS) $(call TF_XCPP2CPP, $<)
+	$(TF_V_DONE) test -e $@
+$(scold_cxxdir)/app/tf/dependencies.mk:
+	$(TF_V_DEP) $(call TF_DEPENDENCIES, $^)
+	$(TF_V_DONE) test -e $@
+include $(scold_cxxdir)/app/tf/dependencies.mk
+clean-dependencies::
+	rm -f $(scold_cxxdir)/app/tf/dependencies.mk

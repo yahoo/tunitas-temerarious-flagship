@@ -1,0 +1,71 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+#import tunitas.application.exits.constants
+#import tunitas.application.options
+#import tunitas.string.Storage
+#import std.filesystem.path // [[FIXTHIS,TODO]] tunitas::file::Path
+namespace app::tf {
+  inline namespace constants { using namespace tunitas::application::exits::constants; } 
+  namespace options = tunitas::application::options;
+  using Path = std::filesystem::path;
+  using String = tunitas::string::Storage;
+}
+#endiv
+#divert <hpp>
+#import tunitas.application.exits.Code
+#import tunitas.application.options.c.Argv
+namespace app::tf {
+  inline auto main(int, char *[]) -> exits::Code;
+  auto main(options::c::Argv) -> exits::Code;
+}
+#endiv
+#divert <ipp>
+namespace app {
+  inline auto tf::main(int cc, char *vv[]) -> exits::Code { return main(options::c::Argv(cc, vv)); }
+}
+#endiv
+#divert <cpp>
+#import std.cerr
+#import tunitas.application.options.Program
+#import tunitas.application.options.Arguments
+#import sys.posix.exec
+namespace app {
+  auto tf::main(options::c::Argv av) -> exits::Code {
+    auto prog = options::Program{av.front()};
+    if (av.size() < 2) {
+      std::cerr << prog << ": error, a command is required\n";
+      return USAGE;
+    }
+    std::string first = av[1];
+    if (first.empty()) {
+      std::cerr << prog << ": error, the <subprogram> cannot be empty\n";
+      return USAGE;
+    } else if ("--usage"s == first || "--help"s == first || "-h"s == first) {
+      std::cout << "usage: " << prog << " <subprogram> ...arguments..."
+                << "\n"
+                << "\nWhere <subprogram> is one of\n"
+                << "roff ... \"run-off\" the Markdown templating language."
+                << "\n";
+      return OK;
+    } else if ('-' == first.front()) {
+      std::cerr << prog << ": error, invalid option (use --usage to explore)\n";
+      return USAGE;
+    } else {
+      auto reargs = options::Arguments{1+av.begin(), av.end()};
+      auto reexec = [&]{
+                      auto redir = Path{av.front()}.parent_path().parent_path().parent_path() / Path{"libexec"} / Path{"temerarious-flagship"};
+                      auto reprog = Path{first}.filename();
+                      return redir / reprog;
+                    }();
+      auto done = sys::posix::exec(reexec, move(reargs));
+      // Even returning here at all signals an error.
+      std::cerr << prog << ": error, could not invoke " << reexec << " because " << error_code(done).message() << '\n';
+      return OS;
+    }
+  }
+}
+#endiv
