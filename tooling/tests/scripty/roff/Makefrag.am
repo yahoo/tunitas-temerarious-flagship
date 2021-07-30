@@ -6,6 +6,7 @@
 #
 tests_scripty_roff_XFAIL_TESTS =
 tests_scripty_roff_TESTS = \
-  tests/scripty/roff/all.test
+  tests/scripty/roff/all.test \
+  tests/scripty/roff/one.test \
   $(tests_scripty_roff_XFAIL_TESTS) \
   $(end)

@@ -1,0 +1,128 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+#import sys.exits.constants // [[FIXTHIS]] move to cli.exits.constants when module-options >= 2.0 is ready
+#import std.ostream
+#import std.tuple
+#import std.string_view
+#import app.roff.process
+namespace app::roff::packaging {
+  namespace [[implementation]] run_func {
+    namespace [[implementation]] impl {
+      using Exit = sys::exits::Code;
+      namespace [[interface]] face { }
+      using View = std::string_view;
+      enum class Assessment { DIRECTIVE, ERROR, IGNORE, PASSTHROUGH };
+      using Parsed = std::tuple<Assessment, process::Processor, View>;
+      using namespace sys::exits::constants;
+    }
+  }
+}
+#endiv
+#divert <hpp>
+#import std.istream
+#import std.ostream
+namespace app::roff {
+  namespace packaging::run_func::impl {
+    namespace face {
+      auto run(std::istream &, std::ostream &) -> Exit;
+    }
+    auto parse(View) -> Parsed;
+    auto trim(View span) -> View;
+    inline constexpr auto ERROR = Parsed{Assessment::ERROR, {}, {}};
+    inline constexpr auto PASSTHROUGH = Parsed{Assessment::PASSTHROUGH, {}, {}};
+  }
+  using packaging::run_func::impl::face::run;
+}
+#endiv
+#divert <cpp>
+#import std.isspace
+#import std.cerr
+#import std.getline
+#import std.string
+#import nonstd.exception.Filesystem
+#import nonstd.exception.Unreachable
+namespace app::roff::packaging::run_func {
+  auto impl::trim(View span) -> View {
+    auto forward = [](View candidate) -> View {
+                     auto b{candidate.begin()};
+                     auto const e{candidate.end()};
+                     while (b < e && std::isspace(*b)) {
+                       ++b;
+                     }
+#if 9 < __GNUC__
+                     return {b, e};
+#else
+                     return {b, size_t(e - b)};
+#endif
+                   };
+    auto reverse = [](View candidate) -> View {
+                     auto b{candidate.rbegin()};
+                     auto const e{candidate.rend()};
+                     while (b < e && std::isspace(*b)) {
+                       ++b;
+                     }
+#if 9 < __GNUC__
+                     return {e.base(), b.base()};
+#else
+                     return {e.base(), size_t(e - b)};
+#endif
+                   };
+    return reverse(forward(span));
+  }
+  auto impl::parse(View line) -> Parsed {
+    if (auto const size=line.size(); 3 < size) {
+      auto const dot=line.at(0);
+      auto const code=line.at(1);
+      auto const space=line.at(2);
+      if ('.' == dot) {
+        if (' ' == space) {
+          auto trimmed = trim(View{3+line.data(), size-3});
+          switch (code) {
+          case '"':
+            return {Assessment::DIRECTIVE, process::comment, trimmed};
+          case '\'':
+            return {Assessment::DIRECTIVE, process::uncomment, trimmed};
+          case 'i':
+            return {Assessment::DIRECTIVE, process::include, trimmed};
+          default:
+            return ERROR;
+          }
+        }
+        return ERROR;
+      }
+    }
+    return PASSTHROUGH;
+  }
+  namespace impl {
+    auto face::run(std::istream &inbound, std::ostream &outbound) -> Exit {
+      inbound.unsetf(std::ios::skipws);
+      auto erroneous = false;
+      auto buffer = std::string{};
+      for (process::Line line{1u}; getline(inbound, buffer); ++line) {
+        if (auto [directive, process, rest]=parse(buffer); Assessment::IGNORE == directive) {
+        } else if (Assessment::DIRECTIVE == directive) {
+          try {
+            process(outbound, line, rest);
+          } catch (nonstd::exception::Filesystem<std::string> const &e) {
+            std::cerr << line << "error, could not open " << e.path1() << " because " << e.code().message() << '\n';
+            std::cerr << line << "error, failed roff directive <<" << buffer.substr(0, 2) << ">>\n";
+            erroneous = true;
+          }
+        } else if (Assessment::ERROR == directive) {
+          std::cerr << line << "error, invalid roff directive <<" << buffer.substr(0, 2) << ">> is ignored\n";
+          erroneous = true;
+        } else if (Assessment::PASSTHROUGH == directive) {
+          outbound << buffer << '\n';
+        } else {
+          throw nonstd::exception::Unreachable{};
+        }
+      }
+      return erroneous ? FAIL : OK;
+    }
+  }
+}
+#endiv

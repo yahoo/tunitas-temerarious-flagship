@@ -5,5 +5,5 @@
 // For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
 #divert <fpp>
 #import tests
-namespace tests::unit { }
+namespace tests::roff { }
 #endiv

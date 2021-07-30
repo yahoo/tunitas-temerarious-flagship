@@ -2,11 +2,7 @@
 __topdir=$(realpath ${0%/*}/../../..)
 export PATH="${__topdir?}/libexec/temerarious-flagship:${__topdir?}/bin:$PATH"
 exec < /dev/null
-roff --help
-roff --usage
-roff -h
-roff -b || test 0 != $?
-roff --bogon || test 0 != $?
-date | roff
-
-
+#
+# the test
+#
+roff < ${0%/*}/one.roff

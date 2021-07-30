@@ -1,0 +1,10 @@
+#!/bin/sh
+__topdir=$(realpath ${0%/*}/../../..)
+export PATH="${__topdir?}/bin:$PATH"
+exec < /dev/null
+#
+# the test
+# same as the ...roff/one.test
+# except we invoke it by 'tf roff < file'
+#
+tf roff < ${0%/*/*}/roff/one.roff

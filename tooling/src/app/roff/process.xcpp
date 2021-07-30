@@ -1,0 +1,63 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+#import std.string_view
+#import std.ostream
+#import app.roff.process.Line
+namespace app::roff::process {
+  //
+  // A library of processors
+  //
+  // Specification:
+  //
+  //   A processor must either accomplish their mission or throw an exception.
+  //
+  // Design:
+  //
+  //   Yes.
+  //
+  using Payload = std::string_view;
+  enum Directive : char;
+  using Processor = void (*)(std::ostream &, Line, Payload);
+}
+#endiv
+#divert <hpp>
+namespace app::roff::process {
+  auto comment(std::ostream &, Line, Payload) -> void;
+  auto uncomment(std::ostream &, Line, Payload) -> void;
+  auto include(std::ostream &, Line, Payload) -> void;
+}
+#endiv
+#divert <cpp>
+#import std.cerr
+#import std.copy
+#import std.filesystem.path
+#import std.ifstream
+#import std.istream_iterator
+#import std.ostream_iterator
+#import std.string_view
+#import nonstd.exception.Filesystem
+namespace app::roff {
+  auto process::comment(std::ostream &outbound, Line, Payload payload) -> void {
+    // Yes, do nothing with the commentariat
+  }
+  auto process::uncomment(std::ostream &outbound, Line line, Payload payload) -> void {
+    std::cerr << "line " << line << ": inappropriate comment character (treating it as a comment line anyway)\n";
+    // Yes, do nothing with the commentariat
+  }
+  auto process::include(std::ostream &outbound, Line, Payload payload) -> void {
+    auto filepath = std::filesystem::path{payload};
+    std::ifstream inbound{filepath};
+    if (!inbound) {
+      throw nonstd::exception::Filesystem<std::string_view>{move(filepath), {errno, std::system_category()}, "open failed"};
+    }
+    inbound.unsetf(std::ios::skipws);
+    using In = std::istream_iterator<char>;
+    using Out = std::ostream_iterator<char>;
+    std::copy(In{inbound}, In{}, Out{outbound});
+  }
+}
+#endiv

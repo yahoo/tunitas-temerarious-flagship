@@ -17,6 +17,9 @@ lib_libapp_roff_la_MODULES = $(call TF_SOURCEStoMODULES, $(lib_libapp_roff_la_SO
 lib_libapp_roff_la_SOURCES = \
   obj/src/app/roff/namespace.cpp \
   obj/src/app/roff/main.cpp \
+  obj/src/app/roff/run.cpp \
+  obj/src/app/roff/process.cpp \
+  obj/src/app/roff/process.Line.cpp \
   $(end)
 
 #

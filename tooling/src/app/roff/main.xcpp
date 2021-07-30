@@ -6,8 +6,10 @@
 #divert <fpp>
 #import tunitas.application.exits.constants
 #import tunitas.application.options
+#import format // [[FIXTHIS]] move to use namespace langu::age::quote when module-langu >= 1.0 is ready
 namespace app::roff {
   inline namespace constants { using namespace tunitas::application::exits::constants; } 
+  using namespace ::format; // ibidem.
   namespace options = tunitas::application::options;
 }
 #endiv
@@ -28,31 +30,33 @@ namespace app {
 #import std.cerr
 #import tunitas.application.options.Program
 #import nonstd.exception.Unimplemented
+#import app.roff.run
+#import format.q // [[FIXTHIS]] move to use langu::age::quote::q when module-langu >= 1.0 is ready
 namespace app {
   auto roff::main(options::c::Argv av) -> exits::Code {
     auto prog = options::Program{av.front()};
-    if (av.size() < 2) {
-      std::cerr << prog << ": error, a command is required\n";
-      return USAGE;
+    if (av.size() > 1) {
+      std::string first = av[1];
+      if (first.empty()) {
+        std::cerr << prog << ": error, the <subprogram> cannot be empty\n";
+        return USAGE;
+      } else if ("--usage"s == first || "--help"s == first || "-h"s == first) {
+        std::cout << "usage: " << prog << " <subprogram> ...arguments..."
+                  << "\n"
+                  << "\nWhere <subprogram> is one of\n"
+                  << "roff ... \"run-off\" the Markdown templating language."
+                  << "\n";
+        return OK;
+      } else if ('-' == first.front()) {
+        std::cerr << prog << ": error, invalid option (use --usage to explore)\n";
+        return USAGE;
+      } else if (2 != av.size()) {
+        std::cerr << prog << ": notice, use " << q("--usage") << " to see the options\n"
+                  << prog << ": error, there are words after the options\n";
+        return USAGE;
+      }
     }
-    std::string first = av[1];
-    if (first.empty()) {
-      std::cerr << prog << ": error, the <subprogram> cannot be empty\n";
-      return USAGE;
-    } else if ("--usage"s == first || "--help"s == first || "-h"s == first) {
-      std::cout << "usage: " << prog << " <subprogram> ...arguments..."
-                << "\n"
-                << "\nWhere <subprogram> is one of\n"
-                << "roff ... \"run-off\" the Markdown templating language."
-                << "\n";
-      return OK;
-    } else if ('-' == first.front()) {
-      std::cerr << prog << ": error, invalid option (use --usage to explore)\n";
-      return USAGE;
-    } else {
-      throw nonstd::exception::Unimplemented{};
-      return OK;
-    }
+    return run(std::cin, std::cout);
   }
 }
 #endiv
