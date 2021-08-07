@@ -1,0 +1,15 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+// NOT YET ---> #import tunitas.file.Path <---- NOT YET (adopt when ready)
+#import std.filesystem.path
+namespace tunitas::flagship::temerarious::path {
+  //
+  // WATCHOUT - the type alias doesn't give ADL
+  //
+  using File = std::filesystem::path;
+}
+#endiv

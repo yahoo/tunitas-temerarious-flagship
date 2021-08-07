@@ -1,0 +1,42 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <hpp>
+#import tunitas.string.View
+namespace tunitas::flagship::temerarious::parser {
+  inline auto trim(View span) -> View;
+}
+#endiv
+#divert <ipp>
+namespace tunitas::flagship::temerarious {
+  auto parser::trim(View span) -> View {
+    auto forward = [](View candidate) -> View {
+                     auto b{candidate.begin()};
+                     auto const e{candidate.end()};
+                     while (b < e && std::isspace(*b)) {
+                       ++b;
+                     }
+#if 9 < __GNUC__
+                     return {b, e};
+#else
+                     return {b, size_t(e - b)};
+#endif
+                   };
+    auto reverse = [](View candidate) -> View {
+                     auto b{candidate.rbegin()};
+                     auto const e{candidate.rend()};
+                     while (b < e && std::isspace(*b)) {
+                       ++b;
+                     }
+#if 9 < __GNUC__
+                     return {e.base(), b.base()};
+#else
+                     return {e.base(), size_t(e - b)};
+#endif
+                   };
+    return reverse(forward(span));
+  }
+}
+#endiv

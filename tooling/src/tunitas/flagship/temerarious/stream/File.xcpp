@@ -1,0 +1,42 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+namespace tunitas::flagship::temerarious::stream {
+  //
+  // The file aspect
+  // Descendants only.
+  //
+  // Specification:
+  //
+  //   Manage the filebuf
+  //
+  // Usage:
+  //
+  //   By inheritance into stream::Output, stream::Output
+  //
+  struct File;
+}
+#endiv
+#divert <hpp>
+#import std.filebuf
+#import std.unique_ptr
+class tunitas::flagship::temerarious::stream::File {
+protected:
+  std::unique_ptr<std::filebuf> buf;
+  virtual ~File() = default;
+public:
+  inline File();
+  File(File &&) = default;
+  auto operator=(File &&) -> File & = default;
+};
+#endiv
+#divert <ipp>
+namespace tunitas::flagship::temerarious::stream {
+  File::File()
+    : buf{std::make_unique<std::filebuf>()}
+  { }
+}
+#endiv

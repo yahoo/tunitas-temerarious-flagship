@@ -3,32 +3,20 @@
 // Licensed under the terms of the Apache-2.0 license.
 // For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
 // For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
-#divert <fpp>
-#import std.string_view
-#import std.ostream
-#import app.roff.process.Line
-namespace app::roff::process {
+#divert <hpp>
+namespace tunitas::flagship::temerarious::directive {
   //
-  // A library of processors
+  // The simple directives
   //
   // Specification:
   //
-  //   A processor must either accomplish their mission or throw an exception.
+  //   ."
+  //   .'
+  //   .i filename
   //
-  // Design:
-  //
-  //   Yes.
-  //
-  using Payload = std::string_view;
-  enum Directive : char;
-  using Processor = void (*)(std::ostream &, Line, Payload);
-}
-#endiv
-#divert <hpp>
-namespace app::roff::process {
-  auto comment(std::ostream &, Line, Payload) -> void;
-  auto uncomment(std::ostream &, Line, Payload) -> void;
-  auto include(std::ostream &, Line, Payload) -> void;
+  auto comment(State &, Output &, Line, Payload) -> void;
+  auto uncomment(State &, Output &, Line, Payload) -> void;
+  auto include(State &, Output &, Line, Payload) -> void;
 }
 #endiv
 #divert <cpp>
@@ -40,16 +28,16 @@ namespace app::roff::process {
 #import std.ostream_iterator
 #import std.string_view
 #import nonstd.exception.Filesystem
-namespace app::roff {
-  auto process::comment(std::ostream &outbound, Line, Payload payload) -> void {
+namespace tunitas::flagship::temerarious {
+  auto directive::comment(State &, Output &outbound, Line, Payload payload) -> void {
     // Yes, do nothing with the commentariat
   }
-  auto process::uncomment(std::ostream &outbound, Line line, Payload payload) -> void {
-    std::cerr << "line " << line << ": inappropriate comment character (treating it as a comment line anyway)\n";
+  auto directive::uncomment(State &, Output &outbound, Line line, Payload payload) -> void {
+    std::cerr << line << ": inappropriate comment character (treating it as a comment line anyway)\n";
     // Yes, do nothing with the commentariat
   }
-  auto process::include(std::ostream &outbound, Line, Payload payload) -> void {
-    auto filepath = std::filesystem::path{payload};
+  auto directive::include(State &, Output &outbound, Line, Payload payload) -> void {
+    auto filepath = path::File{payload};
     std::ifstream inbound{filepath};
     if (!inbound) {
       throw nonstd::exception::Filesystem<std::string_view>{move(filepath), {errno, std::system_category()}, "open failed"};

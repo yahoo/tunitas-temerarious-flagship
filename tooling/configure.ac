@@ -22,7 +22,8 @@ dnl      |
 dnl      \prefix\
 dnl      ||||||||
 dnl      vvvvvvvv
-AC_INIT([tunitas-tooling], [0.0.0], [tunitas@verizonmedia.com])
+AC_INIT([tunitas-temerarious-flagship-tooling], [0.0.0], [tunitas@verizonmedia.com])
+dnl and yes there are other flagships and other toolings (packages-named "flagship" and packages named "tooling")
 TF_INIT(AC_PACKAGE_NAME, AC_PACKAGE_VERSION, AC_PACKAGE_BUGREPORT)
 
 dnl See the AUTOMAKE_OPTIONS in the Makefile.am
@@ -81,6 +82,13 @@ TF_PROG_DC dnl the S.C.O.L.D. disaggregation compiler
 TF_PROG_GCC dnl the correct enfreshend gcc ... we want the one closest to C++23 ...   gcc11 or gcc12 or gcc13
 TF_CHECK_STD_FILESYSTEM dnl defines @libstd_filesystem@
 TF_CHECK_CPPUNIT dnl defines toolflags of cppunit, @CPPFLAGS_cppunit@, @CXXFLAGS_cppunit@, @LDFLAGS_cppunit@, etc.
+
+TF_CHECK_PACKAGES([tunitas.Optional tunitas.Tuple], [tunitas-basics-devel], [Basics of the Tunitas Technologies >= 2.0])
+TF_CHECK_PACKAGES([tests.cppunit.Test tests.cppunit.test.Fixture rigging.suite.io], [module-rigging-devel], [Test Rigging of S.C.O.L.D., module-rigging >= 1.0])
+
+dnl whereas these are just warnings at this point ... we can check for more and we can warn of future compatibilities
+dnl only available in module-rigging >= 2.0
+TF_CHECK_PACKAGES_WARNING([rigging.io], [module-rigging-devel], [Test Rigging of S.C.O.L.D., module-rigging >= 2.0])
 
 dnl WATCHOUT if AC_OUTPUT is not called (transitively from TF_FINALIZE) then
 dnl you will see the fantastically cryptic error

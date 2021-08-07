@@ -92,6 +92,13 @@ dnl
 dnl TF_CHECK_PACKAGES(module-name-list, devel-package-name)
 dnl TF_CHECK_PACKAGES(module-name-list, devel-package-name, package-title)
 dnl
+dnl TF_CHECK_PACKAGES_WARNING(module-name-list, devel-package-name)
+dnl TF_CHECK_PACKAGES_WARNING(module-name-list, devel-package-name, package-title)
+dnl
+dnl TF_CHECK_PACKAGES_ERROR(module-name-list, devel-package-name)
+dnl TF_CHECK_PACKAGES_ERROR(module-name-list, devel-package-name, package-title)
+dnl
+dnl
 dnl Wherein
 dnl   module-name-list    ::= a list of S.C.O.L.D. type modules as you would name them in an #import statement
 dnl   devel-package-name  ::= a single RPM package name as you would install it with dnf
@@ -127,18 +134,29 @@ dnl Usage:
 dnl
 dnl                               dnf install module-std-devel
 dnl                                           |
-dnl                #import std                |
-dnl                #import std.is_same        |
-dnl                        |   |              |
-dnl                        v   v              v
-dnl   TF_CHECK_PACKAGES([std std.is_same], [module-std-devel], [The Standard C++ Library])
-dnl   TF_CHECK_PACKAGES([nonstd], [module-nonstd-devel], [The Non-Standard C++ Library])
-dnl   TF_CHECK_PACKAGES([mysqlpp], [module-mysql-devel]
-dnl   TF_CHECK_PACKAGES([curlpp], [module-curl-devel]
-dnl
-dnl
+dnl                #import std                |                The descriptive naming convention
+dnl                #import std.is_same        |                    |
+dnl                        |     |            |                    |
+dnl                        v     v            v                    v
+dnl   TF_CHECK_PACKAGES([std std.is_same], [module-std-devel], [The Standard C++ Library, module-std >= 1.0])
+dnl   TF_CHECK_PACKAGES([nonstd], [module-nonstd-devel], [The Non-Standard C++ Library, module-nonstd >= 1.3])
+dnl   TF_CHECK_PACKAGES([mysqlpp], [module-mysql-devel]) dnl ..... no description
+dnl   TF_CHECK_PACKAGES([curlpp], [module-curl-devel]) dnl ....... no description given
 dnl
 AC_DEFUN([TF_CHECK_PACKAGES], [
+  TF_CHECK_PACKAGES_WARNING([$1], [$2], [$3])
+])
+AC_DEFUN([TF_CHECK_PACKAGES_WARNING], [
+  TFinternal_CHECK_PACKAGES_CANNOT_PROCEED([$1], [$2], [$3], [
+     TF_MSG_WARNING([should proceed without $2, there may be errors])
+  ])
+])
+AC_DEFUN([TF_CHECK_PACKAGES_ERROR], [
+  TFinternal_CHECK_PACKAGES_CANNOT_PROCEED([$1], [$2], [$3], [
+     TF_MSG_ERROR([cannot proceed without $2, you MUST install $3])
+  ])
+])
+AC_DEFUN([TFinternal_CHECK_PACKAGES_CANNOT_PROCEED], [
     AC_REQUIRE([TF_COMPONENT_METADIRECTORY_TIERS])
     AC_REQUIRE([TF_WITH_STD_SCOLD])
     AC_REQUIRE([TF_WITH_STD_TUNITAS])
@@ -149,11 +167,11 @@ AC_DEFUN([TF_CHECK_PACKAGES], [
     AC_CHECK_HEADERS([$1],
                      [ : ok found ],
                      [
-                         dnl grammar here is difficult as $3 may be empty; but also $1 may be single or several (so plural).
+                         # the (English) grammer here is difficult as [$]3 may be empty; but also [$]1 may be single or several (so plural).
                          TF_MSG_WARNING([cannot find the modules ifelse([$3], [], [around $1], [of $3])])
                          TF_MSG_WARNING([consider: dnf install $2])
-                         dnl [[FIXTHIS]] a way to disable this as a hard error from the command line
-                         TF_MSG_WARNING([cannot proceed without $2])
+                         # expect [$]4 to be a fragment of ERROR or WARNING code
+                         $4 # FIXTHIS a way to disable this as a hard error from the command line
                      ])
     CPPFLAGS="$__CPPFLAGS"
     unset __CPPFLAGS

@@ -7,3 +7,10 @@
 #import tests
 namespace tests::roff { }
 #endiv
+#divert <hpp>
+#import tests.cppunit.Test // enable v1-series and v2-series APIs (moving or simulating cppunit::Test0
+#import tests.cppunit.test.Fixture // ibidem.
+#endiv
+#divert <ipp>
+#import rigging.suite.io
+#endiv

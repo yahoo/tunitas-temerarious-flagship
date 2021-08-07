@@ -1,0 +1,67 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+#import tunitas.string
+#import tunitas.flagship.temerarious.variable
+namespace tests::unit::variable {
+  namespace [[eponymous]] fixture {
+    struct Fixture;
+    namespace library = ::tunitas::flagship::temerarious::variable;
+    namespace string = ::tunitas::string;
+  }
+  using fixture::Fixture;
+}
+#endiv
+#divert <hpp>
+struct tests::unit::variable::Fixture : public cppunit::test::Fixture {
+  template<typename SUBJECT> auto test_Definition() -> void;
+  auto test_Frame() -> void;
+  auto test_Stack() -> void;
+  static auto suite() -> cppunit::Test *;
+};
+#endiv
+#divert <tpp>
+#import tunitas.flagship.temerarious.variable.Definition
+namespace tests::unit::variable {
+  template<typename SUBJECT> auto Fixture::test_Definition() -> void {
+    using Subject = SUBJECT; // e.g. library::Definition<string::Storage>;
+    auto subject = Subject{};
+    CPPUNIT_ASSERT(0 == subject.define.size());
+    CPPUNIT_ASSERT(0 == subject.value.size());
+  }
+}
+#endiv
+#divert <cpp>
+#import tunitas.flagship.temerarious.variable.Frame
+#import tunitas.flagship.temerarious.variable.Stack
+namespace tests::unit::variable {
+  auto Fixture::test_Frame() -> void {
+    using Subject = library::Frame;
+    auto subject = Subject{};
+    CPPUNIT_ASSERT(0 == subject.size());
+  }
+  auto Fixture::test_Stack() -> void {
+    using Subject = library::Stack;
+    auto subject = Subject{};
+    CPPUNIT_ASSERT(0 == subject.size());
+  }
+  auto Fixture::suite() -> cppunit::Test * {
+    using namespace rigging::suite;
+    auto series = Stream{"variable"};
+    series << []{
+                auto def = Stream{"Definition"};
+                def << call("string::Storage", &Fixture::test_Definition<library::Definition<string::Storage>>)
+                    << call("string::View", &Fixture::test_Definition<library::Definition<string::View>>)
+                    << END;
+                return move(def);
+              }()
+           << call("Frame", &Fixture::test_Frame)
+           << call("Stack", &Fixture::test_Stack)
+           << END;
+    return finalize(series);
+  }
+}
+#endiv

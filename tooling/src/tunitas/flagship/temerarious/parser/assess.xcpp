@@ -1,0 +1,79 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+#import tunitas.Tuple
+#import tunitas.flagship.temerarious.directive.Directive
+namespace tunitas::flagship::temerarious::parser {
+  enum class Assessment { DIRECTIVE, ERROR, IGNORE, PASSTHROUGH };
+  using Assessed = Tuple<Assessment, directive::Directive, View>;
+}
+#endiv
+#divert <hpp>
+#import std.underlying_type
+namespace tunitas::flagship::temerarious::parser {
+  inline constexpr auto underlying(Assessment a) { return std::underlying_type_t<Assessment>(a); }
+  inline constexpr auto ERROR = Assessed{Assessment::ERROR, {}, {}};
+  inline constexpr auto PASSTHROUGH = Assessed{Assessment::PASSTHROUGH, {}, {}};
+  auto assess(View line) -> Assessed;
+}
+#endiv
+#divert <cpp>
+#import tunitas.flagship.temerarious.parser.trim
+#import tunitas.flagship.temerarious.directive.library
+namespace tunitas::flagship::temerarious {
+  auto parser::assess(View line) -> Assessed {
+    auto size=line.size();
+    auto first = [line, size]{
+                   auto first=0u;
+                   while (first < size && std::isspace(line.at(first))) {
+                     ++first;
+                   }
+                   return first;
+                 }();
+    if (first < size) {
+      if (auto const dot=line.at(first++); '.' == dot) {
+        if (first == size) {
+          // found: . (just a dot alone)
+          return ERROR;
+        } else {
+          auto const code = line.at(first++);
+          // pass &first by reference so that it can be modifed in the switch
+          auto trimmed = [&first, line, size] { return trim(View{first+line.data(), size-first}); };
+          auto isspace = [&first, size, line]{
+                          if (first+1 < size) {
+                            return ' ' == line.at(first++);
+                          } else {
+                            return false;
+                          }
+                       };
+          switch (code) {
+            namespace library = directive;
+          case '"':
+            // found ."    (doesn't matter what comes next)
+            return {Assessment::DIRECTIVE, library::comment, trimmed()};
+          case '\'':
+            // found .'    (doesn't matter what comes next)
+            return {Assessment::DIRECTIVE, library::uncomment, trimmed()};
+          case 'i':
+            // found .i    (need to valiate more)
+            if (isspace()) {
+              // found ".i "
+              return {Assessment::DIRECTIVE, library::include, trimmed()};
+            } else {
+              // found ".i?" for unknown ?
+              return ERROR;
+            }
+          default:
+            // saw .?  for unknown ?
+            return ERROR;
+          }
+        }
+      }
+    }
+    return PASSTHROUGH;
+  }
+}
+#endiv

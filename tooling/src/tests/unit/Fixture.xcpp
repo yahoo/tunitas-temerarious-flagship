@@ -12,11 +12,31 @@ struct tests::unit::Fixture : public cppunit::test::Fixture {
 };
 #endiv
 #divert <cpp>
+#import tests.unit.app.Fixture
+#import tests.unit.roff.Fixture
+#import tests.unit.tf.Fixture
+#import tests.unit.directive.Fixture
+#import tests.unit.error.Fixture
+#import tests.unit.exception.Fixture
+#import tests.unit.parser.Fixture
+#import tests.unit.processor.Fixture
+#import tests.unit.stream.Fixture
+#import tests.unit.variable.Fixture
 namespace tests::unit {
   auto Fixture::suite() -> cppunit::Test * {
     using namespace rigging::suite;
     auto series = Stream{"unit"};
-    series << END;
+    series << add<app::Fixture>()
+           << add<roff::Fixture>()
+           << add<tf::Fixture>()
+           << add<directive::Fixture>()
+           << add<error::Fixture>()
+           << add<exception::Fixture>()
+           << add<parser::Fixture>()
+           << add<processor::Fixture>()
+           << add<stream::Fixture>()
+           << add<variable::Fixture>()
+           << END;
     return finalize(series);
   }
 }

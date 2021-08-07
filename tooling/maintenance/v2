@@ -1,0 +1,15 @@
+#!/bin/bash
+: ${with_build:=/build}
+: ${with_worktrees:=${with_build?}/worktrees}
+
+with_hypogeal_twilight=${with_hypogeal_twilight:-${with_worktrees?}/hypogeal-twilight/v0.46.0-2.devel} \
+with_module_nonstd=${with_module_nonstd:-${with_worktrees?}/nonstd/v2.0.0-4.devel} \
+with_module_options=${with_module_options:-${with_worktrees?}/options/v2.0.0-3.devel} \
+with_module_sys=${with_module_sys:-${with_worktrees?}/sys/v2.0.0-6.devel} \
+with_module_rigging=${with_module_rigging:-${with_worktrees?}/rigging/v2.0.0-2.finishing} \
+\
+with_module_c=${with_module_c:-no} \
+with_module_std=${with_module_std:-no} \
+with_module_posix=${with_module_posix:-no} \
+\
+exec ${0%/*}/nearby

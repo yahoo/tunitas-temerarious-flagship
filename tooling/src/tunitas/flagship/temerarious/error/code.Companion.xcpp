@@ -1,0 +1,36 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+#import tunitas.flagship.temerarious.error.condition.Companion
+namespace tunitas::flagship::temerarious::error::code {
+  //
+  // The rich error code.
+  //
+  enum class Companion {
+    SUCCESS = (int) condition::Companion::SUCCESS,
+    FAILURE = (int) condition::Companion::FAILURE, // a.k.a. generic failure, no other detail
+    ROFF_FILE, // .................... summarizes a problem with a file, reading or opening
+    ROFF_DIRECTIVE, // ............... summarizes a problem with a directive, invalid, incomplete, etc.
+  };
+}
+#endiv
+#divert <hpp>
+#import std.underlying_type
+namespace tunitas::flagship::temerarious::error::code {
+  // WATCHOUT - success is zero (only one way to succeed); failure is non-zero (many ways to fail)
+  inline constexpr auto underlying(Companion c) { return std::underlying_type_t<Companion>(c); }
+  inline constexpr auto success(Companion c) -> bool { return Companion::SUCCESS == c; }
+  inline constexpr auto failure(Companion c) -> bool { return !success(c); }
+  //
+  inline auto make_error_code(Companion) -> std::error_code;
+}
+#endiv
+#divert <ipp>
+#import tunitas.flagship.temerarious.error.category
+namespace tunitas::flagship::temerarious::error {
+  auto code::make_error_code(Companion code) -> std::error_code { return {(int) code, category()}; }
+}
+#endiv

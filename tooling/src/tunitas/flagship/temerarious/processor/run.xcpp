@@ -1,0 +1,66 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <hpp>
+#import tunitas.Success
+#import tunitas.flagship.temerarious.stream.Input
+#import tunitas.flagship.temerarious.stream.Output
+namespace tunitas::flagship::temerarious::processor {
+  inline auto run(stream::Input &, stream::Output &) -> Success;
+  auto run(stream::Input &, stream::Output &out, stream::Output &err) -> Success;
+}
+#endiv
+#divert <ipp>
+#import std.cerr
+namespace tunitas::flagship::temerarious {
+  auto processor::run(stream::Input &inbound, stream::Output &outbound) -> Success {
+    auto erroneous = stream::Output{std::cerr};
+    return run(inbound, outbound, erroneous);
+  }
+}
+#endiv
+#divert <cpp>
+#import tunitas.string.Storage
+// v2-series #import substd.exception.Filesystem
+#import nonstd.exception.Filesystem // v1-series substd::exception::Filesystem
+#import tunitas.flagship.temerarious.error.Code
+static_assert(sizeof (tunitas::flagship::temerarious::error::code::Companion));
+static_assert(sizeof (std::is_error_code_enum<tunitas::flagship::temerarious::error::code::Companion>));
+static_assert(std::is_error_code_enum<tunitas::flagship::temerarious::error::code::Companion>::value);
+#import tunitas.flagship.temerarious.parser.assess
+#import tunitas.flagship.temerarious.processor.State
+#import tunitas.flagship.temerarious.stream.Line
+#import nonstd.exception.Unreachable
+#import tunitas.flagship.temerarious.exception // cascade namespace exception
+namespace tunitas::flagship::temerarious {
+  auto processor::run(stream::Input &inbound, stream::Output &outbound, stream::Output &erroneity) -> Success {
+    using namespace parser; // assess(...) Assessed, Assessment (you get the idea)
+    auto state = State{};
+    inbound.unsetf(std::ios::skipws);
+    auto erroneous = Success{SUCCESS};
+    auto buffer = string::Storage{};
+    for (stream::Line line{1u}; getline(inbound, buffer); ++line) {
+      if (auto [directive, process, rest]=assess(buffer); Assessment::IGNORE == directive) {
+      } else if (Assessment::DIRECTIVE == directive) {
+        try {
+          process(state, outbound, line, rest);
+        } catch (substd::exception::Filesystem const &e) {
+          erroneity << line << "error, could not open " << e.path1() << " because " << e.code().message() << '\n';
+          erroneity << line << "error, failed roff directive <<" << buffer.substr(0, 2) << ">>\n";
+          erroneous = {error::Code::ROFF_FILE};
+        }
+      } else if (Assessment::ERROR == directive) {
+        erroneity << line << "error, invalid roff directive <<" << buffer.substr(0, 2) << ">> is ignored\n";
+        erroneous = {error::Code::ROFF_DIRECTIVE};
+      } else if (Assessment::PASSTHROUGH == directive) {
+        outbound << buffer << '\n';
+      } else {
+        throw exception::Unreachable{};
+      }
+    }
+    return erroneous;
+  }
+}
+#endiv

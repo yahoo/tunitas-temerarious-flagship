@@ -1,0 +1,79 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+namespace tunitas::flagship::temerarious::stream {
+  //
+  // The output stream
+  //
+  // Specification:
+  //
+  //   An ostream
+  //   A "filename" even if it is stdout
+  //
+  // Lifetimes
+  //
+  //   The ostream referenced in the Output(std::ostream &) constructor must live longer than the Output.
+  //   In that case, the original istream is the owner of the streambuf.
+  //
+  // Design:
+  //
+  //   https://en.cppreference.com/w/cpp/io/basic_ostream/basic_ostream
+  //   <quote>
+  //     3) The move constructor uses basic_ios<CharT, Traits>::move(rhs) to move all basic_ios members, except for the rdbuf(), from rhs into *this.
+  //     This move constructor is protected: it is called by the move constructors of movable output stream classes std::basic_ofstream and std::basic_ostringstream, which know how to correctly move the associated streambuffer.
+  //   </quote>
+  //
+  // Usage:
+  //
+  //   auto outbound = Output{std::cout};
+  //   auto outbound = Output{file::Path{...somehow...}, ...open_mode...};
+  //
+  struct Output;
+}
+#endiv
+#divert <hpp>
+#import tunitas.flagship.temerarious.path.File
+#import tunitas.flagship.temerarious.stream.Base
+#import tunitas.flagship.temerarious.stream.File
+#import std.ostream
+class tunitas::flagship::temerarious::stream::Output : public std::ostream, public Base, private File {
+  using Ancestor = std::ostream;
+public:
+  inline explicit Output(std::ostream &);
+  inline explicit Output(path::File const &, Mode = OUT);
+  inline explicit Output(Output &&);
+  inline auto operator=(Output &&) -> Output &;
+};
+#endiv
+#divert <ipp>
+namespace tunitas::flagship::temerarious::stream {
+  Output::Output(std::ostream &outbound) : Ancestor{outbound.rdbuf()} { }
+  Output::Output(path::File const &filepath, Mode mode) {
+    buf->open(filepath, mode);
+  }
+  Output::Output(Output &&other)
+    : Ancestor{forward<Output>(other)}
+    , Base{forward<Output>(other)}
+    , File{forward<Output>(other)} {
+      Ancestor::set_rdbuf(File::buf.get());
+  }
+  auto Output::operator=(Output &&other) -> Output & {
+    this->Ancestor::swap(other);
+    this->Base::operator=(forward<Output>(other));
+    this->File::operator=(forward<Output>(other));
+    Ancestor::set_rdbuf(File::buf.get());
+    return *this;
+  }
+}
+#endiv
+#divert <cpp>
+namespace tunitas::flagship::temerarious::stream {
+  static_assert(!std::is_copy_constructible_v<Output>);
+  static_assert(!std::is_copy_assignable_v<Output>);
+  static_assert(std::is_move_constructible_v<Output>);
+  static_assert(std::is_move_assignable_v<Output>);
+}
+#endiv

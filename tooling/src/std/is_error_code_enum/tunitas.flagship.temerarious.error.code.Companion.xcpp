@@ -1,0 +1,16 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+#import std.is_error_code_enum
+#forward tunitas.flagship.temerarious.error.code.Companion
+namespace std {
+  template<> struct is_error_code_enum<tunitas::flagship::temerarious::error::code::Companion>;
+}
+#endiv
+#divert <hpp>
+#import std.true_type
+template<> struct std::is_error_code_enum<tunitas::flagship::temerarious::error::code::Companion> : public std::true_type { };
+#endiv

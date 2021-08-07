@@ -7,3 +7,11 @@
 #import tests
 namespace tests::unit { }
 #endiv
+#divert <hpp>
+#import tests.cppunit.Test // enable v1-series and v2-series APIs (moving or simulating cppunit::Test0
+#import tests.cppunit.test.Fixture // ibidem.
+namespace tests::unit { }
+#endiv
+#divert <ipp>
+#import rigging.suite.io
+#endiv

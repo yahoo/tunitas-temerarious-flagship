@@ -1,0 +1,139 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+namespace tests::unit::parser::assess { struct Fixture; }
+#endiv
+#divert <hpp>
+#import tunitas.flagship.temerarious.parser.assess
+#import tunitas.string.View
+#import std.source_location
+struct tests::unit::parser::assess::Fixture : public cppunit::test::Fixture {
+  using Assessment = library::Assessment;
+  auto test_dot_quote_double() -> void;
+  auto test_dot_quote_single() -> void;
+  auto test_dot_i() -> void;
+  auto test_dot_include() -> void;
+  auto test_dot_read() -> void;
+  auto test_dot_bogus() -> void;
+  auto test_passthrough_empty() -> void;
+  auto test_passthrough_something() -> void;
+  auto test_error_space_dot() -> void;
+  auto test_error_dot_only() -> void;
+  auto test_error_dot_bogus() -> void;
+  static auto suite() -> cppunit::Test *;
+protected:
+};
+#endiv
+#divert <cpp>
+#import tests.unit.parser.assess.Accumulator
+namespace tests::unit::parser::assess {
+  auto Fixture::test_dot_quote_double() -> void {
+    auto const expected = Assessment::DIRECTIVE;
+    auto acc = Accumulator{};;
+    acc.observe(expected, ".\""sv);
+    acc.observe(expected, ".\" "sv);
+    acc.observe(expected, ".\"  and more stuff is ignored"sv);
+  }
+  auto Fixture::test_dot_quote_single() -> void {
+    auto const expected = Assessment::DIRECTIVE;
+    auto acc = Accumulator{};
+    acc.observe(expected, ".'"sv);
+    acc.observe(expected, ".' "sv);
+    acc.observe(expected, ".'  and more stuff is ignored"sv);
+  }
+  auto Fixture::test_dot_i() -> void {
+    auto const failure = Assessment::ERROR;
+    auto const success = Assessment::DIRECTIVE;
+    auto acc = Accumulator{};
+    acc.observe(failure, ".i"sv);
+    acc.observe(failure, ".i "sv);
+    acc.observe(success, ".i file"sv);
+    acc.observe(success, ".i file "sv);
+    acc.observe(success, ".i  file  "sv);
+  }
+  auto Fixture::test_dot_include() -> void {
+    auto const failure = Assessment::ERROR;
+    auto const success = Assessment::ERROR; // one day PASSTHROUGH;
+    auto acc = Accumulator{};
+    acc.observe(failure, ".include"sv);
+    acc.observe(failure, ".include "sv);
+    acc.observe(success, ".include file"sv);
+    acc.observe(success, ".include file "sv);
+    acc.observe(success, ".include  file  "sv);
+  }
+  auto Fixture::test_dot_read() -> void {
+    auto const failure = Assessment::ERROR;
+    auto const success = Assessment::ERROR; // one day PASSTHROUGH;
+    auto acc = Accumulator{};
+    acc.observe(failure, ".read"sv);
+    acc.observe(failure, ".read "sv);
+    acc.observe(success, ".read file"sv);
+    acc.observe(success, ".read file "sv);
+    acc.observe(success, ".read  file  "sv);
+  }
+  auto Fixture::test_error_dot_only() -> void {
+    auto acc = Accumulator{};
+    acc.observe(Assessment::ERROR, "."sv);
+    acc.observe(Assessment::ERROR, " ."sv);
+    acc.observe(Assessment::ERROR, " . "sv);
+  }
+  auto Fixture::test_error_space_dot() -> void {
+    auto acc = Accumulator{};
+    // spaces in front of the dot is no longer an error; there may be errors for other reasons (e.g. directive)
+    acc.observe(Assessment::DIRECTIVE, " .\"ignore"sv);
+    acc.observe(Assessment::DIRECTIVE, " .'ignore "sv);
+    acc.observe(Assessment::ERROR, "  ."sv);
+    acc.observe(Assessment::ERROR, "  .bogon that-file"sv);
+  }
+  auto Fixture::test_error_dot_bogus() -> void {
+    auto acc = Accumulator{};
+    acc.observe(Assessment::ERROR, ".bogus"sv);
+    acc.observe(Assessment::ERROR, " .bogus. "sv);
+  }
+  auto Fixture::test_passthrough_empty() -> void {
+    auto acc = Accumulator{};
+    acc.observe(Assessment::PASSTHROUGH, ""sv);
+    acc.observe(Assessment::PASSTHROUGH, " "sv);
+    acc.observe(Assessment::PASSTHROUGH, "  "sv);
+    acc.observe(Assessment::PASSTHROUGH, "   "sv);
+  }
+  auto Fixture::test_passthrough_something() -> void {
+    auto acc = Accumulator{};
+    acc.observe(Assessment::PASSTHROUGH, " something, something, Dark Side!"sv);
+  }
+  auto Fixture::suite() -> cppunit::Test * {
+    using namespace rigging::suite;
+    auto series = Stream{"assess"};
+    series << []{
+                auto dot = Stream{"."};
+                dot << call("qq", &Fixture::test_dot_quote_double)
+                    << call("q", &Fixture::test_dot_quote_single)
+                    << call("i", &Fixture::test_dot_i)
+                    << call("include", &Fixture::test_dot_include)
+                    << call("read", &Fixture::test_dot_read)
+                    << END;
+                return move(dot);
+              }()
+           << []{
+                auto err = Stream{"error"};
+                err << call("only", &Fixture::test_error_dot_only)
+                    << call("bogus", &Fixture::test_error_dot_bogus)
+                    << call("space", &Fixture::test_error_space_dot)
+                    << END;
+                return move(err);
+              }()
+           << []{
+                auto pass = Stream{"passthrough"};
+                pass << call("empty", &Fixture::test_passthrough_empty)
+                     << call("something", &Fixture::test_passthrough_something)
+                     << END;
+                return move(pass);
+              }()
+           << END;
+    return finalize(series);
+  }
+}
+#endiv

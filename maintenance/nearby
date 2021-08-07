@@ -50,6 +50,8 @@ fi
 # [[TODO]] presently, very little of this is used.
 # [[TODO]] none of these options are recognized by buildconf or configure
 #
+: ${CPPFLAGS:=-Wno-cpp}
+: ${CXXFLAGS:=-Wno-deprecated-declarations}
 eval \
     ${prefix:+prefix=$prefix} \
     ${with_temerarious_flagship:+with_temerarious_flagship=$with_temerarious_flagship} \
@@ -59,6 +61,6 @@ eval \
     ${with_nearby:+--with-nearby=$with_nearby} ${with_external:+--with-external=$with_external} \
     ${with_temerarious_flagship:+--with-temerarious-flagship=$with_temerarious_flagship} \
     ${end} &&
-make &&
-make check &&
+make ${CPPFLAGS:+CPPFLAGS="$CPPFLAGS"} ${CXXFLAGS:+CXXFLAGS="$CXXFLAGS"} &&
+make check ${CPPFLAGS:+CPPFLAGS="$CPPFLAGS"} ${CXXFLAGS:+CXXFLAGS="$CXXFLAGS"} &&
 echo OK DONE

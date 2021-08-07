@@ -4,7 +4,7 @@
 // For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
 // For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
 #divert <fpp>
-namespace app::roff::process {
+namespace tunitas::flagship::temerarious::stream {
   //
   // A line number in a file
   //
@@ -24,16 +24,13 @@ namespace app::roff::process {
   //
   //   Oh come on.
   //
-  namespace [[eponymous]] line {
-    enum Line : int unsigned long;
-  }
-  using line::Line;
+  enum Line : int unsigned long;
 }
 #endiv
 #divert <hpp>
 #import std.underlying_type
 #import std.ostream
-namespace app::roff::process::line {
+namespace tunitas::flagship::temerarious::stream {
   inline constexpr auto underlying(Line l) { return std::underlying_type_t<Line>(l); }
   inline auto operator<<(std::ostream &, Line) -> std::ostream &;
   inline auto operator++(Line &) -> Line &;
@@ -41,12 +38,12 @@ namespace app::roff::process::line {
 }
 #endiv
 #divert <ipp>
-namespace app::roff::process {
-  auto line::operator<<(std::ostream &o, Line l) -> std::ostream & { return o << "line " << underlying(l) << ": "; }
-  auto line::operator++(Line &lhs) -> Line & {
+namespace tunitas::flagship::temerarious {
+  auto stream::operator<<(std::ostream &o, Line l) -> std::ostream & { return o << "line " << underlying(l) << ": "; }
+  auto stream::operator++(Line &lhs) -> Line & {
     return lhs = Line(1u+underlying(lhs));
   }
-  auto line::operator++(Line &lhs, int) -> Line {
+  auto stream::operator++(Line &lhs, int) -> Line {
     auto old = lhs;
     ++lhs;
     return old;

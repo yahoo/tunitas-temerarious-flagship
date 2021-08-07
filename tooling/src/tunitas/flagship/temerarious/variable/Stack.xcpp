@@ -1,0 +1,33 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+namespace tunitas::flagship::temerarious::variable {
+  //
+  // A stack of variable frames
+  //
+  // Specification:
+  //
+  //   The stack
+  //
+  //   .push
+  //   .pop
+  //
+  // Usage:
+  //
+  //   Oh come on.
+  //
+  struct Stack;
+}
+#endiv
+#divert <hpp>
+#import tunitas.flagship.temerarious.variable.Frame
+#import std.stack
+#import std.deque
+struct tunitas::flagship::temerarious::variable::Stack : public std::stack<Frame, std::deque<Frame>> {
+  using Ancestor = std::stack<Frame, std::deque<Frame>>;
+public:
+};
+#endiv

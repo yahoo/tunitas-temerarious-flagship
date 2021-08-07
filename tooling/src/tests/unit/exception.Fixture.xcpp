@@ -1,0 +1,84 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+#import tunitas.flagship.temerarious.exception
+namespace tests::unit::exception {
+  namespace [[eponymous]] fixture {
+    struct Fixture;
+    namespace library = ::tunitas::flagship::temerarious::exception;
+  }
+  using fixture::Fixture;
+}
+#endiv
+#divert <hpp>
+#import tunitas.flagship.temerarious.exception.System
+#import tunitas.flagship.temerarious.exception.Filesystem
+namespace tests::unit::exception {
+  struct fixture::Fixture : public cppunit::test::Fixture {
+    auto test_System() -> void;
+    auto test_Filesystem() -> void;
+    template<typename EXCETPION> auto test_Aspect() -> void;
+    static auto suite() -> cppunit::Test *;
+  protected:
+    template<typename EXCEPTION> static auto generate() -> EXCEPTION;
+  };
+  namespace fixture {
+    template<> auto Fixture::generate<library::System>() -> library::System;
+    template<> auto Fixture::generate<library::Filesystem>() -> library::Filesystem;
+  }
+}
+#endiv
+#divert <tpp>
+#import tunitas.flagship.temerarious.exception.Aspect
+namespace tests::unit::exception::fixture {
+  template<typename EXCEPTION> auto Fixture::test_Aspect() -> void try {
+    // Prove that these exceptions are throwable and that they are catchable with a library::Aspect
+    throw generate<EXCEPTION>();
+  } catch (library::Aspect const &) {
+    CPPUNIT_ASSERT(true);
+  }
+}
+#endiv
+#divert <cpp>
+namespace tests::unit::exception::fixture {
+  template<> auto Fixture::generate<library::System>() -> library::System {
+    auto ec = std::error_code{};
+    auto reason = "cause never was the reason"sv;
+    return library::System{move(ec), reason};
+  }
+  template<> auto Fixture::generate<library::Filesystem>() -> library::Filesystem {
+    auto fp = std::filesystem::path{"/tmp"};
+    auto ec = std::error_code{};
+    auto reason = "cause never was the reason"sv;
+    return library::Filesystem{std::move(fp), move(ec), reason};
+  }
+  auto Fixture::test_System() -> void {
+    using Subject = library::System;
+    auto subject = Subject{std::error_code{}, "cause never was the reason"sv};
+    CPPUNIT_ASSERT(nullptr != subject.what());
+  }
+  auto Fixture::test_Filesystem() -> void {
+    using Subject = library::Filesystem;
+    auto subject = Subject{std::error_code{}, "cause never was the reason"sv};
+    CPPUNIT_ASSERT(nullptr != subject.what());
+  }
+  auto Fixture::suite() -> cppunit::Test * {
+    using namespace rigging::suite;
+    auto series = Stream{"exception"};
+    series << call("System", &Fixture::test_System)
+           << call("Filesystem", &Fixture::test_Filesystem)
+           << []{
+                auto asp = Stream{"Aspect"};
+                asp << call("System", &Fixture::test_Aspect<library::System>)
+                    << call("Filesystem", &Fixture::test_Aspect<library::Filesystem>)
+                    << END;
+                return move(asp);
+              }()
+           << END;
+    return finalize(series);
+  }
+}
+#endiv

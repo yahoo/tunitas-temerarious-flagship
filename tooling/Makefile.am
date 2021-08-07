@@ -34,26 +34,38 @@ INSTALLATION_AREAS = \
 include src/app/Makefrag.am
 include src/app/tf/Makefrag.am
 include src/app/roff/Makefrag.am
+include src/autotools/autoconf/Makefrag.am
+include src/std/Makefrag.am
+include src/tunitas/flagship/temerarious/Makefrag.am
 include src/tests/unit/Makefrag.am
 include src/tests/tf/Makefrag.am
 include src/tests/roff/Makefrag.am
 
 # install rules arrive from from @temerarious_flagship_datadir@/am/install.am
 INSTALL_MODULES = \
-  $(lib_libtunitas_application_la_MODULES) \
-  $(lib_libtunitas_server_la_MODULES) \
-  $(lib_libtunitas_la_MODULES) \
-  $(lib_libwant_la_MODULES) \
+  $(lib_libtunitas_flagship_temerarious_la_modules_la) \
   $(end)
 $(if $(DEBUGGING_CONDITION),$(info DEBUG INSTALL_MODULES=$(INSTALL_MODULES)))
 
 bin_PROGRAMS = $(bin_tf)
 libexec_temerarious_flagshipdir = libexec/temerarious-flagship
 libexec_temerarious_flagship_PROGRAMS = $(libexec_temerarious_flagship_roff)
-lib_LTLIBRARIES = 
-noinst_LTLIBRARIES = $(lib_libapp_la) $(lib_libapp_roff_la) $(lib_libapp_tf_la)
+lib_LTLIBRARIES = $(lib_libtunitas_flagship_temerarious_la)
+noinst_LTLIBRARIES = \
+  $(lib_libautotools_autoconf_la) \
+  $(lib_libstd_temerarious_flagship_la) \
+  $(lib_libapp_la) \
+  $(lib_libapp_roff_la) \
+  $(lib_libapp_tf_la) \
+  $(end)
 check_PROGRAMS = $(check_bin_unit) $(check_bin_tf) $(check_bin_roff)
 check_LTLIBRARIES = 
+
+# NEED THIS or else...
+# SHOULD already be supplied in .../am/build.am
+# NEED ---> module_sys_datadir = $(dir $(word 1, $(wildcard $(addsuffix /mk /share/module-sys/mk,$(module_sys_prefix) $(std_scold_prefix) $(prefix)))))
+# NEED ---> .PRECIOUS: $(module_sys_datadir)/mk/sys.o.DUMMIES.mk
+# NEED ---> include $(module_sys_datadir)/mk/sys.o.DUMMIES.mk
 
 include tests/unit/Makefrag.am
 include tests/tf/Makefrag.am
