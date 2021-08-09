@@ -11,6 +11,7 @@ ACLOCAL_AMFLAGS = -I m4
 
 default:
 include @temerarious_flagship_datadir@/am/build.am
+include mk/check-ac.mk
 
 DEVELOPMENT_AREAS = \
   $(module_nonstd_prefix) \

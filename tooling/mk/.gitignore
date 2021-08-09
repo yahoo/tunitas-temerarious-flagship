@@ -1,3 +1,0 @@
-# From ./configure especially configure.ac TF_ENABLE_MOCK_BUILD
-buildconfed.mk
-configured.mk

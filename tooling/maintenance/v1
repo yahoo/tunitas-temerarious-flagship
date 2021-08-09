@@ -1,8 +1,0 @@
-#!/bin/bash
-: ${with_build:=/build}
-: ${with_worktrees:=${with_build?}/worktrees}
-
-with_hypogeal_twilight=${with_hypogeal_twilight:-${with_worktrees?}/hypogeal-twilight/v0.46.0-2.devel} \
-with_module_rigging=${with_module_rigging:-${with_worktrees?}/rigging/v1.0.0-0.devel_ensmoothen} \
-\
-exec ${0%/*}/nearby

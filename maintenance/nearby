@@ -1,12 +1,10 @@
 #!/bin/bash
-# For terms and provenance see the LICENSE file at the top of this repository.
+# Copyright Verizon Media
+# Licensed under the terms of the Apache-2.0 license.
+# For terms, see the LICENSE file at https://github.com/yahoo/tunitas-basics/blob/master/LICENSE
+# For terms, see the LICENSE file at https://git.tunitas.technology/all/components/basics/tree/LICENSE
 #
-# Usage:
-#
-#   ./maintenance/nearby     (no options)
-#
-#   prefix=/usr/local \
-#   ./maintenance/nearby
+# Wut.  Are you kidding me?  Rly?  This is the "simple" interface?
 #
 # the full end-to-end build using the "nearby" development trees
 #
@@ -14,6 +12,37 @@
 #   configure
 #   make [all]
 #   make check
+#
+# Usage:
+#
+#   ./maintenance/nearby     (no options)
+#
+#   prefix=/usr/local \
+#   with_std_tunitas=/opt/tunitas \
+#   with_temerarious_flagship=/opt/tunitas \
+#   ./maintenance/nearby
+# 
+# Common Idioms:
+#
+#   with_build=/build maintenance/nearby
+#
+#   with_tunitas_nearby=/build/tunitas \
+#   with_scold_nearby=/build/scold \
+#   ./maintenance_nearby
+#
+# ... you get the idea
+#
+# Debugging the initial buildconf-configure-make
+#
+#   YOU SEE -----> config.status: executing depfiles commands
+#   YOU SEE -----> config.status: error: in `/build/tunitas/butano':
+#   YOU SEE -----> config.status: error: Something went wrong bootstrapping makefile fragments
+#   YOU SEE ----->     for automatic dependency tracking.  Try re-running configure with the
+#   YOU SEE ----->     '--disable-dependency-tracking' option to at least be able to build
+#   YOU SEE ----->     the package (albeit without support for automatic dependency tracking).
+#   YOU SEE -----> See `config.log' for more details
+#
+#   YOU RUN -----> enable_dependency_tracking=no ./maintenance/nearby 
 #
 cd ${0%/*}/.. || exit 70
 : ${prefix:=/exp/tunitas}
@@ -28,38 +57,108 @@ elif [[ -z ${with_std_tunitas} ]] ; then
         : ${with_std_tunitas:=${prefix}}
     fi
 fi
-: ${with_siblings:=${PWD%/*}}
+: ${with_std_scold:=/opt/scold}
+: ${with_siblings:=${PWD%/*/*}} # e.g. /build/tunitas
 #
-# What is in the "nearby" area?
-# but priority for anything below us in the submodules?
+# What is in the "nearby" area?  Maybe it is in /build
+# But priority for anything below us in the submodules?
 #
-if [[ -d ${PWD%/*}/nearby ]] ; then
-    : ${with_nearby:=${PWD%/*}/nearby}
+if [[ -n $with_build ]] ; then
+    # The "build" directory is a meta-meta area, e.g. /build, with sublocations for tunitas, state-space, scold, nonstd, adhoc and so on.
+    : ${with_tunitas_nearby:=${with_build?}/tunitas}
+    : ${with_scold_nearby:=${with_build?}/scold}
+elif [[ -n $with_nearby ]] ; then
+    # The "nearby" directory is a convenience directory ... nearby ... that blends it all together.
     : ${with_tunitas_nearby:=${with_nearby?}}
     : ${with_scold_nearby:=${with_nearby?}}
 elif [[ -d /build/tunitas ]] && [[ -d /build/scold ]] ; then
-    : ${with_nearby:=/build}
-    : ${with_tunitas_nearby:=${with_nearby?}/tunitas}
-    : ${with_scold_nearby:=${with_nearby?}/scold}
+    # guess at /build
+    : ${with_build:=/build}
+    : ${with_tunitas_nearby:=${with_build?}/tunitas}k
+    : ${with_scold_nearby:=${with_build?}/scold}
+elif [[ -d ${PWD%/*}/nearby ]] ; then
+    # guess at .../nearby
+    : ${with_nearby:=${PWD%/*}/nearby}
+    : ${with_tunitas_nearby:=${with_nearby?}}
+    : ${with_scold_nearby:=${with_nearby?}}
 else
+    # this won't work because ... there is no obvious default
+    : ${with_build:=no}
     : ${with_nearby:=no}
     : ${with_tunitas_nearby:=${with_nearby?}}
     : ${with_scold_nearby:=${with_nearby?}}
 fi
 #
-# [[TODO]] presently, very little of this is used.
-# [[TODO]] none of these options are recognized by buildconf or configure
+# Decide the defaults
+# you can always override the defaults from the command line, but that can be onerous
 #
-: ${CPPFLAGS:=-Wno-cpp}
-: ${CXXFLAGS:=-Wno-deprecated-declarations}
+function UNUSED_set_all_defaults_no() {
+    : ${with_hypogeal_twilight:=${with_std_scold?}} # not needed in after hypogeal-twilight >= 0.43 or 0.44 or so
+    : ${with_module_nonstd:=no}
+    : ${with_module_options:=no}
+    : ${with_module_posix:=no}
+    : ${with_module_rigging:=no}
+    : ${with_module_std:=no}
+    : ${with_module_string:=no}
+    : ${with_module_sys:=no}
+}
+function UNUSED_set_all_defaults_relatively() {
+    : ${with_hypogeal_twilight:=$1/hypogeal-twilight}
+    : ${with_module_nonstd:=$1/module-nonstd}
+    : ${with_module_options:=$1/module-options}
+    : ${with_module_posix:=$1/module-posix}
+    : ${with_module_rigging:=$1/module-rigging}
+    : ${with_module_std:=$1/module-std}
+    : ${with_module_string:=$1/module-string}
+    : ${with_module_sys:=$1/module-sys}
+}
+: ${with_nonstd_gcc:=/exp/gcc/9} # ... WATCHOUT you, the caller must ensure that PATH is set consistenly with this
+# check whether this is different than what PATH finds in the natural course.
+if type -p gcc >/dev/null ; then
+    exe=$(type -p gcc 2>/dev/null)
+    if [[ $exe != ${with_nonstd_gcc}/bin/gcc ]] ; then
+        echo "${0}: notice, instead correct with_nonstd_gcc=${with_nonstd_gcc} $0"
+        for w in {1..30} ; do
+            echo "${0}: warning, the explicit setting with_nonstd_gcc=${with_nonstd_gcc} is not consistent with $exe from PATH"
+        done
+        echo "${0}: notice, permanently fix this as -- PATH=${with_nonstd_gcc}/bin:\$PATH with_nonstd_gcc=${with_nonstd_gcc} $0"
+    fi 1>&2
+fi
+: ${with_module_nonstd:=${with_scold_nearby?}/module-nonstd}
+: ${with_module_options:=${with_scold_nearby?}/module-options}
+: ${with_module_posix:=${with_scold_nearby?}/module-posix}
+: ${with_module_rigging:=${with_scold_nearby?}/module-rigging}
+: ${with_module_std:=${with_scold_nearby?}/module-std}
+: ${with_module_sys:=${with_scold_nearby?}/module-sys}
+: ${with_hypogeal_twilight:=${with_scold_nearby?}/hypogeal-twilight}
+: ${with_temerarious_flagship:=${PWD}} # RIGHT HERE
+: ${with_tunitas_basics:=${with_tunitas_nearby?}/basics}
 eval \
     ${prefix:+prefix=$prefix} \
+    ${with_hypogeal_twilight:+with_hypogeal_twilight=$with_hypogeal_twilight} \
     ${with_temerarious_flagship:+with_temerarious_flagship=$with_temerarious_flagship} \
     ./buildconf &&
 ./configure \
+    ${enable_dependency_tracking:+--enable-dependency-tracking=$enable_dependency_tracking} \
+    ${enable_configure_verbose:+--enable-configure-verbose=$enable_configure_verbose} \
+    ${enable_configure_debug:+--enable-configure-debug=$enable_configure_debug} \
+    --disable-mock-build \
     ${prefix:+--prefix=$prefix} \
     ${with_nearby:+--with-nearby=$with_nearby} ${with_external:+--with-external=$with_external} \
+    ${with_nonstd_gcc:+--with-nonstd-gcc=$with_nonstd_gcc} \
+    ${with_hypogeal_twilight:+--with-hypogeal-twilight=$with_hypogeal_twilight} \
     ${with_temerarious_flagship:+--with-temerarious-flagship=$with_temerarious_flagship} \
+    ${with_module_c:+--with-module-c=$with_module_c} \
+    ${with_module_nonstd:+--with-module-nonstd=$with_module_nonstd} \
+    ${with_module_options:+--with-module-options=$with_module_options} \
+    ${with_module_posix:+--with-module-posix=$with_module_posix} \
+    ${with_module_rigging:+--with-module-rigging=$with_module_rigging} \
+    ${with_module_std:+--with-module-std=$with_module_std} \
+    ${with_module_string:+--with-module-string=$with_module_string} \
+    ${with_module_sys:+--with-module-sys=$with_module_sys} \
+    ${with_tunitas_basics:+--with-tunitas-basics=$with_tunitas_basics} \
+    ${with_std_tunitas:+--with-std-tunitas=$with_std_tunitas} \
+    ${with_std_scold:+--with-std-scold=$with_std_scold} \
     ${end} &&
 make ${CPPFLAGS:+CPPFLAGS="$CPPFLAGS"} ${CXXFLAGS:+CXXFLAGS="$CXXFLAGS"} &&
 make check ${CPPFLAGS:+CPPFLAGS="$CPPFLAGS"} ${CXXFLAGS:+CXXFLAGS="$CXXFLAGS"} &&

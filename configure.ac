@@ -22,7 +22,7 @@ dnl      |
 dnl      \prefix\
 dnl      ||||||||
 dnl      vvvvvvvv
-AC_INIT([tunitas-temerarious-flagship-tooling], [0.0.0], [tunitas@verizonmedia.com])
+AC_INIT([tunitas-temerarious-flagship], [2.0.0], [tunitas@tunitas.technology])
 dnl and yes there are other flagships and other toolings (packages-named "flagship" and packages named "tooling")
 TF_INIT(AC_PACKAGE_NAME, AC_PACKAGE_VERSION, AC_PACKAGE_BUGREPORT)
 
@@ -51,22 +51,21 @@ TF_WITH_SUBSYSTEM([hypogeal-twilight], [], [The SCOLD Build System])
 TF_WITH_SUBSYSTEM([temerarious-flagship], [], [The Tunitas Build System])
 TF_WITH_SUBSYSTEM([tunitas-basics], [], [The Tunitas Basics])
 
-# minimize these
+dnl Minimize these (tunitas-basics holds many of the upper-level library facilities)
+TF_WITH_MODULE([langu])
 TF_WITH_MODULE([nonstd])
 TF_WITH_MODULE([options])
 TF_WITH_MODULE([sys])
 
-# [[deprecating]] being subsumed into module-langu, nonstd, options or sys
+dnl [[deprecating]] being subsumed into module-langu, nonstd, options or sys
 TF_WITH_MODULE([c])
 TF_WITH_MODULE([posix])
 TF_WITH_MODULE([std])
 TF_WITH_MODULE([string])
 
-TF_WITH_MODULE([cppunit])
-TF_WITH_MODULE([rigging], [], [Unit (test) Rigging])
-
-TF_MSG_VERBOSE([compiler-specific (alphabetical)])
-TF_WITH_NONSTD([cppunit])
+TF_WITH_MODULE([rigging]) dnl TESTING_AREAS only
+TF_WITH_MODULE([cppunit]) dnl TESTING_AREAS only and not needed when using module-rigging >= 2.0
+TF_WITH_NONSTD([cppunit]) dnl ibidem
 
 TF_WITH_STD([scold])
 TF_WITH_STD([tunitas])
@@ -86,9 +85,10 @@ TF_CHECK_CPPUNIT dnl defines toolflags of cppunit, @CPPFLAGS_cppunit@, @CXXFLAGS
 TF_CHECK_PACKAGES([tunitas.Optional tunitas.Tuple], [tunitas-basics-devel], [Basics of the Tunitas Technologies >= 2.0])
 TF_CHECK_PACKAGES([tests.cppunit.Test tests.cppunit.test.Fixture rigging.suite.io], [module-rigging-devel], [Test Rigging of S.C.O.L.D., module-rigging >= 1.0])
 
-dnl whereas these are just warnings at this point ... we can check for more and we can warn of future compatibilities
+dnl Whereas These are just warnings at this point ... we can check for more and we can warn of future compatibilities
 dnl only available in module-rigging >= 2.0
-TF_CHECK_PACKAGES_WARNING([rigging.io], [module-rigging-devel], [Test Rigging of S.C.O.L.D., module-rigging >= 2.0])
+TF_CHECK_PACKAGES_WARNING([rigging.io],       [module-rigging-devel], [Test Rigging of S.C.O.L.D., module-rigging >= 2.0])
+TF_CHECK_PACKAGES_WARNING([rigging.suite.io], [module-rigging-devel], [Test Rigging of S.C.O.L.D., module-rigging >= 1.0])
 
 dnl WATCHOUT if AC_OUTPUT is not called (transitively from TF_FINALIZE) then
 dnl you will see the fantastically cryptic error
