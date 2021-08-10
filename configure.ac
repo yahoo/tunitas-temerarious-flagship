@@ -52,13 +52,14 @@ TF_WITH_SUBSYSTEM([temerarious-flagship], [], [The Tunitas Build System])
 TF_WITH_SUBSYSTEM([tunitas-basics], [], [The Tunitas Basics])
 
 dnl Minimize these (tunitas-basics holds many of the upper-level library facilities)
-TF_WITH_MODULE([langu])
+TF_WITH_MODULE([langu]) dnl langu::age::q, langu::age::braket
 TF_WITH_MODULE([nonstd])
 TF_WITH_MODULE([options])
 TF_WITH_MODULE([sys])
 
 dnl [[deprecating]] being subsumed into module-langu, nonstd, options or sys
 TF_WITH_MODULE([c])
+TF_WITH_MODULE([format]) dnl format::q, format::braket
 TF_WITH_MODULE([posix])
 TF_WITH_MODULE([std])
 TF_WITH_MODULE([string])
@@ -84,6 +85,8 @@ TF_CHECK_CPPUNIT dnl defines toolflags of cppunit, @CPPFLAGS_cppunit@, @CXXFLAGS
 
 TF_CHECK_PACKAGES([tunitas.Optional tunitas.Tuple], [tunitas-basics-devel], [Basics of the Tunitas Technologies >= 2.0])
 TF_CHECK_PACKAGES([tests.cppunit.Test tests.cppunit.test.Fixture rigging.suite.io], [module-rigging-devel], [Test Rigging of S.C.O.L.D., module-rigging >= 1.0])
+
+TF_CHECK_PACKAGES([langu.age], [module-langu-devel], [The Langu.age Quoting, module-langu >= 1.0])
 
 dnl Whereas These are just warnings at this point ... we can check for more and we can warn of future compatibilities
 dnl only available in module-rigging >= 2.0

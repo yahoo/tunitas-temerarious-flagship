@@ -7,6 +7,7 @@
 : ${with_worktrees:=${with_build?}/worktrees}
 
 with_hypogeal_twilight=${with_hypogeal_twilight:-${with_worktrees?}/hypogeal-twilight/v0.LATEST} \
+with_module_langu=${with_module_langu:-${with_worktrees?}/langu/v0.LATEST} \
 with_module_nonstd=${with_module_nonstd:-${with_worktrees?}/nonstd/v2.LATEST} \
 with_module_options=${with_module_options:-${with_worktrees?}/options/v2.LATEST} \
 with_module_sys=${with_module_sys:-${with_worktrees?}/sys/v2.LATEST} \

@@ -14,6 +14,7 @@ include @temerarious_flagship_datadir@/am/build.am
 include mk/check-ac.mk
 
 DEVELOPMENT_AREAS = \
+  $(module_langu_prefix) \
   $(module_nonstd_prefix) \
   $(module_options_prefix) \
   $(module_posix_prefix) \

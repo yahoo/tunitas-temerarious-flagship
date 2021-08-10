@@ -22,15 +22,100 @@ namespace tunitas::flagship::temerarious::processor {
 }
 #endiv
 #divert <hpp>
+#import tunitas.string.View
+#import tunitas.string.Storage
 #import tunitas.flagship.temerarious.path.Search
+#import tunitas.flagship.temerarious.processor.condition.Stack
+#import tunitas.flagship.temerarious.processor.diversion.Stack
 #import tunitas.flagship.temerarious.stream.Stack
+#forward tunitas.flagship.temerarious.stream.Output
 #import tunitas.flagship.temerarious.variable.Stack
 struct tunitas::flagship::temerarious::processor::State {
-  State() = default;
+  inline explicit State(); // ................... leaves the diversions unpushed
+  inline explicit State(stream::Output &); // ... pushes the first diversion
   State(State const &) = default;
   auto operator=(State const &) -> State & = default;
   stream::Stack inbound;
   variable::Stack variables;
+  condition::Stack conditions;
+  diversion::Stack diversions;
   path::Search search;
+  inline auto define_variable(string::View identifier, string::View value) -> void;
+  inline auto undefine_variable(string::View identifier) -> void;
+  inline auto push_diversion(stream::Output &) -> void;
+  inline auto push_diversion(string::View identifier) -> void;
+  inline auto pop_diversion() -> void;
+  inline auto push_condition(string::View condition, bool negate = false) -> void;
+  inline auto push_condition(bool condition) -> void;
+  inline auto push_condition(char const *) -> void = delete; // avoid the ambiguity with bool
+  inline auto pop_condition() -> void;
+private:
+  inline static auto s(string::View view) -> string::Storage; // because std::map<...> requires std::string, never std::view
 };
+#endiv
+#divert <ipp>
+#import tunitas.flagship.temerarious.exception.Empty
+namespace tunitas::flagship::temerarious::processor {
+  auto State::s(string::View view) -> string::Storage { return {view.begin(), view.end()}; }
+  State::State() {
+    variables.push({});
+    conditions.push(true);
+    // reminder: the output diversion is still not pushed.
+  }
+  State::State(stream::Output &outbound)
+    : State{} {
+    diversions.push(&outbound);
+  }
+  auto State::define_variable(string::View identifier, string::View value) -> void {
+    // this allows overwriting of variables with new values
+    auto &lhs = variables.top().at(s(identifier));
+    lhs = value;
+  }
+  auto State::undefine_variable(string::View identifier) -> void {
+    auto &t = variables.top();
+    auto found = t.find(s(identifier));
+    auto const end = t.end();
+    if (end != found) {
+      t.erase(found);
+    }
+  }
+  auto State::push_diversion(stream::Output &sink) -> void {
+    diversions.push(&sink);
+  }
+  auto State::push_diversion(string::View identifier) -> void {
+    auto sidentifier = s(identifier);
+    auto &t = variables.top();
+    auto found = t.find(sidentifier);
+    auto const end = t.end();
+    if (end == found) {
+      auto &lhs = t.at(sidentifier); // [[FIXTHIS]] is there a better way? with idempotent map<K,V,A>::insert(...)
+      diversions.push(&lhs);
+    } else {
+      diversions.push(&found->second);
+    }
+  }
+  auto State::pop_diversion() -> void {
+    if (diversions.empty()) {
+      throw exception::Empty{__FUNCTION__}; // this indicates a programmer error
+    }
+    diversions.pop();
+  }
+  auto State::push_condition(string::View identifier, bool negate) -> void {
+    auto condition = [identifier, &t=this->variables.top()]{
+                       auto found = t.find(s(identifier));
+                       auto const end = t.end();
+                       return end == found;
+                     }();
+    conditions.push(condition ^ negate);
+  }
+  auto State::push_condition(bool condition) -> void {
+    conditions.push(condition);
+  }
+  auto State::pop_condition() -> void {
+    if (conditions.empty()) {
+      throw exception::Empty{__FUNCTION__}; // this indicates a programmer error
+    }
+    conditions.pop();
+  }
+}
 #endiv

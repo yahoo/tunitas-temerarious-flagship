@@ -3,25 +3,44 @@
 // Licensed under the terms of the Apache-2.0 license.
 // For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
 // For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+namespace tunitas::flagship::temerarious::processor {
+  inline namespace package_run {
+           namespace package_body_run { }
+           inline namespace interface { using namespace package_body_run; }
+  }
+}
+#import tunitas.flagship.temerarious.parser.assess
+#import langu.age
+#import nonstd
+namespace tunitas::flagship::temerarious::processor {
+  namespace package_run::package_body_run {
+    using namespace langu::age;
+    using namespace parser; // assess(...) Assessed, Assessment (you get the idea)
+    using namespace nonstd; // for visit, Visitor
+  }
+}
+#endiv
 #divert <hpp>
 #import tunitas.Success
 #import tunitas.flagship.temerarious.stream.Input
 #import tunitas.flagship.temerarious.stream.Output
-namespace tunitas::flagship::temerarious::processor {
+namespace tunitas::flagship::temerarious::processor::package_run::interface {
   inline auto run(stream::Input &, stream::Output &) -> Success;
   auto run(stream::Input &, stream::Output &out, stream::Output &err) -> Success;
 }
 #endiv
 #divert <ipp>
 #import std.cerr
-namespace tunitas::flagship::temerarious {
-  auto processor::run(stream::Input &inbound, stream::Output &outbound) -> Success {
+namespace tunitas::flagship::temerarious::processor::package_run {
+  auto interface::run(stream::Input &inbound, stream::Output &outbound) -> Success {
     auto erroneous = stream::Output{std::cerr};
     return run(inbound, outbound, erroneous);
   }
 }
 #endiv
 #divert <cpp>
+#import std.getline
 #import tunitas.string.Storage
 // v2-series #import substd.exception.Filesystem
 #import nonstd.exception.Filesystem // v1-series substd::exception::Filesystem
@@ -34,10 +53,12 @@ static_assert(std::is_error_code_enum<tunitas::flagship::temerarious::error::cod
 #import tunitas.flagship.temerarious.stream.Line
 #import nonstd.exception.Unreachable
 #import tunitas.flagship.temerarious.exception // cascade namespace exception
-namespace tunitas::flagship::temerarious {
-  auto processor::run(stream::Input &inbound, stream::Output &outbound, stream::Output &erroneity) -> Success {
-    using namespace parser; // assess(...) Assessed, Assessment (you get the idea)
-    auto state = State{};
+#import langu.age.braket
+#import nonstd.Visitor
+#import nonstd.visit
+namespace tunitas::flagship::temerarious::processor::package_run {
+  auto interface::run(stream::Input &inbound, stream::Output &outbound, stream::Output &erroneity) -> Success {
+    auto state = State{outbound};
     inbound.unsetf(std::ios::skipws);
     auto erroneous = Success{SUCCESS};
     auto buffer = string::Storage{};
@@ -45,21 +66,32 @@ namespace tunitas::flagship::temerarious {
       if (auto [directive, process, rest]=assess(buffer); Assessment::IGNORE == directive) {
       } else if (Assessment::DIRECTIVE == directive) {
         try {
-          process(state, outbound, line, rest);
+          process(state, outbound, {line, inbound.input_name()}, rest);
+        } catch (exception::Payload const &e) {
+          erroneity << line << "found-->|" << buffer << '\n';
+          erroneity << line << "error, " << e.what() << '\n';
+          erroneous = {error::Code::ROFF_FILE};
         } catch (substd::exception::Filesystem const &e) {
           erroneity << line << "error, could not open " << e.path1() << " because " << e.code().message() << '\n';
           erroneity << line << "error, failed roff directive <<" << buffer.substr(0, 2) << ">>\n";
+          erroneous = {error::Code::ROFF_FILE};
+        } catch (exception::Aspect const &e) {
+          // These are unexpected; it means that some more specific error treatment (above) did ont obtain.
+          erroneity << line << "error, (uh) there was some problem, " << e.what() << '\n';
           erroneous = {error::Code::ROFF_FILE};
         }
       } else if (Assessment::ERROR == directive) {
         erroneity << line << "error, invalid roff directive <<" << buffer.substr(0, 2) << ">> is ignored\n";
         erroneous = {error::Code::ROFF_DIRECTIVE};
       } else if (Assessment::PASSTHROUGH == directive) {
-        outbound << buffer << '\n';
+        auto visitor = Visitor{[buffer](string::Storage *variable) { variable->append(buffer); },
+                               [buffer](stream::Output *outbound) { *outbound << buffer << '\n'; }};
+        visit(visitor, state.diversions.top());
       } else {
         throw exception::Unreachable{};
       }
     }
+#warning TODO check for stetled state of the processor at EOF no open .define.endef no open .ifdef...endif
     return erroneous;
   }
 }

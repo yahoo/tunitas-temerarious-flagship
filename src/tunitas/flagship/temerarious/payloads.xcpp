@@ -4,12 +4,8 @@
 // For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
 // For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
 #divert <fpp>
-namespace tunitas::flagship::temerarious::directive {
-  //
-  // (A (pointer to a) function for) processing a single line in the "ifdef processor"
-  //
-  // Just what it says on the tin.
-  //
-  using Directive = void (*)(State &, Output &, Location, Payload);
-}
+#import tunitas.flagship.temerarious.payload.get_none
+#import tunitas.flagship.temerarious.payload.get_identifier
+#import tunitas.flagship.temerarious.payload.get_identifier_and_more
+#import tunitas.flagship.temerarious.payload.get_filepath
 #endiv

@@ -1,0 +1,84 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+namespace tunitas::flagship::temerarious::exception::partial {
+  //
+  // There was a problem during processing (e.g. in a directive processor)
+  // Descendants only.
+  //
+  // Specification:
+  //
+  //   Has UX-quality grammar (reasonable explanation, complete sentences, etc.).
+  //
+  //   Constructed with a single reason, following exception::Runtime
+  //   i.e. https://en.cppreference.com/w/cpp/error/runtime_error
+  //
+  //   Has a stream::Location that originated from a nearby stream::Input
+  //
+  // Design:
+  //
+  //   Sure.
+  //
+  // Lifetimes;
+  //
+  //   Because the feature::Location uses string::View, the lifetime of the source must be longer than the exception.
+  //   This is trivially satisfied by recovering the Location from a nearby stream::Input by Input::input_name()
+  //
+  // Usage:
+  //
+  //   try {
+  //      ...
+  //      throw exception::Payload{there, "cause never was the reason"sv};
+  //      throw exception::Stack{there, "the stack is empty"sv};
+  //      ...
+  //   } catch (temerarious::exception::Aspect const &) {
+  //      ...ours...
+  //   } catch (tunitas::exception::Aspect const &) {
+  //      ...otherwise ours...
+  //   }
+  //
+  class Processing;
+}
+#endiv
+#divert <hpp>
+#import tunitas.exception.Aspect
+#import tunitas.flagship.temerarious.exception.Aspect
+#import tunitas.flagship.temerarious.exception.feature.Where
+#import tunitas.flagship.temerarious.stream.Location
+#import tunitas.string.View
+#import nonstd.exception.Runtime
+namespace tunitas::flagship::temerarious::exception {
+  class partial::Processing : public virtual Aspect,
+                              public virtual tunitas::exception::Aspect,
+                              public nonstd::exception::Runtime<string::View>,
+                              public feature::Where {
+    struct Ancestors {
+      struct Aspects { /* ... who cares... */ };
+      using Exception = nonstd::exception::Runtime<string::View>;
+      using Where = feature::Where;
+    };
+  protected:
+    ~Processing() = default;
+  public:
+    // The constructor is public so descendants can inherit it as theirs.
+    inline explicit Processing(Location, string::View reason);
+    auto what() const noexcept -> char const * override;
+  };
+}
+#endiv
+#divert <ipp>
+namespace tunitas::flagship::temerarious::exception::partial {
+  Processing::Processing(Location where, string::View reason)
+    : Ancestors::Exception{reason}
+        , Ancestors::Where{where}
+  { }
+}
+#endiv
+#divert <cpp>
+namespace tunitas::flagship::temerarious::exception::partial {
+  auto Processing::what() const noexcept -> char const * { return Ancestors::Exception::what(); }
+}
+#endiv

@@ -6,5 +6,9 @@
 #divert <fpp>
 #import tunitas.flagship.temerarious
 #import tunitas.exception
-namespace tunitas::flagship::temerarious::exception { using namespace tunitas::exception; }
+namespace tunitas::flagship::temerarious::exception {
+  using namespace tunitas::exception;
+  namespace [[nodirectory]] feature { using namespace tunitas::exception::feature; }
+  namespace [[nodirectory]] partial { }
+}
 #endiv

@@ -94,6 +94,7 @@ fi
 #
 function UNUSED_set_all_defaults_no() {
     : ${with_hypogeal_twilight:=${with_std_scold?}} # not needed in after hypogeal-twilight >= 0.43 or 0.44 or so
+    : ${with_module_langu:=no}
     : ${with_module_nonstd:=no}
     : ${with_module_options:=no}
     : ${with_module_posix:=no}
@@ -104,6 +105,7 @@ function UNUSED_set_all_defaults_no() {
 }
 function UNUSED_set_all_defaults_relatively() {
     : ${with_hypogeal_twilight:=$1/hypogeal-twilight}
+    : ${with_module_langu:=$1/module-langu}
     : ${with_module_nonstd:=$1/module-nonstd}
     : ${with_module_options:=$1/module-options}
     : ${with_module_posix:=$1/module-posix}
@@ -124,6 +126,7 @@ if type -p gcc >/dev/null ; then
         echo "${0}: notice, permanently fix this as -- PATH=${with_nonstd_gcc}/bin:\$PATH with_nonstd_gcc=${with_nonstd_gcc} $0"
     fi 1>&2
 fi
+: ${with_module_langu:=${with_scold_nearby?}/module-langu}
 : ${with_module_nonstd:=${with_scold_nearby?}/module-nonstd}
 : ${with_module_options:=${with_scold_nearby?}/module-options}
 : ${with_module_posix:=${with_scold_nearby?}/module-posix}
@@ -149,6 +152,7 @@ eval \
     ${with_hypogeal_twilight:+--with-hypogeal-twilight=$with_hypogeal_twilight} \
     ${with_temerarious_flagship:+--with-temerarious-flagship=$with_temerarious_flagship} \
     ${with_module_c:+--with-module-c=$with_module_c} \
+    ${with_module_langu:+--with-module-langu=$with_module_langu} \
     ${with_module_nonstd:+--with-module-nonstd=$with_module_nonstd} \
     ${with_module_options:+--with-module-options=$with_module_options} \
     ${with_module_posix:+--with-module-posix=$with_module_posix} \

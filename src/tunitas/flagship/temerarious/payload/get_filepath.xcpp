@@ -1,0 +1,65 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <hpp>
+#import tunitas.file.Path
+namespace tunitas::flagship::temerarious::payload::package_payload::interface {
+  //
+  // get_filepath ... a one-argument directive (filepath, only)
+  //
+  // Specification:
+  //
+  //   Returns the filepath.
+  //   Verify that the filepath is reasonable.
+  //   Verify that there are no payloads on the rest of the line.
+  //   Else throw that certain exception.
+  //
+  // Preconditions:
+  //
+  //   The leading and trailing blanks have been removed from the payload range.
+  //
+  // Example:
+  //
+  //      /------------------------------------------------------- dot
+  //      |
+  //      |/------------------------------------------------------ directive 'x'
+  //      ||
+  //      ||                   /---------- a single filepath (no embedded blanks)
+  //      ||                   |
+  //      ||   /---------------+-------------\ (there)
+  //      ||   |                             |
+  //      vv   v                             v
+  //     |.x   /something/something/Dark_Side!     |<----- end
+  //         ^^                              ^^^^^
+  //         ||                              ||||| 
+  //         \\------------------------------\\\\\--------------- leading & trailing blanks were already trimmed
+  //
+  // Usage:
+  //
+  //   auto some_directive(State &, Outbound &, Location where, Payload payload) -> void {
+  //      auto filepath = get_filepath(where, payload);
+  //      ...blah blah blah...
+  //   }
+  //
+  inline auto get_filepath(Location where, Payload payload) -> file::Path;
+}
+#endiv
+#divert <ipp>
+#import tunitas.string.Storage
+namespace tunitas::flagship::temerarious::payload::package_payload {
+  auto interface::get_filepath(Location where, Payload payload) -> file::Path {
+    ensure_not_empty(where, payload);
+    if (has_blanks(payload)) {
+      // Yes, this means that filenamesp with spaces in them are not allowed here.
+      throw exception::Payload{where, "there are multiple words here (only one is allowed)"sv};
+    }
+    // consciously NOT checking for '..' in the filepath
+    if (!isfilepath(payload)) {
+      throw exception::Payload{where, "that is not a reasonable file path"sv};
+    }
+    return string::Storage{payload.begin(), payload.end()};
+  }
+}
+#endiv

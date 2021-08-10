@@ -39,25 +39,37 @@ namespace tunitas::flagship::temerarious::stream {
 #import tunitas.flagship.temerarious.stream.Base
 #import tunitas.flagship.temerarious.stream.File
 #import std.istream
+#import tunitas.string.View
+#import tunitas.string.Storage
 struct tunitas::flagship::temerarious::stream::Input : public std::istream, public Base, private File {
   using Ancestor = std::istream;
 public:
   inline explicit Input(std::istream &);
+  inline explicit Input(std::istream &, string::View name);
   inline explicit Input(path::File const &, Mode = IN);
   inline explicit Input(Input &&);
   inline auto operator=(Input &&) -> Input &;
+  inline auto input_name() const -> string::View;
+private:
+  string::Storage input_description; // i.e. file name
 };
 #endiv
 #divert <ipp>
 namespace tunitas::flagship::temerarious::stream {
-  Input::Input(std::istream &inbound) : Ancestor{inbound.rdbuf()} { }
-  Input::Input(path::File const &filepath, Mode mode) {
+  Input::Input(std::istream &inbound)
+    : Ancestor{inbound.rdbuf()}
+    , input_description{"<input>"}
+  { }
+  Input::Input(path::File const &filepath, Mode mode)
+    : input_description{filepath} {
     buf->open(filepath, mode);
   }
   Input::Input(Input &&other)
     : Ancestor{forward<Input>(other)}
     , Base{forward<Input>(other)}
-    , File{forward<Input>(other)} {
+    , File{forward<Input>(other)}
+      // avoid Ancestor::move(...) which is used to move the streambuf
+    , input_description{std::move(other.input_description)} {
       Ancestor::set_rdbuf(File::buf.get());
   }
   auto Input::operator=(Input &&other) -> Input & {
@@ -65,8 +77,10 @@ namespace tunitas::flagship::temerarious::stream {
     this->Base::operator=(forward<Input>(other));
     this->File::operator=(forward<Input>(other));
     Ancestor::set_rdbuf(File::buf.get());
+    this->input_description = std::move(other.input_description);
     return *this;
   }
+  auto Input::input_name() const -> string::View { return input_description; }
 }
 #endiv
 #divert <cpp>

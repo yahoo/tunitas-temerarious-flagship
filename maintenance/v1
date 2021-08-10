@@ -7,6 +7,7 @@
 : ${with_worktrees:=${with_build?}/worktrees}
 
 with_hypogeal_twilight=${with_hypogeal_twilight:-${with_worktrees?}/hypogeal-twilight/v0.LATEST} \
+with_module_langu=${with_module_langu:-${with_worktrees?}/langu/v0.LATEST} \
 with_module_rigging=${with_module_rigging:-${with_worktrees?}/rigging/v1.LATEST} \
 \
 exec ${0%/*}/nearby

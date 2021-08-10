@@ -5,5 +5,8 @@
 // For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
 #divert <fpp>
 #import tunitas.flagship.temerarious
-namespace tunitas::flagship::temerarious::processor { }
+namespace tunitas::flagship::temerarious::processor {
+  namespace [[nodirectory]] condition { }
+  namespace [[nodirectory]] diversion { }
+}
 #endiv

@@ -1,0 +1,108 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+namespace tests::unit::payload::get { class Filepath; }
+#endiv
+#divert <hpp>
+#import tunitas.string.Storage
+#import std.vector
+struct tests::unit::payload::get::Filepath : public cppunit::test::Fixture, private Here {
+  auto test_good() -> void;
+  auto test_fail_empty() -> void;
+  auto test_fail_multiple() -> void;
+  auto test_fail_badform() -> void;
+  auto test_case_1() -> void;
+  auto test_case_2() -> void;
+  static auto suite() -> cppunit::Test *;
+protected:
+  static auto generate_some_badness() -> std::vector<tunitas::string::Storage>;
+};  
+#endiv
+#divert <cpp>
+namespace tests::unit::payload::get {
+  auto Filepath::generate_some_badness() -> std::vector<tunitas::string::Storage> {
+    // The precondition is that there is no leading or trailing blanks ... don't violate that.
+    // All of these are invalid identifiers for one reason or another
+    return {"",
+            "a b c",
+            "a\fb/c", 
+            "a\tb/c",
+            "a\nb/c",
+            "\b",
+            "\177"};
+  }
+  auto Filepath::test_good() -> void try {
+    auto got = library::get_filepath(here(), "/dev"sv);
+    CPPUNIT_ASSERT("/dev"sv == got);
+  } catch (exception::Aspect const &) {
+    CPPUNIT_ASSERT(false);
+  }
+  auto Filepath::test_fail_empty() -> void try {
+    library::get_filepath(here(), ""sv);
+    CPPUNIT_ASSERT(false);
+  } catch (exception::Aspect const &) {
+    CPPUNIT_ASSERT(true);
+  }
+  auto Filepath::test_fail_multiple() -> void try {
+    library::get_filepath(here(), "/dev null"sv);
+    CPPUNIT_ASSERT(false);
+  } catch (exception::Aspect const &) {
+    CPPUNIT_ASSERT(true);
+  }
+  auto Filepath::test_fail_badform() -> void try {
+    library::get_filepath(here(), "/root/../\007\007"sv);
+    CPPUNIT_ASSERT(false);
+  } catch (exception::Aspect const &) {
+    CPPUNIT_ASSERT(true);
+  }
+  auto Filepath::test_case_1() -> void {
+    // The precondition is that there is no leading or trailing blanks ... don't violate that.
+    library::get_filepath(here(), "."sv);
+    library::get_filepath(here(), ".."sv);
+    library::get_filepath(here(), "..."sv);
+    library::get_filepath(here(), "/"sv);
+    library::get_filepath(here(), "/a"sv);
+    library::get_filepath(here(), "/tmp"sv);
+    library::get_filepath(here(), "/tmp/"sv);
+    library::get_filepath(here(), "/tmp/myfile"sv);
+    library::get_filepath(here(), "/tmp/../var/something"sv);
+    library::get_filepath(here(), "..."sv);
+  }
+  auto Filepath::test_case_2() -> void {
+    for (auto const item : generate_some_badness()) {
+      try {
+        library::get_filepath(here(), item);
+        std::cerr << "DEBUG (should have been bad and was good): --->" << item << "<---\n";
+        CPPUNIT_ASSERT(false);
+      } catch (exception::Aspect const &) {
+        CPPUNIT_ASSERT(true);
+      }
+    }
+  }
+  auto Filepath::suite() -> cppunit::Test * {
+    using namespace rigging::suite;
+    auto series = Stream{"none(...)"};
+    series << call("good", &Filepath::test_good)
+           << []{
+                auto bad = Stream{"fail"};
+                bad << call("empty", &Filepath::test_fail_empty)
+                    << call("multiple", &Filepath::test_fail_multiple)
+                    << call("badform", &Filepath::test_fail_badform)
+                    << END;
+                return move(bad);
+              }()
+           << []{
+                auto cas = Stream{"case"};
+                cas << call("1", &Filepath::test_case_1)
+                    << call("2", &Filepath::test_case_2)
+                    << END;
+                return move(cas);
+              }()
+           << END;
+    return finalize(series);
+  }
+}
+#endiv

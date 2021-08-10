@@ -1,0 +1,32 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+namespace tests::unit::payload {
+  //
+  // Here ... provide for here()
+  // Descendants only
+  //
+  // Usage:
+  //
+  //   private inheritance paired to a Fixture
+  //   Hack the Spew
+  //
+  struct Here;
+}
+#endiv
+#divert <hpp>
+class tests::unit::payload::Here {
+protected:
+  virtual ~Here() = default;
+protected:
+  static auto here() -> library::Location;
+};
+#endiv
+#divert <cpp>
+namespace tests::unit::payload {
+  auto Here::here() -> library::Location { return {std::source_location::current()}; }
+}
+#endiv

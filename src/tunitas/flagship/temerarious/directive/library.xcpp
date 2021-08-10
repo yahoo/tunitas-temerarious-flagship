@@ -4,48 +4,124 @@
 // For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
 // For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
 #divert <hpp>
-namespace tunitas::flagship::temerarious::directive {
-  //
-  // The simple directives
-  //
-  // Specification:
-  //
-  //   ."
-  //   .'
-  //   .i filename
-  //
-  auto comment(State &, Output &, Line, Payload) -> void;
-  auto uncomment(State &, Output &, Line, Payload) -> void;
-  auto include(State &, Output &, Line, Payload) -> void;
+namespace tunitas::flagship::temerarious::directive::package_directive {
+  namespace interface {
+    //
+    // The simple directives
+    //
+    // Specification:
+    //
+    //   ."
+    //   .'
+    //   .i filename
+    //
+    // Design:
+    //
+    //   Sure, why do you ask?
+    //
+    // Usage:
+    //
+    //   see parser::assess(...)
+    //
+    //
+    auto comment(State &, Output &, Location, Payload) -> void;
+    auto uncomment(State &, Output &, Location, Payload) -> void;
+    auto block(State &, Output &, Location, Payload) -> void;
+    auto define(State &, Output &, Location, Payload) -> void;
+    auto endef(State &, Output &, Location, Payload) -> void;
+    auto ifdef(State &, Output &, Location, Payload) -> void;
+    auto elifdef(State &, Output &, Location, Payload) -> void;
+    auto elsedef(State &, Output &, Location, Payload) -> void;
+    auto endif(State &, Output &, Location, Payload) -> void;
+    auto read(State &, Output &, Location, Payload) -> void;
+    auto undef(State &, Output &, Location, Payload) -> void;
+  }
+  namespace package_body_directive::body {
+    inline auto throw_not_in_a_condition_frame(Location where) -> void;
+  }
+}
+#endiv
+#divert <ipp>
+namespace tunitas::flagship::temerarious::directive::package_directive {
+  namespace package_body_directive {
+    auto body::throw_not_in_a_condition_frame(Location where) -> void {
+      throw exception::Stack{where, "not currently in a condition frame (not in a a .ifdef/.elifdef/.endif)"sv};
+    }
+  }
 }
 #endiv
 #divert <cpp>
 #import std.cerr
+namespace tunitas::flagship::temerarious::directive::package_directive {
+  auto interface::comment(State &, Output &, Location, Payload) -> void {
+    // Yes, do nothing with the commentariat
+  }
+  auto interface::uncomment(State &, Output &outbound, Location where, Payload payload) -> void {
+    // [[FIXTHIS]] so we don't have to see std::cerr
+    std::cerr << where << ": inappropriate comment character (treating it as a comment where anyway)\n";
+    // Yes, do nothing with the commentariat
+  }
+  auto interface::block(State &state, Output &, Location where, Payload payload) -> void {
+    auto identifier = get_identifier(where, payload);
+    state.push_diversion(identifier);
+  }
+  auto interface::endef(State &state, Output &, Location where, Payload payload) -> void {
+    get_none(where, payload);
+    if (state.diversions.empty()) {
+      throw exception::Stack{where, "not currently defining any variable (not in a .block)"sv};
+    }
+    state.pop_diversion();
+  }
+  auto interface::define(State &state, Output &, Location where, Payload payload) -> void {
+    auto [identifier, remaining] = get_identifier_and_more(where, payload);
+    state.define_variable(identifier, remaining);
+  }
+  auto interface::undef(State &state, Output &, Location where, Payload payload) -> void {
+    state.undefine_variable(get_identifier(where, payload));
+  }
+  auto interface::ifdef(State &state, Output &, Location where, Payload payload) -> void {
+    state.push_condition(get_identifier(where, payload));
+  }
+  auto interface::elifdef(State &state, Output &, Location where, Payload payload) -> void {
+    if (state.conditions.empty()) {
+      throw_not_in_a_condition_frame(where);
+    }
+    state.pop_condition();
+    state.push_condition(get_identifier(where, payload));
+  }
+  auto interface::elsedef(State &state, Output &, Location where, Payload payload) -> void {
+    if (state.conditions.empty()) {
+      throw_not_in_a_condition_frame(where);
+    }
+    get_none(where, payload);
+    state.pop_condition();
+    state.push_condition(true);
+  }
+  auto interface::endif(State &state, Output &, Location where, Payload payload) -> void {
+    if (state.conditions.empty()) {
+      throw_not_in_a_condition_frame(where);
+    }
+    get_none(where, payload);
+  }
+}
 #import std.copy
-#import std.filesystem.path
 #import std.ifstream
 #import std.istream_iterator
 #import std.ostream_iterator
-#import std.string_view
-#import nonstd.exception.Filesystem
-namespace tunitas::flagship::temerarious {
-  auto directive::comment(State &, Output &outbound, Line, Payload payload) -> void {
-    // Yes, do nothing with the commentariat
-  }
-  auto directive::uncomment(State &, Output &outbound, Line line, Payload payload) -> void {
-    std::cerr << line << ": inappropriate comment character (treating it as a comment line anyway)\n";
-    // Yes, do nothing with the commentariat
-  }
-  auto directive::include(State &, Output &outbound, Line, Payload payload) -> void {
-    auto filepath = path::File{payload};
-    std::ifstream inbound{filepath};
+#import std.system_category
+#import errno
+#import tunitas.flagship.temerarious.exception.Filesystem
+namespace tunitas::flagship::temerarious::directive::package_directive {
+  auto interface::read(State &, Output &outbound, Location where, Payload payload) -> void {
+    auto filepath = get_filepath(where, payload);
+    ifstream inbound{filepath};
     if (!inbound) {
-      throw nonstd::exception::Filesystem<std::string_view>{move(filepath), {errno, std::system_category()}, "open failed"};
+      throw exception::Filesystem{move(filepath), {errno, system_category()}, "open failed"sv};
     }
-    inbound.unsetf(std::ios::skipws);
-    using In = std::istream_iterator<char>;
-    using Out = std::ostream_iterator<char>;
-    std::copy(In{inbound}, In{}, Out{outbound});
+    inbound.unsetf(ios::skipws);
+    using In = istream_iterator<char>;
+    using Out = ostream_iterator<char>;
+    copy(In{inbound}, In{}, Out{outbound});
   }
 }
 #endiv

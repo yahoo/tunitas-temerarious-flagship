@@ -18,7 +18,19 @@ namespace tunitas::flagship::temerarious::exception {
   //
   // Usage:
   //
-  //   Look it up.
+  //   Look it up (and yet).
+  //
+  //   try {
+  //      ...
+  //      throw temerarious::exception::System{...somehow...};
+  //      throw nonstd::exception::System<string::View>{...somehow...};
+  //      throw nonstd::exception::System<string::Storage>{...somehow...};
+  //      ...
+  //   } catch (exception::Aspect const &) {
+  //      ...ours...
+  //   } catch (substd::exception::System const &) {
+  //      ...either one of the nonstd ones...
+  //   }
   //
   class [[nodiscard]] System;
 }

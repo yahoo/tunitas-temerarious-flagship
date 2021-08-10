@@ -1,0 +1,89 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+namespace tunitas::flagship::temerarious::stream {
+  //
+  // The Source Location
+  //
+  // Specification:
+  //
+  //   Rhymes with std::source_location
+  //   https://en.cppreference.com/w/cpp/utility/source_location
+  //
+  //   But no need for the function name.
+  //
+  //   Is noexcept.
+  //   Has a noexcept copy constructor as is required for use in an exception object.
+  //
+  // Design:
+  //
+  //   Uses a string::View
+  //   The constructor Location::Location(std::source_location) is used for testing
+  //
+  // Lifetimes:
+  //
+  //   Because the Location uses string::View, the lifetime of the storage of source must be longer than the Location.
+  //   This is trivially satisfied by recovering the Location from a nearby stream::Input by Input::input_name()
+  //
+  // Usage:
+  //
+  //   auto inbound = stream::Input{...somehow...};
+  //   auto line = stream::Line{...somehow...};
+  //
+  //   auto location = Location{line, inbound.input_name()};
+  //   cout << location << "there is a problem, right here\n";
+  //
+  struct Location;
+}
+#endiv
+#divert <hpp>
+#import tunitas.string.View
+#import tunitas.flagship.temerarious.stream.Line
+#import std.source_location
+namespace tunitas::flagship::temerarious {
+  namespace stream {
+    using std::move;
+    using std::swap;
+    inline auto swap(Location &, Location &) noexcept -> void;
+    inline auto operator<<(std::ostream &, Location const &) -> std::ostream &;
+  }
+  struct stream::Location {
+    using Line = stream::Line;
+    using Filepath = string::View; // NOT a file::Path ...too heavy
+    inline Location(Line, Filepath);
+    inline Location(std::source_location);
+    inline auto line() const noexcept -> Line;
+    inline auto filepath() const noexcept -> Filepath;
+    [[deprecated("why not consider Location::filepath()")]] inline auto file_name() const noexcept -> Filepath;
+  private:
+    Line stored_line;
+    Filepath stored_filepath;
+    friend auto stream::swap(Location &, Location &) noexcept -> void;
+  };
+}
+#endiv
+#divert <ipp>
+namespace tunitas::flagship::temerarious {
+  auto stream::swap(Location &a, Location &b) noexcept -> void {
+    swap(a.stored_line, b.stored_line);
+    swap(a.stored_filepath, b.stored_filepath);
+  }
+  auto stream::operator<<(std::ostream &o, Location const &l) -> std::ostream & { return o << l.filepath() << ':' << underlying(l.line()) << ':' << ' '; }
+  namespace stream {
+    Location::Location(std::source_location sl)
+      : stored_line{sl.line()}
+      , stored_filepath{sl.file_name()}
+    { }
+    Location::Location(Line l, Filepath f)
+      : stored_line{l}
+      , stored_filepath{f}
+    { }
+    auto Location::line() const noexcept -> Line          { return stored_line; }
+    auto Location::filepath() const noexcept -> Filepath  { return stored_filepath; }
+    auto Location::file_name() const noexcept -> Filepath { return stored_filepath; }
+  }
+}
+#endiv

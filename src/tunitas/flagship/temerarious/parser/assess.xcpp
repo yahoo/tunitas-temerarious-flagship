@@ -14,6 +14,36 @@ namespace tunitas::flagship::temerarious::parser {
 #divert <hpp>
 #import std.underlying_type
 namespace tunitas::flagship::temerarious::parser {
+  //
+  // Assess an individual line to see if it is an "ifdef" line
+  //
+  // Specification:
+  //
+  //   begins with a dot ('.')
+  //   Identify the known particles
+  //   Bind the particle processor
+  //   Identify the (trimmed) rest of the line as a view on the original line
+  //
+  //   Directive processors are responsible for parsing the rest of the line (single or multiple words, etc.)
+  //
+  // Design:
+  //
+  //   Not very general.
+  //   Not looking for speed or elegance.
+  //   But maybe simplicity.
+  //
+  // Examples:
+  //
+  //   .i ./filename                  include ./filename
+  //   ." ....blah blah blah...       comments are ignored
+  //   .' ....blah blah blah...       that is not a comment line
+  //
+  // Usage:
+  //
+  //   auto line = string::view{...somehow...};
+  //
+  //   auto assessed = assess(line)
+  //
   inline constexpr auto underlying(Assessment a) { return std::underlying_type_t<Assessment>(a); }
   inline constexpr auto ERROR = Assessed{Assessment::ERROR, {}, {}};
   inline constexpr auto PASSTHROUGH = Assessed{Assessment::PASSTHROUGH, {}, {}};
@@ -23,6 +53,8 @@ namespace tunitas::flagship::temerarious::parser {
 #divert <cpp>
 #import tunitas.flagship.temerarious.parser.trim
 #import tunitas.flagship.temerarious.directive.library
+#import std.isspace
+#import std.isalpha
 namespace tunitas::flagship::temerarious {
   auto parser::assess(View line) -> Assessed {
     auto size=line.size();
@@ -39,8 +71,11 @@ namespace tunitas::flagship::temerarious {
           // found: . (just a dot alone)
           return ERROR;
         } else {
+          //
+          // .????   (found a dot, wht is next?)
+          //
           auto const code = line.at(first++);
-          // pass &first by reference so that it can be modifed in the switch
+          // pass &first by reference so that it can be modifed by trimmed() in the if-elseif-...-else
           auto trimmed = [&first, line, size] { return trim(View{first+line.data(), size-first}); };
           auto isspace = [&first, size, line]{
                           if (first+1 < size) {
@@ -49,27 +84,44 @@ namespace tunitas::flagship::temerarious {
                             return false;
                           }
                        };
-          switch (code) {
-            namespace library = directive;
-          case '"':
+          if ('"' == code) {
             // found ."    (doesn't matter what comes next)
-            return {Assessment::DIRECTIVE, library::comment, trimmed()};
-          case '\'':
+            return {Assessment::DIRECTIVE, directive::comment, trimmed()};
+          } else if ('\'' == code) {
             // found .'    (doesn't matter what comes next)
-            return {Assessment::DIRECTIVE, library::uncomment, trimmed()};
-          case 'i':
-            // found .i    (need to valiate more)
+            return {Assessment::DIRECTIVE, directive::uncomment, trimmed()};
+          } else if (std::isalpha(code)) {
             if (isspace()) {
-              // found ".i "
-              return {Assessment::DIRECTIVE, library::include, trimmed()};
-            } else {
-              // found ".i?" for unknown ?
-              return ERROR;
+              switch (code) {
+              case 'b': // a.k.a. "block" (and push)
+                return {Assessment::DIRECTIVE, directive::define, trimmed()};
+              case 'd': // a.k.a. "define" (no push, just that line)
+                return {Assessment::DIRECTIVE, directive::define, trimmed()};
+              case 'e': // a.k.a. "endef"" (endblock)  (and pop)
+                return {Assessment::DIRECTIVE, directive::endef, trimmed()};
+              case 'f': // a.k.a. "endif"  (and pop)
+                return {Assessment::DIRECTIVE, directive::endif, trimmed()};
+              case 'i': // a.k.a. "ifdef"
+                return {Assessment::DIRECTIVE, directive::ifdef, trimmed()};
+              case 'l': // a.k.a. "elifdef"
+                return {Assessment::DIRECTIVE, directive::elifdef, trimmed()};
+              case 's': // a.k.a. "else"
+                return {Assessment::DIRECTIVE, directive::elsedef, trimmed()};
+              case 'r': // a.k.a. "read"
+                return {Assessment::DIRECTIVE, directive::read, trimmed()};
+              case 'u': // a.k.a. "undef"
+                return {Assessment::DIRECTIVE, directive::undef, trimmed()};
+              }
             }
-          default:
-            // saw .?  for unknown ?
-            return ERROR;
           }
+          //
+          // Found a dot, but the rest of the line was incomprehensible
+          // Among:
+          //   (e.g. ".ab") no space after the leading alpha
+          //   (e.g. ".1") not an alpha after the dot 
+          //   (e.g. ".z") not known single-character directive
+          //
+          return ERROR;
         }
       }
     }

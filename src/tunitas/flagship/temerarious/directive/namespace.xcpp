@@ -5,18 +5,32 @@
 // For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
 #divert <fpp>
 #import tunitas.flagship.temerarious
+namespace tunitas::flagship::temerarious::directive {
+  inline namespace package_directive {
+           namespace package_body_directive::body { }
+           inline namespace interface { using namespace package_body_directive::body; }
+  }
+}
 #import tunitas.string.View
 #import tunitas.flagship.temerarious.stream.Output
-#import tunitas.flagship.temerarious.stream.Line
+#import tunitas.flagship.temerarious.stream.Location
 #import tunitas.flagship.temerarious.processor.State
-namespace tunitas::flagship::temerarious::directive {
-  using State = processor::State;
-  using Output = stream::Output;
-  using Line = stream::Line;
-  using Payload = string::View;
-  //
-  // directive::Directive is a pointer to a directive (function) a
-  //
-  using Directive = void (*)(State &, Output &, Line, Payload);
+#import tunitas.flagship.temerarious.payload
+#import std
+namespace tunitas::flagship::temerarious::directive::package_directive {
+  namespace package_body_directive::body {
+    using State = processor::State;
+    using Output = stream::Output;
+    using Location = stream::Location;
+    using Payload = string::View;
+    using namespace payload;
+    using namespace std;
+  }
 }
+#endiv
+#divert <hpp>
+// Every directive will need something one or more of the payload parsers
+#import tunitas.flagship.temerarious.payloads
+#import tunitas.flagship.temerarious.exception.Stack
+#import tunitas.flagship.temerarious.exception.Payload
 #endiv

@@ -1,0 +1,46 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+namespace tunitas::flagship::temerarious::exception {
+  //
+  // Something is empty.
+  //
+  // Specification:
+  //
+  //   This indicates a programmer error because it could have been checked previously
+  //   This is NOT an exceptional condition with the input data.
+  //   https://en.cppreference.com/w/cpp/error/invalid_argument
+  //
+  // Design:
+  //
+  //   from the Non-Standard Library 
+  //
+  // Usage:
+  //
+  //   Look it up (and yet).
+  //
+  //   try {
+  //      ...
+  //      throw temerarious::exception::Empty{};
+  //      throw temerarious::exception::Empty{...somehow...};
+  //      ...
+  //   } catch (exception::Aspect const &) {
+  //      ...ours...
+  //   } catch (substd::exception::Invalid const &) {
+  //      ...either one of the nonstd ones (not shown)...
+  //   }
+  //
+  class [[nodiscard]] Empty;
+}
+#endiv
+#divert <hpp>
+#import tunitas.flagship.temerarious.exception.partial.Invalid
+class tunitas::flagship::temerarious::exception::Empty : public partial::Invalid {
+  using Ancestor = partial::Invalid;
+public:
+  using Ancestor::Invalid;
+};
+#endiv

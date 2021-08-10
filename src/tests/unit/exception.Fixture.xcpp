@@ -5,27 +5,43 @@
 // For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
 #divert <fpp>
 #import tunitas.flagship.temerarious.exception
+#import tunitas.flagship.temerarious.stream
 namespace tests::unit::exception {
   namespace [[eponymous]] fixture {
     struct Fixture;
     namespace library = ::tunitas::flagship::temerarious::exception;
+    namespace stream = ::tunitas::flagship::temerarious::stream;
   }
   using fixture::Fixture;
 }
 #endiv
 #divert <hpp>
+#import tunitas.flagship.temerarious.exception.Empty
+#import tunitas.flagship.temerarious.exception.Null
+#import tunitas.flagship.temerarious.exception.Payload
+#import tunitas.flagship.temerarious.exception.Stack
 #import tunitas.flagship.temerarious.exception.System
 #import tunitas.flagship.temerarious.exception.Filesystem
+#import tunitas.flagship.temerarious.stream.Location
 namespace tests::unit::exception {
   struct fixture::Fixture : public cppunit::test::Fixture {
+    auto test_Empty() -> void;
+    auto test_Null() -> void;
+    auto test_Payload() -> void;
+    auto test_Stack() -> void;
     auto test_System() -> void;
     auto test_Filesystem() -> void;
     template<typename EXCETPION> auto test_Aspect() -> void;
     static auto suite() -> cppunit::Test *;
   protected:
     template<typename EXCEPTION> static auto generate() -> EXCEPTION;
+    static auto here() -> stream::Location;
   };
   namespace fixture {
+    template<> auto Fixture::generate<library::Empty>() -> library::Empty;
+    template<> auto Fixture::generate<library::Null>() -> library::Null;
+    template<> auto Fixture::generate<library::Payload>() -> library::Payload;
+    template<> auto Fixture::generate<library::Stack>() -> library::Stack;
     template<> auto Fixture::generate<library::System>() -> library::System;
     template<> auto Fixture::generate<library::Filesystem>() -> library::Filesystem;
   }
@@ -43,36 +59,78 @@ namespace tests::unit::exception::fixture {
 }
 #endiv
 #divert <cpp>
+#import std.filesystem.path
+#import std.error_code
+#import std.source_location
 namespace tests::unit::exception::fixture {
+  auto Fixture::here() -> stream::Location { return {std::source_location::current()}; }
+  template<> auto Fixture::generate<library::Empty>() -> library::Empty {
+    auto reason = "the cistern is empty on a Saturday night"sv;
+    return library::Empty{reason};
+  }
+  template<> auto Fixture::generate<library::Null>() -> library::Null {
+    auto reason = "null and void (how can it be both?)"sv;
+    return library::Null{reason};
+  }
+  template<> auto Fixture::generate<library::Payload>() -> library::Payload {
+    auto reason = "cause never was the reason for the evening"sv;
+    return library::Payload{move(here()), reason};
+  }
+  template<> auto Fixture::generate<library::Stack>() -> library::Stack {
+    auto reason = "cause never was the reason for the evening"sv;
+    return library::Stack{move(here()), reason};
+  }
   template<> auto Fixture::generate<library::System>() -> library::System {
     auto ec = std::error_code{};
-    auto reason = "cause never was the reason"sv;
+    auto reason = "or the Tropic of Sir Galahad"sv;
     return library::System{move(ec), reason};
   }
   template<> auto Fixture::generate<library::Filesystem>() -> library::Filesystem {
     auto fp = std::filesystem::path{"/tmp"};
     auto ec = std::error_code{};
-    auto reason = "cause never was the reason"sv;
+    auto reason = "Oz never did give nothing to the Tin Man"sv;
     return library::Filesystem{std::move(fp), move(ec), reason};
+  }
+  auto Fixture::test_Empty() -> void {
+    using Subject = library::Empty;
+    auto subject = Subject{"I tell you we got Trouble, with a capital T"sv};
+    CPPUNIT_ASSERT(nullptr != subject.what());
+  }
+  auto Fixture::test_Payload() -> void {
+    using Subject = library::Payload;
+    auto subject = Subject{here(), "idle hands are the Devil's Workshop"sv};
+    CPPUNIT_ASSERT(nullptr != subject.what());
+  }
+  auto Fixture::test_Stack() -> void {
+    using Subject = library::Stack;
+    auto subject = Subject{here(), "stack them over there"sv};
+    CPPUNIT_ASSERT(nullptr != subject.what());
   }
   auto Fixture::test_System() -> void {
     using Subject = library::System;
-    auto subject = Subject{std::error_code{}, "cause never was the reason"sv};
+    auto subject = Subject{std::error_code{}, "cause never was the reason for the evening"sv};
     CPPUNIT_ASSERT(nullptr != subject.what());
   }
   auto Fixture::test_Filesystem() -> void {
     using Subject = library::Filesystem;
-    auto subject = Subject{std::error_code{}, "cause never was the reason"sv};
+    auto subject = Subject{std::error_code{}, "Or the Tropic of Sir Galahad"sv};
     CPPUNIT_ASSERT(nullptr != subject.what());
   }
   auto Fixture::suite() -> cppunit::Test * {
     using namespace rigging::suite;
     auto series = Stream{"exception"};
-    series << call("System", &Fixture::test_System)
+    series << call("Empty", &Fixture::test_Empty)
+           << call("Payload", &Fixture::test_Payload)
+           << call("Stack", &Fixture::test_Stack)
+           << call("System", &Fixture::test_System)
            << call("Filesystem", &Fixture::test_Filesystem)
            << []{
                 auto asp = Stream{"Aspect"};
-                asp << call("System", &Fixture::test_Aspect<library::System>)
+                asp << call("Empty", &Fixture::test_Aspect<library::Empty>)
+                    << call("Null", &Fixture::test_Aspect<library::Null>)
+                    << call("Payload", &Fixture::test_Aspect<library::Payload>)
+                    << call("Stack", &Fixture::test_Aspect<library::Stack>)
+                    << call("System", &Fixture::test_Aspect<library::System>)
                     << call("Filesystem", &Fixture::test_Aspect<library::Filesystem>)
                     << END;
                 return move(asp);
