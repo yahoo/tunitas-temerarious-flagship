@@ -16,7 +16,7 @@ namespace tunitas::flagship::temerarious::exception::partial {
   //   Constructed with a single reason, following exception::Runtime
   //   i.e. https://en.cppreference.com/w/cpp/error/runtime_error
   //
-  //   Has a stream::Location that originated from a nearby stream::Input
+  //   Has a source::Location that (is expected to have) originated from a nearby stream::Input
   //
   // Design:
   //
@@ -47,7 +47,6 @@ namespace tunitas::flagship::temerarious::exception::partial {
 #import tunitas.exception.Aspect
 #import tunitas.flagship.temerarious.exception.Aspect
 #import tunitas.flagship.temerarious.exception.feature.Where
-#import tunitas.flagship.temerarious.stream.Location
 #import tunitas.string.View
 #import nonstd.exception.Runtime
 namespace tunitas::flagship::temerarious::exception {
@@ -73,7 +72,7 @@ namespace tunitas::flagship::temerarious::exception {
 namespace tunitas::flagship::temerarious::exception::partial {
   Processing::Processing(Location where, string::View reason)
     : Ancestors::Exception{reason}
-        , Ancestors::Where{where}
+    , Ancestors::Where{where}
   { }
 }
 #endiv

@@ -8,25 +8,14 @@ namespace tests::unit::stream { struct Fixture; }
 #endiv
 #divert <hpp>
 struct tests::unit::stream::Fixture : public cppunit::test::Fixture {
-  auto tests_Location() -> void;
-  //
   static auto suite() -> cppunit::Test *;
 };
 #endiv
 #divert <cpp>
 #import tests.unit.stream.input.Fixture
 #import tests.unit.stream.output.Fixture
-#import tunitas.flagship.temerarious.stream.Location
+#import tunitas.flagship.temerarious.source.Location
 namespace tests::unit::stream {
-  auto Fixture::tests_Location() -> void {
-    using Subject = library::Location;
-    auto subject = Subject{library::Line{33}, "somefile.roff"sv};
-    auto l = subject.line();
-    auto fp = subject.filepath();
-    auto fn = subject.file_name();
-    CPPUNIT_ASSERT(33 == underlying(l));
-    CPPUNIT_ASSERT(fp == fn);
-  }
   auto Fixture::suite() -> cppunit::Test * {
     using namespace rigging::suite;
     auto series = Stream{"stream"};

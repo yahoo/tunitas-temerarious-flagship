@@ -4,7 +4,7 @@
 // For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
 // For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
 #divert <fpp>
-namespace tunitas::flagship::temerarious::stream {
+namespace tunitas::flagship::temerarious::source {
   //
   // The Source Location
   //
@@ -20,7 +20,10 @@ namespace tunitas::flagship::temerarious::stream {
   //
   // Design:
   //
-  //   Uses a string::View
+  //   Unlike std::source_location.
+  //   (1) Provides its own storage,  
+  //   (2) Creatable by the programmer (not the compiler)
+  //
   //   The constructor Location::Location(std::source_location) is used for testing
   //
   // Lifetimes:
@@ -41,17 +44,17 @@ namespace tunitas::flagship::temerarious::stream {
 #endiv
 #divert <hpp>
 #import tunitas.string.View
-#import tunitas.flagship.temerarious.stream.Line
+#import tunitas.flagship.temerarious.source.Line
 #import std.source_location
 namespace tunitas::flagship::temerarious {
-  namespace stream {
+  namespace source {
     using std::move;
     using std::swap;
     inline auto swap(Location &, Location &) noexcept -> void;
     inline auto operator<<(std::ostream &, Location const &) -> std::ostream &;
   }
-  struct stream::Location {
-    using Line = stream::Line;
+  struct source::Location {
+    using Line = source::Line;
     using Filepath = string::View; // NOT a file::Path ...too heavy
     inline Location(Line, Filepath);
     inline Location(std::source_location);
@@ -61,18 +64,18 @@ namespace tunitas::flagship::temerarious {
   private:
     Line stored_line;
     Filepath stored_filepath;
-    friend auto stream::swap(Location &, Location &) noexcept -> void;
+    friend auto source::swap(Location &, Location &) noexcept -> void;
   };
 }
 #endiv
 #divert <ipp>
 namespace tunitas::flagship::temerarious {
-  auto stream::swap(Location &a, Location &b) noexcept -> void {
+  auto source::swap(Location &a, Location &b) noexcept -> void {
     swap(a.stored_line, b.stored_line);
     swap(a.stored_filepath, b.stored_filepath);
   }
-  auto stream::operator<<(std::ostream &o, Location const &l) -> std::ostream & { return o << l.filepath() << ':' << underlying(l.line()) << ':' << ' '; }
-  namespace stream {
+  auto source::operator<<(std::ostream &o, Location const &l) -> std::ostream & { return o << l.filepath() << ':' << underlying(l.line()) << ':' << ' '; }
+  namespace source {
     Location::Location(std::source_location sl)
       : stored_line{sl.line()}
       , stored_filepath{sl.file_name()}

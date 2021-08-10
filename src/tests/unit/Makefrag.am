@@ -29,6 +29,7 @@ check_bin_unit_SOURCES = \
   $(obj_src_tests_unit_parser_SUBSOURCES) \
   $(obj_src_tests_unit_payload_SUBSOURCES) \
   $(obj_src_tests_unit_processor_SUBSOURCES) \
+  $(obj_src_tests_unit_source_SUBSOURCES) \
   $(obj_src_tests_unit_stream_SUBSOURCES) \
   obj/src/tests/unit/variable.Fixture.cpp \
   $(end)
@@ -37,6 +38,7 @@ include src/tests/unit/error/Makefrag.am
 include src/tests/unit/parser/Makefrag.am
 include src/tests/unit/payload/Makefrag.am
 include src/tests/unit/processor/Makefrag.am
+include src/tests/unit/source/Makefrag.am
 include src/tests/unit/stream/Makefrag.am
 #
 $(scold_cxxdir)/tests/unit/dependencies.mk: $(check_bin_unit_SOURCES)

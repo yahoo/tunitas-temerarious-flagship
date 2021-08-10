@@ -13,7 +13,7 @@ namespace tunitas::flagship::temerarious::directive {
 }
 #import tunitas.string.View
 #import tunitas.flagship.temerarious.stream.Output
-#import tunitas.flagship.temerarious.stream.Location
+#import tunitas.flagship.temerarious.source.Location
 #import tunitas.flagship.temerarious.processor.State
 #import tunitas.flagship.temerarious.payload
 #import std
@@ -21,7 +21,7 @@ namespace tunitas::flagship::temerarious::directive::package_directive {
   namespace package_body_directive::body {
     using State = processor::State;
     using Output = stream::Output;
-    using Location = stream::Location;
+    using Location = source::Location;
     using Payload = string::View;
     using namespace payload;
     using namespace std;

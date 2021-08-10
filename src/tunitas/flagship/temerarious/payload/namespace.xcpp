@@ -12,13 +12,13 @@ namespace tunitas::flagship::temerarious::payload {
 }
 #import std
 #import tunitas.flagship.temerarious
-#import tunitas.flagship.temerarious.stream.Location
+#import tunitas.flagship.temerarious.source.Location
 #import tunitas.string.View
 #import tunitas.Tuple
 namespace tunitas::flagship::temerarious::payload {
   namespace package_payload::package_body_payload::body {
     using namespace std;
-    using Location = stream::Location;
+    using Location = source::Location;
     using Payload = string::View;
   }
 }

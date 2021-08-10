@@ -5,12 +5,12 @@
 // For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
 #divert <fpp>
 #import tunitas.flagship.temerarious.exception
-#import tunitas.flagship.temerarious.stream
+#import tunitas.flagship.temerarious.source
 namespace tests::unit::exception {
   namespace [[eponymous]] fixture {
     struct Fixture;
     namespace library = ::tunitas::flagship::temerarious::exception;
-    namespace stream = ::tunitas::flagship::temerarious::stream;
+    namespace source = ::tunitas::flagship::temerarious::source;
   }
   using fixture::Fixture;
 }
@@ -22,7 +22,7 @@ namespace tests::unit::exception {
 #import tunitas.flagship.temerarious.exception.Stack
 #import tunitas.flagship.temerarious.exception.System
 #import tunitas.flagship.temerarious.exception.Filesystem
-#import tunitas.flagship.temerarious.stream.Location
+#import tunitas.flagship.temerarious.source.Location
 namespace tests::unit::exception {
   struct fixture::Fixture : public cppunit::test::Fixture {
     auto test_Empty() -> void;
@@ -35,7 +35,7 @@ namespace tests::unit::exception {
     static auto suite() -> cppunit::Test *;
   protected:
     template<typename EXCEPTION> static auto generate() -> EXCEPTION;
-    static auto here() -> stream::Location;
+    static auto here() -> source::Location;
   };
   namespace fixture {
     template<> auto Fixture::generate<library::Empty>() -> library::Empty;
@@ -63,7 +63,7 @@ namespace tests::unit::exception::fixture {
 #import std.error_code
 #import std.source_location
 namespace tests::unit::exception::fixture {
-  auto Fixture::here() -> stream::Location { return {std::source_location::current()}; }
+  auto Fixture::here() -> source::Location { return {std::source_location::current()}; }
   template<> auto Fixture::generate<library::Empty>() -> library::Empty {
     auto reason = "the cistern is empty on a Saturday night"sv;
     return library::Empty{reason};

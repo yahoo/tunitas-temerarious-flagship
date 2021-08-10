@@ -50,7 +50,7 @@ static_assert(sizeof (std::is_error_code_enum<tunitas::flagship::temerarious::er
 static_assert(std::is_error_code_enum<tunitas::flagship::temerarious::error::code::Companion>::value);
 #import tunitas.flagship.temerarious.parser.assess
 #import tunitas.flagship.temerarious.processor.State
-#import tunitas.flagship.temerarious.stream.Line
+#import tunitas.flagship.temerarious.source.Line
 #import nonstd.exception.Unreachable
 #import tunitas.flagship.temerarious.exception // cascade namespace exception
 #import langu.age.braket
@@ -62,7 +62,7 @@ namespace tunitas::flagship::temerarious::processor::package_run {
     inbound.unsetf(std::ios::skipws);
     auto erroneous = Success{SUCCESS};
     auto buffer = string::Storage{};
-    for (stream::Line line{1u}; getline(inbound, buffer); ++line) {
+    for (source::Line line{1u}; getline(inbound, buffer); ++line) {
       if (auto [directive, process, rest]=assess(buffer); Assessment::IGNORE == directive) {
       } else if (Assessment::DIRECTIVE == directive) {
         try {

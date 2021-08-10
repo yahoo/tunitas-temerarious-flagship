@@ -11,7 +11,7 @@ namespace tunitas::flagship::temerarious::exception::feature {
   //
   // Specification:
   //
-  //   Provides this->where() const -> stream::Location
+  //   Provides this->where() const -> source::Location
   //   Vaguely rhynes with feature::What() that supplies implementation of the virtual this->what()
   //
   // Design:
@@ -31,14 +31,14 @@ namespace tunitas::flagship::temerarious::exception::feature {
 }
 #endiv
 #divert <hpp>
-#import tunitas.flagship.temerarious.stream.Location
+#import tunitas.flagship.temerarious.source.Location
 struct tunitas::flagship::temerarious::exception::feature::Where {
-  using Location = stream::Location;
+  using Location = source::Location;
   inline auto where() const noexcept -> Location;
 protected:
   virtual ~Where() = default;
   inline explicit Where(Location);
-  stream::Location stored_location;
+  Location stored_location;
 };
 #endiv
 #divert <ipp>

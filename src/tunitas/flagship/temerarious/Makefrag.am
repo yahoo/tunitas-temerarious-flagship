@@ -24,6 +24,7 @@ lib_libtunitas_flagship_temerarious_la_SOURCES = \
   $(obj_src_tunitas_flagship_temerarious_payload_SUBSOURCES) \
   $(obj_src_tunitas_flagship_temerarious_processor_SUBSOURCES) \
   $(obj_src_tunitas_flagship_temerarious_required_SUBSOURCES) \
+  $(obj_src_tunitas_flagship_temerarious_source_SUBSOURCES) \
   $(obj_src_tunitas_flagship_temerarious_stream_SUBSOURCES) \
   $(obj_src_tunitas_flagship_temerarious_variable_SUBSOURCES) \
   $(end)
@@ -36,6 +37,7 @@ include src/tunitas/flagship/temerarious/parser/Makefrag.am
 include src/tunitas/flagship/temerarious/payload/Makefrag.am
 include src/tunitas/flagship/temerarious/processor/Makefrag.am
 include src/tunitas/flagship/temerarious/required/Makefrag.am
+include src/tunitas/flagship/temerarious/source/Makefrag.am
 include src/tunitas/flagship/temerarious/stream/Makefrag.am
 include src/tunitas/flagship/temerarious/variable/Makefrag.am
 #

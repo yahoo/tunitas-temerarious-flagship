@@ -1,0 +1,63 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+namespace tests::unit::source { struct Fixture; }
+#endiv
+#divert <hpp>
+struct tests::unit::source::Fixture : public cppunit::test::Fixture {
+  auto test_Line() -> void;
+  auto test_Location() -> void;
+  //
+  static auto suite() -> cppunit::Test *;
+};
+#endiv
+#divert <cpp>
+#import std.ostringstream
+#import tests.unit.source.Location
+#import tests.unit.source.Line
+#import tunitas.flagship.temerarious.source.Line
+#import tunitas.flagship.temerarious.source.Location
+namespace tests::unit::source {
+  auto Fixture::test_Line() -> void {
+    using Subject = library::Line;
+    auto l0 = Subject{0};
+    auto l1 = Subject{1};
+    auto l99 = Subject{99};
+    l0++;
+    CPPUNIT_ASSERT(1 == underlying(l0));
+    auto buf = std::ostringstream{};
+    buf << l0 << "something\n"
+        << l1 << "something else\n"
+        << l99 << "Dark Side!\n";
+    CPPUNIT_ASSERT(!buf.str().empty());
+  }
+
+  auto Fixture::test_Location() -> void {
+    using Subject = library::Location;
+    auto subject = Subject{library::Line{33}, "somefile.roff"sv};
+    auto l = subject.line();
+    auto fp = subject.filepath();
+    auto fn = subject.file_name();
+    CPPUNIT_ASSERT(33 == underlying(l));
+    CPPUNIT_ASSERT(fp == fn);
+  }
+  auto Fixture::suite() -> cppunit::Test * {
+    using namespace rigging::suite;
+    auto series = Stream{"source"};
+    series << []{
+                auto use = Stream{"usage"};
+                use << call("Location", &Fixture::test_Location)
+                    << call("Line", &Fixture::test_Line)
+                    << END;
+                return move(use);
+              }()
+           << add<Line>()
+           << add<Location>()
+           << END;
+    return finalize(series);
+  }
+}
+#endiv

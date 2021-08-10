@@ -4,6 +4,9 @@
 // For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
 // For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
 #divert <fpp>
-#import tunitas.flagship.temerarious
-namespace tunitas::flagship::temerarious::stream { }
+#import tests.unit
+#import tunitas.flagship.temerarious.source
+namespace tests::unit::source {
+  namespace library = ::tunitas::flagship::temerarious::source;
+}
 #endiv

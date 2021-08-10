@@ -8,4 +8,15 @@
 namespace tunitas::flagship::temerarious {
   enum class CONFIG { }; // for use with autotools::autoconf::Config<CONFIG>
 }
+// Traditional
+#import std.is_copy_constructible
+#import std.is_copy_assignable
+#import std.is_move_constructible
+#import std.is_move_assignable
+// Modern
+#import nonstd.required.Default_Constructible
+#import nonstd.required.Copy_Assignable
+#import nonstd.required.Copy_Constructible
+#import nonstd.required.Move_Assignable
+#import nonstd.required.Move_Constructible
 #endiv
