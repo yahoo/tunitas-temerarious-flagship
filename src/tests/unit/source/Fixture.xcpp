@@ -9,6 +9,7 @@ namespace tests::unit::source { struct Fixture; }
 #divert <hpp>
 struct tests::unit::source::Fixture : public cppunit::test::Fixture {
   auto test_Line() -> void;
+  auto test_Name() -> void;
   auto test_Location() -> void;
   //
   static auto suite() -> cppunit::Test *;
@@ -16,6 +17,7 @@ struct tests::unit::source::Fixture : public cppunit::test::Fixture {
 #endiv
 #divert <cpp>
 #import std.ostringstream
+#import tests.unit.source.Name
 #import tests.unit.source.Location
 #import tests.unit.source.Line
 #import tunitas.flagship.temerarious.source.Line
@@ -34,7 +36,13 @@ namespace tests::unit::source {
         << l99 << "Dark Side!\n";
     CPPUNIT_ASSERT(!buf.str().empty());
   }
-
+  auto Fixture::test_Name() -> void {
+    using Subject = library::Name;
+    auto subject = Subject{"somefile.roff"sv};
+    auto fp = subject.filepath();
+    auto fn = subject.file_name();
+    CPPUNIT_ASSERT(fp == fn);
+  }
   auto Fixture::test_Location() -> void {
     using Subject = library::Location;
     auto subject = Subject{library::Line{33}, "somefile.roff"sv};
@@ -50,11 +58,13 @@ namespace tests::unit::source {
     series << []{
                 auto use = Stream{"usage"};
                 use << call("Location", &Fixture::test_Location)
+                    << call("Name", &Fixture::test_Name)
                     << call("Line", &Fixture::test_Line)
                     << END;
                 return move(use);
               }()
            << add<Line>()
+           << add<Name>()
            << add<Location>()
            << END;
     return finalize(series);

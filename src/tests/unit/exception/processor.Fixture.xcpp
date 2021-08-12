@@ -1,0 +1,103 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+#import tunitas.flagship.temerarious.processor.exception
+namespace tests::unit::exception::processor {
+  namespace [[eponymous]] fixture {
+    struct Fixture;
+    namespace library = ::tunitas::flagship::temerarious::processor::exception;
+  }
+  using fixture::Fixture;
+}
+#endiv
+#divert <hpp>
+#import tunitas.flagship.temerarious.processor.exception.Condition
+#import tunitas.flagship.temerarious.processor.exception.Diversion
+#import tunitas.flagship.temerarious.processor.exception.Input
+namespace tests::unit::exception::processor {
+  struct fixture::Fixture : public cppunit::test::Fixture {
+    template<typename EXCETPION> auto test_constructor_reason() -> void;
+    template<typename EXCETPION> auto test_Aspect() -> void;
+    static auto suite() -> cppunit::Test *;
+  protected:
+    template<typename EXCEPTION> static auto generate() -> EXCEPTION;
+  };
+  namespace fixture {
+    template<> auto Fixture::generate<library::Condition>() -> library::Condition;
+    template<> auto Fixture::generate<library::Diversion>() -> library::Diversion;
+    template<> auto Fixture::generate<library::Input>() -> library::Input;
+  }
+}
+#endiv
+#divert <tpp>
+#import tunitas.flagship.temerarious.exception.Aspect
+#import tunitas.flagship.temerarious.processor.exception.Aspect
+#import tunitas.exception.Aspect
+// not until v2 #import substd.exception.Exception
+#import nonstd.exception.Exception
+#import nonstd.same_as
+namespace tests::unit::exception::processor::fixture {
+  template<typename EXCEPTION> auto Fixture::test_constructor_reason() -> void {
+    using Subject = EXCEPTION;
+    auto subject = Subject{"And 'cause never was the reason for the evening,"
+                           " or the Tropic of Sir Galahad;"
+                           " and Oz never did give nothing to the Tin Man that he didn't already have"sv};
+    CPPUNIT_ASSERT(nullptr != subject.what());
+  }
+  template<typename EXCEPTION> auto Fixture::test_Aspect() -> void try {
+    // Prove that these exceptions are throwable and that they are catchable with a library::Aspect
+    auto copied = generate<EXCEPTION>();
+    throw copied; // <---------------------------------------- prove the copy constructor
+  } catch (library::Aspect const &) {
+    CPPUNIT_ASSERT(true);
+  } catch (::tunitas::flagship::temerarious::exception::Aspect const &) {
+    CPPUNIT_ASSERT(false);
+  } catch (::tunitas::exception::Aspect const &) {
+    CPPUNIT_ASSERT(false);
+#if 0
+  } catch (substd::exception::Exception const &) {
+#else
+  } catch (nonstd::exception::Exception const &) {
+    static_assert(nonstd::same_as<nonstd::exception::Exception, std::exception>);
+#endif
+    CPPUNIT_ASSERT(false);
+  }
+}
+#endiv
+#divert <cpp>
+namespace tests::unit::exception::processor::fixture {
+  template<> auto Fixture::generate<library::Condition>() -> library::Condition {
+    auto reason = "in what universe do you think that might be true?"sv;
+    return library::Condition{reason};
+  }
+  template<> auto Fixture::generate<library::Diversion>() -> library::Diversion {
+    auto reason = "I have always wanted to direct and have a hyphenated resume: singer-songwriter-actor-director-poet-novelist-gamer-game_devrelelops-AUTEUR"sv;
+    return library::Diversion{reason};
+  }
+  template<> auto Fixture::generate<library::Input>() -> library::Input {
+    auto reason = ("we will solicit the input, listen to the feedback and proceed only after careful consideration"
+                   "  (but then ... do what we were told by The Voices)"sv);
+    return library::Input{reason};
+  }
+  auto Fixture::suite() -> cppunit::Test * {
+    using namespace rigging::suite;
+    auto series = Stream{"processor"};
+    series << call("Condition", &Fixture::test_constructor_reason<library::Condition>)
+           << call("Diversion", &Fixture::test_constructor_reason<library::Diversion>)
+           << call("Input", &Fixture::test_constructor_reason<library::Input>)
+           << []{
+                auto asp = Stream{"Aspect"};
+                asp << call("Condition", &Fixture::test_Aspect<library::Condition>)
+                    << call("Diversion", &Fixture::test_Aspect<library::Diversion>)
+                    << call("Input", &Fixture::test_Aspect<library::Input>)
+                    << END;
+                return move(asp);
+              }()
+           << END;
+    return finalize(series);
+  }
+}
+#endiv

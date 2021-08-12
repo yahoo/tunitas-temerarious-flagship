@@ -17,22 +17,10 @@ namespace tests::unit::variable {
 #endiv
 #divert <hpp>
 struct tests::unit::variable::Fixture : public cppunit::test::Fixture {
-  template<typename SUBJECT> auto test_Definition() -> void;
   auto test_Frame() -> void;
   auto test_Stack() -> void;
   static auto suite() -> cppunit::Test *;
 };
-#endiv
-#divert <tpp>
-#import tunitas.flagship.temerarious.variable.Definition
-namespace tests::unit::variable {
-  template<typename SUBJECT> auto Fixture::test_Definition() -> void {
-    using Subject = SUBJECT; // e.g. library::Definition<string::Storage>;
-    auto subject = Subject{};
-    CPPUNIT_ASSERT(0 == subject.define.size());
-    CPPUNIT_ASSERT(0 == subject.value.size());
-  }
-}
 #endiv
 #divert <cpp>
 #import tunitas.flagship.temerarious.variable.Frame
@@ -51,14 +39,7 @@ namespace tests::unit::variable {
   auto Fixture::suite() -> cppunit::Test * {
     using namespace rigging::suite;
     auto series = Stream{"variable"};
-    series << []{
-                auto def = Stream{"Definition"};
-                def << call("string::Storage", &Fixture::test_Definition<library::Definition<string::Storage>>)
-                    << call("string::View", &Fixture::test_Definition<library::Definition<string::View>>)
-                    << END;
-                return move(def);
-              }()
-           << call("Frame", &Fixture::test_Frame)
+    series << call("Frame", &Fixture::test_Frame)
            << call("Stack", &Fixture::test_Stack)
            << END;
     return finalize(series);

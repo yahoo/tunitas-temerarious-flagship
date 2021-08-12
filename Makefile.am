@@ -61,7 +61,7 @@ noinst_LTLIBRARIES = \
   $(lib_libapp_tf_la) \
   $(end)
 check_PROGRAMS = $(check_bin_unit) $(check_bin_tf) $(check_bin_roff)
-check_LTLIBRARIES = 
+check_LTLIBRARIES = $(none)
 
 # NEED THIS or else...
 # SHOULD already be supplied in .../am/build.am

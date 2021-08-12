@@ -6,49 +6,20 @@
 #divert <fpp>
 namespace tunitas::flagship::temerarious::exception {
   //
-  // A file system exception, from The Temerarious Flagship.
+  // A filesystem exception, from The Temerarious Flagship
   //
-  // Specification:
+  // Semantic: a complete filessystem exception.
   //
-  //   https://en.cppreference.com/w/cpp/filesystem/filesystem_error
-  //
-  // Design:
-  //
-  //   from the Non-Standard Library 
-  //
-  // Usage:
-  //
-  //   Look it up (and yet).
-  //
-  //   try {
-  //      ...
-  //      throw temerarious::exception::Filesystem{...somehow...};
-  //      throw nonstd::exception::Filesystem<string::View>{...somehow...};
-  //      throw nonstd::exception::Filesystem<string::Storage>{...somehow...};
-  //      ...
-  //   } catch (exception::Aspect const &) {
-  //      ...ours...
-  //   } catch (substd::exception::Filesystem const &) {
-  //      ...either one of the nonstd ones...
-  //   }
+  // See partial::Filesystem
   //
   class [[nodiscard]] Filesystem;
 }
 #endiv
 #divert <hpp>
-#import tunitas.exception.Aspect
-#import tunitas.flagship.temerarious.exception.Aspect
-#import tunitas.string.View
-#import nonstd.exception.Filesystem
-class tunitas::flagship::temerarious::exception::Filesystem : public virtual Aspect,
-                                                              public virtual tunitas::exception::Aspect,
-                                                              public nonstd::exception::Filesystem<string::View> {
-  struct Ancestors {
-    struct Aspects { /* ... who cares... */ };
-    using Exception = nonstd::exception::Filesystem<string::View>;
-  };
+#import tunitas.flagship.temerarious.exception.partial.Filesystem
+class tunitas::flagship::temerarious::exception::Filesystem final : public partial::Filesystem {
+  using Ancestor = partial::Filesystem;
 public:
-  using Ancestors::Exception::View; // you "just have to know..." that the constructor is named View
-  auto what() const noexcept -> char const * override { return Ancestors::Exception::what(); }
+  using Ancestor::Filesystem;
 };
 #endiv

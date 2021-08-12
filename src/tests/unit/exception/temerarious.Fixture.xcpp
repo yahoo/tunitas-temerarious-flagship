@@ -1,0 +1,139 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+#import tunitas.flagship.temerarious.exception
+namespace tests::unit::exception::temerarious {
+  namespace [[eponymous]] fixture {
+    struct Fixture;
+    namespace library = ::tunitas::flagship::temerarious::exception;
+  }
+  using fixture::Fixture;
+}
+#endiv
+#divert <hpp>
+#import tunitas.flagship.temerarious.exception.Empty
+#import tunitas.flagship.temerarious.exception.Null
+#import tunitas.flagship.temerarious.exception.Invalid
+#import tunitas.flagship.temerarious.exception.Runtime
+#import tunitas.flagship.temerarious.exception.System
+#import tunitas.flagship.temerarious.exception.Filesystem
+namespace tests::unit::exception::temerarious {
+  struct fixture::Fixture : public cppunit::test::Fixture {
+    auto test_System() -> void;
+    auto test_Filesystem() -> void;
+    template<typename EXCEPTION> auto test_reason() -> void;
+    template<typename EXCEPTION> auto test_Aspect() -> void;
+    static auto suite() -> cppunit::Test *;
+  protected:
+    template<typename EXCEPTION> static auto generate() -> EXCEPTION;
+  };
+  namespace fixture {
+    template<> auto Fixture::generate<library::Empty>() -> library::Empty;
+    template<> auto Fixture::generate<library::Null>() -> library::Null;
+    template<> auto Fixture::generate<library::Invalid>() -> library::Invalid;
+    template<> auto Fixture::generate<library::Runtime>() -> library::Runtime;
+    template<> auto Fixture::generate<library::System>() -> library::System;
+    template<> auto Fixture::generate<library::Filesystem>() -> library::Filesystem;
+  }
+}
+#endiv
+#divert <tpp>
+#import tunitas.flagship.temerarious.exception.Aspect
+#import tunitas.exception.Aspect
+// not until v2 ... #import substd.exception.Exception
+#import nonstd.exception.Exception
+#import nonstd.same_as
+namespace tests::unit::exception::temerarious::fixture {
+  template<typename EXCEPTION> auto Fixture::test_reason() -> void {
+    using Subject = EXCEPTION;
+    auto subject = Subject{"I tell you we got Trouble, with a capital 'T', which rhymes with 'P' and that spells Pool!"sv};
+    CPPUNIT_ASSERT(nullptr != subject.what());
+  }
+  template<typename EXCEPTION> auto Fixture::test_Aspect() -> void try {
+    // Prove that these exceptions are throwable and that they are catchable with a library::Aspect
+    auto copied = generate<EXCEPTION>();
+    throw copied; // <------------------------------------------- prove the copy constructor
+  } catch (library::Aspect const &) {
+    CPPUNIT_ASSERT(true);
+  } catch (::tunitas::exception::Aspect const &) {
+    CPPUNIT_ASSERT(false);
+#if 0
+  } catch (substd::exception::Exception const &) {
+#else
+  } catch (nonstd::exception::Exception const &) {
+    static_assert(nonstd::same_as<nonstd::exception::Exception, std::exception>);
+#endif
+    CPPUNIT_ASSERT(false);
+  }
+}
+#endiv
+#divert <cpp>
+#import std.filesystem.path
+#import std.error_code
+#import std.source_location
+namespace tests::unit::exception::temerarious::fixture {
+  template<> auto Fixture::generate<library::Empty>() -> library::Empty {
+    auto reason = "the cistern is empty on a Saturday night"sv;
+    return library::Empty{reason};
+  }
+  template<> auto Fixture::generate<library::Null>() -> library::Null {
+    auto reason = "null and void (how can it be both?)"sv;
+    return library::Null{reason};
+  }
+  template<> auto Fixture::generate<library::Invalid>() -> library::Invalid {
+    auto reason = "valid, invalid, pick a line!"sv;
+    return library::Invalid{reason};
+  }
+  template<> auto Fixture::generate<library::Runtime>() -> library::Runtime {
+    auto reason = "you do have choices when choosing from the ranks of elite runners";
+    return library::Runtime{reason};
+  }
+  template<> auto Fixture::generate<library::System>() -> library::System {
+    auto ec = std::error_code{};
+    auto reason = "but one has to be systematic about it"sv;
+    return library::System{move(ec), reason};
+  }
+  template<> auto Fixture::generate<library::Filesystem>() -> library::Filesystem {
+    auto fp = std::filesystem::path{"/tmp"};
+    auto ec = std::error_code{};
+    auto reason = "consulting files and folders and directories and dossiers"sv;
+    return library::Filesystem{std::move(fp), move(ec), reason};
+  }
+  auto Fixture::test_System() -> void {
+    using Subject = library::System;
+    auto subject = Subject{std::error_code{}, "cause never was the reason for the evening"sv};
+    CPPUNIT_ASSERT(nullptr != subject.what());
+  }
+  auto Fixture::test_Filesystem() -> void {
+    using Subject = library::Filesystem;
+    auto subject = Subject{"/tmp", std::error_code{}, "Or the Tropic of Sir Galahad"sv};
+    CPPUNIT_ASSERT(nullptr != subject.what());
+  }
+  auto Fixture::suite() -> cppunit::Test * {
+    using namespace rigging::suite;
+    auto series = Stream{"temerarious"};
+    series << call("Empty", &Fixture::test_reason<library::Empty>)
+           << call("Payload", &Fixture::test_reason<library::Null>)
+           << call("Invalid", &Fixture::test_reason<library::Invalid>)
+           << call("Runtime", &Fixture::test_reason<library::Runtime>)
+           << call("System", &Fixture::test_System)
+           << call("Filesystem", &Fixture::test_Filesystem)
+           << []{
+                auto asp = Stream{"Aspect"};
+                asp << call("Empty", &Fixture::test_Aspect<library::Empty>)
+                    << call("Null", &Fixture::test_Aspect<library::Null>)
+                    << call("Invalid", &Fixture::test_Aspect<library::Invalid>)
+                    << call("Runtime", &Fixture::test_Aspect<library::Runtime>)
+                    << call("System", &Fixture::test_Aspect<library::System>)
+                    << call("Filesystem", &Fixture::test_Aspect<library::Filesystem>)
+                    << END;
+                return move(asp);
+              }()
+           << END;
+    return finalize(series);
+  }
+}
+#endiv

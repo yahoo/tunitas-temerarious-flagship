@@ -1,0 +1,106 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+#import tunitas.flagship.temerarious.directive.exception
+#import tunitas.flagship.temerarious.source
+namespace tests::unit::exception::directive {
+  namespace [[eponymous]] fixture {
+    struct Fixture;
+    namespace library = ::tunitas::flagship::temerarious::directive::exception;
+    namespace source = ::tunitas::flagship::temerarious::source;
+  }
+  using fixture::Fixture;
+}
+#endiv
+#divert <hpp>
+#import tunitas.flagship.temerarious.directive.exception.Field
+#import tunitas.flagship.temerarious.directive.exception.Statement
+#import tunitas.flagship.temerarious.directive.exception.State
+#import tunitas.flagship.temerarious.source.Location
+#import tests.unit.Here
+namespace tests::unit::exception::directive {
+  struct fixture::Fixture : public cppunit::test::Fixture, private Here {
+    template<typename EXCEPTION> auto test_constructor_reason() -> void;
+    template<typename EXCEPTION> auto test_Aspect() -> void;
+    static auto suite() -> cppunit::Test *;
+  protected:
+    template<typename EXCEPTION> static auto generate() -> EXCEPTION;
+  };
+  namespace fixture {
+    template<> auto Fixture::generate<library::Field>() -> library::Field;
+    template<> auto Fixture::generate<library::Statement>() -> library::Statement;
+    template<> auto Fixture::generate<library::State>() -> library::State;
+  }
+}
+#endiv
+#divert <tpp>
+#import tunitas.flagship.temerarious.exception.Aspect
+#import tunitas.flagship.temerarious.directive.exception.Aspect
+#import tunitas.exception.Aspect
+// v2-only #import substd.exception.Exception
+#import nonstd.exception.Exception
+#import nonstd.same_as
+namespace tests::unit::exception::directive::fixture {
+  template<typename EXCEPTION> auto Fixture::test_constructor_reason() -> void {
+    using Subject = EXCEPTION;
+    auto subject = Subject{hereinat(), "and there"sv};
+    CPPUNIT_ASSERT(nullptr != subject.what());
+    CPPUNIT_ASSERT(0 != underlying(subject.where().line()));
+  }
+  template<typename EXCEPTION> auto Fixture::test_Aspect() -> void try {
+    // Prove that these exceptions are throwable and that they are catchable with a library::Aspect
+    auto copied = generate<EXCEPTION>();
+    throw copied; // <---------------------------------------- prove the copy constructor
+  } catch (library::Aspect const &) {
+    CPPUNIT_ASSERT(true);
+  } catch (::tunitas::flagship::temerarious::exception::Aspect const &) {
+    CPPUNIT_ASSERT(false);
+  } catch (::tunitas::exception::Aspect const &) {
+    CPPUNIT_ASSERT(false);
+#if 0
+  } catch (substd::exception::Exception const &) {
+#else
+  } catch (nonstd::exception::Exception const &) {
+    static_assert(nonstd::same_as<nonstd::exception::Exception, std::exception>);
+#endif
+    CPPUNIT_ASSERT(false);
+  }
+}
+#endiv
+#divert <cpp>
+#import std.source_location
+namespace tests::unit::exception::directive::fixture {
+  template<> auto Fixture::generate<library::Field>() -> library::Field {
+    auto reason = "out in the field of dreams"sv;
+    return library::Field{hereinat(), reason};
+  }
+  template<> auto Fixture::generate<library::Statement>() -> library::Statement {
+    auto reason = "don't eat processed foods"sv;
+    return library::Statement{hereinat(), reason};
+  }
+  template<> auto Fixture::generate<library::State>() -> library::State {
+    auto reason = "don't eat processed foods"sv;
+    return library::State{hereinat(), reason};
+  }
+  auto Fixture::suite() -> cppunit::Test * {
+    using namespace rigging::suite;
+    auto series = Stream{"directive"};
+    series << call("Field", &Fixture::test_constructor_reason<library::Field>)
+           << call("Statement", &Fixture::test_constructor_reason<library::Statement>)
+           << call("State", &Fixture::test_constructor_reason<library::State>)
+           << []{
+                auto asp = Stream{"Aspect"};
+                asp << call("Field", &Fixture::test_Aspect<library::Field>)
+                    << call("Statement", &Fixture::test_Aspect<library::Statement>)
+                    << call("State", &Fixture::test_Aspect<library::State>)
+                    << END;
+                return move(asp);
+              }()
+           << END;
+    return finalize(series);
+  }
+}
+#endiv

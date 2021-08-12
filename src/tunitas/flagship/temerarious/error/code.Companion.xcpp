@@ -12,8 +12,14 @@ namespace tunitas::flagship::temerarious::error::code {
   enum class Companion {
     SUCCESS = (int) condition::Companion::SUCCESS,
     FAILURE = (int) condition::Companion::FAILURE, // a.k.a. generic failure, no other detail
-    ROFF_FILE, // .................... summarizes a problem with a file, reading or opening
-    ROFF_DIRECTIVE, // ............... summarizes a problem with a directive, invalid, incomplete, etc.
+    FILE, // .................... summarizes a problem with a file, reading or opening
+    DIRECTIVE, // ............... summarizes a problem with a directive, invalid, incomplete, etc.
+    PROCESSOR_INVALID, // ....... the roff processor has an invalid state
+    CONDITION_UNCLOSED, // ...... what is unclear about that?
+    DIVERSION_UNCLOSED, // ...... and?
+    //
+    // WATCHOUT - these declarations must be COPIED MANUALLY into nearby code::Package<...>
+    //
   };
 }
 #endiv

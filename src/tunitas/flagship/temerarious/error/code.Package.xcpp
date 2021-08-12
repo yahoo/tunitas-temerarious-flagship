@@ -77,10 +77,20 @@ namespace tunitas::flagship::temerarious::error {
     using enum Companion; // one day C++20 will allow implicit construction by ...... {Code::FAILURE}
 #else
     using E = Companion; // in the meanwhile, some implicit construction by ......... {error::Code::E::FAILURE}
-    inline static constexpr auto SUCCESS = Companion::SUCCESS;
-    inline static constexpr auto FAILURE = Companion::FAILURE;
-    inline static constexpr auto ROFF_FILE = Companion::ROFF_FILE;
-    inline static constexpr auto ROFF_DIRECTIVE = Companion::ROFF_DIRECTIVE;
+    inline static constexpr auto SUCCESS            = Companion::SUCCESS;
+    inline static constexpr auto FAILURE            = Companion::FAILURE;
+    inline static constexpr auto FILE               = Companion::FILE;
+    inline static constexpr auto DIRECTIVE          = Companion::DIRECTIVE;
+    inline static constexpr auto PROCESSOR_INVALID  = Companion::PROCESSOR_INVALID;
+    inline static constexpr auto CONDITION_UNCLOSED = Companion::CONDITION_UNCLOSED;
+    inline static constexpr auto DIVERSION_UNCLOSED = Companion::DIVERSION_UNCLOSED;
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+    [[deprecated("instead prefer Code::FILE")]]         inline static constexpr auto ROFF_FILE = Companion::FILE;
+    [[deprecated("instead prefer Code::DIRECTIVE")]]    inline static constexpr auto ROFF_DIRECTIVE = Companion::DIRECTIVE;
+    [[deprecated("instead prefer CONDITION_UNCLOSED")]] inline static constexpr auto ROFF_UNCLOSED_CONDITION = Companion::CONDITION_UNCLOSED;
+    [[deprecated("instead prefer DIVERSION_UNCLOSED")]] inline static constexpr auto ROFF_UNCLOSED_DIVERSION = Companion::DIVERSION_UNCLOSED;
+#pragma GCC diagnostic pop
 #endif
     // Follow the constructor signature for error_code
     Package() = default;

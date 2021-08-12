@@ -7,6 +7,12 @@
 tests_scripty_tf_XFAIL_TESTS =
 tests_scripty_tf_TESTS = \
   tests/scripty/tf/all.test \
+  tests/scripty/tf/option.help.test \
+  tests/scripty/tf/option.usage.test \
+  tests/scripty/tf/option.h.test \
+  tests/scripty/tf/option.version.test \
+  tests/scripty/tf/roff.usage.test \
+  tests/scripty/tf/roff.version.test \
   tests/scripty/tf/one.test \
   $(tests_scripty_tf_XFAIL_TESTS) \
   $(end)

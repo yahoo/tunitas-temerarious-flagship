@@ -1,0 +1,47 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+namespace tunitas::flagship::temerarious::version {
+  //
+  // Generate the version string.
+  // Final.
+  //
+  // This is a constant-producing class.
+  //
+  // Usage:
+  //
+  //   auto generator = Generator{};
+  //   auto generated = generator();
+  //   cerr << generated;
+  //
+  class Generator;
+}
+#endiv
+#divert <hpp>
+#import tunitas.flagship.temerarious.version.String
+#import autotools.autoconf.Config.tunitas.flagship.temerarious.CONFIG
+#import std.ostream
+namespace tunitas::flagship::temerarious {
+  namespace version {
+    inline auto operator<<(std::ostream &, Generator const &) -> std::ostream &;
+  }
+  class version::Generator final {
+    using Result = String;
+  public:
+    inline auto operator()() const -> Result;
+  private:
+    using AC = autotools::autoconf::Config<CONFIG>;
+  };
+}
+#endiv
+#divert <ipp>
+namespace tunitas::flagship::temerarious {
+  auto version::operator<<(std::ostream &o, Generator const &g) -> std::ostream & { return o << g(); }
+  namespace version {
+    auto Generator::operator()() const -> Result { return {AC::package_major(), AC::package_minor(), AC::package_patch()}; }
+  }
+}
+#endiv

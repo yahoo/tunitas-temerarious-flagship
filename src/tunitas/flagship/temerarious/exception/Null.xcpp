@@ -6,40 +6,19 @@
 #divert <fpp>
 namespace tunitas::flagship::temerarious::exception {
   //
-  // Something is null
+  // Something is null.
   // Why are you using pointers?  You know those things are dangerous ... don't you?
   //
-  // Specification:
+  // Specification, Design, Usage:
   //
-  //   This indicates a programmer error because it could have been checked previously.
-  //   This is NOT an exceptional condition with the input data.
-  //   https://en.cppreference.com/w/cpp/error/invalid_argument
-  //
-  // Design:
-  //
-  //   from the Non-Standard Library 
-  //
-  // Usage:
-  //
-  //   Look it up (and yet).
-  //
-  //   try {
-  //      ...
-  //      throw temerarious::exception::Null{};
-  //      throw temerarious::exception::Null{...somehow...};
-  //      ...
-  //   } catch (exception::Aspect const &) {
-  //      ...ours...
-  //   } catch (substd::exception::Invalid const &) {
-  //      ...either one of the nonstd ones (not shown)...
-  //   }
+  //   See partial::Invalid
   //
   class [[nodiscard]] Null;
 }
 #endiv
 #divert <hpp>
 #import tunitas.flagship.temerarious.exception.partial.Invalid
-class tunitas::flagship::temerarious::exception::Null : public partial::Invalid {
+class tunitas::flagship::temerarious::exception::Null final : public partial::Invalid {
   using Ancestor = partial::Invalid;
 public:
   using Ancestor::Invalid;

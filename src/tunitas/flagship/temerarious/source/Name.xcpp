@@ -1,0 +1,93 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+namespace tunitas::flagship::temerarious::source {
+  //
+  // The Source Name
+  //
+  // Semantic:
+  //
+  //   A filepath name
+  //   A symbolic name of the input, e.g. "*stdin*" or "<stdin>" or such.
+  //
+  // Specification:
+  //
+  //   Fractions out the rhyme with std::source_location (just the file_name part_
+  //   https://en.cppreference.com/w/cpp/utility/source_location
+  //   But no need for the function name.
+  //
+  //   Is noexcept.
+  //   Has a noexcept copy constructor as is required for use in an exception object.
+  //
+  //   Has the distinctive printed representation without gratuitous quoting.
+  //   So if your filename has shell-token-breaking spaces, then you will be surprised.   Don't use those.
+  //
+  // Design:
+  //
+  //   MAYBE BUT NOT YET -----> Unlike std::source_location.
+  //   MAYBE BUT NOT YET -----> (1) Provides its own storage,  
+  //   MAYBE BUT NOT YET -----> (2) Creatable by the programmer (not the compiler)
+  //
+  //   The constructor name::Name(std::source_location) is used for testing
+  //   Normally the utility would be towards naming the 'roff source file lines, not C++ source lines.
+  //
+  // Lifetimes:
+  //
+  //   Because the Name uses string::View, the lifetime of the storage of the source must be longer than the Name.
+  //   This is trivially satisfied by recovering the Name from a nearby, e.g. stream::Input::input_name()
+  //
+  // Usage:
+  //
+  //   auto inbound = stream::Input{...somehow...};
+  //
+  //   auto name = Name{inbound.input_name()};
+  //   cout << name << "there is a problem, right here\n";
+  //
+  struct Name;
+}
+#endiv
+#divert <hpp>
+#import tunitas.string.View
+#import tunitas.flagship.temerarious.source.Line
+#import std.source_location
+#import std.ostream
+#import std.declval
+namespace tunitas::flagship::temerarious {
+  namespace source {
+    using std::move;
+    using std::swap;
+    inline auto swap(Name &, Name &) noexcept -> void;
+    inline auto operator<<(std::ostream &, Name const &) -> std::ostream &;
+  }
+  struct source::Name {
+    using Filepath = string::View; // NOT a file::Path ...too heavy
+    inline Name(Filepath);
+    inline Name(std::source_location);
+    inline auto filepath() const noexcept -> Filepath;
+    [[deprecated("why not consider Name::filepath()")]] inline auto file_name() const noexcept -> Filepath;
+  private:
+    Filepath stored_filepath;
+    friend auto source::swap(Name &, Name &) noexcept -> void;
+  };
+  namespace source {
+    // The source::Name must have a noexcept copy constructor because it will be used directly in an exception as a member field
+    static_assert(noexcept(source::Name{move(std::declval<source::Name>())}), "noexcept move constructor");
+    static_assert(noexcept(source::Name{std::declval<source::Name const>()}), "noexcept copy constructor");
+  }
+}
+#endiv
+#divert <ipp>
+namespace tunitas::flagship::temerarious {
+  auto source::swap(Name &a, Name &b) noexcept -> void { swap(a.stored_filepath, b.stored_filepath); }
+  auto source::operator<<(std::ostream &o, Name const &l) -> std::ostream & { return o << l.filepath() << ':' << ' '; }
+  namespace source {
+    Name::Name(std::source_location sl) : stored_filepath{sl.file_name()} { }
+    Name::Name(Filepath f) : stored_filepath{f} { }
+    auto Name::filepath() const noexcept -> Filepath  { return stored_filepath; }
+    auto Name::file_name() const noexcept -> Filepath { return stored_filepath; }
+  }
+}
+#endiv

@@ -18,8 +18,9 @@ struct tests::unit::Fixture : public cppunit::test::Fixture {
 #import tests.unit.directive.Fixture
 #import tests.unit.error.Fixture
 #import tests.unit.exception.Fixture
+#import tests.unit.field.Fixture
+#import tests.unit.input.Fixture
 #import tests.unit.parser.Fixture
-#import tests.unit.payload.Fixture
 #import tests.unit.processor.Fixture
 #import tests.unit.source.Fixture
 #import tests.unit.stream.Fixture
@@ -34,8 +35,9 @@ namespace tests::unit {
            << add<directive::Fixture>()
            << add<error::Fixture>()
            << add<exception::Fixture>()
+           << add<field::Fixture>()
+           << add<input::Fixture>()
            << add<parser::Fixture>()
-           << add<payload::Fixture>()
            << add<processor::Fixture>()
            << add<source::Fixture>()
            << add<stream::Fixture>()

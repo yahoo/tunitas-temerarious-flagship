@@ -6,8 +6,10 @@
 #divert <fpp>
 namespace tunitas::flagship::temerarious::exception::partial {
   //
-  // Something is invalid.
+  // Partial completion of a "something is invalid" exception.
   // Descendants only.
+  //
+  // Semantic: this is the programmer's fault (a logic error).
   //
   // Specification:
   //
@@ -20,9 +22,11 @@ namespace tunitas::flagship::temerarious::exception::partial {
   //
   //   from the Non-Standard Library 
   //
-  // Usage:
+  // Examples:
   //
-  //   See Null{} or Empty{}
+  //   See exception::Null{} or exception::Empty{}
+  //
+  // Usage:
   //
   //   try {
   //      ...
@@ -37,7 +41,7 @@ namespace tunitas::flagship::temerarious::exception::partial {
   //      ...either one of the nonstd ones (not shown)...
   //   }
   //
-  class [[nodiscard]] Invalid;
+  class Invalid;
 }
 #endiv
 #divert <hpp>
@@ -45,7 +49,7 @@ namespace tunitas::flagship::temerarious::exception::partial {
 #import tunitas.flagship.temerarious.exception.Aspect
 #import tunitas.string.View
 #import nonstd.exception.Invalid
-class tunitas::flagship::temerarious::exception::partial::Invalid : public virtual Aspect,
+class tunitas::flagship::temerarious::exception::partial::Invalid : public virtual temerarious::exception::Aspect,
                                                                     public virtual tunitas::exception::Aspect,
                                                                     public nonstd::exception::Invalid<string::View> {
   struct Ancestors {
@@ -56,6 +60,6 @@ protected:
   ~Invalid() = default;
 public:
   using Ancestors::Exception::View; // you "just have to know..." that the constructor is named View
-  virtual auto what() const noexcept -> char const * { return Ancestors::Exception::what(); }
+  auto what() const noexcept -> char const * override { return Ancestors::Exception::what(); }
 };
 #endiv

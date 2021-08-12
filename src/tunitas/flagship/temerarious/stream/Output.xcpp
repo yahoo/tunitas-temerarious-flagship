@@ -37,43 +37,73 @@ namespace tunitas::flagship::temerarious::stream {
 #divert <hpp>
 #import tunitas.flagship.temerarious.path.File
 #import tunitas.flagship.temerarious.stream.Base
-#import tunitas.flagship.temerarious.stream.File
+#import tunitas.flagship.temerarious.stream.Filebuf
 #import std.ostream
-class tunitas::flagship::temerarious::stream::Output : public std::ostream, public Base, private File {
-  using Ancestor = std::ostream;
-public:
-  inline explicit Output(std::ostream &);
-  inline explicit Output(path::File const &, Mode = OUT);
-  inline explicit Output(Output &&);
-  inline auto operator=(Output &&) -> Output &;
-};
+namespace tunitas::flagship::temerarious {
+  namespace stream {
+    using std::swap;
+    inline auto swap(Output &, Output &) noexcept -> void;
+  }
+  class stream::Output : public std::ostream, public Base, private Filebuf {
+    using Ancestor = std::ostream;
+    friend auto stream::swap(Output &, Output &) noexcept -> void;
+  public:
+    inline explicit Output(std::ostream &);
+    inline explicit Output(path::File const &, Mode = OUT);
+    inline explicit Output(Output &&);
+    inline auto operator=(Output &&) -> Output &;
+  private:
+    inline auto swap_streamstuff(Output &other) noexcept -> void;
+  };
+}
 #endiv
 #divert <ipp>
-namespace tunitas::flagship::temerarious::stream {
-  Output::Output(std::ostream &outbound) : Ancestor{outbound.rdbuf()} { }
-  Output::Output(path::File const &filepath, Mode mode) {
-    buf->open(filepath, mode);
+namespace tunitas::flagship::temerarious {
+  auto stream::swap(Output &a, Output &b) noexcept -> void {
+    Output::Base &a_base{a}, &b_base{b};
+    swap(a_base, b_base);
+    Output::Filebuf &a_filebuf{a}, &b_filebuf{b};
+    swap(a_filebuf, b_filebuf);
+    a.swap_streamstuff(b);
   }
-  Output::Output(Output &&other)
-    : Ancestor{forward<Output>(other)}
-    , Base{forward<Output>(other)}
-    , File{forward<Output>(other)} {
-      Ancestor::set_rdbuf(File::buf.get());
-  }
-  auto Output::operator=(Output &&other) -> Output & {
-    this->Ancestor::swap(other);
-    this->Base::operator=(forward<Output>(other));
-    this->File::operator=(forward<Output>(other));
-    Ancestor::set_rdbuf(File::buf.get());
-    return *this;
+  namespace stream {
+    auto Output::swap_streamstuff(Output &that) noexcept -> void {
+      // This accesses protected interfaces up in the Ancestor
+      this->swap(that); // ............... swaps the format bits, but nothing else
+      auto a_rdbuf = this->rdbuf(); // ... swap the streambuf pointer
+      auto b_rdbuf = that.rdbuf();
+      this->set_rdbuf(b_rdbuf);
+      that.set_rdbuf(a_rdbuf);
+    }
+    Output::Output(std::ostream &outbound) : Ancestor{outbound.rdbuf()} { }
+    Output::Output(path::File const &filepath, Mode mode) {
+      buf->open(filepath, mode);
+    }
+    Output::Output(Output &&other)
+      : Ancestor{}
+      , Base{forward<Output>(other)}
+      , Filebuf{forward<Output>(other)} {
+        swap_streamstuff(other);
+      }
+    auto Output::operator=(Output &&other) -> Output & {
+      swap_streamstuff(other);
+      Base::operator=(forward<Output>(other));
+      Filebuf::operator=(forward<Output>(other));
+      return *this;
+    }
   }
 }
 #endiv
 #divert <cpp>
-namespace tunitas::flagship::temerarious::stream {
-  static_assert(!std::is_copy_constructible_v<Output>);
-  static_assert(!std::is_copy_assignable_v<Output>);
-  static_assert(std::is_move_constructible_v<Output>);
-  static_assert(std::is_move_assignable_v<Output>);
+namespace {
+  namespace testate {
+    using namespace std;
+    using namespace tunitas::flagship::temerarious::stream;
+    static_assert(!is_default_constructible_v<Output>);
+    static_assert(!is_copy_constructible_v<Output>);
+    static_assert(!is_copy_assignable_v<Output>);
+    static_assert(is_move_constructible_v<Output>);
+    static_assert(is_move_assignable_v<Output>);
+  }
 }
 #endiv

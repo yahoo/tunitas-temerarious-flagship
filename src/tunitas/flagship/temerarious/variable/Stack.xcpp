@@ -25,9 +25,10 @@ namespace tunitas::flagship::temerarious::variable {
 #divert <hpp>
 #import tunitas.flagship.temerarious.variable.Frame
 #import std.stack
-#import std.deque
-struct tunitas::flagship::temerarious::variable::Stack : public std::stack<Frame, std::deque<Frame>> {
+struct tunitas::flagship::temerarious::variable::Stack : public std::stack<Frame> {
   using Ancestor = std::stack<Frame, std::deque<Frame>>;
 public:
+  Stack() = default;
+  using Ancestor::stack;
 };
 #endiv

@@ -1,0 +1,48 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+namespace tunitas::flagship::temerarious::exception {
+  //
+  // The condition (stack) in the top frame of the input stack (in the processor) has some problem.
+  //
+  // Specification:
+  //
+  //   The condition stack is empty.
+  //   The condition is sill full (has more than one element) at end-of-file.
+  //
+  //   https://en.cppreference.com/w/cpp/error/invalid_argument
+  //
+  // Design:
+  //
+  //   As they all do.
+  //
+  // Usage:
+  //
+  //   try {
+  //      ...
+  //      throw processor::exception::Condition{"because ... reasons..."sv};
+  //      throw temerarious::exception::Condition{...somehow...};
+  //      ...
+  //   } catch (processor::exception::Aspect const &) {
+  //      ...ours...
+  //   } catch (temerarious::exception::Invalid const &) {
+  //      ...wider and more generally...
+  //   }
+  //
+  class [[nodiscard]] Condition;
+}
+#endiv
+#divert <hpp>
+#import tunitas.flagship.temerarious.exception.partial.Invalid
+#import tunitas.flagship.temerarious.processor.exception.Aspect
+class tunitas::flagship::temerarious::processor::exception::Condition : public virtual processor::exception::Aspect,
+                                                                        public partial::Invalid {
+  using Ancestor = partial::Invalid;
+public:
+  using Ancestor::Invalid;
+  auto what() const noexcept -> char const * override { return Ancestor::what(); }
+};
+#endiv

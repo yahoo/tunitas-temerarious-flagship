@@ -6,35 +6,44 @@
 #divert <fpp>
 #import tunitas.application.exits.constants
 #import tunitas.application.options
+#import tunitas.flagship.temerarious
 #import tunitas.string.Storage
-#import std.filesystem.path // [[FIXTHIS,TODO]] tunitas::file::Path
+#import tunitas.file.Path
 namespace app::tf {
-  inline namespace constants { using namespace tunitas::application::exits::constants; } 
-  namespace options = tunitas::application::options;
-  using Path = std::filesystem::path;
-  using String = tunitas::string::Storage;
+  inline namespace package_main {
+           namespace package_body_main::body { }
+           inline namespace interface { using namespace package_body_main::body; } }
+  namespace package_main::package_body_main::body {
+    inline namespace constants { using namespace tunitas::application::exits::constants; } 
+    namespace options = tunitas::application::options;
+    using Path = tunitas::file::Path;
+    using String = tunitas::string::Storage;
+    namespace version = tunitas::flagship::temerarious::version;
+  }
 }
 #endiv
 #divert <hpp>
 #import tunitas.application.exits.Code
 #import tunitas.application.options.c.Argv
-namespace app::tf {
+namespace app::tf::package_main::interface {
   inline auto main(int, char *[]) -> exits::Code;
   auto main(options::c::Argv) -> exits::Code;
 }
 #endiv
 #divert <ipp>
-namespace app {
-  inline auto tf::main(int cc, char *vv[]) -> exits::Code { return main(options::c::Argv(cc, vv)); }
+namespace app::tf::package_main {
+  inline auto interface::main(int cc, char *vv[]) -> exits::Code { return main(options::c::Argv(cc, vv)); }
 }
 #endiv
 #divert <cpp>
 #import std.cerr
 #import tunitas.application.options.Program
 #import tunitas.application.options.Arguments
+#import tunitas.flagship.temerarious.version.Generator
 #import sys.posix.exec
-namespace app {
-  auto tf::main(options::c::Argv av) -> exits::Code {
+#import app.tf.usage.Message
+namespace app::tf::package_main {
+  auto interface::main(options::c::Argv av) -> exits::Code {
     auto prog = options::Program{av.front()};
     if (av.size() < 2) {
       std::cerr << prog << ": error, a command is required\n";
@@ -45,12 +54,11 @@ namespace app {
       std::cerr << prog << ": error, the <subprogram> cannot be empty\n";
       return USAGE;
     } else if ("--usage"s == first || "--help"s == first || "-h"s == first) {
-      std::cout << "usage: " << prog << " <subprogram> ...arguments..."
-                << "\n"
-                << "\nWhere <subprogram> is one of\n"
-                << "roff ... \"run-off\" the Markdown templating language."
-                << "\n";
+      std::cout << usage::Message{prog} << '\n';
       return OK;
+      } else if ("--version"s == first || "-V"s == first) {
+        std::cout << version::Generator{} << '\n';
+        return OK;
     } else if ('-' == first.front()) {
       std::cerr << prog << ": error, invalid option (use --usage to explore)\n";
       return USAGE;

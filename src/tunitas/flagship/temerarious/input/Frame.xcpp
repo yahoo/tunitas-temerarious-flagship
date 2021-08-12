@@ -1,0 +1,84 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+namespace tunitas::flagship::temerarious::input {
+  //
+  // An input frame.
+  //
+  // Specification:
+  //
+  //   Comprises:
+  //     the input stream
+  //     the conditions stack
+  //     the diversion stack
+  //
+  // Invariants:
+  //
+  //   The diversions, conditions stacks will always have at least one item.
+  //   This is commenced in the constructor.
+  //   Such a condition is checked and relied upon in State::pop_input()
+  //
+  //   The stream;:Input cannot move (be relocated) across the lifetime of the Frame
+  //   This is a non-trivial condition to guarantee ...
+  //   [[FIXTHIS]] ... because the processor::State::inbound stack CAN relocate on inbound.push(...)
+  //
+  // Lifetimes:
+  //
+  //   In the cases are as follows
+  //      Frame(stream::Input &&, stream::Output &); ..... both streams must last longer than this frame
+  //      Frame(stream::Input &&, Frame &); .............. the parent frame must last longer.
+  //
+  // Usage:
+  //
+  //   See the nearby Stack  (of Frames)
+  //
+  struct Frame;
+}
+#endiv
+#divert <hpp>
+#import tunitas.flagship.temerarious.diversion.Stack
+#import tunitas.flagship.temerarious.input.condition.Stack
+#import tunitas.flagship.temerarious.input.Stack
+#import tunitas.flagship.temerarious.stream.Input
+#forward tunitas.flagship.temerarious.stream.Output
+namespace tunitas::flagship::temerarious {
+  namespace input {
+    using std::move;
+    using std::swap;
+    inline auto swap(Frame &, Frame &) noexcept -> void;
+  }
+  struct input::Frame {
+    inline [[implicit]] Frame(stream::Input &&, stream::Output &);
+    inline [[implicit]] Frame(stream::Input &&, Frame &previous);
+    stream::Input inbound; // ......... singular, the containing stack is plural
+    diversion::Stack diversions; // ... plural, because it is a stack of them
+    condition::Stack conditions; // ... plural, ibidem.
+  };
+}
+#endiv
+#divert <ipp>
+namespace tunitas::flagship::temerarious {
+  auto input::swap(Frame &a, Frame &b) noexcept -> void {
+    swap(a.inbound, b.inbound);
+    swap(a.diversions, b.diversions);
+    swap(a.conditions, b.conditions);
+  }
+  namespace input {
+    Frame::Frame(stream::Input &&inbound, stream::Output &outbound)
+      : inbound{forward<stream::Input>(inbound)} {
+      // always at least one, in each stack
+      diversions.push(&outbound);
+      conditions.push(true);
+    }
+    Frame::Frame(stream::Input &&inbound, Frame &previous)
+      : inbound{forward<stream::Input>(inbound)} {
+      // always at least one, in each stack
+      diversions.push(previous.diversions.top());
+      conditions.push(true);
+    }
+  }
+}
+#endiv

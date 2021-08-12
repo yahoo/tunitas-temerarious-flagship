@@ -17,8 +17,8 @@ lib_libapp_tf_la_MODULES = $(call TF_SOURCEStoMODULES, $(lib_libapp_tf_la_SOURCE
 lib_libapp_tf_la_SOURCES = \
   obj/src/app/tf/namespace.cpp \
   obj/src/app/tf/main.cpp \
+  obj/src/app/tf/usage.Message.cpp \
   $(end)
-
 #
 $(scold_cxxdir)/app/tf/dependencies.mk: $(bin_tf_SOURCES) $(lib_libapp_tf_la_SOURCES)
 $(bin_tf_SOURCES) $(lib_libapp_tf_la_SOURCES) : obj/src/%.cpp : src/%.xcpp

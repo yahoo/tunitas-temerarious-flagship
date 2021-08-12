@@ -22,7 +22,6 @@ namespace tunitas::flagship::temerarious::variable {
 #divert <hpp>
 #import std.map
 #import tunitas.string.Storage
-#import tunitas.flagship.temerarious.variable.Definition
 struct tunitas::flagship::temerarious::variable::Frame : public std::map<string::Storage, string::Storage> {
   using Ancestor = std::map<string::Storage, string::Storage>;
 public:

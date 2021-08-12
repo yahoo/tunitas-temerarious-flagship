@@ -8,5 +8,6 @@ obj_src_tests_unit_source_SUBSOURCES = \
   obj/src/tests/unit/source/namespace.cpp \
   obj/src/tests/unit/source/Fixture.cpp \
   obj/src/tests/unit/source/Line.cpp \
+  obj/src/tests/unit/source/Name.cpp \
   obj/src/tests/unit/source/Location.cpp \
   $(end)

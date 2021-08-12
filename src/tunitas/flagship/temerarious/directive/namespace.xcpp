@@ -15,22 +15,24 @@ namespace tunitas::flagship::temerarious::directive {
 #import tunitas.flagship.temerarious.stream.Output
 #import tunitas.flagship.temerarious.source.Location
 #import tunitas.flagship.temerarious.processor.State
-#import tunitas.flagship.temerarious.payload
 #import std
 namespace tunitas::flagship::temerarious::directive::package_directive {
   namespace package_body_directive::body {
     using State = processor::State;
     using Output = stream::Output;
     using Location = source::Location;
-    using Payload = string::View;
-    using namespace payload;
+    using Payload = string::View; // a place where one or more fields can be found
     using namespace std;
   }
 }
 #endiv
-#divert <hpp>
-// Every directive will need something one or more of the payload parsers
-#import tunitas.flagship.temerarious.payloads
-#import tunitas.flagship.temerarious.exception.Stack
-#import tunitas.flagship.temerarious.exception.Payload
+#divert <ipp>
+#import tunitas.flagship.temerarious.directive.exception.Statement // and may throw such exceptions as are available
+#import tunitas.flagship.temerarious.directive.exception.State
+#import tunitas.flagship.temerarious.directive.fields // Every directive will need something one or more of the payload parsers
+namespace tunitas::flagship::temerarious::directive::package_directive {
+  namespace package_body_directive::body {
+    using namespace field; // all the field parser-validators will be visible en masse from tunitas.flagship.temerarious.fields
+  }
+}
 #endiv

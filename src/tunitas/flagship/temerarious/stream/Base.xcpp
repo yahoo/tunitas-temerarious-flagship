@@ -26,12 +26,21 @@ namespace tunitas::flagship::temerarious::stream {
 #endiv
 #divert <hpp>
 #import std.ios_base
-class tunitas::flagship::temerarious::stream::Base {
-protected:
-  virtual ~Base() = default;
-public:
-  using Mode = std::ios_base::openmode;
-  inline static constexpr auto OUT = std::ios_base::out;
-  inline static constexpr auto IN = std::ios_base::in;
-};
+#import std.ios
+#forward tunitas.flagship.temerarious.stream.Filebuf
+namespace tunitas::flagship::temerarious {
+  namespace stream {
+    using std::swap;
+    inline auto swap(Base &, Base &) noexcept -> void;
+  }
+  class stream::Base {
+    friend auto stream::swap(Base &, Base &) noexcept -> void { } // indeed, there is nothing to swap
+  protected:
+    virtual ~Base() = default;
+  public:
+    using Mode = std::ios_base::openmode;
+    inline static constexpr auto OUT = std::ios_base::out;
+    inline static constexpr auto IN = std::ios_base::in;
+  };
+}
 #endiv

@@ -7,5 +7,6 @@
 obj_src_tunitas_flagship_temerarious_source_SUBSOURCES = \
   obj/src/tunitas/flagship/temerarious/source/namespace.cpp \
   obj/src/tunitas/flagship/temerarious/source/Line.cpp \
+  obj/src/tunitas/flagship/temerarious/source/Name.cpp \
   obj/src/tunitas/flagship/temerarious/source/Location.cpp \
   $(end)

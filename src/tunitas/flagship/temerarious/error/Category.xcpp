@@ -47,10 +47,13 @@ namespace tunitas::flagship::temerarious::error {
   auto Category::message(int code) const -> std::string {
     switch (code::Companion{code}) {
       using namespace std::string_literals;
-    case code::Companion::SUCCESS:        return "success"s;
-    case code::Companion::FAILURE:        return "failure"s;
-    case code::Companion::ROFF_FILE:      return "problem with a 'roff file"s;
-    case code::Companion::ROFF_DIRECTIVE: return "problem with a 'roff directive"s;
+    case code::Companion::SUCCESS:            return "success"s;
+    case code::Companion::FAILURE:            return "failure"s;
+    case code::Companion::FILE:               return "problem with a 'roff file"s; // opening, missing, writing
+    case code::Companion::DIRECTIVE:          return "problem with a 'roff directive"s; // e.g. incomprehensible directive
+    case code::Companion::PROCESSOR_INVALID:  return "the 'roff process reached an invalid date"; // a.k.a. "an internal error"
+    case code::Companion::DIVERSION_UNCLOSED: return "unclosed diversion at end-of-file"s;
+    case code::Companion::CONDITION_UNCLOSED: return "unclosed conditional at end-of-file"s;
     default:
       return "Error #"s + std::to_string(code);
     }

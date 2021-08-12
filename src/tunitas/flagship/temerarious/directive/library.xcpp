@@ -45,7 +45,7 @@ namespace tunitas::flagship::temerarious::directive::package_directive {
 namespace tunitas::flagship::temerarious::directive::package_directive {
   namespace package_body_directive {
     auto body::throw_not_in_a_condition_frame(Location where) -> void {
-      throw exception::Stack{where, "not currently in a condition frame (not in a a .ifdef/.elifdef/.endif)"sv};
+      throw exception::State{where, "not currently in a condition frame (not in a a .ifdef/.elifdef/.else/.endif)"sv};
     }
   }
 }
@@ -65,12 +65,11 @@ namespace tunitas::flagship::temerarious::directive::package_directive {
     auto identifier = get_identifier(where, payload);
     state.push_diversion(identifier);
   }
-  auto interface::endef(State &state, Output &, Location where, Payload payload) -> void {
+  auto interface::endef(State &state, Output &, Location where, Payload payload) -> void try {
     get_none(where, payload);
-    if (state.diversions.empty()) {
-      throw exception::Stack{where, "not currently defining any variable (not in a .block)"sv};
-    }
     state.pop_diversion();
+  } catch (processor::exception::Diversion const &) {
+    throw exception::State{where, "not currently defining any variable (not in a .divert/.endiv)"sv};
   }
   auto interface::define(State &state, Output &, Location where, Payload payload) -> void {
     auto [identifier, remaining] = get_identifier_and_more(where, payload);
@@ -82,26 +81,24 @@ namespace tunitas::flagship::temerarious::directive::package_directive {
   auto interface::ifdef(State &state, Output &, Location where, Payload payload) -> void {
     state.push_condition(get_identifier(where, payload));
   }
-  auto interface::elifdef(State &state, Output &, Location where, Payload payload) -> void {
-    if (state.conditions.empty()) {
-      throw_not_in_a_condition_frame(where);
-    }
+  auto interface::elifdef(State &state, Output &, Location where, Payload payload) -> void try {
     state.pop_condition();
     state.push_condition(get_identifier(where, payload));
+  } catch (processor::exception::Condition const &) {
+    throw_not_in_a_condition_frame(where);
   }
-  auto interface::elsedef(State &state, Output &, Location where, Payload payload) -> void {
-    if (state.conditions.empty()) {
-      throw_not_in_a_condition_frame(where);
-    }
+  auto interface::elsedef(State &state, Output &, Location where, Payload payload) -> void try {
+    state.pop_condition();
+    get_none(where, payload);
+    state.push_condition(true);
+  } catch (processor::exception::Condition const &) {
+    throw_not_in_a_condition_frame(where);
+  }
+  auto interface::endif(State &state, Output &, Location where, Payload payload) -> void try {
     get_none(where, payload);
     state.pop_condition();
-    state.push_condition(true);
-  }
-  auto interface::endif(State &state, Output &, Location where, Payload payload) -> void {
-    if (state.conditions.empty()) {
-      throw_not_in_a_condition_frame(where);
-    }
-    get_none(where, payload);
+  } catch (processor::exception::Condition const &) {
+    throw_not_in_a_condition_frame(where);
   }
 }
 #import std.copy
@@ -111,9 +108,13 @@ namespace tunitas::flagship::temerarious::directive::package_directive {
 #import std.system_category
 #import errno
 #import tunitas.flagship.temerarious.exception.Filesystem
+#import tunitas.flagship.temerarious.stream.Input
 namespace tunitas::flagship::temerarious::directive::package_directive {
-  auto interface::read(State &, Output &outbound, Location where, Payload payload) -> void {
+  auto interface::read(State &state, Output &outbound, Location where, Payload payload) -> void {
     auto filepath = get_filepath(where, payload);
+    state.push_input(stream::Input{filepath});
+#if 0
+    // We no longer do this here ... we have pushed the new input onto the stack; the main loop will take care of it.
     ifstream inbound{filepath};
     if (!inbound) {
       throw exception::Filesystem{move(filepath), {errno, system_category()}, "open failed"sv};
@@ -122,6 +123,7 @@ namespace tunitas::flagship::temerarious::directive::package_directive {
     using In = istream_iterator<char>;
     using Out = ostream_iterator<char>;
     copy(In{inbound}, In{}, Out{outbound});
+#endif
   }
 }
 #endiv

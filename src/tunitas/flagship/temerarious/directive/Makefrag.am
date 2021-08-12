@@ -8,5 +8,10 @@ obj_src_tunitas_flagship_temerarious_directive_SUBSOURCES = \
   obj/src/tunitas/flagship/temerarious/directives.cpp \
   obj/src/tunitas/flagship/temerarious/directive/namespace.cpp \
   obj/src/tunitas/flagship/temerarious/directive/Directive.cpp \
+  $(obj_src_tunitas_flagship_temerarious_directive_exception_SUBSOURCES) \
+  $(obj_src_tunitas_flagship_temerarious_directive_field_SUBSOURCES) \
   obj/src/tunitas/flagship/temerarious/directive/library.cpp \
   $(end)
+#
+include src/tunitas/flagship/temerarious/directive/exception/Makefrag.am
+include src/tunitas/flagship/temerarious/directive/field/Makefrag.am

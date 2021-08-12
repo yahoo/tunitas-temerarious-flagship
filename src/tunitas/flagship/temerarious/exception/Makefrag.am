@@ -7,13 +7,14 @@
 obj_src_tunitas_flagship_temerarious_exception_SUBSOURCES = \
   obj/src/tunitas/flagship/temerarious/exception/namespace.cpp \
   obj/src/tunitas/flagship/temerarious/exception/Aspect.cpp \
-  obj/src/tunitas/flagship/temerarious/exception/feature.Where.cpp \
-  obj/src/tunitas/flagship/temerarious/exception/partial.Processing.cpp \
   obj/src/tunitas/flagship/temerarious/exception/partial.Invalid.cpp \
+  obj/src/tunitas/flagship/temerarious/exception/partial.Runtime.cpp \
+  obj/src/tunitas/flagship/temerarious/exception/partial.System.cpp \
+  obj/src/tunitas/flagship/temerarious/exception/partial.Filesystem.cpp \
   obj/src/tunitas/flagship/temerarious/exception/Empty.cpp \
   obj/src/tunitas/flagship/temerarious/exception/Null.cpp \
-  obj/src/tunitas/flagship/temerarious/exception/Payload.cpp \
-  obj/src/tunitas/flagship/temerarious/exception/Stack.cpp \
+  obj/src/tunitas/flagship/temerarious/exception/Invalid.cpp \
+  obj/src/tunitas/flagship/temerarious/exception/Runtime.cpp \
   obj/src/tunitas/flagship/temerarious/exception/System.cpp \
   obj/src/tunitas/flagship/temerarious/exception/Filesystem.cpp \
   $(end)

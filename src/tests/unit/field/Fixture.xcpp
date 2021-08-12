@@ -1,0 +1,107 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+namespace tests::unit::field { class Fixture; }
+#endiv
+#divert <hpp>
+struct tests::unit::field::Fixture : public cppunit::test::Fixture, private Here {
+  auto test_none() -> void;
+  auto test_identifier() -> void;
+  auto test_identifier_and_more() -> void;
+  auto test_filepath() -> void;
+  static auto suite() -> cppunit::Test *;
+};  
+#endiv
+#divert <cpp>
+#import tests.unit.field.get.None
+#import tests.unit.field.get.Identifier
+#import tests.unit.field.get.Identifier_And_More
+#import tests.unit.field.get.Filepath
+#import tests.unit.field.body.Fixture
+namespace tests::unit::field {
+  auto Fixture::suite() -> cppunit::Test * {
+    using namespace rigging::suite;
+    auto series = Stream{"field"};
+    series << []{
+                auto use = Stream{"usage"};
+                use << []{
+                         auto get = Stream{"get"};
+                         get << call("none", &Fixture::test_none)
+                             << call("identifier", &Fixture::test_identifier)
+                             << call("identifier&...more...", &Fixture::test_identifier_and_more)
+                             << call("filepath", &Fixture::test_filepath)
+                             << END;
+                         return move(get);
+                       }()
+                    << END;
+                return move(use);
+              }()
+           << []{
+                auto get = Stream{"get"};
+                get << add<get::None>()
+                    << add<get::Identifier>()
+                    << add<get::Identifier_And_More>()
+                    << add<get::Filepath>()
+                    << END;
+                return move(get);
+              }()
+           << add<body::Fixture>()
+           << END;
+    return finalize(series);
+  }
+}
+namespace tests::unit::field {
+  auto Fixture::test_none() -> void try {
+    library::get_none(hereinat(), ""sv);
+    CPPUNIT_ASSERT(true);
+  } catch (exception::Aspect const &) {
+    CPPUNIT_ASSERT(false);
+  }
+  auto Fixture::test_identifier() -> void {
+    [goal=true]{
+      auto got = library::get_identifier(hereinat(), "alpha"sv);
+      CPPUNIT_ASSERT("alpha"sv == got);
+    }();
+    [goal=false]{
+      try {
+        library::get_identifier(hereinat(), "beta gamma"sv);
+        CPPUNIT_ASSERT(goal);
+      } catch (exception::Aspect const &) {
+        CPPUNIT_ASSERT(!goal);
+      }
+    }();
+  }
+  auto Fixture::test_identifier_and_more() -> void {
+    [goal=true]{
+      auto [id, val] = library::get_identifier_and_more(hereinat(), "alpha beta gamma delta foxtrot rabbit beaver pickle"sv);
+      CPPUNIT_ASSERT("alpha"sv == id);
+      CPPUNIT_ASSERT(10 < val.size()); // whatever that thing is...
+    }();
+    [goal=false]{
+      try {
+        library::get_identifier_and_more(hereinat(), "beta-only"sv); // missing the value field
+        CPPUNIT_ASSERT(goal);
+      } catch (exception::Aspect const &) {
+        CPPUNIT_ASSERT(!goal);
+      }
+    }();
+  }
+  auto Fixture::test_filepath() -> void {
+    [goal=true]{
+      auto got = library::get_filepath(hereinat(), "/tmp"sv);
+      CPPUNIT_ASSERT("/tmp"sv == got);
+    }();
+    [goal=false]{
+      try {
+        library::get_filepath(hereinat(), "./\b\b\b\b\b\b\b\b\b\b\b\b"sv);
+        CPPUNIT_ASSERT(goal);
+      } catch (exception::Aspect const &) {
+        CPPUNIT_ASSERT(!goal);
+      }
+    }();
+  }
+}
+#endiv

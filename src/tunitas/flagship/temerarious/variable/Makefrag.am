@@ -9,6 +9,5 @@ obj_src_tunitas_flagship_temerarious_variable_SUBSOURCES = \
   obj/src/tunitas/flagship/temerarious/variable/required/namespace.cpp \
   obj/src/tunitas/flagship/temerarious/variable/required/string.Viewable.cpp \
   obj/src/tunitas/flagship/temerarious/variable/Frame.cpp \
-  obj/src/tunitas/flagship/temerarious/variable/Definition.cpp \
   obj/src/tunitas/flagship/temerarious/variable/Stack.cpp \
   $(end)

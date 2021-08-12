@@ -8,47 +8,18 @@ namespace tunitas::flagship::temerarious::exception {
   //
   // A system exception, from The Temerarious Flagship
   //
-  // Specification:
+  // Semantic: a complete system exception.
   //
-  //   https://en.cppreference.com/w/cpp/error/system_error
-  //
-  // Design:
-  //
-  //   from the Non-Standard Library 
-  //
-  // Usage:
-  //
-  //   Look it up (and yet).
-  //
-  //   try {
-  //      ...
-  //      throw temerarious::exception::System{...somehow...};
-  //      throw nonstd::exception::System<string::View>{...somehow...};
-  //      throw nonstd::exception::System<string::Storage>{...somehow...};
-  //      ...
-  //   } catch (exception::Aspect const &) {
-  //      ...ours...
-  //   } catch (substd::exception::System const &) {
-  //      ...either one of the nonstd ones...
-  //   }
+  // See partial::System
   //
   class [[nodiscard]] System;
 }
 #endiv
 #divert <hpp>
-#import tunitas.exception.Aspect
-#import tunitas.flagship.temerarious.exception.Aspect
-#import tunitas.string.View
-#import nonstd.exception.Filesystem
-class tunitas::flagship::temerarious::exception::System : public virtual Aspect,
-                                                          public virtual tunitas::exception::Aspect,
-                                                          public nonstd::exception::Filesystem<string::View> {
-  struct Ancestors {
-    struct Aspects { /* ... who cares... */ };
-    using Exception = nonstd::exception::Filesystem<string::View>;
-  };
+#import tunitas.flagship.temerarious.exception.partial.System
+class tunitas::flagship::temerarious::exception::System final : public partial::System {
+  using Ancestor = partial::System;
 public:
-  using Ancestors::Exception::View; // you "just have to know..." that the constructor is named View
-  virtual auto what() const noexcept -> char const * { return Ancestors::Exception::what(); }
+  using Ancestor::System;
 };
 #endiv

@@ -4,20 +4,35 @@
 // For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
 // For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
 #divert <fpp>
-namespace tests::unit::processor::state { struct Fixture; }
+#import tunitas.flagship.temerarious.stream
+namespace tests::unit::processor::state {
+  namespace [[eponymous]] fixture {
+    struct Fixture;
+    namespace stream = ::tunitas::flagship::temerarious::stream;
+  }
+  using fixture::Fixture;
+}
 #endiv
 #divert <hpp>
 #import tunitas.flagship.temerarious.processor.State
-struct tests::unit::processor::state::Fixture : public cppunit::test::Fixture {
+struct tests::unit::processor::state::fixture::Fixture : public cppunit::test::Fixture {
   using Subject = library::State;
   auto test_constructor_default() -> void;
   static auto suite() -> cppunit::Test *;
 };
 #endiv
 #divert <cpp>
-namespace tests::unit::processor::state {
+#import std.istringstream
+#import std.ostringstream
+#import tunitas.flagship.temerarious.stream.Input
+#import tunitas.flagship.temerarious.stream.Output
+namespace tests::unit::processor::state::fixture {
   auto Fixture::test_constructor_default() -> void {
-    auto subject = Subject{};
+    auto bufin = std::istringstream{};
+    auto bufout = std::ostringstream{};
+    auto inbound = stream::Input{bufin};
+    auto outbound = stream::Output{bufout};
+    auto subject = Subject{move(inbound), outbound};
     CPPUNIT_ASSERT(sizeof (subject));
   }
   auto Fixture::suite() -> cppunit::Test * {

@@ -6,34 +6,43 @@
 #divert <fpp>
 #import tunitas.application.exits.constants
 #import tunitas.application.options
-#import format // [[FIXTHIS]] move to use namespace langu::age::quote when module-langu >= 1.0 is ready
+#import tunitas.flagship.temerarious
+#import langu.age
 namespace app::roff {
-  inline namespace constants { using namespace tunitas::application::exits::constants; } 
-  using namespace ::format; // ibidem.
-  namespace options = tunitas::application::options;
+  inline namespace package_main {
+           namespace package_body_main::body { }
+           inline namespace interface { using namespace package_body_main::body; } }
+  namespace package_main::package_body_main::body {
+    inline namespace constants { using namespace tunitas::application::exits::constants; } 
+    using namespace langu::age;
+    namespace options = tunitas::application::options;
+    namespace version = tunitas::flagship::temerarious::version;
+  }
 }
 #endiv
 #divert <hpp>
 #import tunitas.application.exits.Code
 #import tunitas.application.options.c.Argv
-namespace app::roff {
+namespace app::roff::package_main::interface {
   inline auto main(int, char *[]) -> exits::Code;
   auto main(options::c::Argv) -> exits::Code;
 }
 #endiv
 #divert <ipp>
-namespace app {
-  inline auto roff::main(int cc, char *vv[]) -> exits::Code { return main(options::c::Argv(cc, vv)); }
+namespace app::roff::package_main {
+  inline auto interface::main(int cc, char *vv[]) -> exits::Code { return main(options::c::Argv(cc, vv)); }
 }
 #endiv
 #divert <cpp>
 #import std.cerr
 #import tunitas.application.options.Program
+#import tunitas.flagship.temerarious.version.Generator
 #import nonstd.exception.Unimplemented
 #import app.roff.run
-#import format.q // [[FIXTHIS]] move to use langu::age::quote::q when module-langu >= 1.0 is ready
-namespace app {
-  auto roff::main(options::c::Argv av) -> exits::Code {
+#import app.roff.usage.Message
+#import langu.age.q
+namespace app::roff::package_main {
+  auto interface::main(options::c::Argv av) -> exits::Code {
     auto prog = options::Program{av.front()};
     if (av.size() > 1) {
       std::string first = av[1];
@@ -41,11 +50,10 @@ namespace app {
         std::cerr << prog << ": error, the <subprogram> cannot be empty\n";
         return USAGE;
       } else if ("--usage"s == first || "--help"s == first || "-h"s == first) {
-        std::cout << "usage: " << prog << " <subprogram> ...arguments..."
-                  << "\n"
-                  << "\nWhere <subprogram> is one of\n"
-                  << "roff ... \"run-off\" the Markdown templating language."
-                  << "\n";
+        std::cout << usage::Message{prog} << '\n';
+        return OK;
+      } else if ("--version"s == first || "-V"s == first) {
+        std::cout << version::Generator{} << '\n';
         return OK;
       } else if ('-' == first.front()) {
         std::cerr << prog << ": error, invalid option (use --usage to explore)\n";

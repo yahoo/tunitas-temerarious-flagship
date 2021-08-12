@@ -7,5 +7,6 @@
 #import app
 namespace app::roff {
   namespace [[implementation]] packaging { }
+  namespace [[nodirectory]] usage { }
 }
 #endiv

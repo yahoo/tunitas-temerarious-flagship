@@ -1,0 +1,56 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+namespace tunitas::flagship::temerarious::input::exception {
+  //
+  // A problem with a "missing" file; e.g. not in the searchpath.
+  //
+  // Semantic: a file (name fragment) that is missing
+  //           as such, this is NOT a "system error" and there is no error code.
+  //
+  // Lifetimes:
+  //
+  //   The constructor accepts a view on a name (a view on a string).
+  //   The whence() returns a view on a string (a description of a filepath) which last longer than the exception.
+  //   Since this is frequently used with path::Search, some care is required.
+  //   
+  // Specification, Design, Usage: see partial::Filesystem
+  //
+  struct [[nodiscard]] Missing;
+}
+#endiv
+#divert <hpp>
+#import tunitas.flagship.temerarious.input.exception.Aspect
+#import tunitas.flagship.temerarious.input.exception.feature.Whence
+#import tunitas.flagship.temerarious.exception.partial.Runtime
+struct tunitas::flagship::temerarious::input::exception::Missing final : public virtual input::exception::Aspect,
+                                                                         public feature::Whence,
+                                                                         public partial::Runtime {
+  struct Ancestors {
+    struct Aspects  { /* ... who cares ... */ };
+    using Whence = feature::Whence;
+    using Exception = partial::Runtime;
+  };
+public:
+  inline explicit Missing(Name const &, string::View reason); // works for Location too
+  auto what() const noexcept -> char const *;
+  auto whence() const noexcept -> source::Name;
+};
+#endiv
+#divert <ipp>
+namespace tunitas::flagship::temerarious::input::exception {
+  Missing::Missing(Name const &missing, string::View reason)
+    : Ancestors::Whence{missing}
+    , Ancestors::Exception{reason}
+  { }
+}
+#endiv
+#divert <cpp>
+namespace tunitas::flagship::temerarious::input::exception {
+  auto Missing::what() const noexcept -> char const * { return Ancestors::Exception::what(); }
+  auto Missing::whence() const noexcept -> source::Name { return Ancestors::Whence::whence(); }
+};
+#endiv

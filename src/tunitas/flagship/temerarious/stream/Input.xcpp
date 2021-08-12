@@ -37,57 +37,90 @@ namespace tunitas::flagship::temerarious::stream {
 #divert <hpp>
 #import tunitas.flagship.temerarious.path.File
 #import tunitas.flagship.temerarious.stream.Base
-#import tunitas.flagship.temerarious.stream.File
+#import tunitas.flagship.temerarious.stream.Filebuf
+#import tunitas.flagship.temerarious.source.Name
 #import std.istream
 #import tunitas.string.View
 #import tunitas.string.Storage
-struct tunitas::flagship::temerarious::stream::Input : public std::istream, public Base, private File {
-  using Ancestor = std::istream;
-public:
-  inline explicit Input(std::istream &);
-  inline explicit Input(std::istream &, string::View name);
-  inline explicit Input(path::File const &, Mode = IN);
-  inline explicit Input(Input &&);
-  inline auto operator=(Input &&) -> Input &;
-  inline auto input_name() const -> string::View;
-private:
-  string::Storage input_description; // i.e. file name
-};
+namespace tunitas::flagship::temerarious {
+  namespace stream {
+    using std::move;
+    using std::swap;
+    inline auto swap(Input &a, Input &b) noexcept -> void;
+  }    
+  class stream::Input : public std::istream, public Base, private Filebuf {
+    using Ancestor = std::istream;
+    friend auto swap(Input &a, Input &b) noexcept -> void;
+  public:
+    inline explicit Input(std::istream &);
+    inline explicit Input(std::istream &, string::View name);
+    inline explicit Input(path::File const &, Mode = IN);
+    inline explicit Input(Input &&);
+    inline auto operator=(Input &&) -> Input &;
+    [[deprecated("prefer whence()")]] inline auto input_name() const -> string::View; // suitable for use in input::exception::Present{...}
+    inline auto whence() const -> source::Name; // suitable for use in input::exception::Present{...}
+  private:
+    string::Storage input_description; // i.e. file name
+    inline auto swap_streamstuff(Input &) noexcept -> void;
+  };
+}
 #endiv
 #divert <ipp>
-namespace tunitas::flagship::temerarious::stream {
-  Input::Input(std::istream &inbound)
-    : Ancestor{inbound.rdbuf()}
-    , input_description{"<input>"}
-  { }
-  Input::Input(path::File const &filepath, Mode mode)
-    : input_description{filepath} {
-    buf->open(filepath, mode);
+namespace tunitas::flagship::temerarious {
+  auto stream::swap(Input &a, Input &b) noexcept -> void {
+    Input::Base &a_base{a}, &b_base{b};
+    swap(a_base, b_base);
+    Input::Filebuf &a_filebuf{a}, &b_filebuf{b};
+    swap(a_filebuf, b_filebuf);
+    a.swap_streamstuff(b);
+    swap(a.input_description, b.input_description);
   }
-  Input::Input(Input &&other)
-    : Ancestor{forward<Input>(other)}
-    , Base{forward<Input>(other)}
-    , File{forward<Input>(other)}
-      // avoid Ancestor::move(...) which is used to move the streambuf
-    , input_description{std::move(other.input_description)} {
-      Ancestor::set_rdbuf(File::buf.get());
+  namespace stream {
+    auto Input::swap_streamstuff(Input &that) noexcept -> void {
+      // This accesses protected interfaces up in the Ancestor
+      this->swap(that); // ................... swaps the format bits, but nothing else
+      auto a_rdbuf = this->rdbuf(); // ....... swap the streambuf pointer
+      auto b_rdbuf = that.rdbuf();
+      this->set_rdbuf(b_rdbuf);
+      that.set_rdbuf(a_rdbuf);
+    }
+    Input::Input(std::istream &inbound)
+      : Ancestor{inbound.rdbuf()}
+      , input_description{"<input>"}
+    { }
+    Input::Input(path::File const &filepath, Mode mode)
+      : input_description{filepath} {
+      buf->open(filepath, mode);
+    }
+    Input::Input(Input &&other)
+      : Ancestor{}
+      , Base{forward<Input>(other)}
+      , Filebuf{forward<Input>(other)}
+      , input_description{std::move(other.input_description)} {
+        swap_streamstuff(other);
+    }
+    auto Input::operator=(Input &&other) -> Input & {
+      swap_streamstuff(other);
+      Base::operator=(forward<Input>(other));
+      Filebuf::operator=(forward<Input>(other));
+      input_description = std::move(other.input_description);
+      return *this;
+    }
+    auto Input::input_name() const -> string::View { return input_description; }
+    auto Input::whence() const -> source::Name { return {input_description}; }
   }
-  auto Input::operator=(Input &&other) -> Input & {
-    this->Ancestor::swap(other);
-    this->Base::operator=(forward<Input>(other));
-    this->File::operator=(forward<Input>(other));
-    Ancestor::set_rdbuf(File::buf.get());
-    this->input_description = std::move(other.input_description);
-    return *this;
-  }
-  auto Input::input_name() const -> string::View { return input_description; }
 }
 #endiv
 #divert <cpp>
-namespace tunitas::flagship::temerarious::stream {
-  static_assert(!std::is_copy_constructible_v<Input>);
-  static_assert(!std::is_copy_assignable_v<Input>);
-  static_assert(std::is_move_constructible_v<Input>);
-  static_assert(std::is_move_assignable_v<Input>);
+namespace {
+  namespace testate {
+    using namespace std;
+    using namespace tunitas::flagship::temerarious::stream;
+    static_assert(!is_default_constructible_v<Input>);
+    static_assert(!is_copy_constructible_v<Input>);
+    static_assert(!is_copy_assignable_v<Input>);
+    static_assert(is_move_constructible_v<Input>);
+    static_assert(is_move_assignable_v<Input>);
+  }
 }
 #endiv

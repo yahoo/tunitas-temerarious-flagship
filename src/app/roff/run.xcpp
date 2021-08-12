@@ -54,7 +54,7 @@ namespace app::roff::package_run {
     auto erroneity = Output{std::clog};
     auto outbound = Output{out};
     auto inbound = Input{in};
-    auto ess = processor::run(inbound, outbound, erroneity);
+    auto ess = processor::run(move(inbound), outbound, erroneity);
     return good(ess) ? OK : FAIL;
   }
 }

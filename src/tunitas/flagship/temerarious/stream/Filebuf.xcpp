@@ -1,0 +1,54 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+namespace tunitas::flagship::temerarious::stream {
+  //
+  // The file aspect
+  // Descendants only.
+  //
+  // Specification:
+  //
+  //   Manage the filebuf
+  //
+  // Usage:
+  //
+  //   By inheritance into stream::Output, stream::Output
+  //
+  struct Filebuf;
+}
+#endiv
+#divert <hpp>
+#import std.filebuf
+#import std.unique_ptr
+namespace tunitas::flagship::temerarious {
+  namespace stream {
+    using std::swap;
+    inline auto swap(Filebuf &, Filebuf &) noexcept -> void;
+  }
+  class stream::Filebuf {
+    friend auto stream::swap(Filebuf &, Filebuf &) noexcept -> void;
+  protected:
+    std::unique_ptr<std::filebuf> buf;
+    virtual ~Filebuf() = default;
+  public:
+    inline Filebuf();
+    Filebuf(Filebuf &&) = default;
+    auto operator=(Filebuf &&) -> Filebuf & = default;
+  };
+}
+#endiv
+#divert <ipp>
+namespace tunitas::flagship::temerarious {
+  auto stream::swap(Filebuf &a, Filebuf &b) noexcept -> void {
+    swap(a.buf, b.buf);
+  }
+  namespace stream {
+    Filebuf::Filebuf()
+      : buf{std::make_unique<std::filebuf>()}
+    { }
+  }
+}
+#endiv

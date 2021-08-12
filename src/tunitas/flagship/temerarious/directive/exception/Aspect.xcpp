@@ -1,0 +1,51 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+namespace tunitas::flagship::temerarious::directive::exception {
+  //
+  // The aspect of a directive exception
+  //
+  // Specification:
+  //
+  //   The directive exceptions have a member
+  //      auto location() const noexcept -> source::Location
+  //
+  //   These exceptions pertain to the operation of the directive itself.
+  //   As such, the pertain to the luser's input. These signal the luser's problem.
+  //   They cover problems in the field (a subgenre of the directive)
+  //
+  // Usage: (for example for the case of an Invalid exception)
+  //
+  //   class my::Problem : public virtual directive::exception::Aspect,
+  //                       public virtual temerarious::exception::Aspect,
+  //                       public virtual tunitas::exception::Aspect,
+  //                       public nonstd::exception::Invalid<string::View> {
+  //     struct Ancestors {
+  //       using Exception = nonstd::exception::Invalid<string::View>;
+  //     };
+  //   public:
+  //      ...constructor...
+  //      auto what() const noexcept -> char const * override { return Ancestors::Exception::what(); }
+  //   };
+  //
+  struct Aspect;
+}
+#endiv
+#divert <hpp>
+#import tunitas.flagship.temerarious.source.Location
+struct tunitas::flagship::temerarious::directive::exception::Aspect {
+protected:
+  virtual ~Aspect();
+public:
+  virtual auto what() const noexcept -> char const * = 0;
+  virtual auto where() const noexcept -> source::Location = 0;
+};
+#endiv
+#divert <cpp>
+namespace tunitas::flagship::temerarious::directive::exception {
+  Aspect::~Aspect() = default;
+}
+#endiv

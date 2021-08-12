@@ -1,0 +1,77 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <hpp>
+namespace tunitas::flagship::temerarious::directive::field::package_field::interface {
+  //
+  // get_identifier_and_more ... a two-argument directive (name & value)
+  //
+  // Specification:
+  //
+  //   Returns the pair of { identifier, remaining }
+  //   Verify eacy sub-field is appropriately shaped.
+  //   Else throw that certain exception
+  //
+  // Preconditions:
+  //
+  //   The leading and trailing blanks have been removed from the payload range.
+  //
+  // Example: (with context)
+  //
+  //      /------------------------------------------------------- dot
+  //      |
+  //      |/------------------------------------------------------ directive 'x'
+  //      ||
+  //      ||                   /---------------------- exploring this range (with the leading & trailing blanks trimmed)
+  //      ||                   |                       looking for a leading identifier and then "anything after that"
+  //      ||   /---------------+--------------\ (there)
+  //      ||   |                              |
+  //      ||   +--------\ /-------------------+
+  //      ||   |        | |                   |
+  //      vv   v        v v                   v
+  //     |.x   identifier some value at all ...      |<----- end
+  //         ^^                                ^^^^^^
+  //         ||                                ||||||
+  //         \\--------------------------------\|\\\\--------------- leading & trailing blanks were already trimmed
+  //
+  // Usage:
+  //
+  //   auto some_directive(State &, Outbound &, Location where, Payload payload) -> void {
+  //      auto [name, value] = get_identifier_and_more(where, payload);
+  //      ...blah blah blah...
+  //   }
+  //
+  inline auto get_identifier_and_more(Location where, Payload payload) -> Tuple<string::View, string::View>;
+}
+#endiv
+#divert <ipp>
+#import tunitas.flagship.temerarious.directive.field.get_identifier
+namespace tunitas::flagship::temerarious::directive::field::package_field {
+  auto interface::get_identifier_and_more(Location where, Payload payload) -> Tuple<string::View, string::View> {
+    ensure_not_empty(where, payload);
+    if (auto blank=find_first_blank(payload); NO == blank) {
+      throw exception::Statement{where, "need two fields here"sv};
+    } else {
+      auto data = payload.data();
+      auto const end = payload.size();
+      auto identifier = get_identifier(where, string::View{data, blank});
+      auto start = [end, payload](size_t start) {
+                    for ( ; start < end; ++start) {
+                      if (!isspace(payload.at(start))) {
+                        break;
+                      }
+                    }
+                    return start;
+                  }(blank+1u);
+      auto value = string::View{data+start, payload.size() - start};
+      ensure_not_empty(where, value);
+      if (!istext(value)) {
+        throw exception::Field{where, "unprintable field"sv};
+      }
+      return {identifier, value};
+    }      
+  }
+}
+#endiv

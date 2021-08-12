@@ -7,7 +7,8 @@
 obj_src_tunitas_flagship_temerarious_processor_SUBSOURCES = \
   obj/src/tunitas/flagship/temerarious/processor/namespace.cpp \
   obj/src/tunitas/flagship/temerarious/processor/State.cpp \
-  obj/src/tunitas/flagship/temerarious/processor/condition.Stack.cpp \
-  obj/src/tunitas/flagship/temerarious/processor/diversion.Stack.cpp \
+  $(obj_src_tunitas_flagship_temerarious_processor_exception_SUBSOURCES) \
   obj/src/tunitas/flagship/temerarious/processor/run.cpp \
   $(end)
+#
+include src/tunitas/flagship/temerarious/processor/exception/Makefrag.am
