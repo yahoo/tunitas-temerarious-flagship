@@ -42,9 +42,9 @@ struct tunitas::flagship::temerarious::input::exception::Present final : public 
 public:
   // Same rough constructor argument alignment as the ancestor nonstd::exception::Filesystem<string::View>
   inline explicit Present(char const *, std::error_code, string::View reason) = delete; // no pointers!
-  inline explicit Present(string::View, std::error_code, string::View reason);
-  inline explicit Present(string::Storage const &, std::error_code, string::View reason);
-  inline explicit Present(file::Path const &, std::error_code, string::View reason);
+  inline explicit Present(string::View filepath, std::error_code, string::View reason);
+  inline explicit Present(string::Storage const & filepath, std::error_code, string::View reason);
+  inline explicit Present(file::Path const & filepath, std::error_code, string::View reason);
   inline explicit Present(source::Name const &, std::error_code, string::View reason); // and source::Location works too
   auto what() const noexcept -> char const * override;
   auto whence() const noexcept -> source::Name override;

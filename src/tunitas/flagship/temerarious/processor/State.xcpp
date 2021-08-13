@@ -35,120 +35,144 @@ namespace tunitas::flagship::temerarious::processor {
 #forward tunitas.flagship.temerarious.stream.Input
 #forward tunitas.flagship.temerarious.stream.Output
 #import tunitas.flagship.temerarious.variable.Frame
-struct tunitas::flagship::temerarious::processor::State {
-  //
-  // And when do you use which?
-  // https://en.cppreference.com/w/cpp/language/value_category (prvalue, rvalue, lvalue, etc.)
-  //
-  //                                  /----------------------------------- prvalue, the Input is accepted by the State.
-  //                                  |
-  //                                  |                  /---------------- lvalue, the Output is referenced to an existing one.
-  //                                  |                  |
-  //                                  v                  v
-  inline explicit State(stream::Input &&, stream::Output &);
-  State(State const &) = default;
-  auto operator=(State const &) -> State & = default;
-  input::Stack inbounds;
-  variable::Frame globals;
-  path::Search search;
-  inline auto define_variable(string::View identifier, string::View value) -> void;
-  inline auto undefine_variable(string::View identifier) -> void;
-  inline auto push_input(stream::Input &&) -> void;
-  inline auto pop_input() -> void;
-  inline auto push_diversion(stream::Output &) -> void;
-  inline auto push_diversion(string::View identifier) -> void;
-  inline auto pop_diversion() -> void;
-  inline auto push_condition(string::View condition, bool negate = false) -> void;
-  inline auto push_condition(bool condition) -> void;
-  inline auto push_condition(char const *) -> void = delete; // avoid the ambiguity with bool
-  inline auto pop_condition() -> void;
-  inline auto passthrough(string::View line) -> void;
-private:
-  inline static auto s(string::View view) -> string::Storage; // because std::map<...> requires std::string, never std::view
-  inline auto ensure_condition() -> bool &; // a.k.a. condition::Frame &
-  inline auto ensure_conditions() -> input::condition::Stack &;
-  inline auto ensure_diversion() -> diversion::Frame &;
-  inline auto ensure_diversions() -> diversion::Stack &;
-  inline auto ensure_inbound() -> input::Frame &;
-  inline auto ensure_inbounds() -> input::Stack &;
-};
+namespace tunitas::flagship::temerarious {
+  namespace processor {
+    //
+    // Rhymes with std::getline(ostream &, [[fill]] string &) -> ostream &
+    // Throws if the inbounds stack is empty
+    //
+    // Usage:
+    //
+    //   auto &state = State{...somehow...};
+    //   auto buffer = string::Storage{...somehow...};
+    //   while (getline(state, buffer)) {
+    //      ...use the buffer...
+    //   }
+    //
+    inline auto getline(State &, [[fill]] string::Storage &) -> stream::Input &;
+  }
+  struct processor::State {
+    //
+    // And when do you use which?
+    // https://en.cppreference.com/w/cpp/language/value_category (prvalue, rvalue, lvalue, etc.)
+    //
+    //                                  /----------------------------------- prvalue, the Input is accepted by the State.
+    //                                  |
+    //                                  |                  /---------------- lvalue, the Output is referenced to an existing one.
+    //                                  |                  |
+    //                                  v                  v
+    inline explicit State(stream::Input &&, stream::Output &);
+    State(State const &) = default;
+    auto operator=(State const &) -> State & = default;
+    input::Stack inbounds;
+    variable::Frame globals;
+    path::Search search;
+    inline auto define_variable(string::View identifier, string::View value) -> void;
+    inline auto undefine_variable(string::View identifier) -> void;
+    inline auto push_input(stream::Input &&) -> void;
+    inline auto pop_input() -> void;
+    inline auto push_diversion(stream::Output &) -> void;
+    inline auto push_diversion(string::View identifier) -> void;
+    inline auto pop_diversion() -> void;
+    inline auto push_condition(string::View condition, bool negate = false) -> void;
+    inline auto push_condition(bool condition) -> void;
+    inline auto push_condition(char const *) -> void = delete; // avoid the ambiguity with bool
+    inline auto pop_condition() -> void;
+    inline auto passthrough(string::View line) -> void;
+  private:
+    inline static auto s(string::View view) -> string::Storage; // because std::map<...> requires std::string, never std::view
+    inline auto ensure_condition() -> bool &; // a.k.a. condition::Frame &
+    inline auto ensure_conditions() -> input::condition::Stack &;
+    inline auto ensure_diversion() -> diversion::Frame &;
+    inline auto ensure_diversions() -> diversion::Stack &;
+    inline auto ensure_inbound() -> input::Frame &;
+    inline auto ensure_inbounds() -> input::Stack &;
+    friend auto processor::getline(State &, string::Storage &) -> stream::Input &;
+  };
+}
 #endiv
 #divert <ipp>
 #import tunitas.flagship.temerarious.processor.exception.Diversion
 #import tunitas.flagship.temerarious.processor.exception.Condition
 #import tunitas.flagship.temerarious.processor.exception.Input
-namespace tunitas::flagship::temerarious::processor {
-  State::State(stream::Input &&in, stream::Output &out) {
-    inbounds.push({forward<stream::Input>(in), out});
+#import std.getline
+namespace tunitas::flagship::temerarious {
+  auto processor::getline(State &state, string::Storage &fill) -> stream::Input & {
+    auto &in = state.ensure_inbound().inbound;
+    std::getline(in, fill);
+    return in;
   }
-  auto State::define_variable(string::View identifier, string::View value) -> void {
-    // this allows overwriting of variables with new values
-    auto &lhs = globals.at(s(identifier));
-    lhs = value;
-  }
-  auto State::undefine_variable(string::View identifier) -> void {
-    auto found = globals.find(s(identifier));
-    auto const end = globals.end();
-    if (end != found) {
-      globals.erase(found);
+  namespace processor {
+    State::State(stream::Input &&in, stream::Output &out) { inbounds.push({forward<stream::Input>(in), out}); }
+    auto State::passthrough(string::View buffer) -> void { ensure_diversion().emplace(buffer); }
+    auto State::define_variable(string::View identifier, string::View value) -> void {
+      globals[s(identifier)] = value; // this allows overwriting of old variables with new values 
     }
-  }
-  auto State::push_input(stream::Input &&noob) -> void {
-    noob.unsetf(std::ios::skipws);
-    inbounds.push({forward<stream::Input>(noob), ensure_inbound()});
-  }
-  auto State::pop_input() -> void {
-    // Independent of whether the input frame is "good to close" then ... close it.
-    // The caller is responsible for probing the input frame and messaging about problems.
-    // Such happens in processor::run(...) in the main event loop at EOF of the input frame.
-  }
-  auto State::push_diversion(string::View identifier) -> void {
-    auto *sink = [identifier, this]{
-                   auto sidentifier = s(identifier);
+    auto State::undefine_variable(string::View identifier) -> void {
+      auto found = globals.find(s(identifier));
+      auto const end = globals.end();
+      if (end != found) {
+        globals.erase(found);
+      }
+    }
+    auto State::push_input(stream::Input &&noob) -> void {
+      noob.unsetf(std::ios::skipws);
+      // Can push on an empty stack.
+      inbounds.push({forward<stream::Input>(noob), ensure_inbound()});
+    }
+    auto State::pop_input() -> void {
+      // Independent of whether the input frame is "good to close" then ... close it.
+      // The caller is responsible for probing the input frame and messaging about problems.
+      // Such happens in processor::run(...) in the main event loop at EOF of the input frame.
+      ensure_inbounds().pop();
+    }
+    auto State::push_diversion(string::View identifier) -> void {
+      auto *sink = [identifier, this]{
+                     auto sidentifier = s(identifier);
 #if 1
-                   // Either the insertion was performed true==inserted.second and inserted.first is that place
-                   // Or else the insertion was refused false==inserted.second and inserted.first is old item.
-                   auto inserted = globals.insert({s(identifier), string::Storage{}});
-                   return &inserted.first->second;
+                     // Either the insertion was performed true==inserted.second and inserted.first is that place
+                     // Or else the insertion was refused false==inserted.second and inserted.first is old item.
+                     auto inserted = globals.insert({s(identifier), string::Storage{}});
+                     return &inserted.first->second;
 #else
-                   auto found = globals.find(sidentifier);
-                   auto const end = globals.end();
-                   if (end == found) {
-                     auto &lhs = globals.at(sidentifier);
-                     return &lhs;
-                   } else {
-                     return &found->second;
-                   }
+                     auto found = globals.find(sidentifier);
+                     auto const end = globals.end();
+                     if (end == found) {
+                       auto &lhs = globals.at(sidentifier);
+                       return &lhs;
+                     } else {
+                       return &found->second;
+                     }
 #endif
-                 }();
-      ensure_diversions().push(sink);
-  }
-  auto State::pop_diversion() -> void {
-    auto &d = ensure_diversions();
-    d.pop();
-    if (d.empty()) {
-      throw exception::Diversion{"diversions are exhausted"}; // an .divert/.endiv
+                   }();
+        ensure_diversions().push(sink);
+    }
+    auto State::pop_diversion() -> void {
+      auto &d = ensure_diversions();
+      d.pop();
+      if (d.empty()) {
+        throw exception::Diversion{"diversions are exhausted"}; // an .divert/.endiv
+      }
+    }
+    auto State::push_condition(string::View identifier, bool negate) -> void {
+      auto condition = [identifier, &t=this->globals]{
+                         auto found = t.find(s(identifier));
+                         auto const end = t.end();
+                         return end == found;
+                       }();
+      ensure_conditions().push(condition ^ negate);
+    }
+    auto State::push_condition(bool condition) -> void {
+      ensure_conditions().push(condition);
+    }
+    auto State::pop_condition() -> void {
+      auto &c = ensure_conditions();
+      c.pop();
+      if (c.empty()) {
+        throw exception::Condition{"conditions are exhausted"}; // unbalanced .if/.elif/.else/.endif"sv};
+      }
     }
   }
-  auto State::push_condition(string::View identifier, bool negate) -> void {
-    auto condition = [identifier, &t=this->globals]{
-                       auto found = t.find(s(identifier));
-                       auto const end = t.end();
-                       return end == found;
-                     }();
-    ensure_conditions().push(condition ^ negate);
-  }
-  auto State::push_condition(bool condition) -> void {
-    ensure_conditions().push(condition);
-  }
-  auto State::pop_condition() -> void {
-    auto &c = ensure_conditions();
-    c.pop();
-    if (c.empty()) {
-      throw exception::Condition{"conditions are exhausted"}; // unbalanced .if/.elif/.else/.endif"sv};
-    }
-  }
-  auto State::passthrough(string::View buffer) -> void { ensure_diversion().emplace(buffer); }
 }
 namespace tunitas::flagship::temerarious::processor {
   // utilities and privates (protecteds)

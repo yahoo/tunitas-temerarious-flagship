@@ -1,0 +1,3 @@
+#!/bin/bash --norc
+source ${0%/*}/../rigging.sh
+tf roff ${directory?}/top.roff

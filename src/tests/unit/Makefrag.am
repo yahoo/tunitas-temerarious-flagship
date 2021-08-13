@@ -6,6 +6,7 @@
 #
 check_bin_unit = check/bin/unit
 check_bin_unit_LDADD = \
+  $(lib_libtunitas_flagship_temerarious_la) \
   $(lib_libapp_la) \
   $(lib_libapp_tf_la) \
   $(lib_libapp_roff_la) \

@@ -11,10 +11,14 @@ namespace app::roff {
   }
 }
 #import sys.exits.constants // [[FIXTHIS]] move to cli.exits.constants when module-options >= 2.0 is ready
+#import tunitas.file
+#import tunitas.string
 namespace app::roff {
   namespace package_run::package_body_run::body {
     using Exit = sys::exits::Code;
     using namespace sys::exits::constants;
+    namespace file = tunitas::file;
+    namespace string = tunitas::string;
   }
 }
 #endiv
@@ -24,6 +28,7 @@ namespace app::roff {
 #import tunitas.flagship.temerarious.stream.Input
 #import tunitas.flagship.temerarious.stream.Output
 #import tunitas.flagship.temerarious.processor
+#import tunitas.file.Path
 namespace app::roff::package_run {
   namespace interface {
     //
@@ -38,6 +43,7 @@ namespace app::roff::package_run {
     //   return run(cin, cout);
     // 
     inline auto run(std::istream &, std::ostream &) -> Exit;
+    inline auto run(file::Path const &in, file::Path const &out) -> Exit;
   }
   namespace package_body_run::body {
     using tunitas::flagship::temerarious::stream::Input;
@@ -47,9 +53,22 @@ namespace app::roff::package_run {
 }
 #endiv
 #divert <ipp>
+#import app.roff.exception.File
 #import std.clog
+#import std.ifstream
+#import std.ofstream
 #import tunitas.flagship.temerarious.processor.run
 namespace app::roff::package_run {
+  auto interface::run(file::Path const &infile, file::Path const &outfile) -> Exit {
+    auto erroneity = Output{std::clog};
+    if (auto in = std::ifstream{infile}; !in) {
+      throw exception::File{"reading", infile};
+    } else if (auto out = std::ofstream{outfile}; !out) {
+      throw exception::File{"writing", outfile};
+    } else {
+      return run(in, out);
+    }
+  }
   auto interface::run(std::istream &in, std::ostream &out) -> Exit {
     auto erroneity = Output{std::clog};
     auto outbound = Output{out};

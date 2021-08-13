@@ -7,6 +7,7 @@
 obj_src_tests_unit_exception_SUBSOURCES = \
   obj/src/tests/unit/exception/namespace.cpp \
   obj/src/tests/unit/exception/Fixture.cpp \
+  obj/src/tests/unit/exception/app.Fixture.cpp \
   obj/src/tests/unit/exception/temerarious.Fixture.cpp \
   obj/src/tests/unit/exception/processor.Fixture.cpp \
   obj/src/tests/unit/exception/directive.Fixture.cpp \

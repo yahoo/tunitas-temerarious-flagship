@@ -33,10 +33,12 @@ struct tests::unit::stream::output::Fixture : public cppunit::test::Fixture {
 namespace tests::unit::stream::output {
   auto Fixture::test_constructor_conversion_stream() -> void {
     auto subject = Subject{std::cout}; // <---------------------------------------- test this
+    CPPUNIT_ASSERT(subject.good());
     subject << "a loud mouth bass";
   }
   auto Fixture::test_constructor_conversion_file() -> void {
     auto subject = Subject{"/dev/null"}; // <---------------------------------------- test this
+    CPPUNIT_ASSERT(subject.good());
     subject << "shush, be quiet!";
   }
   auto Fixture::test_constructor_copy() -> void {
@@ -73,7 +75,7 @@ namespace tests::unit::stream::output {
                 con << []{
                          auto ver = Stream{"conversion"};
                          ver << call("stream", &Fixture::test_constructor_conversion_stream)
-                             << call("fil", &Fixture::test_constructor_conversion_file)
+                             << call("file", &Fixture::test_constructor_conversion_file)
                              << END;
                          return move(ver);
                        }()

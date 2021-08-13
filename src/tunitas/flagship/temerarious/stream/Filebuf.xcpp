@@ -4,6 +4,7 @@
 // For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
 // For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
 #divert <fpp>
+#import nonstd.uninitialized
 namespace tunitas::flagship::temerarious::stream {
   //
   // The file aspect
@@ -17,38 +18,44 @@ namespace tunitas::flagship::temerarious::stream {
   //
   //   By inheritance into stream::Output, stream::Output
   //
-  struct Filebuf;
+  namespace [[eponymous]] filebuf {
+    struct Filebuf;
+    using namespace nonstd::uninitialized;
+  }
+  using filebuf::Filebuf;
 }
 #endiv
 #divert <hpp>
 #import std.filebuf
 #import std.unique_ptr
-namespace tunitas::flagship::temerarious {
-  namespace stream {
+#import nonstd.uninitialized
+namespace tunitas::flagship::temerarious::stream {
+  namespace filebuf {
     using std::swap;
     inline auto swap(Filebuf &, Filebuf &) noexcept -> void;
   }
-  class stream::Filebuf {
-    friend auto stream::swap(Filebuf &, Filebuf &) noexcept -> void;
+  class filebuf::Filebuf {
+    friend auto filebuf::swap(Filebuf &, Filebuf &) noexcept -> void;
   protected:
     std::unique_ptr<std::filebuf> buf;
     virtual ~Filebuf() = default;
+    inline static constexpr auto UNINITIALIZED = filebuf::UNINITIALIZED;
   public:
     inline Filebuf();
+    inline Filebuf(Uninitialized);
     Filebuf(Filebuf &&) = default;
     auto operator=(Filebuf &&) -> Filebuf & = default;
   };
 }
 #endiv
 #divert <ipp>
-namespace tunitas::flagship::temerarious {
-  auto stream::swap(Filebuf &a, Filebuf &b) noexcept -> void {
+namespace tunitas::flagship::temerarious::stream {
+  auto filebuf::swap(Filebuf &a, Filebuf &b) noexcept -> void {
     swap(a.buf, b.buf);
   }
-  namespace stream {
-    Filebuf::Filebuf()
-      : buf{std::make_unique<std::filebuf>()}
-    { }
+  namespace filebuf {
+    Filebuf::Filebuf() : buf{std::make_unique<std::filebuf>()}  { }
+    Filebuf::Filebuf(Uninitialized)  { }
   }
 }
 #endiv

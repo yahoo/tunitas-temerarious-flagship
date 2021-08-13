@@ -1,0 +1,81 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+#import tunitas.string
+#import tunitas.file
+namespace app::roff::exception {
+  //
+  // A problem opening a file, within the application layer.
+  //
+  // Specification:
+  //
+  //   A single file, by name.
+  //   With a verb (expect "reading" or "writing")
+  //
+  //   These are thrown around within the application layer, before entering the main 'roff processor loop.
+  //   They are used for characterizing problems in both for input and output files.
+  //
+  // Design:
+  //
+  //   The current errno is captured in the default argument.
+  //   An alternative errno value can be supplied.
+  //
+  // Usage:
+  //
+  //   throw exception::File{filepath, "reading"};
+  //
+  namespace [[eponymous]] file {
+    namespace eponymity {
+      struct [[nodiscard]] File;
+      namespace string = tunitas::string;
+      namespace file = tunitas::file;
+    }
+  }
+  using file::eponymity::File;
+}
+#endiv
+#divert <hpp>
+#import app.exception.Aspect
+#import nonstd.exception.Filesystem
+#import tunitas.file.Path
+#import tunitas.string.View
+#import tunitas.string.Storage
+#import nonstd.errcode // rhymes with errno
+struct app::roff::exception::file::eponymity::File : public virtual Aspect,
+                                                     public nonstd::exception::Filesystem<string::View> {
+  struct Ancestors {
+    struct Aspects { /* who cares? */ };
+    using Exception = nonstd::exception::Filesystem<string::View>;
+  };
+public:
+  // verbie = "open for reading"
+  // verbie = "open for writing"
+  // verbie = "open"
+  // verbie = "close"
+  inline explicit File(string::View verbie, file::Path const &, std::error_code = nonstd::errcode());
+  auto what() const noexcept -> char const * override;
+private:
+  static auto format(string::View verbie, file::Path const &, std::error_code) -> string::Storage;
+};
+#endiv
+#divert <ipp>
+namespace app::roff::exception::file::eponymity {
+  File::File(string::View verbie, file::Path const &filepath, std::error_code ec)
+    : Ancestors::Exception{filepath, ec, format(verbie, filepath, ec)}
+  { }
+}
+#endiv
+#divert <cpp>
+#import std.ostringstream
+namespace app::roff::exception::file::eponymity {
+  auto File::what() const noexcept -> char const * { return Ancestors::Exception::what(); }
+  auto File::format(string::View verbie, file::Path const &filepath, std::error_code ec) -> string::Storage {
+    auto buf = std::ostringstream{};
+    buf << "cannot " << verbie << " the file " << filepath << " because " << ec.message();
+    return buf.str();
+  }
+}
+#endiv

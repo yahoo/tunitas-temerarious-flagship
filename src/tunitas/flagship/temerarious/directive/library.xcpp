@@ -58,7 +58,7 @@ namespace tunitas::flagship::temerarious::directive::package_directive {
   }
   auto interface::uncomment(State &, Output &outbound, Location where, Payload payload) -> void {
     // [[FIXTHIS]] so we don't have to see std::cerr
-    std::cerr << where << ": inappropriate comment character (treating it as a comment where anyway)\n";
+    std::cerr << where << ": warning, inappropriate comment character (treating it as a comment where anyway)\n";
     // Yes, do nothing with the commentariat
   }
   auto interface::block(State &state, Output &, Location where, Payload payload) -> void {
@@ -101,29 +101,17 @@ namespace tunitas::flagship::temerarious::directive::package_directive {
     throw_not_in_a_condition_frame(where);
   }
 }
-#import std.copy
-#import std.ifstream
-#import std.istream_iterator
-#import std.ostream_iterator
-#import std.system_category
-#import errno
-#import tunitas.flagship.temerarious.exception.Filesystem
+#import nonstd.errcode
 #import tunitas.flagship.temerarious.stream.Input
+#import tunitas.flagship.temerarious.input.exception.Present
 namespace tunitas::flagship::temerarious::directive::package_directive {
   auto interface::read(State &state, Output &outbound, Location where, Payload payload) -> void {
     auto filepath = get_filepath(where, payload);
-    state.push_input(stream::Input{filepath});
-#if 0
-    // We no longer do this here ... we have pushed the new input onto the stack; the main loop will take care of it.
-    ifstream inbound{filepath};
+    auto inbound = stream::Input{filepath};
     if (!inbound) {
-      throw exception::Filesystem{move(filepath), {errno, system_category()}, "open failed"sv};
+      throw input::exception::Present{filepath, nonstd::errcode(), ".r filename"};
     }
-    inbound.unsetf(ios::skipws);
-    using In = istream_iterator<char>;
-    using Out = ostream_iterator<char>;
-    copy(In{inbound}, In{}, Out{outbound});
-#endif
+    state.push_input(move(inbound));
   }
 }
 #endiv

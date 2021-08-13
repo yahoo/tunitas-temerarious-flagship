@@ -75,9 +75,17 @@ namespace tunitas::flagship::temerarious {
       this->set_rdbuf(b_rdbuf);
       that.set_rdbuf(a_rdbuf);
     }
-    Output::Output(std::ostream &outbound) : Ancestor{outbound.rdbuf()} { }
+    Output::Output(std::ostream &outbound)
+      : Ancestor{outbound.rdbuf()}
+      , Filebuf{UNINITIALIZED}
+    { }
     Output::Output(path::File const &filepath, Mode mode) {
-      buf->open(filepath, mode);
+      this->init(buf.get());
+      if (!buf->open(filepath, mode)) {
+        this->setstate(ios_base::failbit);
+      } else {
+        this->clear();
+      }
     }
     Output::Output(Output &&other)
       : Ancestor{}

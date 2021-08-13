@@ -19,6 +19,7 @@ lib_libapp_roff_la_SOURCES = \
   obj/src/app/roff/main.cpp \
   obj/src/app/roff/run.cpp \
   obj/src/app/roff/usage.Message.cpp \
+  obj/src/app/roff/exception.File.cpp \
   $(end)
 #
 $(scold_cxxdir)/app/roff/dependencies.mk: $(libexec_temerarious_flagship_roff_SOURCES) $(lib_libapp_roff_la_SOURCES)

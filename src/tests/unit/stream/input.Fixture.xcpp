@@ -23,6 +23,7 @@ struct tests::unit::stream::input::Fixture : public cppunit::test::Fixture {
   auto test_constructor_move() -> void;
   auto test_assignment_copy() -> void;
   auto test_assignment_move() -> void;
+  auto test_getline() -> void;
   static auto suite() -> cppunit::Test *;
 };
 #endiv
@@ -33,12 +34,17 @@ struct tests::unit::stream::input::Fixture : public cppunit::test::Fixture {
 namespace tests::unit::stream::input {
   auto Fixture::test_constructor_conversion_stream() -> void {
     auto buf = std::istringstream{"I want something to read"};
+    buf.unsetf(std::ios::skipws);
     auto subject = Subject{buf}; // <---------------------------------------- test this
+    CPPUNIT_ASSERT(subject.good());
     std::string something;
     subject >> something;
+    CPPUNIT_ASSERT(!something.empty());
+    std::cerr << __FILE__ << ':' << __LINE__ << ' ' << __FUNCTION__ << " finds <<" << something << ">>\n";
   }
   auto Fixture::test_constructor_conversion_file() -> void {
     auto subject = Subject{"/dev/null"}; // <---------------------------------------- test this
+    CPPUNIT_ASSERT(subject.good());
     std::string something;
     subject >> something;
   }
@@ -54,9 +60,13 @@ namespace tests::unit::stream::input {
   auto Fixture::test_constructor_move() -> void {
     auto buf = std::istringstream{"I want something to read"};
     auto specimen = Subject{buf};
+    CPPUNIT_ASSERT(specimen.good());
     auto subject = Subject{move(specimen)}; // <---------------------------------------- test this
+    CPPUNIT_ASSERT(subject.good());
     std::string something;
     subject >> something;
+    CPPUNIT_ASSERT(!something.empty());
+    std::cerr << __FILE__ << ':' << __LINE__ << ' ' << __FUNCTION__ << " finds <<" << something << ">>\n";
   }
   auto Fixture::test_assignment_copy() -> void {
 #if 0 // copy is denied
@@ -72,9 +82,27 @@ namespace tests::unit::stream::input {
     auto buf = std::istringstream{"I want something to read"};
     auto specimen = Subject{buf};
     auto subject = Subject{std::cin};
+    CPPUNIT_ASSERT(subject.good());
     subject = move(specimen); // <---------------------------------------- test this
+    CPPUNIT_ASSERT(subject.good());
     std::string something;
     subject >> something;
+    CPPUNIT_ASSERT(!something.empty());
+    std::cerr << __FILE__ << ':' << __LINE__ << ' ' << __FUNCTION__ << " finds <<" << something << ">>\n";
+  }
+  auto Fixture::test_getline() -> void {
+    auto in = std::istringstream{"line 1: apple\n"
+                                 "line 2: banana\n"
+                                 "line 3: cherry\n"
+                                 "line 4: dog\n"
+                                 "line 5: eagle\n"s};
+    auto buf = string::Storage{};
+    auto count{0u};
+    while (getline(in, buf)) {
+      ++count;
+      std::cerr << "read <<" << buf << ">>\n";
+    }
+    CPPUNIT_ASSERT(5u == count);
   }
   auto Fixture::suite() -> cppunit::Test * {
     using namespace rigging::suite;
@@ -84,7 +112,7 @@ namespace tests::unit::stream::input {
                 con << []{
                          auto ver = Stream{"conversion"};
                          ver << call("stream", &Fixture::test_constructor_conversion_stream)
-                             << call("stream", &Fixture::test_constructor_conversion_file)
+                             << call("file", &Fixture::test_constructor_conversion_file)
                              << END;
                          return move(ver);
                        }()
@@ -100,6 +128,7 @@ namespace tests::unit::stream::input {
                     << END;
                 return move(ass);
               }()
+           << call("getline", &Fixture::test_getline)
            << END;
     return finalize(series);
   }

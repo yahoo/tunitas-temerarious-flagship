@@ -10,7 +10,10 @@ lib_libapp_la_LDFLAGS = $(PACKAGE_LDFLAGS_SET)
 lib_libapp_la_MODULES = $(call TF_SOURCEStoMODULES, $(lib_libapp_la_SOURCES))
 lib_libapp_la_SOURCES = \
   obj/src/app/namespace.cpp \
+  $(obj_src_app_exception_SUBSOURCES) \
   $(end)
+#
+include src/app/exception/Makefrag.am
 #
 $(scold_cxxdir)/app/dependencies.mk: $(lib_libapp_la_SOURCES)
 $(lib_libapp_la_SOURCES) : obj/src/%.cpp : src/%.xcpp

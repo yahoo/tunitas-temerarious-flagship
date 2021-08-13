@@ -12,6 +12,7 @@ namespace tests::unit::exception { class Fixture; }
 #import tests.unit.exception.processor.Fixture
 #import tests.unit.exception.directive.Fixture
 #import tests.unit.exception.input.Fixture
+#import tests.unit.exception.app.Fixture
 struct tests::unit::exception::Fixture : public cppunit::test::Fixture {
   static auto suite() -> cppunit::Test *;
 };
@@ -25,6 +26,7 @@ namespace tests::unit::exception {
            << add<processor::Fixture>()
            << add<directive::Fixture>()
            << add<input::Fixture>()
+           << add<app::Fixture>()
            << END;
     return finalize(series);
   }

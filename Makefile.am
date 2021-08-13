@@ -33,19 +33,22 @@ INSTALLATION_AREAS = \
   $(std_tunitas_prefix) \
   $(end)
 
+include addenda/nonstd/Makefrag.am
 include src/app/Makefrag.am
 include src/app/tf/Makefrag.am
 include src/app/roff/Makefrag.am
 include src/autotools/autoconf/Makefrag.am
 include src/std/Makefrag.am
 include src/tunitas/flagship/temerarious/Makefrag.am
-include src/tests/unit/Makefrag.am
-include src/tests/tf/Makefrag.am
+include src/tests/catty/Makefrag.am
 include src/tests/roff/Makefrag.am
+include src/tests/tf/Makefrag.am
+include src/tests/unit/Makefrag.am
 
 # install rules arrive from from @temerarious_flagship_datadir@/am/install.am
 INSTALL_MODULES = \
-  $(lib_libtunitas_flagship_temerarious_la_modules_la) \
+  $(lib_libtunitas_flagship_temerarious_la) \
+  $(lib_libwant_la) \
   $(end)
 $(if $(DEBUGGING_CONDITION),$(info DEBUG INSTALL_MODULES=$(INSTALL_MODULES)))
 
@@ -54,13 +57,19 @@ libexec_temerarious_flagshipdir = libexec/temerarious-flagship
 libexec_temerarious_flagship_PROGRAMS = $(libexec_temerarious_flagship_roff)
 lib_LTLIBRARIES = $(lib_libtunitas_flagship_temerarious_la)
 noinst_LTLIBRARIES = \
+  $(lib_libaddenda_nonstd_la) \
   $(lib_libautotools_autoconf_la) \
   $(lib_libstd_temerarious_flagship_la) \
   $(lib_libapp_la) \
   $(lib_libapp_roff_la) \
   $(lib_libapp_tf_la) \
   $(end)
-check_PROGRAMS = $(check_bin_unit) $(check_bin_tf) $(check_bin_roff)
+check_PROGRAMS = \
+  $(check_bin_unit) \
+  $(check_bin_catty) \
+  $(check_bin_tf) \
+  $(check_bin_roff) \
+  $(end)
 check_LTLIBRARIES = $(none)
 
 # NEED THIS or else...
@@ -70,6 +79,7 @@ check_LTLIBRARIES = $(none)
 # NEED ---> include $(module_sys_datadir)/mk/sys.o.DUMMIES.mk
 
 include tests/unit/Makefrag.am
+include tests/catty/Makefrag.am
 include tests/tf/Makefrag.am
 include tests/roff/Makefrag.am
 include tests/scripty/roff/Makefrag.am
@@ -83,6 +93,7 @@ XPASS_TESTS = \
   $(end)
 XFAIL_TESTS = \
   $(tests_unit_XFAIL_TESTS) \
+  $(tests_catty_XFAIL_TESTS) \
   $(tests_tf_XFAIL_TESTS) \
   $(tests_roff_XFAIL_TESTS) \
   $(tests_scripty_tf_XFAIL_TESTS) \
@@ -90,6 +101,7 @@ XFAIL_TESTS = \
   $(end)
 TESTS = \
   $(tests_unit_TESTS) \
+  $(tests_catty_TESTS) \
   $(tests_tf_TESTS) \
   $(tests_roff_TESTS) \
   $(tests_scripty_tf_TESTS) \

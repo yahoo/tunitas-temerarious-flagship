@@ -1,0 +1,32 @@
+#!/bin/bash --norc
+__topdir=$(realpath ${0%/*}/../..)
+export PATH="${__topdir?}/check/bin:${__topdir?}/bin:$PATH"
+cat <<EOF | catty
+apple
+banana
+cherry
+dog
+eagle
+frog
+goat
+harpie
+idiot
+jackass
+kangaroo
+llama
+marmot
+narwhal
+ocelot
+possum
+quail
+rat
+seal
+turkey
+usufruct
+vole
+whale
+xylotyl
+yak
+zebra
+EOF
+

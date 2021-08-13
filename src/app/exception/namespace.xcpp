@@ -5,10 +5,8 @@
 // For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
 #divert <fpp>
 #import app
-#import app.exception
-namespace app::roff {
-  namespace [[implementation]] packaging { }
-  namespace [[nodirectory]] usage { }
-  namespace [[nodirectory]] exception { using namespace app::exception; }
+#import tunitas.application.exception
+namespace app::exception {
+  using namespace tunitas::application::exception;
 }
 #endiv
