@@ -8,15 +8,13 @@ namespace tests::unit::source { struct Location; }
 #endiv
 #divert <hpp>
 #import tunitas.flagship.temerarious.source.Location
-#import tunitas.flagship.temerarious.source.Line
-#import tunitas.file.Path
 struct tests::unit::source::Location : public cppunit::test::Fixture {
   using Subject = library::Location;
-  using Line = library::Line;
-  using Filepath = ::tunitas::file::Path;
   auto test_constructor_std() -> void;
-  auto test_constructor_2arg() -> void;
+  auto test_constructor_2view() -> void;
+  auto test_constructor_2name() -> void;
   auto test_line() -> void;
+  auto test_fileview() -> void;
   auto test_filepath() -> void;
   auto test_file_name() -> void;
   auto test_operator_insert() -> void;
@@ -27,27 +25,38 @@ struct tests::unit::source::Location : public cppunit::test::Fixture {
 #divert <cpp>
 #import std.ostringstream
 #import std.source_location
-#import tunitas.file.Path
+#import tunitas.flagship.temerarious.source.Line
+#import tunitas.flagship.temerarious.source.Name
 namespace tests::unit::source {
   auto Location::test_constructor_std() -> void {
     auto subject = Subject{std::source_location::current()};
     CPPUNIT_ASSERT(sizeof (subject));
   }
-  auto Location::test_constructor_2arg() -> void {
+  auto Location::test_constructor_2view() -> void {
     auto subject = Subject{library::Line{33}, "/tmp/pickles-are-funny.roff"sv};
+    CPPUNIT_ASSERT(sizeof (subject));
+    CPPUNIT_ASSERT(library::Line{33} == subject.line());
+  }
+  auto Location::test_constructor_2name() -> void {
+    auto name = library::Name{"/tmp/onions-are-sad.roff"sv};
+    auto subject = Subject{library::Line{33}, name};
     CPPUNIT_ASSERT(sizeof (subject));
   }
   auto Location::test_line() -> void {
     auto subject = Subject{std::source_location::current()};
     CPPUNIT_ASSERT(library::Line{} != subject.line());
   }
+  auto Location::test_fileview() -> void {
+    auto subject = Subject{std::source_location::current()};
+    CPPUNIT_ASSERT(Subject::Fileview{} != subject.fileview());
+  }
   auto Location::test_filepath() -> void {
     auto subject = Subject{std::source_location::current()};
-    CPPUNIT_ASSERT(::tunitas::file::Path{} != subject.filepath());
+    CPPUNIT_ASSERT(Subject::Fileview{} != subject.filepath());
   }
   auto Location::test_file_name() -> void {
     auto subject = Subject{std::source_location::current()};
-    CPPUNIT_ASSERT(::tunitas::file::Path{} != subject.file_name());
+    CPPUNIT_ASSERT(Subject::Fileview{} != subject.file_name());
   }
   auto Location::test_operator_insert() -> void {
     auto subject = Subject{library::Line{33}, "/tmp/pickles-are-funny.roff"sv};
@@ -63,11 +72,13 @@ namespace tests::unit::source {
     series << []{
                 auto con = Stream{"constructor"};
                 con << call("std::source_location", &Location::test_constructor_std)
-                    << call("2arg", &Location::test_constructor_2arg)
+                    << call("file::Path", &Location::test_constructor_2view)
+                    << call("Name", &Location::test_constructor_2name)
                     << END;
                 return move(con);
               }()
            << call("line", &Location::test_line)
+           << call("fileview", &Location::test_fileview)
            << call("filepath", &Location::test_filepath)
            << call("file_name", &Location::test_file_name)
            << call("operator<<", &Location::test_operator_insert)

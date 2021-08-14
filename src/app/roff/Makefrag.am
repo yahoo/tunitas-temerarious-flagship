@@ -17,6 +17,10 @@ lib_libapp_roff_la_MODULES = $(call TF_SOURCEStoMODULES, $(lib_libapp_roff_la_SO
 lib_libapp_roff_la_SOURCES = \
   obj/src/app/roff/namespace.cpp \
   obj/src/app/roff/main.cpp \
+  obj/src/app/roff/main.Palette.cpp \
+  obj/src/app/roff/main.Palette.Error.cpp \
+  obj/src/app/roff/main.Palette.Warning.cpp \
+  obj/src/app/roff/main.Palette.Notice.cpp \
   obj/src/app/roff/run.cpp \
   obj/src/app/roff/usage.Message.cpp \
   obj/src/app/roff/exception.File.cpp \

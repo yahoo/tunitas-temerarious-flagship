@@ -11,9 +11,9 @@ namespace tests::unit::source { struct Name; }
 #import tunitas.file.Path
 struct tests::unit::source::Name : public cppunit::test::Fixture {
   using Subject = library::Name;
-  using Filepath = ::tunitas::file::Path;
   auto test_constructor_std() -> void;
-  auto test_constructor_1arg() -> void;
+  auto test_constructor_1view() -> void;
+  auto test_fileview() -> void;
   auto test_filepath() -> void;
   auto test_file_name() -> void;
   auto test_operator_insert() -> void;
@@ -30,17 +30,21 @@ namespace tests::unit::source {
     auto subject = Subject{std::source_location::current()};
     CPPUNIT_ASSERT(sizeof (subject));
   }
-  auto Name::test_constructor_1arg() -> void {
+  auto Name::test_constructor_1view() -> void {
     auto subject = Subject{"/tmp/pickles-are-sour.roff"sv};
     CPPUNIT_ASSERT(sizeof (subject));
   }
+  auto Name::test_fileview() -> void {
+    auto subject = Subject{std::source_location::current()};
+    CPPUNIT_ASSERT(Subject::Fileview{} != subject.fileview());
+  }
   auto Name::test_filepath() -> void {
     auto subject = Subject{std::source_location::current()};
-    CPPUNIT_ASSERT(::tunitas::file::Path{} != subject.filepath());
+    CPPUNIT_ASSERT(Subject::Fileview{} != subject.filepath());
   }
   auto Name::test_file_name() -> void {
     auto subject = Subject{std::source_location::current()};
-    CPPUNIT_ASSERT(::tunitas::file::Path{} != subject.file_name());
+    CPPUNIT_ASSERT(Subject::Fileview{} != subject.file_name());
   }
   auto Name::test_operator_insert() -> void {
     auto subject = Subject{"/tmp/pickles-are-sour.roff"sv};
@@ -56,10 +60,11 @@ namespace tests::unit::source {
     series << []{
                 auto con = Stream{"constructor"};
                 con << call("std::source_location", &Name::test_constructor_std)
-                    << call("1arg", &Name::test_constructor_1arg)
+                    << call("1view", &Name::test_constructor_1view)
                     << END;
                 return move(con);
               }()
+           << call("fileview", &Name::test_fileview)
            << call("filepath", &Name::test_filepath)
            << call("file_name", &Name::test_file_name)
            << call("operator<<", &Name::test_operator_insert)

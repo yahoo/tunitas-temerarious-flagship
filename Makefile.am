@@ -84,12 +84,14 @@ include tests/tf/Makefrag.am
 include tests/roff/Makefrag.am
 include tests/scripty/roff/Makefrag.am
 include tests/scripty/tf/Makefrag.am
+include tests/readme/Makefrag.am
 XPASS_TESTS = \
   $(tests_unit_XPASS_TESTS) \
   $(tests_tf_XPASS_TESTS) \
   $(tests_roff_XPASS_TESTS) \
   $(tests_scripty_tf_XPASS_TESTS) \
   $(tests_scripty_roff_XPASS_TESTS) \
+  $(tests_readme_XPASS_TESTS) \
   $(end)
 XFAIL_TESTS = \
   $(tests_unit_XFAIL_TESTS) \
@@ -98,6 +100,7 @@ XFAIL_TESTS = \
   $(tests_roff_XFAIL_TESTS) \
   $(tests_scripty_tf_XFAIL_TESTS) \
   $(tests_scripty_roff_XFAIL_TESTS) \
+  $(tests_readme_XFAIL_TESTS) \
   $(end)
 TESTS = \
   $(tests_unit_TESTS) \
@@ -106,6 +109,7 @@ TESTS = \
   $(tests_roff_TESTS) \
   $(tests_scripty_tf_TESTS) \
   $(tests_scripty_roff_TESTS) \
+  $(tests_readme_TESTS) \
   $(end)
 
 # The Makefile_*SET variables are assembled by .../toolflags.mk

@@ -5,51 +5,54 @@
 // For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
 #divert <fpp>
 namespace app::roff {
+  namespace package_body_run {
+    namespace interface { }
+    namespace body { using namespace interface; }
+  }
   inline namespace package_run {
-           namespace package_body_run::body { }
-           inline namespace interface { using namespace package_body_run::body; }
+    inline namespace interface { using namespace package_body_run::body; }
   }
 }
 #import sys.exits.constants // [[FIXTHIS]] move to cli.exits.constants when module-options >= 2.0 is ready
 #import tunitas.file
+#import tunitas.flagship.temerarious.processor.Preparation
 #import tunitas.string
-namespace app::roff {
-  namespace package_run::package_body_run::body {
+#import tunitas.flagship.temerarious.processor
+#import tunitas.flagship.temerarious.stream.Input
+#import tunitas.flagship.temerarious.stream.Output
+namespace app::roff::package_body_run {
+  namespace interface {
     using Exit = sys::exits::Code;
-    using namespace sys::exits::constants;
     namespace file = tunitas::file;
+    using tunitas::flagship::temerarious::processor::Preparation;
+  }
+  namespace body {
+    using namespace sys::exits::constants;
     namespace string = tunitas::string;
+    namespace processor = tunitas::flagship::temerarious::processor;
+    using tunitas::flagship::temerarious::stream::Input;
+    using tunitas::flagship::temerarious::stream::Output;
   }
 }
 #endiv
 #divert <hpp>
 #import std.istream
 #import std.ostream
-#import tunitas.flagship.temerarious.stream.Input
-#import tunitas.flagship.temerarious.stream.Output
-#import tunitas.flagship.temerarious.processor
 #import tunitas.file.Path
-namespace app::roff::package_run {
-  namespace interface {
-    //
-    // This is much simpler now that the core off the processor has moved into the library
-    //
-    // Specification:
-    //
-    //    process input ... write output
-    //
-    // Usage:
-    //
-    //   return run(cin, cout);
-    // 
-    inline auto run(std::istream &, std::ostream &) -> Exit;
-    inline auto run(file::Path const &in, file::Path const &out) -> Exit;
-  }
-  namespace package_body_run::body {
-    using tunitas::flagship::temerarious::stream::Input;
-    using tunitas::flagship::temerarious::stream::Output;
-    namespace processor = tunitas::flagship::temerarious::processor;
-  }
+namespace app::roff::package_body_run::interface {
+  //
+  // This is much simpler now that the core off the processor has moved into the library
+  //
+  // Specification:
+  //
+  //    process input ... write output
+  //
+  // Usage:
+  //
+  //   return run(cin, cout);
+  // 
+  inline auto run(std::istream &, std::ostream &, Preparation = {}) -> Exit;
+  inline auto run(file::Path const &in, file::Path const &out, Preparation = {}) -> Exit;
 }
 #endiv
 #divert <ipp>
@@ -58,22 +61,22 @@ namespace app::roff::package_run {
 #import std.ifstream
 #import std.ofstream
 #import tunitas.flagship.temerarious.processor.run
-namespace app::roff::package_run {
-  auto interface::run(file::Path const &infile, file::Path const &outfile) -> Exit {
+namespace app::roff::package_body_run {
+  auto interface::run(file::Path const &infile, file::Path const &outfile, Preparation preparation) -> Exit {
     auto erroneity = Output{std::clog};
     if (auto in = std::ifstream{infile}; !in) {
       throw exception::File{"reading", infile};
     } else if (auto out = std::ofstream{outfile}; !out) {
       throw exception::File{"writing", outfile};
     } else {
-      return run(in, out);
+      return run(in, out, move(preparation));
     }
   }
-  auto interface::run(std::istream &in, std::ostream &out) -> Exit {
+  auto interface::run(std::istream &in, std::ostream &out, Preparation preparation) -> Exit {
     auto erroneity = Output{std::clog};
     auto outbound = Output{out};
     auto inbound = Input{in};
-    auto ess = processor::run(move(inbound), outbound, erroneity);
+    auto ess = processor::run(move(inbound), outbound, erroneity, move(preparation));
     return good(ess) ? OK : FAIL;
   }
 }

@@ -23,34 +23,60 @@ namespace tunitas::flagship::temerarious::input::exception {
 }
 #endiv
 #divert <hpp>
+#import std.shared_ptr
+#import std.declval
 #import tunitas.flagship.temerarious.input.exception.Aspect
-#import tunitas.flagship.temerarious.input.exception.feature.Whence
 #import tunitas.flagship.temerarious.exception.partial.Runtime
-struct tunitas::flagship::temerarious::input::exception::Missing final : public virtual input::exception::Aspect,
-                                                                         public feature::Whence,
-                                                                         public partial::Runtime {
-  struct Ancestors {
-    struct Aspects  { /* ... who cares ... */ };
-    using Whence = feature::Whence;
-    using Exception = partial::Runtime;
+#import tunitas.flagship.temerarious.source.Name
+#import tunitas.file.Path
+#import tunitas.string.View
+#import tunitas.string.Storage
+namespace tunitas::flagship::temerarious::input {
+  struct exception::Missing final : public virtual input::exception::Aspect,
+                                    public partial::Runtime {
+    struct Ancestors {
+      struct Aspects  { /* ... who cares ... */ };
+      using Exception = partial::Runtime;
+    };
+    using Storage = string::Storage;
+    using Fileview = string::View;
+    using Filepath = file::Path;
+  public:
+    inline explicit Missing(char const *, string::View) = delete; // no  pointers!
+    inline explicit Missing(Storage const &missing_filepath, string::View reason);
+    inline explicit Missing(Fileview missing_filepath, string::View reason);
+    inline explicit Missing(Filepath const &missing_filepath, string::View reason);
+    inline explicit Missing(source::Name const &, string::View reason); // by reference so it works for Location too
+    auto what() const noexcept -> char const *;
+    auto whence() const noexcept -> source::Name;
+  private:
+    std::shared_ptr<Filepath> stored_filepath;
   };
-public:
-  inline explicit Missing(Name const &, string::View reason); // works for Location too
-  auto what() const noexcept -> char const *;
-  auto whence() const noexcept -> source::Name;
-};
+  namespace exception {
+    static_assert(noexcept(Missing{std::declval<Missing>()}), "noexcept copy constructor");
+  }
+}
 #endiv
 #divert <ipp>
 namespace tunitas::flagship::temerarious::input::exception {
-  Missing::Missing(Name const &missing, string::View reason)
-    : Ancestors::Whence{missing}
-    , Ancestors::Exception{reason}
+  Missing::Missing(source::Name const &candidate, string::View reason) : Missing{candidate.fileview(), reason} { }
+  Missing::Missing(Fileview candidate, string::View reason)
+    : Ancestors::Exception{reason} // because Filepath MUST be constructed from a temporary string::Storage
+    , stored_filepath{std::make_shared<Filepath>(string::Storage{candidate.begin(), candidate.end()})}
+  { }
+  Missing::Missing(Storage const &candidate, string::View reason)
+    : Ancestors::Exception{reason}
+    , stored_filepath{std::make_shared<Filepath>(candidate)}
+  { }
+  Missing::Missing(Filepath const &candidate, string::View reason)
+    : Ancestors::Exception{reason}
+    , stored_filepath{std::make_shared<Filepath>(candidate)}
   { }
 }
 #endiv
 #divert <cpp>
 namespace tunitas::flagship::temerarious::input::exception {
   auto Missing::what() const noexcept -> char const * { return Ancestors::Exception::what(); }
-  auto Missing::whence() const noexcept -> source::Name { return Ancestors::Whence::whence(); }
+  auto Missing::whence() const noexcept -> source::Name { return {stored_filepath->native()}; }
 };
 #endiv

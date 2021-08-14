@@ -11,11 +11,9 @@ namespace tests::unit::exception::input { struct Missing; }
 #import tunitas.flagship.temerarious.input.exception.Missing
 struct tests::unit::exception::input::Missing : public cppunit::test::Fixture, private Here {
   using Subject = library::Missing;
-#if o // there are no such constructors for the Missing ... there are such constructors for Present
   auto test_constructor_view() -> void;
   auto test_constructor_storage() -> void;
   auto test_constructor_path() -> void;
-#endif
   auto test_constructor_name() -> void;
   auto test_constructor_location() -> void;
   auto test_what() -> void;
@@ -25,7 +23,6 @@ struct tests::unit::exception::input::Missing : public cppunit::test::Fixture, p
 #endiv
 #divert <cpp>
 namespace tests::unit::exception::input {
-#if 0
   auto Missing::test_constructor_view() -> void {
     //
     // test the constructor with the varying first argument
@@ -35,7 +32,7 @@ namespace tests::unit::exception::input {
     auto subject = Subject{string::View{"/dev/bogus"}, "no such device or address"sv};
     CPPUNIT_ASSERT(sizeof (subject));
     CPPUNIT_ASSERT(nullptr != subject.what());
-    CPPUNIT_ASSERT(!subject.whence().filepath().empty());
+    CPPUNIT_ASSERT(!subject.whence().fileview().empty());
   }
   auto Missing::test_constructor_storage() -> void {
     //
@@ -46,7 +43,7 @@ namespace tests::unit::exception::input {
     auto subject = Subject{string::Storage{"/dev/bogus"}, "no such device or address"sv};
     CPPUNIT_ASSERT(sizeof (subject));
     CPPUNIT_ASSERT(nullptr != subject.what());
-    CPPUNIT_ASSERT(!subject.whence().filepath().empty());
+    CPPUNIT_ASSERT(!subject.whence().fileview().empty());
   }
   auto Missing::test_constructor_path() -> void {
     //
@@ -57,9 +54,8 @@ namespace tests::unit::exception::input {
     auto subject = Subject{file::Path{"/dev/bogus"}, "no such device or address"sv};
     CPPUNIT_ASSERT(sizeof (subject));
     CPPUNIT_ASSERT(nullptr != subject.what());
-    CPPUNIT_ASSERT(!subject.whence().filepath().empty());
+    CPPUNIT_ASSERT(!subject.whence().fileview().empty());
   }
-#endif
   auto Missing::test_constructor_name() -> void {
     //
     // test the constructor with the varying first argument
@@ -69,7 +65,7 @@ namespace tests::unit::exception::input {
     auto subject = Subject{hereabout(), "no such device or address"sv};
     CPPUNIT_ASSERT(sizeof (subject));
     CPPUNIT_ASSERT(nullptr != subject.what());
-    CPPUNIT_ASSERT(!subject.whence().filepath().empty());
+    CPPUNIT_ASSERT(!subject.whence().fileview().empty());
   }
   auto Missing::test_constructor_location() -> void {
     //
@@ -80,7 +76,7 @@ namespace tests::unit::exception::input {
     auto subject = Subject{hereinat(), "no such device or address"sv};
     CPPUNIT_ASSERT(sizeof (subject));
     CPPUNIT_ASSERT(nullptr != subject.what());
-    CPPUNIT_ASSERT(!subject.whence().filepath().empty());
+    CPPUNIT_ASSERT(!subject.whence().fileview().empty());
   }
   auto Missing::test_what() -> void {
     // already tested

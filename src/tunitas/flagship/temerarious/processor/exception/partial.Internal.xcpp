@@ -1,0 +1,57 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+namespace tunitas::flagship::temerarious::processor::exception::partial {
+  //
+  // An internal condition of the processor is untenable.
+  // Descendants only.
+  //
+  // Specification:
+  //
+  //   Such problems ...
+  //   ... were previously detectable by the programmer (you) yet they were not.
+  //   ... represent failures of operation of the processor itself.
+  //   ... are not recoverable.
+  //
+  //   https://en.cppreference.com/w/cpp/error/invalid_argument
+  //
+  // Design:
+  //
+  //   And so it goes.
+  //
+  // Usage:
+  //
+  //   try {
+  //      ...
+  //      throw processor::exception::Condition{"because ... reasons..."sv};
+  //      throw processor::exception::Diversion{"because ... reasons..."sv};
+  //      throw processor::exception::Input{"because ... reasons..."sv};
+  //      ...
+  //   } catch (processor::exception::Aspect const &) {
+  //      ...ours...
+  //   } catch (temerarious::exception::Aspect const &) {
+  //      ...wider and more generally...
+  //   }
+  //
+  class Internal;
+}
+#endiv
+#divert <hpp>
+#import tunitas.flagship.temerarious.exception.partial.Invalid
+#import tunitas.flagship.temerarious.processor.exception.Aspect
+class tunitas::flagship::temerarious::processor::exception::partial::Internal : public virtual processor::exception::Aspect,
+                                                                                public partial::Invalid {
+  struct Ancestors {
+    struct Aspects { /* ...who cares?... */ };
+    using Exception = partial::Invalid;
+  };
+protected:
+  ~Internal() = default;
+public:
+  using Ancestors::Exception::Invalid;
+  auto what() const noexcept -> char const * override { return Ancestors::Exception::what(); }
+};
+#endiv

@@ -12,6 +12,8 @@ namespace tunitas::flagship::temerarious::path {
   //
   //   Like "-I" in the C++ system
   //
+  //   Implicitly -I. is always first in the path.
+  //
   // Design
   //
   //   That the elements of push_{front,back} are actual directories is unchecked
@@ -32,6 +34,8 @@ namespace tunitas::flagship::temerarious::path {
 struct tunitas::flagship::temerarious::path::Search : private std::deque<File> {
   using Ancestor = std::deque<File>;
 public:
+  using Ancestor::empty;
+  using Ancestor::size;
   using Ancestor::push_back;
   using Ancestor::push_front;
   auto find(File const &suffix) const -> Outcome<File>;
@@ -43,13 +47,18 @@ public:
 #import std.error_code
 namespace tunitas::flagship::temerarious::path {
   auto Search::find(File const &suffix) const -> Outcome<File> {
-    for (auto const &prefix : *this) {
-      auto proposal = prefix / suffix;
-      if (sys::posix::exists(proposal)) {
-        return {move(proposal)};
+    if (sys::posix::exists(suffix)) {
+      // This is or isn't the common case, so we do the copy here rather than at the call site
+      return {suffix};
+    } else {
+      for (auto const &prefix : *this) {
+        auto proposal = prefix / suffix;
+        if (sys::posix::exists(proposal)) {
+          return {move(proposal)};
+        }
       }
+      return std::error_code{sys::posix::E::NOENT};
     }
-    return std::error_code{sys::posix::E::NOENT};
   }
 }
 #endiv

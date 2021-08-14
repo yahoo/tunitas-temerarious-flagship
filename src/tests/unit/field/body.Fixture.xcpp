@@ -10,7 +10,10 @@
 namespace tests::unit::field::body {
   namespace [[eponymous]] fixture {
     class Fixture;
-    namespace library = ::tunitas::flagship::temerarious::directive::field::package_field::package_body_field::body;
+    namespace library {
+      using namespace ::tunitas::flagship::temerarious::directive::field;
+      using namespace ::tunitas::flagship::temerarious::directive::field::package_field::package_body_field::body;
+    }
     namespace exception = ::tunitas::flagship::temerarious::directive::exception;
     namespace string = ::tunitas::string;
   }

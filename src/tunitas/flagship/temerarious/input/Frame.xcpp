@@ -39,6 +39,9 @@ namespace tunitas::flagship::temerarious::input {
 }
 #endiv
 #divert <hpp>
+#import tunitas.flagship.temerarious.source.Line
+#import tunitas.flagship.temerarious.source.Name
+#import tunitas.flagship.temerarious.source.Location
 #import tunitas.flagship.temerarious.diversion.Stack
 #import tunitas.flagship.temerarious.input.condition.Stack
 #import tunitas.flagship.temerarious.input.Stack
@@ -49,20 +52,32 @@ namespace tunitas::flagship::temerarious {
     using std::move;
     using std::swap;
     inline auto swap(Frame &, Frame &) noexcept -> void;
+    inline auto getline(Frame &, [[fill]] string::Storage &) -> stream::Input &;
   }
   struct input::Frame {
     inline [[implicit]] Frame(stream::Input &&, stream::Output &);
     inline [[implicit]] Frame(stream::Input &&, Frame &previous);
     stream::Input inbound; // ......... singular, the containing stack is plural
+    source::Line line{};
+    inline auto where() const noexcept -> source::Location;
+    inline auto whence() const noexcept -> source::Name;
     diversion::Stack diversions; // ... plural, because it is a stack of them
     condition::Stack conditions; // ... plural, ibidem.
   };
 }
 #endiv
 #divert <ipp>
+#import std.getline
 namespace tunitas::flagship::temerarious {
+  auto input::getline(Frame &frame, [[fill]] string::Storage &buffer) -> stream::Input & {
+    if (std::getline(frame.inbound, buffer)) {
+      ++frame.line;
+    }
+    return frame.inbound;
+  }
   auto input::swap(Frame &a, Frame &b) noexcept -> void {
     swap(a.inbound, b.inbound);
+    swap(a.line, b.line);
     swap(a.diversions, b.diversions);
     swap(a.conditions, b.conditions);
   }
@@ -79,6 +94,8 @@ namespace tunitas::flagship::temerarious {
       diversions.push(previous.diversions.top());
       conditions.push(true);
     }
+    auto Frame::where() const noexcept -> source::Location { return {line, inbound.whence()}; }
+    auto Frame::whence() const noexcept -> source::Name    { return inbound.whence(); }
   }
 }
 #endiv

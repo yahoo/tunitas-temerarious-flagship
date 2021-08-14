@@ -9,7 +9,6 @@
 namespace tunitas::flagship::temerarious::directive::exception {
   using namespace temerarious::exception;
   namespace [[nodirectory]] feature { using namespace temerarious::exception::feature; }
+  namespace [[nodirectory]] partial { using namespace temerarious::exception::partial; }
 }
-#import tunitas.flagship.temerarious.directive.exception
-namespace { using namespace tunitas::flagship::temerarious::directive::exception; }
 #endiv

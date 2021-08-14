@@ -4,7 +4,7 @@
 // For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
 // For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
 #divert <fpp>
-namespace tunitas::flagship::temerarious::exception {
+namespace tunitas::flagship::temerarious::processor::exception {
   //
   // The input (stack) in the processor has some problem.
   //
@@ -12,22 +12,21 @@ namespace tunitas::flagship::temerarious::exception {
   //
   //   The input stack is empty.
   //
-  //   https://en.cppreference.com/w/cpp/error/invalid_argument
+  //   See the Specification section of the ancestor (this is a logic error, a programmer's error, and not recoverable)
   //
   // Design:
   //
-  //   They all follow the Design Language Guidelines.
+  //   And so it goes.
   //
   // Usage:
   //
   //   try {
   //      ...
   //      throw processor::exception::Input{"because ...reasons..."sv};
-  //      throw temerarious::exception::Input{...somehow...};
   //      ...
   //   } catch (processor::exception::Aspect const &) {
   //      ...ours...
-  //   } catch (temerarious::exception::Invalid const &) {
+  //   } catch (temerarious::exception::Aspect const &) {
   //      ...wider and more generally...
   //   }
   //
@@ -35,13 +34,10 @@ namespace tunitas::flagship::temerarious::exception {
 }
 #endiv
 #divert <hpp>
-#import tunitas.flagship.temerarious.exception.partial.Invalid
-#import tunitas.flagship.temerarious.processor.exception.Aspect
-class tunitas::flagship::temerarious::processor::exception::Input : public virtual processor::exception::Aspect,
-                                                                    public partial::Invalid {
-  using Ancestor = partial::Invalid;
+#import tunitas.flagship.temerarious.processor.exception.partial.Internal
+class tunitas::flagship::temerarious::processor::exception::Input final : public partial::Internal {
+  using Ancestor = partial::Internal;
 public:
-  using Ancestor::Invalid;
-  auto what() const noexcept -> char const * override { return Ancestor::what(); }
+  using Ancestor::Internal;
 };
 #endiv

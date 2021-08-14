@@ -9,5 +9,6 @@
 namespace tunitas::flagship::temerarious::processor::exception {
   using namespace temerarious::exception;
   namespace [[nodirectory]] feature { using namespace temerarious::exception::feature; }
+  namespace [[nodirectory]] partial { using namespace temerarious::exception::partial; }
 }
 #endiv

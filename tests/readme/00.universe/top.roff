@@ -46,12 +46,20 @@ else DEFINE and ELSEDEF is not defined at all <------------------------------ te
 .r middle.roff
 ." wheren middle.roff later reads bottom.roff
 
-.." block and undef  <-------------------------------- test this (.b ... .e followed by .u)
+About to undef a block variable (.b ... .e
+." block and undef  <-------------------------------- test this (.b ... .e followed by .u)
 .b define-undefine
 .e
 .u define-undefine
-
-.." define undef  <-------------------------------- test this (.d followed by .u)
+Done
+.i define-undef
+define-undef is still defined ERROR
+.s
+define-undef is now undefined GOOD
+.f
+."
+About to define-and-undef undef a line variable (.d)
+." define undef  <-------------------------------- test this (.d followed by .u)
 .d variable99 variable99
 .u variable99
 

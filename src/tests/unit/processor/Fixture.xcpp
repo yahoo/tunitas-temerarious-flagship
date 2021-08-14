@@ -8,16 +8,33 @@ namespace tests::unit::processor { struct Fixture; }
 #endiv
 #divert <hpp>
 struct tests::unit::processor::Fixture : public cppunit::test::Fixture {
+  auto test_usage_Preparation() -> void;
   static auto suite() -> cppunit::Test *;
 };
 #endiv
 #divert <cpp>
+#import tunitas.flagship.temerarious.processor.Preparation
 #import tests.unit.processor.state.Fixture
 namespace tests::unit::processor {
+  auto Fixture::test_usage_Preparation() -> void {
+    using Subject = library::Preparation;
+    auto a = Subject{}, b = Subject{};
+    a.defines["apple"s] = "banana"s;
+    a.search.push_back("/usr/tmp");
+    swap(a, b);
+    CPPUNIT_ASSERT(1 == b.defines.size());
+    CPPUNIT_ASSERT(1 == b.search.size());
+  }
   auto Fixture::suite() -> cppunit::Test * {
     using namespace rigging::suite;
     auto series = Stream{"processor"};
-    series << add<state::Fixture>()
+    series << []{
+                auto use = Stream{"usage"};
+                use << call("Preparation", &Fixture::test_usage_Preparation)
+                    << END;
+                return move(use);
+              }()
+           << add<state::Fixture>()
            << END;
     return finalize(series);
   }

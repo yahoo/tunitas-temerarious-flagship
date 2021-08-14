@@ -1,0 +1,5 @@
+#!/bin/bash --norc
+source ${0%/*}/../rigging.sh
+#
+# the point here is that the search path is (a) provided and (b) interesting
+tf roff -I${directory?}/{abc,def,ghi} ${directory?}/example.roff ${directory?}/o.example.roffed

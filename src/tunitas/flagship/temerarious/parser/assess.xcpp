@@ -76,7 +76,8 @@ namespace tunitas::flagship::temerarious {
           //
           auto const code = line.at(first++);
           // pass &first by reference so that it can be modifed by trimmed() in the if-elseif-...-else
-          auto trimmed = [&first, line, size] { return trim(View{first+line.data(), size-first}); };
+          auto untrimmed = [&first, line, size] { return View{first+line.data(), size-first}; };
+          auto trimmed = [&first, line, size]   { return trim(View{first+line.data(), size-first}); };
           auto isspace = [&first, size, line]{
                           if (first+1 < size) {
                             return ' ' == line.at(first++);
@@ -90,11 +91,50 @@ namespace tunitas::flagship::temerarious {
           } else if ('\'' == code) {
             // found .'    (doesn't matter what comes next)
             return {Assessment::DIRECTIVE, directive::uncomment, trimmed()};
+          } else if ('\\' == code) {
+            return {Assessment::DIRECTIVE, directive::rest, untrimmed()};
           } else if (std::isalpha(code)) {
-            if (isspace()) {
+            auto accept = [&]{
+                            if (first == size) {
+                              //
+                              // special-case those directivs that have zero arguments
+                              //
+                              // /---------- . (first dot)
+                              // |/--------- ? is any character
+                              // ||/-------- end-of-string
+                              // |||
+                              // vvv
+                              // .?<----- end after the ?
+                              //
+                              switch (code) {
+                              case '\\': // .\     (passthrough the rest)
+                              case 'e': // .endef
+                              case 'f': // .endif
+                              case 's': // .else
+                              case 'x': // .exit
+                                return true;
+                              default:
+                                return false;
+                              }
+                            } else if (isspace()) {
+                              //
+                              // any directive with a space after it gets a second look
+                              //
+                              // /---------- . (first dot)                              // |/--------- ? is any character
+                              // ||////----- space(s)
+                              // ||||||
+                              // vvvvvv
+                              // .?    <----- trailing spaces or other characters
+                              //
+                              return true;
+                            } else {
+                              return false;
+                            }
+                          }();
+            if (accept) {
               switch (code) {
               case 'b': // a.k.a. "block" (and push)
-                return {Assessment::DIRECTIVE, directive::define, trimmed()};
+                return {Assessment::DIRECTIVE, directive::block, trimmed()};
               case 'd': // a.k.a. "define" (no push, just that line)
                 return {Assessment::DIRECTIVE, directive::define, trimmed()};
               case 'e': // a.k.a. "endef"" (endblock)  (and pop)
@@ -111,6 +151,12 @@ namespace tunitas::flagship::temerarious {
                 return {Assessment::DIRECTIVE, directive::read, trimmed()};
               case 'u': // a.k.a. "undef"
                 return {Assessment::DIRECTIVE, directive::undef, trimmed()};
+              case 'n': // a.k.a. "notice" or "info"
+                return {Assessment::DIRECTIVE, directive::notice, trimmed()};
+              case 'w': // a.k.a. "warn"
+                return {Assessment::DIRECTIVE, directive::warning, trimmed()};
+              case 'x': // a.k.a. "exit" or "fatal"
+                return {Assessment::DIRECTIVE, directive::fatal, trimmed()};
               }
             }
           }

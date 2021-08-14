@@ -1,0 +1,51 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+namespace tunitas::flagship::temerarious::processor::exception {
+  //
+  // The processor state itself has some problem.
+  //
+  // Specification:
+  //
+  //   The processor is unusable.
+  //
+  //   https://en.cppreference.com/w/cpp/error/runtime_argument
+  //
+  // Design:
+  //
+  //   They all follow the Design Language Guidelines.
+  //
+  // Background:
+  //
+  //   This could happen for involuntary for some unspecified reason.
+  //   This could happen for voluntary reasons (the luser's document invoked .x to die)
+  //
+  // Usage:
+  //
+  //   try {
+  //      ...
+  //      throw processor::exception::State{"because ...reasons..."sv};
+  //      ...
+  //   } catch (processor::exception::Aspect const &) {
+  //      ...ours...
+  //   } catch (temerarious::exception::Aspect const &) {
+  //      ...wider and more generally...
+  //   }
+  //
+  class [[nodiscard]] State;
+}
+#endiv
+#divert <hpp>
+#import tunitas.flagship.temerarious.exception.partial.Runtime
+#import tunitas.flagship.temerarious.processor.exception.Aspect
+class tunitas::flagship::temerarious::processor::exception::State final : public virtual processor::exception::Aspect,
+                                                                          public partial::Runtime {
+  using Ancestor = partial::Runtime;
+public:
+  using Ancestor::Runtime;
+  auto what() const noexcept -> char const * override { return Ancestor::what(); }
+};
+#endiv

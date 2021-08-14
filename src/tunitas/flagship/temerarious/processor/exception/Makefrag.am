@@ -7,7 +7,9 @@
 obj_src_tunitas_flagship_temerarious_processor_exception_SUBSOURCES = \
   obj/src/tunitas/flagship/temerarious/processor/exception/namespace.cpp \
   obj/src/tunitas/flagship/temerarious/processor/exception/Aspect.cpp \
+  obj/src/tunitas/flagship/temerarious/processor/exception/partial.Internal.cpp \
   obj/src/tunitas/flagship/temerarious/processor/exception/Input.cpp \
   obj/src/tunitas/flagship/temerarious/processor/exception/Diversion.cpp \
   obj/src/tunitas/flagship/temerarious/processor/exception/Condition.cpp \
+  obj/src/tunitas/flagship/temerarious/processor/exception/State.cpp \
   $(end)

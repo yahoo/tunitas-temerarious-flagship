@@ -63,13 +63,15 @@ namespace tunitas::flagship::temerarious {
     inline auto operator<<(std::ostream &, Name const &) -> std::ostream &;
   }
   struct source::Name {
-    using Filepath = string::View; // NOT a file::Path ...too heavy
-    inline Name(Filepath);
+    using Fileview = string::View; // NOT a file::Path ...too heavy
+    using Filepath [[deprecated("instead prefer Name::Fileview")]] = Fileview;;
+    inline Name(Fileview);
     inline Name(std::source_location);
-    inline auto filepath() const noexcept -> Filepath;
-    [[deprecated("why not consider Name::filepath()")]] inline auto file_name() const noexcept -> Filepath;
+    inline auto fileview() const noexcept -> Fileview;
+    [[deprecated("instead use Name::fileview()")]] inline auto filepath() const noexcept -> Fileview;
+    [[deprecated("why not consider Name::fileview()")]] inline auto file_name() const noexcept -> Fileview;
   private:
-    Filepath stored_filepath;
+    Fileview stored_fileview;
     friend auto source::swap(Name &, Name &) noexcept -> void;
   };
   namespace source {
@@ -81,13 +83,14 @@ namespace tunitas::flagship::temerarious {
 #endiv
 #divert <ipp>
 namespace tunitas::flagship::temerarious {
-  auto source::swap(Name &a, Name &b) noexcept -> void { swap(a.stored_filepath, b.stored_filepath); }
+  auto source::swap(Name &a, Name &b) noexcept -> void { swap(a.stored_fileview, b.stored_fileview); }
   auto source::operator<<(std::ostream &o, Name const &l) -> std::ostream & { return o << l.filepath() << ':' << ' '; }
   namespace source {
-    Name::Name(std::source_location sl) : stored_filepath{sl.file_name()} { }
-    Name::Name(Filepath f) : stored_filepath{f} { }
-    auto Name::filepath() const noexcept -> Filepath  { return stored_filepath; }
-    auto Name::file_name() const noexcept -> Filepath { return stored_filepath; }
+    Name::Name(std::source_location sl) : stored_fileview{sl.file_name()} { }
+    Name::Name(Fileview f) : stored_fileview{f} { }
+    auto Name::fileview() const noexcept -> Fileview  { return stored_fileview; }
+    auto Name::filepath() const noexcept -> Fileview  { return fileview(); }
+    auto Name::file_name() const noexcept -> Fileview { return stored_fileview; }
   }
 }
 #endiv

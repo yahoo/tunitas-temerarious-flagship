@@ -8,7 +8,11 @@ namespace tunitas::flagship::temerarious::directive::exception {
   //
   // There was some problem with the 'roff processor state after processing some 'roff
   //
-  // Semantic: this exception pertains to the (untenable) state of the processor when attempting the directive
+  // Semantic:
+  //
+  //  This exception pertains to the (untenable) state of the processor when attempting the directive
+  //  This means that the directive (function) cannot perform its job; is refusing to perform.
+  //  Such problems are recoverable errors (contrast with processor::exception::State, which isn't)
   //
   // Specification, Design, Lifetimes Usage:
   //

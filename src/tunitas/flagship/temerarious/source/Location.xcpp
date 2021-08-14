@@ -59,7 +59,8 @@ namespace tunitas::flagship::temerarious {
     using Ancestor = Name;
   public:
     using Line = source::Line;
-    inline Location(Line, Filepath);
+    inline Location(Line, Fileview);
+    inline Location(Line, Name);
     inline Location(std::source_location);
     inline auto line() const noexcept -> Line;
   private:
@@ -86,11 +87,15 @@ namespace tunitas::flagship::temerarious {
       : Ancestor{sl}
       , stored_line{sl.line()}
     { }
-    Location::Location(Line l, Filepath f)
+    Location::Location(Line l, Fileview f)
       : Ancestor{f}
       , stored_line{l}
     { }
-    auto Location::line() const noexcept -> Line          { return stored_line; }
+    Location::Location(Line l, Name n)
+      : Ancestor{n}
+      , stored_line{l}
+    { }
+    auto Location::line() const noexcept -> Line { return stored_line; }
   }
 }
 #endiv

@@ -4,19 +4,24 @@
 # For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
 # For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
 #
-tests_readme_XFAIL_TESTS = 
-tests_readme_TESTS = \
-  tests/readme/01.universe/run.test \
+tests_readme_XFAIL_TESTS = \
+  tests/readme/00.universe/special.test \
   $(end)
-x = \
-  tests/readme/02.define-endef/run.test \
-  tests/readme/02.variable/run.test \
-  tests/readme/03.else/run.test \
+tests_readme_TESTS = \
+  tests/readme/01.fatal/fail.test \
+  tests/readme/01.notice/run.test \
+  tests/readme/01.warning/run.test \
+  tests/readme/01.rest/run.test \
+  tests/readme/02.block-endef/run.test \
+  tests/readme/02.define/run.test \
+  tests/readme/02.undef/run.test \
   tests/readme/03.ifdef/run.test \
-  tests/readme/03.ifdef-elsifdef-1/run.test \
-  tests/readme/03.ifdef-elsifdef-2/run.test \
-  tests/readme/04.read-1/run.test \
-  tests/readme/04.read_many/run.test \
-  tests/readme/04.read_recursive/run.test \
+  tests/readme/03.else/run.test \
+  tests/readme/03.elseifdef.1/run.test \
+  tests/readme/03.elseifdef.2/run.test \
+  tests/readme/04.read.direct/run.test \
+  tests/readme/04.read.search/special.test \
+  tests/readme/04.read.recursive/fail.test \
+  \
   $(tests_readme_XFAIL_TESTS) \
   $(end)

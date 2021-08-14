@@ -17,6 +17,7 @@ namespace tests::unit::exception::processor {
 #import tunitas.flagship.temerarious.processor.exception.Condition
 #import tunitas.flagship.temerarious.processor.exception.Diversion
 #import tunitas.flagship.temerarious.processor.exception.Input
+#import tunitas.flagship.temerarious.processor.exception.State
 namespace tests::unit::exception::processor {
   struct fixture::Fixture : public cppunit::test::Fixture {
     template<typename EXCETPION> auto test_constructor_reason() -> void;
@@ -29,6 +30,7 @@ namespace tests::unit::exception::processor {
     template<> auto Fixture::generate<library::Condition>() -> library::Condition;
     template<> auto Fixture::generate<library::Diversion>() -> library::Diversion;
     template<> auto Fixture::generate<library::Input>() -> library::Input;
+    template<> auto Fixture::generate<library::State>() -> library::State;
   }
 }
 #endiv
@@ -82,17 +84,23 @@ namespace tests::unit::exception::processor::fixture {
                    "  (but then ... do what we were told by The Voices)"sv);
     return library::Input{reason};
   }
+  template<> auto Fixture::generate<library::State>() -> library::State {
+    auto reason = "time to die"sv;
+    return library::State{reason};
+  }
   auto Fixture::suite() -> cppunit::Test * {
     using namespace rigging::suite;
     auto series = Stream{"processor"};
     series << call("Condition", &Fixture::test_constructor_reason<library::Condition>)
            << call("Diversion", &Fixture::test_constructor_reason<library::Diversion>)
            << call("Input", &Fixture::test_constructor_reason<library::Input>)
+           << call("State", &Fixture::test_constructor_reason<library::State>)
            << []{
                 auto asp = Stream{"Aspect"};
                 asp << call("Condition", &Fixture::test_Aspect<library::Condition>)
                     << call("Diversion", &Fixture::test_Aspect<library::Diversion>)
                     << call("Input", &Fixture::test_Aspect<library::Input>)
+                    << call("Input", &Fixture::test_Aspect<library::State>)
                     << END;
                 return move(asp);
               }()

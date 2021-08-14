@@ -33,6 +33,13 @@ namespace tunitas::flagship::temerarious::directive::field {
 #import std.isalnum
 #import std.isxdigit
 namespace tunitas::flagship::temerarious::directive::field {
+  namespace interface {
+    //
+    // Used also by the command line to establish -D<NAME>=<VALUE>
+    //
+    inline auto is_identifier(string::View) -> bool;
+    [[deprecated("instaed prefer the underscored one as is_identifier(...)")]] inline auto isidentifier(string::View) -> bool;
+  }
   namespace package_field::package_body_field::body {
     //
     // The bundle of functions needed to recover elements of the field
@@ -69,7 +76,6 @@ namespace tunitas::flagship::temerarious::directive::field {
     // See the table https://en.cppreference.com/w/c/string/byte/isprint
     inline auto isidentifier0(char) -> bool; // shaped like a C++ identifier (but omitting the latent support for '$'
     inline auto isidentifierN(char) -> bool; // ibidem.
-    inline auto isidentifier(string::View) -> bool;
     inline auto isfilepath(string::View) -> bool; // (Unix) file paths can contain pretty much any character except \0
     inline auto istext(string::View) -> bool; // any text at all ... this is locale-specific, so all those exotic characters(!)
     inline auto find_first_blank(string::View) -> size_t; // returns NO on blank-not-found
@@ -83,31 +89,34 @@ namespace tunitas::flagship::temerarious::directive::field {
 #endiv
 #divert <ipp>
 #import std.all_of
-namespace tunitas::flagship::temerarious::directive::field::package_field::package_body_field {
-  auto body::isidentifier0(char candidate) -> bool { return isalpha(candidate) || '_' == candidate; }
-  auto body::isidentifierN(char candidate) -> bool { return (isdigit(candidate) ||
-                                                             '-' == candidate ||
-                                                             '.' == candidate ||
-                                                             isidentifier0(candidate)); }
-  auto body::isidentifier(string::View candidate) -> bool {
+namespace tunitas::flagship::temerarious::directive::field::package_field {
+  auto interface::isidentifier(string::View candidate) -> bool { return is_identifier(candidate); }
+  auto interface::is_identifier(string::View candidate) -> bool {
     return (!candidate.empty() &&
             isidentifier0(candidate.front()) &&
             all_of(1+candidate.begin(), candidate.end(), [](char c) { return isidentifierN(c); }));
   }
-  auto body::isfilepath(string::View candidate) -> bool {
-    return (!candidate.empty() &&
-            all_of(candidate.begin(), candidate.end(), [](char c) { return isgraph(c); }));
-  }
-  auto body::istext(string::View candidate) -> bool {
-    // WATCHOUT - the definition of isprint varies by locale.
-    // We WANT the exotic character values for the second field (the value of the "name=value" definition)
-    return all_of(candidate.begin(), candidate.end(), [](char c){ return isblank(c) || isprint(c); });
-  }
-  auto body::find_first_blank(string::View candidate) -> size_t { return candidate.find_first_of(" \t\n\f"); }
-  auto body::has_blanks(string::View candidate) -> bool { return NO != find_first_blank(candidate); }
-  auto body::ensure_not_empty(Location where, string::View candidate) -> void {
-    if (candidate.empty()) {
-      throw exception::Field{where, "there nothing here, only emptiness"sv};
+  namespace package_body_field {
+    auto body::isidentifier0(char candidate) -> bool { return isalpha(candidate) || '_' == candidate; }
+    auto body::isidentifierN(char candidate) -> bool { return (isdigit(candidate) ||
+                                                               '-' == candidate ||
+                                                               '.' == candidate ||
+                                                               isidentifier0(candidate)); }
+    auto body::isfilepath(string::View candidate) -> bool {
+      return (!candidate.empty() &&
+              all_of(candidate.begin(), candidate.end(), [](char c) { return isgraph(c); }));
+    }
+    auto body::istext(string::View candidate) -> bool {
+      // WATCHOUT - the definition of isprint varies by locale.
+      // We WANT the exotic character values for the second field (the value of the "name=value" definition)
+      return all_of(candidate.begin(), candidate.end(), [](char c){ return isblank(c) || isprint(c); });
+    }
+    auto body::find_first_blank(string::View candidate) -> size_t { return candidate.find_first_of(" \t\n\f"); }
+    auto body::has_blanks(string::View candidate) -> bool { return NO != find_first_blank(candidate); }
+    auto body::ensure_not_empty(Location where, string::View candidate) -> void {
+      if (candidate.empty()) {
+        throw exception::Field{where, "there nothing here, only emptiness"sv};
+      }
     }
   }
 }

@@ -24,6 +24,7 @@ namespace tunitas::flagship::temerarious::directive::package_directive {
     //   see parser::assess(...)
     //
     //
+    auto rest(State &, Output &, Location, Payload) -> void;
     auto comment(State &, Output &, Location, Payload) -> void;
     auto uncomment(State &, Output &, Location, Payload) -> void;
     auto block(State &, Output &, Location, Payload) -> void;
@@ -35,6 +36,9 @@ namespace tunitas::flagship::temerarious::directive::package_directive {
     auto endif(State &, Output &, Location, Payload) -> void;
     auto read(State &, Output &, Location, Payload) -> void;
     auto undef(State &, Output &, Location, Payload) -> void;
+    auto notice(State &, Output &, Location, Payload) -> void;
+    auto warning(State &, Output &, Location, Payload) -> void;
+    auto fatal(State &, Output &, Location, Payload) -> void;
   }
   namespace package_body_directive::body {
     inline auto throw_not_in_a_condition_frame(Location where) -> void;
@@ -51,67 +55,114 @@ namespace tunitas::flagship::temerarious::directive::package_directive {
 }
 #endiv
 #divert <cpp>
-#import std.cerr
+#import std.clog
 namespace tunitas::flagship::temerarious::directive::package_directive {
+  auto interface::rest(State &state, Output &output, Location, Payload payload) -> void {
+    state.passthrough(payload);
+  }
   auto interface::comment(State &, Output &, Location, Payload) -> void {
     // Yes, do nothing with the commentariat
   }
-  auto interface::uncomment(State &, Output &outbound, Location where, Payload payload) -> void {
-    // [[FIXTHIS]] so we don't have to see std::cerr
-    std::cerr << where << ": warning, inappropriate comment character (treating it as a comment where anyway)\n";
-    // Yes, do nothing with the commentariat
+  auto interface::uncomment(State &s, Output &o, Location w, Payload p) -> void {
+    warning(s, o, w, "inappropriate comment character (treating it as a comment where anyway)"sv);
+    comment(s, o, w, p);
   }
   auto interface::block(State &state, Output &, Location where, Payload payload) -> void {
-    auto identifier = get_identifier(where, payload);
+    if (state.is_enabled()) {
+      auto identifier = get_identifier(where, payload);
     state.push_diversion(identifier);
+    }
   }
   auto interface::endef(State &state, Output &, Location where, Payload payload) -> void try {
-    get_none(where, payload);
-    state.pop_diversion();
+    if (state.is_enabled()) {
+      get_none(where, payload);
+      state.pop_diversion();
+    }
   } catch (processor::exception::Diversion const &) {
     throw exception::State{where, "not currently defining any variable (not in a .divert/.endiv)"sv};
   }
   auto interface::define(State &state, Output &, Location where, Payload payload) -> void {
-    auto [identifier, remaining] = get_identifier_and_more(where, payload);
-    state.define_variable(identifier, remaining);
+    if (state.is_enabled()) {
+      auto [identifier, remaining] = get_identifier_and_more(where, payload);
+      state.define_variable(identifier, remaining);
+    }
   }
   auto interface::undef(State &state, Output &, Location where, Payload payload) -> void {
-    state.undefine_variable(get_identifier(where, payload));
+    if (state.is_enabled()) {
+      state.undefine_variable(get_identifier(where, payload));
+    }
   }
   auto interface::ifdef(State &state, Output &, Location where, Payload payload) -> void {
-    state.push_condition(get_identifier(where, payload));
+    if (state.is_enabled()) {
+      state.push_condition(get_identifier(where, payload));
+    } else {
+      // We're still processing matching ifdef...endef pairs, even in disabled mode.
+      state.push_condition(false);
+    }
   }
-  auto interface::elifdef(State &state, Output &, Location where, Payload payload) -> void try {
+  auto interface::elifdef(State &state, Output &outbound, Location where, Payload payload) -> void {
+    // Treat this as closing the .ifdef / .endif and starting a new .ifdef
     state.pop_condition();
-    state.push_condition(get_identifier(where, payload));
-  } catch (processor::exception::Condition const &) {
-    throw_not_in_a_condition_frame(where);
+    ifdef(state, outbound, where, payload);
   }
   auto interface::elsedef(State &state, Output &, Location where, Payload payload) -> void try {
+    auto now = state.is_enabled();
     state.pop_condition();
-    get_none(where, payload);
-    state.push_condition(true);
+    if (state.is_enabled()) {
+      get_none(where, payload);
+    }
+    state.push_condition(!now);
   } catch (processor::exception::Condition const &) {
     throw_not_in_a_condition_frame(where);
   }
   auto interface::endif(State &state, Output &, Location where, Payload payload) -> void try {
-    get_none(where, payload);
+    if (state.is_enabled()) {
+      get_none(where, payload);
+    }
     state.pop_condition();
   } catch (processor::exception::Condition const &) {
     throw_not_in_a_condition_frame(where);
   }
+  auto interface::notice(State &state, Output &, Location where, Payload payload) -> void {
+    if (state.is_enabled()) {
+      if (payload.empty()) { payload = "is given"sv; }
+      std::clog << where << "notice, " << payload << '\n';
+    }
+  }
+  auto interface::warning(State &state, Output &, Location where, Payload payload) -> void {
+    if (state.is_enabled()) {
+      if (payload.empty()) { payload = "is noted"sv; }
+      std::clog << where << "warning, " << payload << '\n';
+    }
+  }
+  auto interface::fatal(State &state, Output &, Location where, Payload payload) -> void {
+    if (state.is_enabled()) {
+      if (payload.empty()) { payload = "quitting the processor"sv; }
+      std::clog << where << "error, " << payload << '\n';
+      state.fatal(payload);
+    }
+  }
 }
 #import nonstd.errcode
 #import tunitas.flagship.temerarious.stream.Input
+#import tunitas.flagship.temerarious.input.exception.Missing
 #import tunitas.flagship.temerarious.input.exception.Present
 namespace tunitas::flagship::temerarious::directive::package_directive {
   auto interface::read(State &state, Output &outbound, Location where, Payload payload) -> void {
-    auto filepath = get_filepath(where, payload);
-    auto inbound = stream::Input{filepath};
-    if (!inbound) {
-      throw input::exception::Present{filepath, nonstd::errcode(), ".r filename"};
+    if (state.is_enabled()) {
+      auto suffix = get_filepath(where, payload);
+      if (auto found = state.search.find(suffix); fail(found)) {
+        throw input::exception::Missing{suffix, "does not exist in the search path"};
+      } else {
+        auto resolved = value(move(found));
+        auto inbound = stream::Input{resolved};
+        if (!inbound) {
+          throw input::exception::Present{resolved, nonstd::errcode(), ".r filename"};
+        } else {
+          state.push_input(move(inbound));
+        }
+      }
     }
-    state.push_input(move(inbound));
   }
 }
 #endiv
