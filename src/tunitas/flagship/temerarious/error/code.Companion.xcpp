@@ -17,6 +17,7 @@ namespace tunitas::flagship::temerarious::error::code {
     PROCESSOR_INVALID, // ....... the roff processor has an invalid state
     CONDITION_UNCLOSED, // ...... what is unclear about that?
     DIVERSION_UNCLOSED, // ...... and?
+    VARIABLE_UNFOUND, // ........ and? (still unclear?)
     //
     // WATCHOUT - these declarations must be COPIED MANUALLY into nearby code::Package<...>
     //

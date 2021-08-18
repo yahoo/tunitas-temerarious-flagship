@@ -29,6 +29,7 @@ namespace tunitas::flagship::temerarious::directive::package_directive {
 #divert <ipp>
 #import tunitas.flagship.temerarious.directive.exception.Statement // and may throw such exceptions as are available
 #import tunitas.flagship.temerarious.directive.exception.State
+#import tunitas.flagship.temerarious.directive.exception.Variable
 #import tunitas.flagship.temerarious.directive.fields // Every directive will need something one or more of the payload parsers
 namespace tunitas::flagship::temerarious::directive::package_directive {
   namespace package_body_directive::body {

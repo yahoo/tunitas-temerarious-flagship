@@ -1,0 +1,38 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+#import tests.unit.stream.streamy.Extras.template
+#forward tunitas.flagship.temerarious.stream.Output
+namespace tests::unit::stream::streamy {
+  template<> struct Extras<library::Output>;
+}
+#divert <hpp>
+#forward tests.unit.stream.Streamy
+#import std.ostringstream
+namespace tests::unit::stream::streamy {
+  template<> struct Extras<library::Output> {
+    using Subject = library::Output;
+    using Fixture = Streamy<library::Output>; // because we'll need the descendant for the subsuite
+    using Base_Stream = std::ostringstream;
+    // no extra tests (they are all on the library::Input side
+  protected:
+    static auto subsuite() -> Stream;
+    auto generate_base_stream() -> Base_Stream; // The stream is suitable for writing
+  };
+}
+#endiv
+#divert <cpp>
+#import tests.unit.stream.streamy.Streamy.Output // see the full type so we can take member pointers off of it
+namespace tests::unit::stream::streamy {
+  auto Extras<library::Output>::generate_base_stream() -> Base_Stream { return std::ostringstream{}; }
+  auto Extras<library::Output>::subsuite() -> Stream {
+    auto sub = Stream{"specifics"};
+    sub // none
+      << END;
+    return sub;
+  }
+}
+#endiv

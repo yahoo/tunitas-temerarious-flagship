@@ -60,8 +60,11 @@ namespace tunitas::flagship::temerarious {
     auto Frame::emplace(string::View buffer) -> void {
       auto &self = static_cast<Ancestor &>(*this);
       using namespace nonstd;
-      auto visitor = Visitor{[buffer](string::Storage *variable) { variable->append(buffer); },
-                             [buffer](stream::Output *outbound) { *outbound << buffer << '\n'; }};
+      auto visitor = Visitor{[buffer](stream::Output *outbound) { *outbound << buffer << '\n'; },
+                             [buffer](string::Storage *variable) {
+                               variable->append(buffer);
+                               variable->append("\n");
+                             }};
       visit(visitor, self);
     }
   }

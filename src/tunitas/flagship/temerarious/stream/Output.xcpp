@@ -80,8 +80,8 @@ namespace tunitas::flagship::temerarious {
       , Filebuf{UNINITIALIZED}
     { }
     Output::Output(path::File const &filepath, Mode mode) {
-      this->init(buf.get());
-      if (!buf->open(filepath, mode)) {
+      this->init(opened_file_streambuf.get());
+      if (!opened_file_streambuf->open(filepath, mode)) {
         this->setstate(ios_base::failbit);
       } else {
         this->clear();

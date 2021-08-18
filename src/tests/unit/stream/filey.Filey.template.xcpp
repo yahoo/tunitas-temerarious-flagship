@@ -1,0 +1,123 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+namespace tests::unit::stream::filey {
+  //
+  // The stream-to-a-file test fixture
+  //
+  // Design:
+  //
+  //   mostly template, a little specialization
+  //
+  // Usage:
+  //
+  //   auto series = Stream{...somehow...};
+  //   series << add<Filey<library::Input>>()
+  //          << add<Filey<library::Output>>()
+  //          << END;
+  //
+  template<typename LIBRARY_STREAM> struct Filey;
+}
+#endiv
+#divert <hpp>
+#import tests.unit.stream.Exerciser
+#import tests.unit.stream.filey.Extras
+namespace tests::unit::stream {
+  template<typename LIBRARY_STREAM> class filey::Filey : public cppunit::test::Fixture,
+                                                         private Exerciser<LIBRARY_STREAM>,
+                                                         public filey::Extras<LIBRARY_STREAM> {
+    struct Ancestors {
+      using Fixture = cppunit::test::Fixture;
+      using Exerciser = stream::Exerciser<LIBRARY_STREAM>;
+      using Extras = filey::Extras<LIBRARY_STREAM>;
+    };
+  public:
+    using Subject = LIBRARY_STREAM;
+    // See streamy::Steamy<LIBRARY_STREAM>::test_constructor_conversion_stream() -> void;
+    auto test_constructor_conversion_file() -> void;
+    auto test_constructor_copy() -> void;
+    auto test_constructor_move() -> void;
+    auto test_assignment_copy() -> void;
+    auto test_assignment_move() -> void;
+    static auto suite() -> cppunit::Test *;
+  };
+}
+#endiv
+#divert <tpp>
+#import std.stringstream
+namespace tests::unit::stream::filey {
+  template<typename _> auto Filey<_>::test_constructor_conversion_file() -> void {
+    auto generated = Ancestors::Extras::generate_existing_filepath();
+    auto subject = Subject{generated}; // <---------------------------------------- test this
+    CPPUNIT_ASSERT(subject.good());
+    Ancestors::Exerciser::exercise(subject);
+  }
+  template<typename _> auto Filey<_>::test_constructor_copy() -> void {
+#if 0 // copy is denied
+    auto buf = ...somehow...
+    auto specimen = Subject{buf};
+    auto subject = Subject{specimen}; // <---------------------------------------- test this
+    Ancestors::Exerciser::exercise(subject);
+#endif
+  }
+  template<typename _> auto Filey<_>::test_constructor_move() -> void {
+    auto specimen = Subject{Ancestors::Extras::generate_existing_filepath()};
+    CPPUNIT_ASSERT(specimen.good());
+    auto subject = Subject{move(specimen)}; // <---------------------------------------- test this
+    CPPUNIT_ASSERT(subject.good());
+    Ancestors::Exerciser::exercise(subject);
+  }
+  template<typename _> auto Filey<_>::test_assignment_copy() -> void {
+#if 0 // copy is denied
+    auto buf = ...somehow...
+    auto specimen = Subject{buf};
+    auto subject = Subject{};
+    subject = Subject{specimen}; // <---------------------------------------- test this
+    Ancestors::Exerciser::exercise(subject);
+#endif
+  }
+  template<typename _> auto Filey<_>::test_assignment_move() -> void {
+    auto specimen = Subject{Ancestors::Extras::generate_existing_filepath()};
+    auto either = std::stringstream{}; // ... doesn't matter what this is ... but needs to be good and then gone
+    auto subject = Subject{either};
+    CPPUNIT_ASSERT(subject.good());
+    subject = move(specimen); // <---------------------------------------- test this
+    CPPUNIT_ASSERT(subject.good());
+    Ancestors::Exerciser::exercise(subject);
+  }
+  template<typename _> auto Filey<_>::suite() -> cppunit::Test * {
+    auto series = Stream{typeid(Subject).name()};
+    series << []{
+                auto use = Stream{"usage"};
+                use << []{
+                         auto con = Stream{"constructor"};
+                         con << []{
+                                  auto ver = Stream{"conversion"};
+                                  ver << call("file", &Filey::test_constructor_conversion_file)
+                                      << END;
+                                  return move(ver);
+                                }()
+                             << call("copy", &Filey::test_constructor_copy)
+                             << call("move", &Filey::test_constructor_move)
+                             << END;
+                         return move(con);
+                       }()
+                    << []{
+                         auto ass = Stream{"assignment"};
+                         ass << call("copy", &Filey::test_assignment_copy)
+                             << call("move", &Filey::test_assignment_move)
+                             << END;
+                         return move(ass);
+                       }()
+                    << Ancestors::Extras::subsuite()
+                    << END;
+                return move(use);
+              }()
+           << END;
+    return finalize(series);
+  }
+}
+#endiv

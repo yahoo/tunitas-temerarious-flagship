@@ -13,10 +13,15 @@ namespace tests {
 #endiv
 #divert <hpp>
 // Because every test fixture will need these
-#import cppunit.Test // ........... [[TODO, FIXTHIS]] use rigging::Test when module-rigging >= 2.0 is ready
-#import cppunit.test.Fixture // ... [[TODO, FIXTHIS]] ibidem.
+#import tests.cppunit.Test // ........... [[TODO, FIXTHIS]] use rigging::Test when module-rigging >= 2.0 is ready
+#import tests.cppunit.test.Fixture // ... [[TODO, FIXTHIS]] ibidem.
+#import tests.cppunit.ASSERT // ......... ibidem.
+// And sooner or later we'll need to be outputting (it's a test rig; of course we do)
+#import std.cerr
+#import std.clog
+#import std.cout
 #endiv
 #divert <ipp>
 #import tunitas.string.literals
-#import rigging.suite.io // ibidem.
+#import rigging.suite.io // ibidem ... [[FIXTHIS]] use rigging.io when module-rigging >= 2.0 is ready
 #endiv

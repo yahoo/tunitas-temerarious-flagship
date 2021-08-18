@@ -24,21 +24,24 @@ namespace tunitas::flagship::temerarious::directive::package_directive {
     //   see parser::assess(...)
     //
     //
-    auto rest(State &, Output &, Location, Payload) -> void;
+    auto passage(State &, Output &, Location, Payload) -> void;
     auto comment(State &, Output &, Location, Payload) -> void;
     auto uncomment(State &, Output &, Location, Payload) -> void;
     auto block(State &, Output &, Location, Payload) -> void;
     auto define(State &, Output &, Location, Payload) -> void;
     auto endef(State &, Output &, Location, Payload) -> void;
+    auto substitute(State &, Output &, Location, Payload) -> void;
     auto ifdef(State &, Output &, Location, Payload) -> void;
     auto elifdef(State &, Output &, Location, Payload) -> void;
     auto elsedef(State &, Output &, Location, Payload) -> void;
     auto endif(State &, Output &, Location, Payload) -> void;
-    auto read(State &, Output &, Location, Payload) -> void;
     auto undef(State &, Output &, Location, Payload) -> void;
     auto notice(State &, Output &, Location, Payload) -> void;
     auto warning(State &, Output &, Location, Payload) -> void;
     auto fatal(State &, Output &, Location, Payload) -> void;
+    auto help(State &, Output &, Location, Payload) -> void;
+    auto dump(State &, Output &, Location, Payload) -> void;
+    auto help(State &, Output &, Location, Payload) -> void;
   }
   namespace package_body_directive::body {
     inline auto throw_not_in_a_condition_frame(Location where) -> void;
@@ -56,8 +59,9 @@ namespace tunitas::flagship::temerarious::directive::package_directive {
 #endiv
 #divert <cpp>
 #import std.clog
+#import nonstd.exception.Unimplemented
 namespace tunitas::flagship::temerarious::directive::package_directive {
-  auto interface::rest(State &state, Output &output, Location, Payload payload) -> void {
+  auto interface::passage(State &state, Output &output, Location, Payload payload) -> void {
     state.passthrough(payload);
   }
   auto interface::comment(State &, Output &, Location, Payload) -> void {
@@ -70,7 +74,7 @@ namespace tunitas::flagship::temerarious::directive::package_directive {
   auto interface::block(State &state, Output &, Location where, Payload payload) -> void {
     if (state.is_enabled()) {
       auto identifier = get_identifier(where, payload);
-    state.push_diversion(identifier);
+      state.push_diversion(identifier);
     }
   }
   auto interface::endef(State &state, Output &, Location where, Payload payload) -> void try {
@@ -90,6 +94,20 @@ namespace tunitas::flagship::temerarious::directive::package_directive {
   auto interface::undef(State &state, Output &, Location where, Payload payload) -> void {
     if (state.is_enabled()) {
       state.undefine_variable(get_identifier(where, payload));
+    }
+  }
+  auto interface::substitute(State &state, Output &, Location where, Payload payload) -> void {
+    if (state.is_enabled()) {
+      auto reference = get_identifier(where, payload);
+      if (auto defined = state.recover_variable(reference); good(defined)) {
+        state.passthrough(value(defined));
+      } else {
+        //
+        // See the receiving catch site in run(...)
+        // grammar: ...?
+        //
+        throw exception::Variable{reference, where, "there is no such variable"};
+      }
     }
   }
   auto interface::ifdef(State &state, Output &, Location where, Payload payload) -> void {
@@ -142,26 +160,16 @@ namespace tunitas::flagship::temerarious::directive::package_directive {
       state.fatal(payload);
     }
   }
-}
-#import nonstd.errcode
-#import tunitas.flagship.temerarious.stream.Input
-#import tunitas.flagship.temerarious.input.exception.Missing
-#import tunitas.flagship.temerarious.input.exception.Present
-namespace tunitas::flagship::temerarious::directive::package_directive {
-  auto interface::read(State &state, Output &outbound, Location where, Payload payload) -> void {
+  auto interface::help(State &state, Output &, Location where, Payload payload) -> void {
     if (state.is_enabled()) {
-      auto suffix = get_filepath(where, payload);
-      if (auto found = state.search.find(suffix); fail(found)) {
-        throw input::exception::Missing{suffix, "does not exist in the search path"};
-      } else {
-        auto resolved = value(move(found));
-        auto inbound = stream::Input{resolved};
-        if (!inbound) {
-          throw input::exception::Present{resolved, nonstd::errcode(), ".r filename"};
-        } else {
-          state.push_input(move(inbound));
-        }
-      }
+      get_none(where, payload);
+      throw exception::Unimplemented{};
+    }
+  }
+  auto interface::dump(State &state, Output &, Location where, Payload payload) -> void {
+    if (state.is_enabled()) {
+      get_none(where, payload);
+      state.dump(std::clog);
     }
   }
 }

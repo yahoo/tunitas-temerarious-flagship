@@ -1,0 +1,106 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+#include <hpp/tunitas.flagship.temerarious.processor.State>
+#endiv
+#divert <hpp>
+#import std.ostream
+#import tunitas.flagship.temerarious.processor.State
+#import tunitas.Optional
+#import tunitas.string.View
+#import tunitas.string.Storage
+#import tunitas.file.Path
+namespace tunitas::flagship::temerarious::processor {
+  struct State::Dumper {
+    inline [[implicit]] Dumper(std::ostream &, State const &);
+    std::ostream &outbound;
+    State const &state;
+    auto dump_inbounds() const -> void;
+    auto dump_variables() const -> void;
+    auto dump_directories() const -> void;
+    inline auto dump() const -> void;
+  protected:
+    inline auto there_are(size_t count, string::Storage singular, Optional<string::Storage> plural = {}) const -> void;
+    //
+    inline static auto single_line(string::View) -> bool;
+    inline static auto pluralize(size_t count, string::Storage singular, Optional<string::Storage> plural = {}) -> string::Storage;
+    inline static auto presence(file::Path const &directory) -> string::Storage;
+  };
+}
+#endiv
+#divert <ipp>
+#import sys.posix.stat
+#import sys.posix.isdir
+#import sys.posix.isreg
+namespace tunitas::flagship::temerarious::processor {
+  State::Dumper::Dumper(std::ostream &o, State const &s)
+    : outbound{o}
+    , state{s}
+  { }
+  auto State::Dumper::single_line(string::View candidate) -> bool { return string::Storage::npos != candidate.find('\n'); }
+  auto State::Dumper::pluralize(size_t count, string::Storage singular, Optional<string::Storage> plural) -> string::Storage {
+    if (1 == count) {
+      return move(singular);
+    } else {
+      return plural.value_or(singular + "s"s);
+    }
+  }
+  auto State::Dumper::presence(file::Path const &directory) -> string::Storage {
+    using namespace sys::posix;
+    using sys::posix::stat; // must occlude ::stat(...) and struct ::stat
+    if (auto tat = stat(directory); fail(tat)) {
+      return "MISSING"s;
+    } else if (auto const &truct=value(tat); !isdir(truct)) {
+      //                     MISSING      MISSING
+      return isreg(truct) ? "FILE   "s : "OTHER  "s;
+      return "NOT-DIR"s;;
+    } else {
+      //      MISSING
+      return "present"s;
+    }
+  }
+  auto State::Dumper::dump() const -> void {
+    dump_inbounds();
+    dump_variables();
+    dump_directories();
+    outbound << '\n';
+  }
+  auto State::Dumper::there_are(size_t count, string::Storage singular, Optional<string::Storage> plural) const -> void {
+    outbound << "\nThere are " << count << ' ' << pluralize(count, singular, plural);
+  }
+}
+#endiv
+#divert <cpp>
+#import langu.age.q
+#import langu.age.curly
+namespace tunitas::flagship::temerarious::processor {
+  auto State::Dumper::dump_inbounds() const -> void {
+    outbound << "Processor State Dump"
+             << "\nInbound (streams)n"
+             << "\nTop " << state.inbounds.top().where();
+    there_are(state.inbounds.size(), "input frame");
+  }
+  auto State::Dumper::dump_variables() const -> void {
+    outbound << "\nVariables";
+    for (auto const &pair : state.globals) {
+      outbound << "\nvariable " << q(pair.first);
+      if (single_line(pair.second)) {
+        outbound << " = " << q(pair.second);
+      } else {
+        outbound << " is a block " << curly(pair.second);
+      }
+    }
+    there_are(state.globals.size(), "variable");
+  }
+  auto State::Dumper::dump_directories() const -> void {
+    outbound << "\nDirectories (the searchpath)\n";
+    for (auto const &directory : state.directories) {
+      outbound << '\n' << presence(directory) << ' ' << directory;
+    }
+    there_are(state.directories.size(), "directory", "directories");
+  }
+}
+#endiv

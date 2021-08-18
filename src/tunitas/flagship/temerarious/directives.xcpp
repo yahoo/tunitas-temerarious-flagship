@@ -11,4 +11,5 @@
 //   #import tunitas.flagship.temerarious.directives
 //   ... all of of the directive (processors) in namespace tunitas::flagship::temerarious::directive are available
 #import tunitas.flagship.temerarious.directive.library
+#import tunitas.flagship.temerarious.directive.read
 #endiv

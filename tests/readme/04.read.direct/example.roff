@@ -4,5 +4,7 @@ Show that .r works
 ."
 ." This reads by a direct path; it does not use the searchpath mechanism.
 ."
-.r tests/readme/04.read.direct/subexample.roff
+." DO NOT ---> .r tests/readme/04.read.direct/subexample.roff <--- because -I. is not on the command line
+." DO -------> .r subexample.roff because the immediate place to look is the directory whence this file
+.r subexample.roff
 Expect to have seen m/^GOOD/ above if the .r worked

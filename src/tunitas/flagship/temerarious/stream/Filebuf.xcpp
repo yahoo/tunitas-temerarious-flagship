@@ -14,9 +14,14 @@ namespace tunitas::flagship::temerarious::stream {
   //
   //   Manage the filebuf
   //
+  // Design:
+  //
+  //   The opened_file_steambuf need not be live (non-null).
+  //   That occurs when the descendant {Input,Output} is borrowing the rdbuf of another stream
+  //
   // Usage:
   //
-  //   By inheritance into stream::Output, stream::Output
+  //   By inheritance into stream::Iutput or stream::Output
   //
   namespace [[eponymous]] filebuf {
     struct Filebuf;
@@ -37,7 +42,7 @@ namespace tunitas::flagship::temerarious::stream {
   class filebuf::Filebuf {
     friend auto filebuf::swap(Filebuf &, Filebuf &) noexcept -> void;
   protected:
-    std::unique_ptr<std::filebuf> buf;
+    std::unique_ptr<std::filebuf> opened_file_streambuf;
     virtual ~Filebuf() = default;
     inline static constexpr auto UNINITIALIZED = filebuf::UNINITIALIZED;
   public:
@@ -51,10 +56,10 @@ namespace tunitas::flagship::temerarious::stream {
 #divert <ipp>
 namespace tunitas::flagship::temerarious::stream {
   auto filebuf::swap(Filebuf &a, Filebuf &b) noexcept -> void {
-    swap(a.buf, b.buf);
+    swap(a.opened_file_streambuf, b.opened_file_streambuf);
   }
   namespace filebuf {
-    Filebuf::Filebuf() : buf{std::make_unique<std::filebuf>()}  { }
+    Filebuf::Filebuf() : opened_file_streambuf{std::make_unique<std::filebuf>()}  { }
     Filebuf::Filebuf(Uninitialized)  { }
   }
 }

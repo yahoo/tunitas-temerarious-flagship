@@ -16,14 +16,22 @@ struct tests::unit::field::get::Identifier : public cppunit::test::Fixture, priv
   auto test_fail_badform() -> void;
   auto test_case_1() -> void;
   auto test_case_2() -> void;
+  auto test_case_3() -> void;
   static auto suite() -> cppunit::Test *;
 protected:
-  static auto generate_some_badness() -> std::vector<tunitas::string::Storage>;
-};  
+  using Generated = std::vector<tunitas::string::Storage>;
+  static auto generate_some_goodness() -> Generated;
+  static auto generate_some_badness() -> Generated;
+  static auto generate_some_pathologies() -> Generated;
+};
 #endiv
 #divert <cpp>
 namespace tests::unit::field::get {
-  auto Identifier::generate_some_badness() -> std::vector<tunitas::string::Storage> {
+  auto Identifier::generate_some_pathologies() -> Generated {
+    return {"HEAD_TUNITAS_REPOSITORY_URL/",
+            "URL/"};
+  }
+  auto Identifier::generate_some_badness() -> Generated {
     // The precondition is that there is no leading or trailing blanks ... don't violate that.
     // All of these are invalid identifiers for one reason or another
     return {"a b c",
@@ -35,6 +43,17 @@ namespace tests::unit::field::get {
             "..",
             "...",
             ".cshrc"};
+  }
+  auto Identifier::generate_some_goodness() -> Generated {
+    return {"a"s,
+            "ab"s,
+            "a1"s,
+            "_a"s,
+            "__"s,
+            "_-"s,
+            "_1"s,
+            "a-b"s,
+            "a--"s};
   }
   auto Identifier::test_good() -> void try {
     auto got = library::get_identifier(hereinat(), "cabbage-headded-monster"sv);
@@ -63,32 +82,51 @@ namespace tests::unit::field::get {
 }
 #import tests.cppunit.Exception
 #import std.exception
+#import langu.age.q
 namespace tests::unit::field::get {
+  // http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2020/p2012r0.pdf
   auto Identifier::test_case_1() -> void {
     // The precondition is that there is no leading or trailing blanks ... don't violate that.
-    library::get_identifier(hereinat(), "a"sv);
-    library::get_identifier(hereinat(), "ab"sv);
-    library::get_identifier(hereinat(), "a1"sv);
-    library::get_identifier(hereinat(), "_a"sv);
-    library::get_identifier(hereinat(), "__"sv);
-    library::get_identifier(hereinat(), "_-"sv);
-    library::get_identifier(hereinat(), "_1"sv);
-    library::get_identifier(hereinat(), "a-b"sv);
-    library::get_identifier(hereinat(), "a--"sv);
+    [p2012=generate_some_goodness()]{
+      for (auto const &item : p2012) {
+        try {
+          auto const got = library::get_identifier(hereinat(), item);
+          CPPUNIT_ASSERT(got == item);
+        } catch (exception::Aspect const &) {
+          CPPUNIT_ASSERT(false);
+        }
+      }
+    }();
   }
   auto Identifier::test_case_2() -> void {
-    for (auto const item : generate_some_badness()) {
-      try {
-        library::get_identifier(hereinat(), item);
-        CPPUNIT_ASSERT(false);
-      } catch (exception::Aspect const &) {
-        CPPUNIT_ASSERT(true);
+    [p2012=generate_some_badness()]{
+      for (auto const &item : p2012) {
+        try {
+          library::get_identifier(hereinat(), item);
+          CPPUNIT_ASSERT(false);
+        } catch (exception::Aspect const &) {
+          CPPUNIT_ASSERT(true);
+        }
       }
-    }
+    }();
+  }
+  auto Identifier::test_case_3() -> void {
+    [p2012=generate_some_pathologies()]{
+      for (auto const &item : p2012) {
+        auto expected = library::is_identifier(item);
+        std::cerr << "DEBUG " << langu::age::q(item) << " expected " << expected << '\n';
+        try {
+          auto const got = library::get_identifier(hereinat(), item);
+          CPPUNIT_ASSERT(expected && got == item);
+        } catch (exception::Aspect const &) {
+          CPPUNIT_ASSERT(!expected);
+        }
+      }
+    }();
   }
   auto Identifier::suite() -> cppunit::Test * {
     using namespace rigging::suite;
-    auto series = Stream{"none(...)"};
+    auto series = Stream{"identifier(...)"};
     series << call("good", &Identifier::test_good)
            << []{
                 auto bad = Stream{"fail"};
@@ -102,6 +140,7 @@ namespace tests::unit::field::get {
                 auto cas = Stream{"case"};
                 cas << call("1", &Identifier::test_case_1)
                     << call("2", &Identifier::test_case_2)
+                    << call("3", &Identifier::test_case_3)
                     << END;
                 return move(cas);
               }()

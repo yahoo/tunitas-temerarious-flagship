@@ -54,6 +54,7 @@ namespace tunitas::flagship::temerarious::error {
     case code::Companion::PROCESSOR_INVALID:  return "the 'roff process reached an invalid date"; // a.k.a. "an internal error"
     case code::Companion::DIVERSION_UNCLOSED: return "unclosed diversion at end-of-file"s;
     case code::Companion::CONDITION_UNCLOSED: return "unclosed conditional at end-of-file"s;
+    case code::Companion::VARIABLE_UNFOUND:   return "no such variable"s;
     default:
       return "Error #"s + std::to_string(code);
     }

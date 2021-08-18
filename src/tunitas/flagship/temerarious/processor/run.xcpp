@@ -78,7 +78,9 @@ namespace tunitas::flagship::temerarious::processor::package_run {
 }
 #endiv
 #divert <cpp>
-#import tunitas.string.Storage
+#import langu.age.braket
+#import langu.age.q
+#import nonstd.exception.Unreachable
 #import tunitas.flagship.temerarious.error.Code
 static_assert(sizeof (tunitas::flagship::temerarious::error::code::Companion));
 static_assert(sizeof (std::is_error_code_enum<tunitas::flagship::temerarious::error::code::Companion>));
@@ -86,14 +88,14 @@ static_assert(std::is_error_code_enum<tunitas::flagship::temerarious::error::cod
 // [[TODO]] v2-series #import substd.exception.Filesystem, nonstd::exception::Filesystem<string::View>
 #import tunitas.flagship.temerarious.exception // cascade namespace exception
 #import tunitas.flagship.temerarious.directive.exception.Aspect
+#import tunitas.flagship.temerarious.directive.exception.Variable
 #import tunitas.flagship.temerarious.input.exception.Aspect
 #import tunitas.flagship.temerarious.input.exception.Present
 #import tunitas.flagship.temerarious.parser.assess
 #import tunitas.flagship.temerarious.processor.exception.Aspect
 #import tunitas.flagship.temerarious.processor.State
 #import tunitas.flagship.temerarious.source.Line
-#import nonstd.exception.Unreachable
-#import langu.age.q
+#import tunitas.string.Storage
 namespace tunitas::flagship::temerarious::processor::package_run {
   auto interface::run(stream::Input &&inbound_moved_into_state, stream::Output &outbound, stream::Output &errbound, Preparation preparation) -> Success {
     auto state = State{forward<stream::Input>(inbound_moved_into_state), outbound, move(preparation)};
@@ -111,7 +113,11 @@ namespace tunitas::flagship::temerarious::processor::package_run {
           if (auto [directive, process, rest]=assess(buffer); Assessment::IGNORE == directive) {
             // Yup, ignore the line
           } else if (Assessment::ERROR == directive) {
-            errbound << where << "error, invalid roff directive " << q(buffer.substr(0, 2)) << " must be ignored\n";
+            // This frequently happens when multiple letters are used instead of the single letter scheme
+            //   e.g. ".def" instead of ".d"
+            // So we give as much context as possible in the hopes that more is more useful.
+            errbound << where << "found-->| " << buffer << '\n';
+            errbound << where << "error, invalid roff directive is ignored\n";
             erroneous = {error::Code::DIRECTIVE};
           } else if (Assessment::PASSTHROUGH == directive) {
             state.passthrough(buffer);
@@ -120,13 +126,16 @@ namespace tunitas::flagship::temerarious::processor::package_run {
             try {
               process(state, outbound, where, rest);
             } catch (input::exception::Present const &e) {
-              errbound << where << "error, could not open " << q(e.whence()) << " because " << e.code().message() << '\n';
-              errbound << where << "error, failed roff directive <<" << buffer.substr(0, 2) << ">>\n";
+              errbound << where << "notice, could not open " << q(e.whence()) << " because " << e.code().message() << '\n';
+              errbound << where << "error, failed roff directive " << braket(braket(buffer.substr(0, 2))) << '\n';
               erroneous = {error::Code::FILE};
             } catch (input::exception::Aspect const &e) {
-              errbound << where << "error, could not find " << q(e.whence().filepath()) << '\n';
-              errbound << where << "error, failed roff directive <<" << buffer.substr(0, 2) << ">>\n";
+              errbound << where << "notice, could not find " << q(e.whence().filepath()) << '\n';
+              errbound << where << "error, failed roff directive " << braket(braket(buffer.substr(0, 2))) << " because " << e.what() << '\n';
               erroneous = {error::Code::FILE};
+            } catch (directive::exception::Variable const &e) {
+              errbound << where << "could not interpolate " << q(e.identifier()) << " because " << e.what() << '\n';
+              erroneous = {error::Code::DIRECTIVE};
             } catch (directive::exception::Aspect const &e) {
               errbound << where << "found-->|" << buffer << '\n';
               errbound << where << "error, " << e.what() << '\n';

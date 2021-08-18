@@ -53,10 +53,13 @@ namespace tunitas::flagship::temerarious::directive::field {
     //
     // Schema ... Identifier:
     //
-    //   not empty
-    //   like a DNS label or a Scheme variable name (has dashes)
-    //   like C++  (underscores)
-    //   like cascaded names (has dots)
+    //   Not empty
+    //   Follows a multitude of cultures and styles, being at least:
+    //     like a DNS label or a Scheme variable name (has dashes)
+    //     like a filename with slashes
+    //     like C++ (underscores)
+    //     like cascaded names (has dots)
+    //   But the first character must be "reasonable" ... being C++ styled.
     //
     // Schema ... Identifier:
     //
@@ -101,6 +104,7 @@ namespace tunitas::flagship::temerarious::directive::field::package_field {
     auto body::isidentifierN(char candidate) -> bool { return (isdigit(candidate) ||
                                                                '-' == candidate ||
                                                                '.' == candidate ||
+                                                               '/' == candidate ||
                                                                isidentifier0(candidate)); }
     auto body::isfilepath(string::View candidate) -> bool {
       return (!candidate.empty() &&

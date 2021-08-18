@@ -52,7 +52,7 @@ namespace tunitas::flagship::temerarious::parser {
 #endiv
 #divert <cpp>
 #import tunitas.flagship.temerarious.parser.trim
-#import tunitas.flagship.temerarious.directive.library
+#import tunitas.flagship.temerarious.directives
 #import std.isspace
 #import std.isalpha
 namespace tunitas::flagship::temerarious {
@@ -85,15 +85,7 @@ namespace tunitas::flagship::temerarious {
                             return false;
                           }
                        };
-          if ('"' == code) {
-            // found ."    (doesn't matter what comes next)
-            return {Assessment::DIRECTIVE, directive::comment, trimmed()};
-          } else if ('\'' == code) {
-            // found .'    (doesn't matter what comes next)
-            return {Assessment::DIRECTIVE, directive::uncomment, trimmed()};
-          } else if ('\\' == code) {
-            return {Assessment::DIRECTIVE, directive::rest, untrimmed()};
-          } else if (std::isalpha(code)) {
+          if (std::isalpha(code)) {
             auto accept = [&]{
                             if (first == size) {
                               //
@@ -107,7 +99,6 @@ namespace tunitas::flagship::temerarious {
                               // .?<----- end after the ?
                               //
                               switch (code) {
-                              case '\\': // .\     (passthrough the rest)
                               case 'e': // .endef
                               case 'f': // .endif
                               case 's': // .else
@@ -158,6 +149,30 @@ namespace tunitas::flagship::temerarious {
               case 'x': // a.k.a. "exit" or "fatal"
                 return {Assessment::DIRECTIVE, directive::fatal, trimmed()};
               }
+            }
+          } else {
+            switch (code) {
+            case '"':
+              // found ."    (doesn't matter what comes next)
+              return {Assessment::DIRECTIVE, directive::comment, trimmed()};
+            case '\'':
+            case '#':
+              // found .'    (doesn't matter what comes next)
+              return {Assessment::DIRECTIVE, directive::uncomment, trimmed()};
+            case '\\':
+              // the ".\" captures the rest of the line ... so one can have leading dots on a line by uttering ".\.cshrc"
+              return {Assessment::DIRECTIVE, directive::passage, untrimmed()};
+            case '/':
+              // the "./" occurs frequently enough with "./configure" that we allow it as a passthrough
+              return {Assessment::DIRECTIVE, directive::passage, line}; // we return line, not even untrimmed()
+            case '$':
+              // substitute the variable
+              return {Assessment::DIRECTIVE, directive::substitute, trimmed()};
+            case '_':
+              // dump
+              return {Assessment::DIRECTIVE, directive::dump, trimmed()};
+            case '?': // a.k.a. "help"
+              return {Assessment::DIRECTIVE, directive::help, trimmed()};
             }
           }
           //

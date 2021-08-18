@@ -79,7 +79,7 @@ namespace tests::unit::field::get {
     CPPUNIT_ASSERT(true);
   }
   auto Identifier_And_More::test_fail_bad_id() -> void try {
-    library::get_identifier_and_more(hereinat(), "a/b/c pathname"sv); // <----- test this (bad identifier)
+    library::get_identifier_and_more(hereinat(), "/a/b/c! pathname"sv); // <----- test this (bad identifier)
     CPPUNIT_ASSERT(false);
   } catch (exception::Aspect const &) {
     CPPUNIT_ASSERT(true);
@@ -97,44 +97,47 @@ namespace tests::unit::field::get {
 #import tests.cppunit.Exception
 #import std.exception
 namespace tests::unit::field::get {
+  // http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2020/p2012r0.pdf
   auto Identifier_And_More::test_case_1() -> void {
     // The precondition is that there is no leading or trailing blanks ... don't violate that.
-    for (auto const item : generate_some_goodness()) {
-      try {
-        std::cerr << "DEBUG: testing for goodness --->" << item << "<---";
-        library::get_identifier_and_more(hereinat(), item);
-        std::cerr << "GOOD\n";
-        CPPUNIT_ASSERT(true);
-      } catch (cppunit::Exception const &) {
-        throw;
-      } catch (exception::Aspect const &) {
-        std::cerr << "FAIL\n";
-        CPPUNIT_ASSERT(false);
-      } catch (std::exception const &) {
-        std::cerr << "HARD FAIL (unexpected exception)\n";
-        CPPUNIT_ASSERT(false);
+    [p2012=generate_some_goodness()]{
+      for (auto const item : p2012) {
+        try {
+          std::cerr << "DEBUG: testing for goodness --->" << item << "<---";
+          library::get_identifier_and_more(hereinat(), item);
+          std::cerr << "GOOD\n";
+          CPPUNIT_ASSERT(true);
+        } catch (cppunit::Exception const &) {
+          throw;
+        } catch (exception::Aspect const &) {
+          std::cerr << "FAIL\n";
+          CPPUNIT_ASSERT(false);
+        } catch (std::exception const &) {
+          std::cerr << "HARD FAIL (unexpected exception)\n";
+          CPPUNIT_ASSERT(false);
+        }
       }
-    }
+    }();
   }
   auto Identifier_And_More::test_case_2() -> void {
-    for (auto const item : generate_some_badness()) {
-      try {
-        auto [id, rest] = library::get_identifier_and_more(hereinat(), item);
-        std::cerr << "DEBUG should fail but did not " << braket(braket(item)) << '\n';
-        std::cerr << "DEBUG identifier=" << library::isidentifier(id) << ' ' << id << '\n';
-        std::cerr << "DEBUG text=" << library::istext(rest) << ' ' << braket(braket(rest)) << '\n';
-        std::cerr << "DEBUG id=" << q(id) << ", rest=" << q(rest) << "\n";
-        
-
-        CPPUNIT_ASSERT(false);
-      } catch (exception::Aspect const &) {
-        CPPUNIT_ASSERT(true);
+    [p2012=generate_some_badness()]{
+      for (auto const item : p2012) {
+        try {
+          auto [id, rest] = library::get_identifier_and_more(hereinat(), item);
+          std::cerr << "DEBUG should fail but did not " << braket(braket(item)) << '\n';
+          std::cerr << "DEBUG identifier=" << library::isidentifier(id) << ' ' << id << '\n';
+          std::cerr << "DEBUG text=" << library::istext(rest) << ' ' << braket(braket(rest)) << '\n';
+          std::cerr << "DEBUG id=" << q(id) << ", rest=" << q(rest) << "\n";
+          CPPUNIT_ASSERT(false);
+        } catch (exception::Aspect const &) {
+          CPPUNIT_ASSERT(true);
+        }
       }
-    }
+    }();
   }
   auto Identifier_And_More::suite() -> cppunit::Test * {
     using namespace rigging::suite;
-    auto series = Stream{"none(...)"};
+    auto series = Stream{"identifier_and_more(...)"};
     series << call("good", &Identifier_And_More::test_good)
            << []{
                 auto fail = Stream{"fail"};

@@ -67,30 +67,41 @@ namespace tests::unit::stream::output {
     subject = move(specimen); // <---------------------------------------- test this
     subject << "a loud mouth bass";
   }
+}
+#import tests.unit.stream.Filey
+#import tests.unit.stream.Streamy
+namespace tests::unit::stream::output {
   auto Fixture::suite() -> cppunit::Test * {
     using namespace rigging::suite;
     auto series = Stream{"Output"};
     series << []{
-                auto con = Stream{"constructor"};
-                con << []{
-                         auto ver = Stream{"conversion"};
-                         ver << call("stream", &Fixture::test_constructor_conversion_stream)
-                             << call("file", &Fixture::test_constructor_conversion_file)
+                auto use = Stream{"usage"};
+                use << []{
+                         auto con = Stream{"constructor"};
+                         con << []{
+                                  auto ver = Stream{"conversion"};
+                                  ver << call("stream", &Fixture::test_constructor_conversion_stream)
+                                      << call("file", &Fixture::test_constructor_conversion_file)
+                                      << END;
+                                  return move(ver);
+                                }()
+                             << call("copy", &Fixture::test_constructor_copy)
+                             << call("move", &Fixture::test_constructor_move)
                              << END;
-                         return move(ver);
+                         return move(con);
                        }()
-                    << call("copy", &Fixture::test_constructor_copy)
-                    << call("move", &Fixture::test_constructor_move)
+                    << []{
+                         auto ass = Stream{"assignment"};
+                         ass << call("copy", &Fixture::test_assignment_copy)
+                             << call("move", &Fixture::test_assignment_move)
+                             << END;
+                         return move(ass);
+                       }()
                     << END;
-                return move(con);
+                return move(use);
               }()
-           << []{
-                auto ass = Stream{"assignment"};
-                ass << call("copy", &Fixture::test_assignment_copy)
-                    << call("move", &Fixture::test_assignment_move)
-                    << END;
-                return move(ass);
-              }()
+           << add<Filey<library::Output>>()
+           << add<Streamy<library::Output>>()
            << END;
     return finalize(series);
   }

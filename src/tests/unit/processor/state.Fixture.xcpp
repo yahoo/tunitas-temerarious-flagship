@@ -18,7 +18,10 @@ namespace tests::unit::processor::state {
 struct tests::unit::processor::state::fixture::Fixture : public cppunit::test::Fixture {
   using Subject = library::State;
   auto test_constructor_default() -> void;
+  auto test_dump() -> void;
   static auto suite() -> cppunit::Test *;
+protected:
+  static auto generate() -> library::State;
 };
 #endiv
 #divert <cpp>
@@ -27,13 +30,20 @@ struct tests::unit::processor::state::fixture::Fixture : public cppunit::test::F
 #import tunitas.flagship.temerarious.stream.Input
 #import tunitas.flagship.temerarious.stream.Output
 namespace tests::unit::processor::state::fixture {
-  auto Fixture::test_constructor_default() -> void {
+  auto Fixture::generate() -> library::State {
     auto bufin = std::istringstream{};
     auto bufout = std::ostringstream{};
     auto inbound = stream::Input{bufin};
     auto outbound = stream::Output{bufout};
-    auto subject = Subject{move(inbound), outbound};
+    return Subject{move(inbound), outbound};
+  }
+  auto Fixture::test_constructor_default() -> void {
+    auto subject = generate();
     CPPUNIT_ASSERT(sizeof (subject));
+  }
+  auto Fixture::test_dump() -> void {
+    auto subject = generate();
+    subject.dump(std::clog);
   }
   auto Fixture::suite() -> cppunit::Test * {
     using namespace rigging::suite;
@@ -44,6 +54,7 @@ namespace tests::unit::processor::state::fixture {
                     << END;
                 return move(con);
               }()
+           << call("dump", &Fixture::test_dump)
            << END;
     return finalize(series);
   }

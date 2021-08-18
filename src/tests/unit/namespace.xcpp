@@ -10,8 +10,6 @@ namespace tests::unit { }
 #divert <hpp>
 #import tests.cppunit.Test // enable v1-series and v2-series APIs (moving or simulating cppunit::Test0
 #import tests.cppunit.test.Fixture // ibidem.
+#import rigging.suite.io // need rigging::suite;:Stream up at <hpp>
 namespace tests::unit { }
-#endiv
-#divert <ipp>
-#import rigging.suite.io
 #endiv

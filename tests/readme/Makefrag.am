@@ -8,6 +8,7 @@ tests_readme_XFAIL_TESTS = \
   tests/readme/00.universe/special.test \
   $(end)
 tests_readme_TESTS = \
+  tests/readme/01.comment/run.test \
   tests/readme/01.fatal/fail.test \
   tests/readme/01.notice/run.test \
   tests/readme/01.warning/run.test \
@@ -15,6 +16,7 @@ tests_readme_TESTS = \
   tests/readme/02.block-endef/run.test \
   tests/readme/02.define/run.test \
   tests/readme/02.undef/run.test \
+  tests/readme/02.substitute/run.test \
   tests/readme/03.ifdef/run.test \
   tests/readme/03.else/run.test \
   tests/readme/03.elseifdef.1/run.test \

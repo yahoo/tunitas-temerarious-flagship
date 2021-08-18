@@ -10,4 +10,5 @@ obj_src_tunitas_flagship_temerarious_stream_SUBSOURCES = \
   obj/src/tunitas/flagship/temerarious/stream/Output.cpp \
   obj/src/tunitas/flagship/temerarious/stream/Input.cpp \
   obj/src/tunitas/flagship/temerarious/stream/Filebuf.cpp \
+  obj/src/tunitas/flagship/temerarious/stream/Directory.cpp \
   $(end)

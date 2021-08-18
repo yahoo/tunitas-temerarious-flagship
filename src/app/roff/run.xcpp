@@ -18,8 +18,7 @@ namespace app::roff {
 #import tunitas.flagship.temerarious.processor.Preparation
 #import tunitas.string
 #import tunitas.flagship.temerarious.processor
-#import tunitas.flagship.temerarious.stream.Input
-#import tunitas.flagship.temerarious.stream.Output
+#import tunitas.flagship.temerarious.stream
 namespace app::roff::package_body_run {
   namespace interface {
     using Exit = sys::exits::Code;
@@ -30,8 +29,7 @@ namespace app::roff::package_body_run {
     using namespace sys::exits::constants;
     namespace string = tunitas::string;
     namespace processor = tunitas::flagship::temerarious::processor;
-    using tunitas::flagship::temerarious::stream::Input;
-    using tunitas::flagship::temerarious::stream::Output;
+    namespace stream = tunitas::flagship::temerarious::stream;
   }
 }
 #endiv
@@ -58,24 +56,26 @@ namespace app::roff::package_body_run::interface {
 #divert <ipp>
 #import app.roff.exception.File
 #import std.clog
-#import std.ifstream
-#import std.ofstream
+#import tunitas.flagship.temerarious.stream.Input
+#import tunitas.flagship.temerarious.stream.Output
 #import tunitas.flagship.temerarious.processor.run
 namespace app::roff::package_body_run {
   auto interface::run(file::Path const &infile, file::Path const &outfile, Preparation preparation) -> Exit {
-    auto erroneity = Output{std::clog};
-    if (auto in = std::ifstream{infile}; !in) {
+    auto erroneity = stream::Output{std::clog};
+    // The use of the temerarious streams (just std fstreams) also captures the name of the file for error messaging
+    if (auto in = stream::Input{infile}; !in) {
       throw exception::File{"reading", infile};
-    } else if (auto out = std::ofstream{outfile}; !out) {
+    } else if (auto out = stream::Output{outfile}; !out) {
       throw exception::File{"writing", outfile};
     } else {
-      return run(in, out, move(preparation));
+      auto ess = processor::run(move(in), out, erroneity, move(preparation));
+      return good(ess) ? OK : FAIL;
     }
   }
   auto interface::run(std::istream &in, std::ostream &out, Preparation preparation) -> Exit {
-    auto erroneity = Output{std::clog};
-    auto outbound = Output{out};
-    auto inbound = Input{in};
+    auto erroneity = stream::Output{std::clog};
+    auto outbound = stream::Output{out};
+    auto inbound = stream::Input{in};
     auto ess = processor::run(move(inbound), outbound, erroneity, move(preparation));
     return good(ess) ? OK : FAIL;
   }

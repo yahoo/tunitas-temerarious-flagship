@@ -24,6 +24,9 @@ struct tests::unit::stream::input::Fixture : public cppunit::test::Fixture {
   auto test_assignment_copy() -> void;
   auto test_assignment_move() -> void;
   auto test_getline() -> void;
+  auto test_input_name() -> void;
+  auto test_whence() -> void;
+  auto test_directory() -> void;
   static auto suite() -> cppunit::Test *;
 };
 #endiv
@@ -47,6 +50,7 @@ namespace tests::unit::stream::input {
     CPPUNIT_ASSERT(subject.good());
     std::string something;
     subject >> something;
+    CPPUNIT_ASSERT("/dev/null"sv == subject.input_name());
   }
   auto Fixture::test_constructor_copy() -> void {
 #if 0 // copy is denied
@@ -104,31 +108,75 @@ namespace tests::unit::stream::input {
     }
     CPPUNIT_ASSERT(5u == count);
   }
+  auto Fixture::test_input_name() -> void {
+    auto buf = std::istringstream{"I want something to read"};
+    auto subject = Subject{buf};
+    CPPUNIT_ASSERT(subject.good());
+    auto name = subject.input_name(); // <---------------------------------------- test this
+    CPPUNIT_ASSERT(!name.empty());
+  }
+  auto Fixture::test_whence() -> void {
+    auto buf = std::istringstream{"I want something to read"};
+    auto subject = Subject{buf};
+    CPPUNIT_ASSERT(subject.good());
+    auto name = subject.whence(); // <---------------------------------------- test this
+    CPPUNIT_ASSERT(!name.filepath().empty());
+  }
+  auto Fixture::test_directory() -> void {
+    auto buf = std::istringstream{"I want something to read"};
+    auto subject = Subject{buf};
+    CPPUNIT_ASSERT(subject.good());
+    auto const expected = ::tunitas::file::Path{"."};
+    auto const actual = subject.directory(); // <---------------------------------------- test this
+    std::cerr << "DEBUG whence=" << subject.whence() << '\n';
+    auto w = subject.whence();
+    auto f = w.filepath();
+    auto path = ::tunitas::file::Path{::tunitas::string::Storage{f.begin(), f.end()}};
+    std::cerr << "DEBUG path=" << path << '\n';
+    std::cerr << "DEBUG parent_path=" << path.parent_path() << '\n';
+    std::cerr << "DEBUG whence=" << subject.whence() << '\n';
+    std::cerr << "DEBUG expected=" << expected << ", actual=" << actual << '\n';
+    CPPUNIT_ASSERT(actual == expected);
+  }
+}
+#import tests.unit.stream.Filey
+#import tests.unit.stream.Streamy
+namespace tests::unit::stream::input {
   auto Fixture::suite() -> cppunit::Test * {
     using namespace rigging::suite;
     auto series = Stream{"Input"};
     series << []{
-                auto con = Stream{"constructor"};
-                con << []{
-                         auto ver = Stream{"conversion"};
-                         ver << call("stream", &Fixture::test_constructor_conversion_stream)
-                             << call("file", &Fixture::test_constructor_conversion_file)
+                auto use = Stream{"usage"};
+                use << []{
+                         auto con = Stream{"constructor"};
+                         con << []{
+                                  auto ver = Stream{"conversion"};
+                                  ver << call("stream", &Fixture::test_constructor_conversion_stream)
+                                      << call("file", &Fixture::test_constructor_conversion_file)
+                                      << END;
+                                  return move(ver);
+                                }()
+                             << call("copy", &Fixture::test_constructor_copy)
+                             << call("move", &Fixture::test_constructor_move)
                              << END;
-                         return move(ver);
+                         return move(con);
                        }()
-                    << call("copy", &Fixture::test_constructor_copy)
-                    << call("move", &Fixture::test_constructor_move)
+                    << []{
+                         auto ass = Stream{"assignment"};
+                         ass << call("copy", &Fixture::test_assignment_copy)
+                             << call("move", &Fixture::test_assignment_move)
+                             << END;
+                         return move(ass);
+                       }()
+                    << call("getline", &Fixture::test_getline)
+                    << call("input_name", &Fixture::test_input_name)
+                    << call("whence", &Fixture::test_whence)
+                    << call("directory", &Fixture::test_directory)
                     << END;
-                return move(con);
+                return move(use);
               }()
-           << []{
-                auto ass = Stream{"assignment"};
-                ass << call("copy", &Fixture::test_assignment_copy)
-                    << call("move", &Fixture::test_assignment_move)
-                    << END;
-                return move(ass);
-              }()
-           << call("getline", &Fixture::test_getline)
+           << add<Filey<library::Input>>()
+           << add<Streamy<library::Input>>()
            << END;
     return finalize(series);
   }

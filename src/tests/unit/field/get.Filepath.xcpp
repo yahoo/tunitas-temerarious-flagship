@@ -84,7 +84,7 @@ namespace tests::unit::field::get {
   }
   auto Filepath::suite() -> cppunit::Test * {
     using namespace rigging::suite;
-    auto series = Stream{"none(...)"};
+    auto series = Stream{"filepath(...)"};
     series << call("good", &Filepath::test_good)
            << []{
                 auto bad = Stream{"fail"};

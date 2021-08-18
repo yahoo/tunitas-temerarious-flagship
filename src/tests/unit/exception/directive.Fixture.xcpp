@@ -19,6 +19,7 @@ namespace tests::unit::exception::directive {
 #import tunitas.flagship.temerarious.directive.exception.Field
 #import tunitas.flagship.temerarious.directive.exception.Statement
 #import tunitas.flagship.temerarious.directive.exception.State
+#import tunitas.flagship.temerarious.directive.exception.Variable
 #import tunitas.flagship.temerarious.source.Location
 #import tests.unit.Here
 namespace tests::unit::exception::directive {
@@ -33,6 +34,7 @@ namespace tests::unit::exception::directive {
     template<> auto Fixture::generate<library::Field>() -> library::Field;
     template<> auto Fixture::generate<library::Statement>() -> library::Statement;
     template<> auto Fixture::generate<library::State>() -> library::State;
+    template<> auto Fixture::generate<library::Variable>() -> library::Variable;
   }
 }
 #endiv
@@ -85,6 +87,11 @@ namespace tests::unit::exception::directive::fixture {
     auto reason = "don't eat processed foods"sv;
     return library::State{hereinat(), reason};
   }
+  template<> auto Fixture::generate<library::Variable>() -> library::Variable {
+    auto const identifier = "myvariable"sv;
+    auto reason = "well, it depends"sv;
+    return library::Variable{identifier, hereinat(), reason};
+  }
   auto Fixture::suite() -> cppunit::Test * {
     using namespace rigging::suite;
     auto series = Stream{"directive"};
@@ -96,6 +103,7 @@ namespace tests::unit::exception::directive::fixture {
                 asp << call("Field", &Fixture::test_Aspect<library::Field>)
                     << call("Statement", &Fixture::test_Aspect<library::Statement>)
                     << call("State", &Fixture::test_Aspect<library::State>)
+                    << call("Variable", &Fixture::test_Aspect<library::Variable>)
                     << END;
                 return move(asp);
               }()

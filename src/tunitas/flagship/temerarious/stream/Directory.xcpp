@@ -1,0 +1,95 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+namespace tunitas::flagship::temerarious::stream {
+  //
+  // Provide for the directory() accessor
+  //
+  // Specification:
+  //
+  //   A cached copy of the directory of the input file
+  //   Cached
+  //   Use "." if there was no input file path
+  //
+  // Design:
+  //
+  //   Opportunistic, lazy ... don't manifest the directory unless it is needed.
+  //   But recognize that it will be used repeatedly, when used, in a searchpath.
+  //
+  //   In intern_cached_directory(...) we presume the suggestion is a file path.
+  //   Because because if it was not a file (isreg) then the descendant's open activity would have failed.
+  //
+  // Usage:
+  //
+  //   by private MI in Input
+  //
+  //   The descendant is expected to implement
+  //     inline auto directory() const -> file::Path const &;
+  //   by interning something into the cache
+  //
+  //   auto Input::directory() const -> file::Path const & {
+  //     intern_cached_directory(input_description); <------------------------ known to the descendant
+  //     return *cached_directory;
+  //   }
+  //
+  namespace [[eponymous]] directory {
+    struct Directory;
+  }
+  using directory::Directory;
+}
+#endiv
+#divert <hpp>
+#import tunitas.file.Path
+#import tunitas.string.Storage
+#import std.unique_ptr
+namespace tunitas::flagship::temerarious::stream {
+  namespace directory {
+    using std::move;
+    using std::swap;
+    inline auto swap(Directory &, Directory &) noexcept -> void;
+  }
+  class directory::Directory {
+    friend auto directory::swap(Directory &, Directory &) noexcept -> void;
+  protected:
+    virtual ~Directory() = default;
+    Directory() = default;
+    inline Directory(Directory &&);
+    inline auto operator=(Directory &&) -> Directory &;
+    inline auto intern_cached_directory(string::Storage const &) const -> void;
+    mutable std::unique_ptr<file::Path> cached_directory;
+  };
+}
+#endiv
+#divert <ipp>
+#import std.make_unique
+namespace tunitas::flagship::temerarious::stream {
+  auto directory::swap(Directory &a, Directory &b) noexcept -> void {
+    swap(a.cached_directory, b.cached_directory);
+  }
+  namespace directory {
+    Directory::Directory(Directory &&other)
+      : cached_directory{move(other.cached_directory)}
+    { }
+    auto Directory::operator=(Directory &&other) -> Directory & {
+      this->cached_directory = move(other.cached_directory);
+      return *this;
+    }
+    auto Directory::intern_cached_directory(string::Storage const &suggestion) const -> void {
+      if (nullptr == cached_directory.get()) {
+        auto parent = [](file::Path suggestion) -> file::Path {
+                        // WATCHOUT - the file::Path will not replace emptiness with "."
+                        if (suggestion.has_parent_path()) {
+                          return suggestion.parent_path();
+                        } else {
+                          return ".";
+                        }
+                      };
+        cached_directory = std::make_unique<file::Path>(parent(suggestion));
+      }
+    }
+  }
+}
+#endiv

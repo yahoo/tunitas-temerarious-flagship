@@ -11,6 +11,7 @@ obj_src_tunitas_flagship_temerarious_directive_SUBSOURCES = \
   $(obj_src_tunitas_flagship_temerarious_directive_exception_SUBSOURCES) \
   $(obj_src_tunitas_flagship_temerarious_directive_field_SUBSOURCES) \
   obj/src/tunitas/flagship/temerarious/directive/library.cpp \
+  obj/src/tunitas/flagship/temerarious/directive/read.cpp \
   $(end)
 #
 include src/tunitas/flagship/temerarious/directive/exception/Makefrag.am

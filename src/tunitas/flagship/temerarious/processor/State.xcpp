@@ -5,6 +5,7 @@
 // For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
 #divert <fpp>
 #import tunitas.string.literals
+#import langu.age
 namespace tunitas::flagship::temerarious::processor {
   //
   // The processor state
@@ -27,20 +28,26 @@ namespace tunitas::flagship::temerarious::processor {
   namespace [[eponymous]] state {
     struct State;
     using namespace string::literals;
+    using namespace langu::age; // specifically for State:;Dumper(...)
   }
   using state::State;
 }
 #endiv
 #divert <hpp>
+#import tunitas.Outcome
+#import tunitas.file.Path
 #import tunitas.string.View
 #import tunitas.string.Storage
 #import tunitas.flagship.temerarious.path.Search
+#import tunitas.flagship.temerarious.error.Code
 #import tunitas.flagship.temerarious.input.Frame
 #import tunitas.flagship.temerarious.input.Stack
 #import tunitas.flagship.temerarious.processor.Preparation
 #forward tunitas.flagship.temerarious.stream.Input
 #forward tunitas.flagship.temerarious.stream.Output
-#import tunitas.flagship.temerarious.variable.Frame
+#import std.ostream
+#import std.is_const
+#import std.conditional
 namespace tunitas::flagship::temerarious::processor {
   namespace state {
     // any ADL-found nearby API?
@@ -61,13 +68,15 @@ namespace tunitas::flagship::temerarious::processor {
     auto operator=(State const &) -> State & = default;
     input::Stack inbounds;
     variable::Frame globals;
-    path::Search search;
+    path::Search directories;
     [[deprecated("instead prefer state::is_enbled()")]] inline auto enabled() const -> bool;
     inline auto is_enabled() const -> bool;
     inline auto define_variable(string::View identifier, string::View value) -> void;
     inline auto undefine_variable(string::View identifier) -> void;
+    inline auto recover_variable(string::View identifier) const -> Outcome<string::View>;
     inline auto push_input(stream::Input &&) -> void;
     inline auto pop_input() -> void;
+    inline auto search(file::Path const &suffix) const -> Outcome<file::Path>;
     inline auto push_diversion(stream::Output &) -> void;
     inline auto push_diversion(string::View identifier) -> void;
     inline auto pop_diversion() -> void;
@@ -77,15 +86,21 @@ namespace tunitas::flagship::temerarious::processor {
     inline auto pop_condition() -> void;
     inline auto passthrough(string::View line) -> void;
     inline auto fatal(string::View message = "fatal error, the processor is exiting") -> void;
+    inline auto dump(std::ostream &) const -> void;
   private:
+    struct Dumper;
+    friend struct Dumper;
     inline static auto s(string::View view) -> string::Storage; // because std::map<...> requires std::string, never std::view
     inline auto ensure_condition() const -> bool;
     inline auto ensure_condition() -> bool &; // a.k.a. condition::Frame &
     inline auto ensure_conditions() -> input::condition::Stack &;
     inline auto ensure_diversion() -> diversion::Frame &;
     inline auto ensure_diversions() -> diversion::Stack &;
+    template<typename STATE> inline static auto ensure_inbounds(STATE &) -> std::conditional_t<std::is_const_v<STATE>, input::Stack const, input::Stack> &;
     inline auto ensure_inbound() -> input::Frame &;
+    inline auto ensure_inbound() const -> input::Frame const &;
     inline auto ensure_inbounds() -> input::Stack &;
+    inline auto ensure_inbounds() const -> input::Stack const &;
     // This number SHOULD be less than the maximum number of open files.
     // If it is not then the maximum number of open files will trigger first and you'll see that failure mode instead.
     inline static constexpr auto INPUT_RECURSION_LIMIT = 100ul;
@@ -97,13 +112,14 @@ namespace tunitas::flagship::temerarious::processor {
 #import tunitas.flagship.temerarious.processor.exception.Condition
 #import tunitas.flagship.temerarious.processor.exception.Input
 #import tunitas.flagship.temerarious.processor.exception.State
+#import tunitas.flagship.temerarious.processor.State.Dumper
 #import std.to_string
 namespace tunitas::flagship::temerarious::processor {
   namespace state {
     State::State(stream::Input &&in, stream::Output &out) { inbounds.push({forward<stream::Input>(in), out}); }
     State::State(stream::Input &&in, stream::Output &out, Preparation prep)
       : globals{prep.defines}
-      , search{prep.search} {
+      , directories{prep.search} {
       inbounds.push({forward<stream::Input>(in), out});
     }
     auto State::enabled() const -> bool    { return is_enabled(); }
@@ -114,6 +130,9 @@ namespace tunitas::flagship::temerarious::processor {
         ensure_diversion().emplace(buffer);
       }
     }
+  }
+  auto State::dump(std::ostream &outbound) const -> void {
+    Dumper{outbound, *this}.dump();
   }
 }
 namespace tunitas::flagship::temerarious::processor::state {
@@ -128,6 +147,15 @@ namespace tunitas::flagship::temerarious::processor::state {
     auto const end = globals.end();
     if (end != found) {
       globals.erase(found);
+    }
+  }
+  auto State::recover_variable(string::View identifier) const -> Outcome<string::View> {
+    auto found = globals.find(s(identifier));
+    auto const end = globals.end();
+    if (end == found) {
+      return (std::error_code) error::Code{error::Code::VARIABLE_UNFOUND};
+    } else {
+      return (string::View) found->second;
     }
   }
 }
@@ -150,6 +178,12 @@ namespace tunitas::flagship::temerarious::processor::state {
     // Such happens in processor::run(...) in the main event loop at EOF of the input frame.
     ensure_inbounds().pop();
   }
+}
+namespace tunitas::flagship::temerarious::processor::state {
+  //
+  // Directory Search (searchpath) Operations
+  //
+  auto State::search(file::Path const &suffix) const -> Outcome<file::Path> { return directories.find(ensure_inbound().inbound.directory(), suffix); }
 }
 namespace tunitas::flagship::temerarious::processor::state {
   //
@@ -211,7 +245,8 @@ namespace tunitas::flagship::temerarious::processor::state {
 namespace tunitas::flagship::temerarious::processor::state {
   // utilities and privates (protecteds)
   auto State::s(string::View view) -> string::Storage { return {view.begin(), view.end()}; }
-  auto State::ensure_inbound() -> input::Frame &       { return ensure_inbounds().top(); }
+  auto State::ensure_inbound() -> input::Frame &             { return ensure_inbounds(*this).top(); }
+  auto State::ensure_inbound() const -> input::Frame const & { return ensure_inbounds(*this).top(); }
   auto State::ensure_diversion() -> diversion::Frame & { return ensure_diversions().top(); }
   auto State::ensure_condition() -> bool &             { return ensure_conditions().top(); }
   auto State::ensure_condition() const -> bool {
@@ -224,11 +259,13 @@ namespace tunitas::flagship::temerarious::processor::state {
     // this still indicates a programmer error: mismatched diversion push-pop (somewhere)
     throw exception::Condition{__FUNCTION__};
   }
-  auto State::ensure_inbounds() -> input::Stack & {
-    if (inbounds.empty()) {
+  auto State::ensure_inbounds() -> input::Stack &             { return ensure_inbounds(*this); }
+  auto State::ensure_inbounds() const -> input::Stack const & { return ensure_inbounds(*this); }
+  template<typename STATE> auto State::ensure_inbounds(STATE &state) -> std::conditional_t<std::is_const_v<STATE>, input::Stack const, input::Stack> & {
+    if (state.inbounds.empty()) {
       throw exception::Input{__FUNCTION__}; // this indicates a programmer error: mismatched inbounds.push-pop
     }
-    return inbounds;
+    return state.inbounds;
   }
   auto State::ensure_diversions() -> diversion::Stack & {
     if (auto &t = ensure_inbound().diversions; t.empty()) {

@@ -7,6 +7,7 @@
 obj_src_tunitas_flagship_temerarious_processor_SUBSOURCES = \
   obj/src/tunitas/flagship/temerarious/processor/namespace.cpp \
   obj/src/tunitas/flagship/temerarious/processor/State.cpp \
+  obj/src/tunitas/flagship/temerarious/processor/State.Dumper.cpp \
   obj/src/tunitas/flagship/temerarious/processor/Preparation.cpp \
   $(obj_src_tunitas_flagship_temerarious_processor_exception_SUBSOURCES) \
   obj/src/tunitas/flagship/temerarious/processor/run.cpp \

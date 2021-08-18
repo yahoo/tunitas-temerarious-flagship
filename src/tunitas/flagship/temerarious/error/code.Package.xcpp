@@ -84,6 +84,7 @@ namespace tunitas::flagship::temerarious::error {
     inline static constexpr auto PROCESSOR_INVALID  = Companion::PROCESSOR_INVALID;
     inline static constexpr auto CONDITION_UNCLOSED = Companion::CONDITION_UNCLOSED;
     inline static constexpr auto DIVERSION_UNCLOSED = Companion::DIVERSION_UNCLOSED;
+    inline static constexpr auto VARIABLE_UNFOUND   = Companion::VARIABLE_UNFOUND;
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
     [[deprecated("instead prefer Code::FILE")]]         inline static constexpr auto ROFF_FILE = Companion::FILE;

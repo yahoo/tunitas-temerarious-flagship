@@ -38,8 +38,10 @@ namespace tunitas::flagship::temerarious::stream {
 #import tunitas.flagship.temerarious.path.File
 #import tunitas.flagship.temerarious.stream.Base
 #import tunitas.flagship.temerarious.stream.Filebuf
+#import tunitas.flagship.temerarious.stream.Directory
 #import tunitas.flagship.temerarious.source.Name
 #import std.istream
+#import tunitas.file.Path
 #import tunitas.string.View
 #import tunitas.string.Storage
 namespace tunitas::flagship::temerarious {
@@ -48,7 +50,7 @@ namespace tunitas::flagship::temerarious {
     using std::swap;
     inline auto swap(Input &a, Input &b) noexcept -> void;
   }    
-  class stream::Input : public std::istream, public Base, private Filebuf {
+  class stream::Input : public std::istream, public Base, private Filebuf, private Directory {
     using Ancestor = std::istream;
     friend auto swap(Input &a, Input &b) noexcept -> void;
   public:
@@ -59,6 +61,7 @@ namespace tunitas::flagship::temerarious {
     inline auto operator=(Input &&) -> Input &;
     [[deprecated("prefer whence()")]] inline auto input_name() const -> string::View; // suitable for use in input::exception::Present{...}
     inline auto whence() const -> source::Name; // suitable for use in input::exception::Present{...}
+    inline auto directory() const -> file::Path const &;
   private:
     string::Storage input_description; // i.e. file name
     inline auto swap_streamstuff(Input &) noexcept -> void;
@@ -72,6 +75,9 @@ namespace tunitas::flagship::temerarious {
     swap(a_base, b_base);
     Input::Filebuf &a_filebuf{a}, &b_filebuf{b};
     swap(a_filebuf, b_filebuf);
+    Input::Directory &a_directory{a}, &b_directory{b};
+    swap(a_directory, b_directory);
+    // polish
     a.swap_streamstuff(b);
     swap(a.input_description, b.input_description);
   }
@@ -84,15 +90,16 @@ namespace tunitas::flagship::temerarious {
       this->set_rdbuf(b_rdbuf);
       that.set_rdbuf(a_rdbuf);
     }
-    Input::Input(std::istream &inbound)
+    Input::Input(std::istream &inbound) : Input{inbound, "<input>"} { }
+    Input::Input(std::istream &inbound, string::View name)
       : Ancestor{inbound.rdbuf()}
       , Filebuf{UNINITIALIZED}
-      , input_description{"<input>"}
+      , input_description{string::Storage{name.begin(), name.end()}}
     { }
     Input::Input(path::File const &filepath, Mode mode)
       : input_description{filepath} {
-      this->init(buf.get());
-      if (!buf->open(filepath, mode)) {
+      this->init(opened_file_streambuf.get());
+      if (!opened_file_streambuf->open(filepath, mode)) {
         this->setstate(ios_base::failbit);
       } else {
         this->clear();
@@ -102,18 +109,28 @@ namespace tunitas::flagship::temerarious {
       : Ancestor{}
       , Base{forward<Input>(other)}
       , Filebuf{forward<Input>(other)}
-      , input_description{std::move(other.input_description)} {
+      , Directory{forward<Input>(other)}
+      , input_description{stream::move(other.input_description)} {
         swap_streamstuff(other);
     }
     auto Input::operator=(Input &&other) -> Input & {
       swap_streamstuff(other);
       Base::operator=(forward<Input>(other));
       Filebuf::operator=(forward<Input>(other));
-      input_description = std::move(other.input_description);
+      Directory::operator=(forward<Input>(other));
+      input_description = stream::move(other.input_description); // because Ancestor::move(...) occludes
       return *this;
     }
     auto Input::input_name() const -> string::View { return input_description; }
     auto Input::whence() const -> source::Name { return {input_description}; }
+    auto Input::directory() const -> file::Path const & {
+      if (nullptr == opened_file_streambuf.get()) {
+        intern_cached_directory(".");
+      } else {
+        intern_cached_directory(input_description);
+      }
+      return *cached_directory;
+    }
   }
 }
 #endiv

@@ -12,4 +12,5 @@ obj_src_tunitas_flagship_temerarious_directive_exception_SUBSOURCES = \
   obj/src/tunitas/flagship/temerarious/directive/exception/Field.cpp \
   obj/src/tunitas/flagship/temerarious/directive/exception/Statement.cpp \
   obj/src/tunitas/flagship/temerarious/directive/exception/State.cpp \
+  obj/src/tunitas/flagship/temerarious/directive/exception/Variable.cpp \
   $(end)

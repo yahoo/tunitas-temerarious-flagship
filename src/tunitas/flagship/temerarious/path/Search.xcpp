@@ -36,28 +36,43 @@ struct tunitas::flagship::temerarious::path::Search : private std::deque<File> {
 public:
   using Ancestor::empty;
   using Ancestor::size;
+  using Ancestor::begin;
+  using Ancestor::end;
   using Ancestor::push_back;
   using Ancestor::push_front;
-  auto find(File const &suffix) const -> Outcome<File>;
+  inline auto find(File const &suffix) const -> Outcome<File>;
+  auto find(File const &relative, File const &suffix) const -> Outcome<File>;
 };
+#endiv
+#divert <ipp>
+namespace tunitas::flagship::temerarious::path {
+  auto Search::find(File const &suffix) const -> Outcome<File> {
+    // [[FIXTHIS]] a gratuitous copy in it which could be optimized away.
+    return find(".", suffix);
+  }
+}
 #endiv
 #divert <cpp>
 #import sys.posix.E
 #import sys.posix.exists
 #import std.error_code
 namespace tunitas::flagship::temerarious::path {
-  auto Search::find(File const &suffix) const -> Outcome<File> {
-    if (sys::posix::exists(suffix)) {
-      // This is or isn't the common case, so we do the copy here rather than at the call site
-      return {suffix};
+  auto Search::find(File const &relative_directory, File const &suffix) const -> Outcome<File> {
+    if (suffix.is_absolute()) {
+      return suffix;
     } else {
-      for (auto const &prefix : *this) {
-        auto proposal = prefix / suffix;
-        if (sys::posix::exists(proposal)) {
-          return {move(proposal)};
+      if (auto relatively = relative_directory / suffix; sys::posix::exists(relatively)) {
+        // This is or isn't the common case, so we do the copy here rather than at the call site.
+        return {move(relatively)};
+      } else {
+        for (auto const &prefix : *this) {
+          auto proposal = prefix / suffix;
+          if (sys::posix::exists(proposal)) {
+            return {move(proposal)};
+          }
         }
+        return std::error_code{sys::posix::E::NOENT};
       }
-      return std::error_code{sys::posix::E::NOENT};
     }
   }
 }
