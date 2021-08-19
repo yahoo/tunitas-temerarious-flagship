@@ -1,0 +1,26 @@
+// This is C++ 23 -*- c++ -*- -std=c++23 in the stylings of the S.C.O.L.D. design method.
+// For terms and provenance see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace scold::easy::cascade {
+  //
+  // Do the matryoska nested namespace sense or not
+  //
+  // Usage: really?
+  //
+  enum class Matryoshka { NO, YES };
+}
+#endiv
+#divert <hpp>
+namespace scold::easy::cascade {
+  inline auto yes(Matryoshka) -> bool;
+  inline auto no(Matryoshka) -> bool;
+}
+#endiv
+#divert <ipp>
+auto scold::easy::cascade::yes(Matryoshka m) -> bool {
+  return Matryoshka::YES == m;
+}
+auto scold::easy::cascade::no(Matryoshka m) -> bool {
+  return Matryoshka::NO == m;
+}
+#endiv

@@ -1,0 +1,55 @@
+// This is C++ 23 -*- c++ -*- -std=c++23 in the stylings of the S.C.O.L.D. design method.
+// For terms and provenance see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace want::aliases::detail {
+  //
+  // The remainder of a matching operation.
+  // e.g. starts_with(...) == word
+  //
+  // Captures the boolean sense of the operation as truth.
+  // Captures the value of the remainder as a string.
+  //
+  // Usage:
+  //
+  //   if (auto started = starts_with("-E", "--external=") == word; started) {
+  //      .. begins with -E or --external=
+  //      auto const &suffix = started.value();
+  //      auto &suffix = started.value();
+  //      auto suffix = std::move(started.value());
+  //   }
+  //
+  class Remainder;
+}
+#endiv
+#divert <hpp>
+#import std.string
+class want::aliases::detail::Remainder {
+public:
+  inline Remainder();
+  inline explicit Remainder(bool); // if true, then the value is ""
+  inline explicit Remainder(std::string value);
+  inline operator bool() const;
+  inline auto value() -> std::string &; // so that the idiom -- std::move(remainder.value()) -- just works
+  inline auto value() const -> std::string const &;
+protected:
+  bool captured_status;
+  std::string captured_value;
+};
+#endiv
+#divert <ipp>
+namespace want::aliases::detail {
+  Remainder::Remainder()
+    : captured_status{false}
+  { }
+  Remainder::Remainder(bool status)
+    : captured_status{status}
+  { }
+  Remainder::Remainder(std::string value)
+    : captured_status{true}
+    , captured_value{std::move(value)}
+  { }
+  Remainder::operator bool() const { return captured_status; }
+  auto Remainder::value() -> std::string & { return captured_value; }
+  auto Remainder::value() const -> std::string const & { return captured_value; }
+}
+#endiv

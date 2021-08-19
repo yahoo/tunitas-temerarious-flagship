@@ -1,0 +1,15 @@
+// This is C++ 23 -*- c++ -*- -std=c++23 in the stylings of the S.C.O.L.D. design method.
+// For terms and provenance see the LICENSE file at the top of the repository.
+#divert <fpp>
+#import std.string
+#import std.string_view
+namespace tests::unit { }
+#endiv
+#divert <hpp>
+#import std.string_literals
+#import std.string_view_literals
+#import std.literals
+namespace tests::unit {
+  using namespace std::literals;
+}
+#endiv

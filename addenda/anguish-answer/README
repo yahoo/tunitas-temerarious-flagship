@@ -1,0 +1,171 @@
+anguish-answer - Ersatz CPP-style scaffolding until the SCOLD preprocesor is ready
+
+Outreach
+   http://www.scold-lang.org
+   git://git.scold-lang.org
+
+The current preprocessor
+
+usage:
+    xscold [ -I<directory> ] [ --srcdir=<directory> ] [ --objdir=<directory> ] ...files.xcpp
+
+The file.xcpp are each burst up into the five phases of C++ declaration-to-definition
+according to the "#divert" syntax of the XML-style scaffolding.
+
+file.xcpp
+    #divert <fpp>
+    ...forward declarations...
+    #divert </fpp>
+    #divert <hpp>
+    ...complete "header" declarations...
+    #divert </hpp>
+    #divert <ipp>
+    ...inline definitions...
+    #divert </ipp>
+    #divert <tpp>
+    ...outline template function definition declarations...
+    #divert </tpp>
+    #divert <cpp>
+    ...outline definitions...
+    #divert </cpp>
+
+The corresponding C++ modules are created in ${objdir}/modules.  The modules are
+referenced from within the *.xcpp overlay syntax with an #import directive
+
+    #import std.vector
+    #import std.basic_string
+    #import my.Class
+
+
+Publications
+ * Wendell Baker; Scalable C++ Original Location Disaggregation (SCOLD); 2004-04-12.
+
+    language definition
+    prototype code.
+
+Proposals
+
+    Gabriel Dos Reis, Mark Hall, Gor Nishanov; A Module System for C++; Document N4047; Modules Study Group, ISO/IEC JTC1/SC22/WG21; 2014-05-27; 22 pages.
+    Team; Modules; Clang 3.5 Documentation; 2014.
+    Douglas Gregor (Apple); Modules [in LLVM]; 2012-11-07; 87 pages.
+    Daveed Vandevoorde; Modules in C++; N3347=12-0037; Revision 6; ISO/IEC JTC1/SC22/WG21; 2012-01-11; 23 pages; previously noted.
+    Daveed Vandevoorde (Edison Compiler Group); Modules in C++; Keynote at C++Now!; On YouTube; 2012-06; 1:08:42; slides (44 slides).
+    Wendell Baker; Scalable C++ Original Location Disaggregation (SCOLD); 2004-04-12; references SCOLD v0.1
+    Bjarne Stroustrup. #scope: A simple scope mechanism for the C/C++ preprocessor. Technical Report N1614=04-0054, ISO/IEC JTC1/SC22/WG21,
+    2004-04; 11 pages.
+
+References
+
+    Bjarne Stoustrup; C++ FAQ; current, last update 2014-10?.
+    Stefanus Du Toit; Workiing Draft, Standard for Programming Language C++; Document N3797; ISO/IEC JTC1/SC22/WG21; 2013-10-13; 1366 pages.
+    Also: draft source.
+    International Standard ISO/IEC 14882 Programming Languages — C++; International Organization for Standards; 3rd edition; 2011; paywalled.
+    Margaret E. Ellis, Bjarne Stroustrup; The Annotated C++ Reference Manual; Addison-Wesley; 1990.
+
+Overview
+
+    Version v0.1, circa 2004-Q2.
+    Five phases of the C++ declarations
+        forward declarations; e.g. class name declarations with incomplete types.
+        complete declarations; e.g. with class definitions.
+        inline definitions; e.g. inline functions, inline function templates
+        outline definition declarations; e.g. outline templates
+        outline definitions; e.g. are strong definitions subject the One Definition Rule (ODR)
+    Codifies existing reasonable-to-best practice in library physical design.
+    Blends in with the existing cut & paste methodology of C Pre–Processor language capability of C++98, C++03 [and now C++11].
+
+Grammar
+
+translation_unit ::= stanza-list
+
+stanza ::= declaration-list code-body
+
+declaration ::= provide | require | include
+
+code-body ::= forward declarations { ...arbitrary C++ Code... }
+code-body ::= complete declarations { ...arbitrary C++ Code... }
+code-body ::= inline definitions { ...arbitrary C++ Code... }
+code-body ::= outline definition declarations { ...arbitrary C++ Code... }
+code-body ::= outline definitions { ...arbitrary C++ Code... }
+
+Semantics
+
+    Semantics defined in terms of the existing #include model of a C++ translation unit.
+    The stanzas necessarily have a partial order defined by the C++ Standard; i.e.the stanzas within a translation unit must be ordered as:
+        forward declarations precede complete declarations
+        which precede inline definitions
+        which precede outline definition declarations
+        which precede outline definitions
+    Reminder: consider a multiple translation unit application.
+    The declarations establish a partial order among the code bodies from other translation units.
+    The stanzas forward declaration through outline definition declarations must be presented for the outline definitions section of any translation uint.
+    There is a natural “zipper-like” reassembly of the interfaces via idempotent recursive #include-type operations (think #pragma once).
+
+Implementation
+
+For module mymodule.scpp as a translation unit:
+
+    the forward declarations stanza becomes mymodule.fpp
+    the complete declarations stanza becomes mymodule.hpp
+        which includes mymodule.fpp
+        and #includes hpp phases from other translation units mentioned as  requires
+    the inline definitions stanza becomes mymodule.ipp
+        which includes mymodule.hpp
+        and #includes ipp phases from other translation units mentioned as  requires
+    the outline definition declarations stanza becomes mymodule.tpp
+        which includes mymodule.ipp
+        and #includes tpp phases from other translation units mentioned as  requires
+    the complete declarations stanza becomes mymodule.cpp
+        which includes mymodule.tpp
+        and #includes the tpp phases from any other translation units’ interfaces that it requires.
+
+Example
+
+provide <iostream>;
+provide "myclass.h";
+provide myclass;
+provide mynamespace::myclass;
+forward declarations {
+  class myclass;
+  namespace mynamespace {
+    class myclass;
+  }
+}
+
+require std::auto_ptr;
+require std::string;
+complete declarations {
+#include <iostream>
+#include "myclass.h"
+  class myclass {
+    int save;
+  public:
+    myclass();
+    inline int value() const;
+  };
+  namespace mynamespace {
+    class myclass {
+    public:
+      myclass(std::string const &);
+      template<typename TYPE> void set(TYPE);
+    };
+  }
+}
+
+inline declarations {
+   inline int myclass::value() const {
+     return save;
+  }
+}
+
+outline definition declarations {
+  template<typename TYPE> void myclass::set(TYPE x) {
+    ...etc...
+  }
+}
+
+outline definitions {
+  mynamespace::myclass::myclass(std::string const &value) {
+    ...etc...
+  }
+}

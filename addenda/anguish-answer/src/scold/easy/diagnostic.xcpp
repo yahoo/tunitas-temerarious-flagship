@@ -1,0 +1,40 @@
+// This is C++ 23 -*- c++ -*- -std=c++23 in the stylings of the S.C.O.L.D. design method.
+// For terms and provenance see the LICENSE file at the top of the repository.
+#divert <hpp>
+#import scold.easy.message.Stream
+#import scold.easy.filesystem.Path
+#import scold.easy.line.Number
+namespace scold::easy::diagnostic {
+  //
+  // The diagnostic messages
+  // Done in the gcc style.
+  //
+  // Usage:
+  //
+  //   file("./file.cpp") << "do not do that" << end;
+  //   line("./file.cpp", 33) << "do not do that on that line" << end;
+  //
+  namespace packaging {
+    using message::Stream;
+    using filesystem::Path;
+    using line::Number;
+    inline auto file(Path const &) -> Stream;
+    inline auto line(Path const &, Number) -> Stream;
+  }
+  using packaging::file;
+  using packaging::line;
+}
+#endiv
+#divert <ipp>
+#import std.cerr
+namespace scold::easy::diagnostic {
+  auto packaging::file(Path const &filepath) -> Stream {
+    Stream begin{std::cerr};
+    return begin << filepath << ": error, ";
+  }
+  auto packaging::line(Path const &filepath, Number number) -> Stream {
+    Stream begin{std::cerr};
+    return begin << filepath << ':' << number << ": error, ";
+  }
+}
+#endiv

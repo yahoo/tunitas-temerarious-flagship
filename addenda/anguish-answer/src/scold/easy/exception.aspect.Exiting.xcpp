@@ -1,0 +1,64 @@
+// This is C++ 23 -*- c++ -*- -std=c++23 in the stylings of the S.C.O.L.D. design method.
+// For terms and provenance see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace scold::easy::exception::aspect {
+  //
+  // The abstract aspect of an exiting exception
+  //
+  // See nearby provides::Exiting, which provides these capabilities
+  // for those exception types which do not otherwise have such in-built.
+  // 
+  // Usage:
+  //
+  //   class my::Problem : public exception::aspect::Exiting, ..., public std::exception {
+  //     struct ancestors {
+  //       using Exiting = exception::aspect::Exiting;
+  //       using Provides = ...something that provides Exiting's obligations
+  //       using Exception = std::exception or a compatible descendant;
+  //     };
+  //   public:
+  //      auto what() const noexcept -> char const * final           { return Provides::what(); }
+  //      auto stream() const noexcept -> std::ostream & final       { return Provides::stream(); }
+  //      auto code() const noexcept -> nonstd::sysexits;:Code final { return Provides::code(); }
+  //   };
+  //
+  //   try {
+  //     ...operating...
+  //     throw Quitting{...};
+  //     throw Failing{...};
+  //     throw Version{...};
+  //     throw Usage{...};
+  //     ...
+  //   } catch (exception::aspect::Exiting const &e) {
+  //     e.stream() << format(e) << '\n';
+  //     return e.code();
+  //   }
+  //
+  class Exiting;
+}
+#endiv
+#divert <hpp>
+#import nonstd.sysexits.Code
+#import std.ostream
+class scold::easy::exception::aspect::Exiting {
+protected:
+  virtual ~Exiting() = default;
+  Exiting() = default;
+public:
+  virtual auto stream() const noexcept -> std::ostream & = 0;
+  virtual auto code() const noexcept -> nonstd::sysexits::Code = 0;
+  virtual auto what() const noexcept -> char const * = 0;
+  struct Formatter;
+};
+namespace scold::easy::exception::aspect {
+  [[deprecated("collides with 'namespace format'; instead prefer put(...)")]] inline auto format(Exiting const &) -> Exiting::Formatter;
+  inline auto put(Exiting const &) -> Exiting::Formatter;
+}
+#import scold.easy.exception.aspect.Exiting.Formatter
+#endiv
+#divert <ipp>
+namespace scold::easy::exception {
+  auto aspect::format(Exiting const &e) -> Exiting::Formatter { return Exiting::Formatter{e}; }
+  auto aspect::put(Exiting const &e) -> Exiting::Formatter { return Exiting::Formatter{e}; }
+}
+#endiv

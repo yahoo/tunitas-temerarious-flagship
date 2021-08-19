@@ -1,0 +1,81 @@
+// This is C++ 23 -*- c++ -*- -std=c++23 in the stylings of the S.C.O.L.D. design method.
+// For terms and provenance see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace scold::easy::exception::provides {
+  //
+  // The concrete provision of the exiting exception obligations
+  //
+  // See nearby provides::Exiting, which provides these capabilities
+  // for those exception types which do not otherwise have such in-built.
+  // 
+  // Usage:
+  //
+  //   class my::Problem : private exception::provides::Exiting, public exception::abstract::Exiting, public std::exception {
+  //     struct ancestors {
+  //       using Exiting = exception::abstract::Exiting;
+  //       using Provides = exception::provides::Exiting;
+  //       using Exception = std::exception or a compatible descendant;
+  //     };
+  //   public:
+  //      auto what() const noexcept -> char const * final           { return Provides::what(); }
+  //      auto stream() const noexcept -> std::ostream & final       { return Provides::stream(); }
+  //      auto code() const noexcept -> nonstd::sysexits;:Code final { return Provides::code(); }
+  //   };
+  //
+  //   try {
+  //     ...operating...
+  //     throw Quitting{...};
+  //     throw Failing{...};
+  //     throw Version{...};
+  //     throw Usage{...};
+  //     ...
+  //   } catch (exception::provides::Exiting const &e) {
+  //     e.stream() << format(e) << '\n';
+  //     return e.code();
+  //   }
+  //
+  class Exiting;
+}
+#endiv
+#divert <hpp>
+#import nonstd.sysexits.Code
+#import std.ostream
+#import std.string
+#import std.shared_ptr
+class scold::easy::exception::provides::Exiting {
+protected:
+  virtual ~Exiting() = default;
+  inline Exiting(std::ostream &, nonstd::sysexits::Code, std::string reason);
+public:
+  virtual auto stream() const noexcept -> std::ostream &;
+  virtual auto code() const noexcept -> nonstd::sysexits::Code;
+  virtual auto what() const noexcept -> char const *;
+private:
+  std::ostream &stored_stream;
+  nonstd::sysexits::Code stored_code;
+  std::shared_ptr<std::string> stored_what; // an exception's copy construct MUST not throw, therefore...
+};
+#endiv
+#divert <ipp>
+#import std.make_shared
+namespace scold::easy::exception::provides {
+  Exiting::Exiting(std::ostream &outbound, nonstd::sysexits::Code code, std::string reason)
+    : stored_stream{outbound}
+    , stored_code{code}
+    , stored_what{std::make_shared<std::string>(std::move(reason))}
+  { }
+}
+#endiv
+#divert <cpp>
+namespace scold::easy::exception::provides {
+  auto Exiting::stream() const noexcept -> std::ostream & {
+                                                           return stored_stream;
+  }
+  auto Exiting::code() const noexcept -> nonstd::sysexits::Code {
+    return stored_code;
+  }
+  auto Exiting::what() const noexcept -> char const * {
+    return stored_what->c_str();
+  }
+}
+#endiv

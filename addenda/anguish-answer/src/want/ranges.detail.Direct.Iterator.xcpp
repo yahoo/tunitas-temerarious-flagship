@@ -1,0 +1,101 @@
+// This is C++ 23 -*- c++ -*- -std=c++23 in the stylings of the S.C.O.L.D. design method.
+// For terms and provenance see the LICENSE file at the top of the repository.
+#divert <fpp>
+//
+// An iterator which iterates  [min..max] intead of the usual [begin, end)
+// here 'max' is the last legal element
+// there 'end' is "one beyond" the last legal element
+//
+// As such, there is no way to represent the empty range.
+// Any range will necessarily specify at least one element 
+//
+#import want.ranges.detail.Direct
+#endiv
+#divert <hpp>
+#import std.size_t
+#import std.make_signed
+#import std.iterator_traits
+namespace want::ranges::detail {
+  template<required::Directable _> struct Direct<_>::Iterator {
+    // New School
+    using Value = typename Direct::Value;
+    using Distance = typename std::make_signed<Value>::type;
+    // Old School (c.f. the now-very-deprecated std::iterator<TYPE>)
+    using value_type = Value;
+    using distance_type = Distance;
+    inline explicit Iterator();
+    inline explicit Iterator(Value current, Value final);
+    inline auto operator==(Iterator const &) const -> bool;
+    inline auto operator!=(Iterator const &) const -> bool;
+    inline auto operator*() const -> Value;
+    inline auto operator++() -> Iterator &;
+    inline auto operator++(int) -> Iterator;
+    inline static auto incrementationalize(Value) -> Value;
+  protected:
+    friend class Direct;
+    inline explicit Iterator(Value current, Value final, bool done);
+    Value current;
+    Value const final;
+    bool done;
+  };
+}
+#endiv
+#divert <ipp>
+#import std.invalid_argument
+#import want.ranges.detail.Direct.Iterator
+namespace want::ranges::detail {
+  template<required::Directable _> Direct<_>::Iterator::Iterator() : Iterator{{}, {}, true} { }
+  template<required::Directable _> Direct<_>::Iterator::Iterator(Value current, Value final) : Iterator{current, final, false} { }
+  template<required::Directable _> Direct<_>::Iterator::Iterator(Value current, Value final, bool done)
+    : current{current}
+    , final{final}
+    , done{done}
+  { }
+  template<required::Directable _> auto Direct<_>::Iterator::operator==(Iterator const &b) const -> bool {
+    auto const &a{*this};
+    if (a.done == b.done) {
+      // Either they are both 'done' or neither is done'
+      if (!a.done) {
+        // Neither is done, so where is the position?
+        return a.current == b.current;
+      } else {
+        // Both are done.
+        return true;
+      }
+    } else {
+      // Either (xor) of the iterators is in the 'done' state
+      return false;
+    }
+  }
+  template<required::Directable _> auto Direct<_>::Iterator::operator!=(Iterator const &b) const -> bool {
+    return !this->operator==(b);
+  }
+  template<required::Directable _> auto Direct<_>::Iterator::operator*() const -> Value {
+    if (done) {
+      throw std::invalid_argument{"done"};
+    } else {
+      return current;
+    }
+  }
+  template<required::Directable _> auto Direct<_>::Iterator::operator++() -> Iterator & {
+    if (done) {
+      throw std::invalid_argument{"done"};
+    } else if (current == final) {
+      done = true;
+    } else {
+      current = incrementationalize(current);
+    }
+    return *this;
+  }
+  template<required::Directable _> auto Direct<_>::Iterator::operator++(int) -> Iterator {
+    Iterator old{*this};
+    operator++();
+    return old;
+  }
+  template<required::Directable _> auto Direct<_>::Iterator::incrementationalize(Value v) -> Value {
+    // If this doesn't work for you specialize your own
+    // This MAY be working because of an overload on operator+
+    return v + 1;
+  }
+}
+#endiv

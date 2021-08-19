@@ -1,0 +1,10 @@
+// This is C++ 23 -*- c++ -*- -std=c++23 in the stylings of the S.C.O.L.D. design method.
+// For terms and provenance see the LICENSE file at the top of the repository.
+#divert <fpp>
+#import nonstd.regex.matching.Results
+namespace lite::regex::matching {
+  // Simplifying ...
+  using nonstd::regex::matching::Results;
+  using nonstd::regex::matching::SResults;
+}
+#endiv

@@ -1,0 +1,76 @@
+// This is C++ 23 -*- c++ -*- -std=c++23 in the stylings of the S.C.O.L.D. design method.
+// For terms and provenance see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace scold::easy::searchpath {
+  //
+  // An iterator over searchpat helements
+  // elide the implementation detail of the Sense
+  //
+  // Usage:
+  //
+  //   for (name::Filepath const &filepath : searchpath) {
+  //     ...use the filepath...
+  //   }
+  //
+  class Iterator;
+}
+#endiv
+#divert <hpp>
+namespace scold::easy::searchpath {
+  inline auto operator==(Iterator const &, Iterator const &) -> bool;
+  inline auto operator!=(Iterator const &, Iterator const &) -> bool;
+}
+#import scold.easy.Searchpath
+#import std.iterator_traits
+class scold::easy::searchpath::Iterator {
+public:
+  Iterator() = delete;
+protected:
+  friend class easy::Searchpath;
+  using Base_Iterator = Searchpath::Positions::const_iterator;
+  inline explicit Iterator(Base_Iterator);
+public:
+  // New School
+  using Value = std::iterator_traits<Base_Iterator>::value_type::second_type; // SPECIAL
+  using Difference = std::iterator_traits<Base_Iterator>::difference_type;
+  using Pointer = std::iterator_traits<Base_Iterator>::pointer;
+  using Reference = std::iterator_traits<Base_Iterator>::reference;
+  using Category = std::iterator_traits<Base_Iterator>::iterator_category;
+  // old_school
+  using value_type = Value;
+  using difference_type = Difference;
+  using pointer = Pointer;
+  using reference = Reference;
+  using iterator_category = Category;
+  // the interface
+  inline auto operator*() const -> Value const &;
+  inline auto operator++() -> Iterator &;
+  inline auto operator++(int) -> Iterator;
+protected:
+  Base_Iterator base_iterator;
+  friend auto operator==(Iterator const &, Iterator const &) -> bool;
+};
+#endiv
+#divert <ipp>
+namespace scold::easy::searchpath {
+  auto operator==(Iterator const &a, Iterator const &b) -> bool {
+    return a.base_iterator == b.base_iterator;
+  }
+  auto operator!=(Iterator const &a, Iterator const &b) -> bool {
+    return !operator==(a, b);
+  }
+  Iterator::Iterator(Base_Iterator b)
+    : base_iterator{b}
+  { }
+  auto Iterator::operator*() const -> Value const & { return base_iterator->second; }
+  auto Iterator::operator++() -> Iterator & {
+    ++base_iterator;
+    return *this;
+  }
+  auto Iterator::operator++(int) -> Iterator {
+    Iterator old{*this};
+    ++base_iterator;
+    return old;
+  }
+}
+#endiv

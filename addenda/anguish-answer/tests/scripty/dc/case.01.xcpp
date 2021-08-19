@@ -1,0 +1,10 @@
+#divert <fpp>
+namespace casey::oh_one {
+  struct Something;
+}
+#endiv
+#divert <hpp>
+struct casey::oh_one::Something {
+  int i;
+};
+#endiv

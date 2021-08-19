@@ -1,0 +1,24 @@
+// This is C++ 23 -*- c++ -*- -std=c++23 in the stylings of the S.C.O.L.D. design method.
+// For terms and provenance see the LICENSE file at the top of the repository.
+#divert <hpp>
+#import want.ranges.detail.Direct
+namespace want::ranges {
+  //
+  // Iterate over a range from mimimum to maximum (including maximum)
+  // without requiring uttering "one beyond maximum" as per the usual range paradim.
+  //
+  // Usage:
+  //
+  //   auto mm = minmax(1, 10);
+  //   for (auto i : mm) {
+  //     ...see range 1..10...
+  //   }
+  //
+  template<typename TYPE> inline auto minmax(TYPE const &min, TYPE const &max) -> detail::Direct<TYPE>;
+}
+#endiv
+#divert <ipp>
+template<typename TYPE> auto want::ranges::minmax(TYPE const &min, TYPE const &max) -> detail::Direct<TYPE> {
+  return detail::Direct<TYPE>{min, max};
+}
+#endiv

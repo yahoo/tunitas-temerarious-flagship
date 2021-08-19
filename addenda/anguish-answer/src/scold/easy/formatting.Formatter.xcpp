@@ -1,0 +1,8 @@
+// This is C++ 23 -*- c++ -*- -std=c++23 in the stylings of the S.C.O.L.D. design method.
+// For terms and provenance see the LICENSE file at the top of the repository.
+#divert <fpp>
+#import scold.easy.formatting.Formatter.template
+#import scold.easy.formatting.Formatter.time
+#import scold.easy.formatting.Formatter.uuid
+#import scold.easy.formatting.Formatter.file
+#endiv

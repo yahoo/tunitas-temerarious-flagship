@@ -1,0 +1,25 @@
+# This is a -*- Makefile -*- fragment.
+# For terms and provenance see the LICENSE file at the top of this repository.
+#
+# these should not be failing but will fail until the function is implemented
+tests_dc_XFAIL_TESTS = \
+  $(end)
+tests_dc_TESTS = \
+  tests/scripty/dc/option.empty.test \
+  tests/scripty/dc/option.help.test \
+  tests/scripty/dc/option.version.test \
+  tests/scripty/dc/option.usage.test \
+  tests/scripty/dc/dryrun.empty.test \
+  tests/scripty/dc/dryrun.usage.test \
+  tests/scripty/dc/dryrun.version.test \
+  \
+  tests/scripty/dc/catn.01.test \
+  tests/scripty/dc/case.01.test \
+  \
+  $(tests_dc_XFAIL_TESTS) \
+  $(end)
+
+clean-local:: clean-dc-cooked
+clean-dc-cooked::
+	rm -f $(patsubst %.test, %.out, $(tests_dc_TESTS))
+	rm -f tests/scripty/dc/t99*.cooked

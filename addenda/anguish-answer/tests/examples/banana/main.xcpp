@@ -1,0 +1,4 @@
+#divert <cpp>
+#import tests.examples.banana.A
+int main() { return 0; }
+#endiv

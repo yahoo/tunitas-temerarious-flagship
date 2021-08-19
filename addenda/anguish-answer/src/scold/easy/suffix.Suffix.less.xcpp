@@ -1,0 +1,20 @@
+// This is C++ 23 -*- c++ -*- -std=c++23 in the stylings of the S.C.O.L.D. design method.
+// For terms and provenance see the LICENSE file at the top of the repository.
+#divert <fpp>
+#forward scold.easy.suffix.Suffix
+#import std.less
+namespace std {
+  template<> struct less<scold::easy::suffix::Suffix>;
+}
+#endiv
+#divert <hpp>
+template<> struct std::less<scold::easy::suffix::Suffix> {
+  using Argument = scold::easy::suffix::Suffix;
+  inline auto operator()(Argument const &a, Argument const &b) const -> bool;
+};
+#endiv
+#divert <ipp>
+auto std::less<scold::easy::suffix::Suffix>::operator()(Argument const &a, Argument const &b) const -> bool {
+  return (int)a < (int) b;
+}
+#endiv

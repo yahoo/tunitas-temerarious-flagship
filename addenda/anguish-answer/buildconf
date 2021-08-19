@@ -1,0 +1,166 @@
+#!/bin/bash
+
+# Run ./buildconf on the first time out
+# if ./configure exists then you probably don't need to run this
+#
+# ./buildconf <--------------- upon receiving the dist
+# ./configure <--------------- first time
+# make <---------------------- rinse & repeat: edit-compile-test-debug
+# make check <---------------- ibidem.
+# [sudo] make install <------- ready
+#
+
+cd ${0%/*}
+declare NAME="${0##*/}[${PWD##*/}]"
+
+# ... below is boilerplate "The Guesswork"
+#
+# Concept: look around, but in a principled way
+#    if HYPOGEAL_TWILIGHT, then take that
+#    else look below, look above, look to the side
+#
+if [ set == "${with_hypogeal_twilight:+set}" ] && [ set != "${hypogeal_twilight_prefix:+set}" ] ; then
+    echo "${NAME}: notice, accepting the hypogeal-twilight prefix value from the environment"
+    echo "${NAME}: notice, with_hypogeal_twilight=${with_hypogeal_twilight}"
+    #
+    # It was given by the luser, respect that.
+    #
+    hypogeal_twilight_prefix="${with_hypogeal_twilight}"
+    if [ ! -d "${hypogeal_twilight_prefix?}" ] ; then
+        echo "${NAME}: hint, verify that ${hypogeal_twilight_prefix?} exists and redo"
+        echo "${NAME}: error, explicit with_hypogeal_twilight=${hypogeal_twilight_prefix?} from the environment"
+        echo "${NAME}: error, yet the directory ${hypogeal_twilight_prefix?} is missing"
+        echo "${NAME}: error, quitting"
+        exit 1
+    fi 1>&2
+fi
+if [ set == "${HYPOGEAL_TWILIGHT:+set}" ] && [ set != "${hypogeal_twilight_prefix:+set}" ] ; then
+    echo "${NAME}: notice, accepting the hypogeal-twilight prefix value from the environment"
+    echo "${NAME}: notice, found HYPOGEAL_TWILIGHT=${HYPOGEAL_TWILIGHT}"
+    echo "${NAME}: notice, and yet HYPOGEAL_TWILIGHT is deprecating, instead use with_hypogeal_twilight=${HYPOGEAL_TWILIGHT}"
+    #
+    # It was given by the luser, respect that.
+    #
+    hypogeal_twilight_prefix="${HYPOGEAL_TWILIGHT}"
+    if [ ! -d "${hypogeal_twilight_prefix?}" ] ; then
+        echo "${NAME}: hint, verify that ${hypogeal_twilight_prefix?} exists and redo"
+        echo "${NAME}: error, explicit HYPOGEAL_TWILIGHT=${hypogeal_twilight_prefix?} from the environment"
+        echo "${NAME}: error, yet the directory ${hypogeal_twilight_prefix?} is missing"
+        echo "${NAME}: error, quitting"
+        exit 1
+    fi 1>&2
+fi
+if [ set != "${hypogeal_twilight_prefix:+set}" ] ; then
+    #
+    # Any nearby development areas?
+    #
+    # need the PWD because buildconf is recursive, into the submodules
+    declare -a devGUESSES=( ${PWD} ${PWD}/submodules ${PWD}/external ${PWD}/.. ${PWD}../.. /build/scold )
+    for above in ${devGUESSES[@]}; do
+        guess="$above/hypogeal-twilight"
+        if [ -d $guess/ac ] ; then
+            hypogeal_twilight_prefix="${guess}"
+            break;
+        fi 
+    done
+fi
+if [ set != "${hypogeal_twilight_prefix:+set}" ] ; then
+    #
+    # Any visible production install areas?
+    #
+    declare -a prodGUESSES=( /opt/scold /usr/local/scold /usr/local /usr )
+    for guess in ${prodGUESSES[@]}; do
+        if [ -d $guess/libexec/hypogeal-twilight ] || [ -d $guess/libexec/hypogeal-twilight ] ; then
+            hypogeal_twilight_prefix="${guess}"
+            break;
+        fi 
+    done
+fi
+if [ set != "${hypogeal_twilight_prefix:+set}" ] ; then
+    echo "${NAME}: hint, redo as 'HYPOGEAL_TWILIGHT=.../DIRECTORY $0'"
+    echo "${NAME}: error, cannot guess where hypogeal-twilight might be, you will need to specify it explicitly"
+    echo "${NAME}: error, quitting"
+    exit 1
+fi 1>&2
+
+if [ -d "${hypogeal_twilight_prefix}/ac" ] ; then
+    #
+    # a development area
+    #
+    #   e.g. ../hypogeal-twilight
+    #        /build/scold/hypogeal-twilight
+    #
+    if [ -d "${hypogeal_twilight_prefix}/libexec" ] ; then
+        # current >= v0.43
+        hypogeal_twilight_libexecdir="${hypogeal_twilight_prefix}/libexec"
+    else
+        # old <= v0.42
+        hypogeal_twilight_libexecdir="${hypogeal_twilight_prefix}/ac"
+    fi
+    hypogeal_twilight_libexec_PATH="${hypogeal_twilight_libexecdir}"
+    hypogeal_twilight_datarootdir="${hypogeal_twilight_prefix}"
+    hypogeal_twilight_datadir="${hypogeal_twilight_datarootdir?}"
+    hypogeal_twilight_libdir="${hypogeal_twilight_prefix}/lib"
+else
+    #
+    # an installed area
+    #
+    #   e.g. /opt/scold/hypogeal-twilight
+    #
+    hypogeal_twilight_libexecdir="${hypogeal_twilight_prefix}/libexec/hypogeal-twilight"
+    hypogeal_twilight_libexec_PATH="${hypogeal_twilight_libexecdir}"
+    hypogeal_twilight_datarootdir="${hypogeal_twilight_prefix}/share/hypogeal-twilight"
+    hypogeal_twilight_datadir="${hypogeal_twilight_datarootdir?}"
+    hypogeal_twilight_libdir="${hypogeal_twilight_prefix}/lib/hypogeal-twilight"
+fi
+
+# Add the discovered estimated-specified location of hypogeal-twilight to the PATH
+# but also support an optional in-project override of the libexec area (which will be rarely used).
+export PATH="${PWD}/libexec/hypogeal-twilight:${hypogeal_twilight_libexec_PATH:+$hypogeal_twilight_libexec_PATH:}$PATH"
+
+# ... above is boilerplate "The Guesswork"
+# ... below is the actual function of buildconf
+
+function failure() {
+cat <<EOF | sed -e "s/^/${NAME} -----> /"
+PATH=${PATH:-(unset)}
+LD_LIBRARY_PATH=${LD_LIBRARY_PATH:-(unset)}
+with_baleful_ballad=${with_baleful_ballad:-(unset)}
+with_hypogeal_twilight=${with_hypogeal_twilight:-(unset)}
+[[deprecated]] ANGUISH_ANSWER=${ANGUISH_ANSWER:-(unset)}
+[[deprecated]] BALEFUL_BALLAD=${BALEFUL_BALLAD:-(unset)}
+[[deprecated]] HYPOGEAL_TWILIGHT=${HYPOGEAL_TWILIGHT:-(unset)}
+EOF
+    echo "${NAME}: errors exist, quitting"
+    exit 1
+} 1>&2
+trap failure ERR
+
+# enfreshen the (local) autoconf m4 macros
+echo "${NAME}: found $(type -p autotools-local-preconfigure)"
+autotools-local-preconfigure "$@"
+
+if [ -n "${CONFIG_SITE}" ] ; then
+    # it is from the environment, keep it
+    echo "${NAME}: notice, environment establishes CONFIG_SITE=${CONFIG_SITE}"
+else
+    if [ -f etc/config.site.in ] ; then
+        : no need to do anything
+        echo "${NAME}: notice, ./etc/config.site.in exists, ignoring any ./config.settings.in"
+    elif [ -f config.settings.in ] ; then
+        echo "${NAME}: notice, only ./config.settings.in exists, using that instead of ./etc/config.site.in."
+
+        # config.settings is the "standard one" ... which is always instantiated.
+        # the caller has the option of choosing another one (but that would be unwise) 
+        export CONFIG_SITE=${CONFIG_SITE:-config.settings}
+
+        # provides its own chatter
+        establish-config-settings
+
+        # provides its own chatter
+        insert-config-settings-in-configure
+    fi
+fi
+
+echo "${NAME}: OK"
+exit 0

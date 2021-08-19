@@ -1,0 +1,26 @@
+// This is C++ 23 -*- c++ -*- -std=c++23 in the stylings of the S.C.O.L.D. design method.
+// For terms and provenance see the LICENSE file at the top of the repository.
+#divert <hpp>
+#forward scold.easy.debugging.Formatter
+namespace scold::easy {
+  //
+  // Make certain data types loggable (debuggable)
+  //
+  // Of course the lifetime of the value must be longer than that of the Formatter
+  //
+  // Usage:
+  //
+  //   auto value = ...somehow....;
+  //   stream << debuggable(value);
+  //
+  template<typename TYPE> inline auto debuggable(TYPE const &) -> debugging::Formatter<TYPE>;
+}
+#endiv
+#divert <ipp>
+#import scold.easy.debugging.Formatter
+namespace scold {
+  template<typename TYPE> auto easy::debuggable(TYPE const &value) -> debugging::Formatter<TYPE> {
+    return debugging::Formatter<TYPE>{value};
+  }
+}
+#endiv

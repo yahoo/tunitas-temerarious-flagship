@@ -1,0 +1,61 @@
+.checked
+
+# synthesized by buildconf
+configure
+# synthesized by make (the Makefile)
+check-anguish-answer.spec
+*-check.spec
+
+# autotools or libtool building
+.dirstamp
+.deps
+
+# autotools building
+aclocal.m4
+ar-lib
+autom4te.cache
+compile
+config.guess
+config.h
+config.h.in
+config.log
+config.status
+config.sub
+configure
+depcomp
+install-sh
+libtool
+ltmain.sh
+m4
+Makefile
+Makefile.in
+missing
+stamp-h1
+
+# automake & incendiary-sophist testing
+test-driver
+test-suite.log
+
+# the S.C.O.LlD. build system
+obj
+obj/**/*.o
+obj/**/*.lo
+
+# these should be in your personal ~/.config/git/ignore
+# these should not be in the project-level ignorance
+
+*~
+\#*
+.\#*
+
+o.git_*.out
+o.make.out
+o.*.out
+
+j99
+j99.*
+o99.*
+t99.*
+old.*
+
+#end

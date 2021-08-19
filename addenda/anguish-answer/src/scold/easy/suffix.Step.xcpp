@@ -1,0 +1,140 @@
+// This is C++ 23 -*- c++ -*- -std=c++23 in the stylings of the S.C.O.L.D. design method.
+// For terms and provenance see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace scold::easy::suffix {
+  //
+  // A step is the sense of the processor before, during and after the suffixes.
+  // You use a Step "like an enum" where you need to express "begin" and "end" of the processor.
+  //
+  //   BEGIN FPP HPP IPP TPP CPP END
+  //
+  // Usage:
+  //
+  //  sure, there is usage.
+  // 
+  class Step;
+}
+#endiv
+#divert <hpp>
+#import scold.easy.List
+#import std.string
+namespace scold::easy::suffix {
+  inline auto greater(Step const &, Step const &) -> bool;
+  inline auto succ(Step const &) -> Step; // throws std::invalid_argument if no successor
+  inline auto pred(Step const &) -> Step; // same if no (predecessor)
+  inline auto max(Step const &, Step const &) -> Step;
+  inline auto min(Step const &, Step const &) -> Step;
+  inline auto to_string(Step const &) -> std::string;
+  inline auto operator==(Step const &, Step const &) -> bool;
+  inline auto operator!=(Step const &, Step const &) -> bool;
+  inline auto operator<(Step, Step) -> bool;
+  inline auto operator<=(Step, Step) -> bool;
+  inline auto operator>(Step, Step) -> bool;
+  inline auto operator>=(Step, Step) -> bool;
+}
+#import scold.easy.suffix.Suffix
+#import std.underlying_type
+#forward scold.easy.suffix.Step.less
+class scold::easy::suffix::Step {
+protected:
+  using Value = std::underlying_type<Suffix>::type;
+  inline constexpr Step(); // indeed, there is no default constructor; you must use the manifest constants, below
+  inline constexpr explicit Step(Value value) : value{value} { }
+  Value value;
+  friend auto suffix::operator==(Step const &, Step const &) -> bool;
+  friend struct std::less<Step>;
+public:
+  inline constexpr Step(Suffix value) : value{(int) value} { }
+  inline auto is_suffix() const -> bool;
+  inline operator Suffix() const; // WATCHOUT - throws if the Step is not also a suffix (you do not want this)
+  // Makes it look & feel like an enum class
+  static Step const BEGIN;
+  static Step const FPP;
+  static Step const HPP;
+  static Step const IPP;
+  static Step const TPP;
+  static Step const CPP;
+  static Step const END;
+};
+#import std.is_trivially_copy_constructible
+static_assert(std::is_trivially_copy_constructible_v<scold::easy::suffix::Step>);
+namespace scold::easy::suffix {
+  inline Step const Step::FPP = Step(Suffix::FPP);
+  inline Step const Step::HPP = Step{Suffix::HPP};
+  inline Step const Step::IPP = Step{Suffix::IPP};
+  inline Step const Step::TPP = Step{Suffix::TPP};
+  inline Step const Step::CPP = Step{Suffix::CPP};
+  inline Step const Step::END = Step{1 + CPP.value};
+  inline Step const Step::BEGIN = Step{-1 + FPP.value};
+}
+#import scold.easy.suffix.Step.less
+constexpr scold::easy::suffix::Step::Step() : value{-1 + (int)Suffix::FPP} { }
+#endiv
+#divert <ipp>
+// REMOVE #import scold.easy.suffix.tables // tables::GREATER, tables::NEIGHBORS
+#import std.bad_optional_access
+#import std.invalid_argument
+namespace scold::easy {
+  auto suffix::operator==(Step const &a, Step const &b) -> bool {
+    return a.value == b.value;
+  }
+  auto suffix::operator!=(Step const &a, Step const &b) -> bool {
+    return !operator==(a, b);
+  }
+  auto suffix::operator<(Step a, Step b) -> bool {
+    std::less<Step> lt;
+    return lt(a, b);
+  }
+  auto suffix::operator<=(Step a, Step b) -> bool { return operator<(a, b) || a == b; }
+  auto suffix::operator>(Step a, Step b) -> bool { return operator<(b, a); }
+  auto suffix::operator>=(Step a, Step b) -> bool { return operator<=(b, a); }
+  auto suffix::greater(Step const &a, Step const &b) -> bool {
+    std::less<Step> lt;
+    return lt(b, a);
+  }
+  auto suffix::pred(Step const &m) -> Step {
+    try {
+      return *tables::NEIGHBORS.at(m).pred;
+    } catch (std::bad_optional_access const &) {
+      // Because using std::optional is an implementation detail here
+      // we rethrow something meaningful that declares what is really wrong (the argument is invalid)
+      throw std::invalid_argument{"pred"};
+    }
+  }
+  auto suffix::succ(Step const &m) -> Step {
+    try {
+      return *tables::NEIGHBORS.at(m).succ;
+    } catch (std::bad_optional_access const &) {
+      // ibidem.
+      throw std::invalid_argument{"succ"};
+    }
+  }
+  auto suffix::max(Step const &a, Step const &b) -> Step {
+    return greater(a, b) ? a : b;
+  }
+  auto suffix::min(Step const &a, Step const &b) -> Step {
+    return greater(a, b) ? b : a;
+  }
+  auto suffix::to_string(Step const &m) -> std::string {
+    return to_string((Suffix) m);
+  }
+}
+#import scold.easy.suffix.Limits
+#import std.invalid_argument
+namespace scold::easy::suffix {
+  auto Step::is_suffix() const -> bool {
+    using Limits = suffix::Limits<Suffix>;
+    return (Value)Limits::min() <= this->value && this->value <= (Value)Limits::max();
+  }
+  Step::operator Suffix() const {
+    if (!is_suffix()) {
+      throw std::invalid_argument{"cast"};
+    }
+    return Suffix{value};
+  }
+}
+#endiv
+#divert <cpp>
+#import std.is_trivially_copy_constructible
+static_assert(std::is_trivially_copy_constructible_v<scold::easy::suffix::Step>);
+#endiv

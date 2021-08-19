@@ -1,0 +1,16 @@
+usage: lt-dc [...options...] [...files.xcpp...]
+
+Flag Options:
+[ --verbose ]                 be verbose, this is not the default
+[ --warnings ]                have warnings, this is the default
+[ --insert-namespace ]        look for & insert the per-directory namespace module, this is the default
+The flag options can be inverted with a 'no-' prefix; e.g '--no-warnings'
+
+Value Options:
+[ -I<directory> ]             same as with any C++ compiler
+[ --srcdir=<directory> ]      e.g. $(scold_srcdir)
+[ --objdir=<directory> ]      e.g. $(scold_cxxdir), probably not $(scold_objdir)
+
+C++ Files:
+files.xcpp                    C++2a source code in the S.C.O.L.D. stylings that are so popular these days
+

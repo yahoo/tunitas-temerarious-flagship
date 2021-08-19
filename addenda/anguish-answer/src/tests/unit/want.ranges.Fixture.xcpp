@@ -1,0 +1,63 @@
+// This is C++ 23 -*- c++ -*- -std=c++23 in the stylings of the S.C.O.L.D. design method.
+// For terms and provenance see the LICENSE file at the top of the repository.
+#divert <fpp>
+#import want // in lieu of want.ranges (namespace.xcpp)
+namespace tests::unit::want::ranges {
+  namespace [[eponymous]] fixture {
+    class Fixture;
+    namespace library = ::want::ranges;
+  }
+  using fixture::Fixture;
+}
+#endiv
+#divert <hpp>
+#import cppunit.Test
+#import cppunit.test.Fixture
+struct tests::unit::want::ranges::fixture::Fixture : public cppunit::test::Fixture {
+  auto test_minmax() -> void;
+  auto test_forward() -> void;
+  auto test_reverse() -> void;
+  static auto suite() -> cppunit::Test *;
+};
+#endiv
+#divert <cpp>
+#import want.ranges.minmax
+#import want.ranges.forward
+#import want.ranges.reverse
+namespace tests::unit::want::ranges::fixture {
+  auto Fixture::test_minmax() -> void {
+    auto accumulator = 0l;
+    for (auto number : ::want::ranges::minmax(1, 4)) {
+      accumulator += number;
+    }
+    auto const expected = 1l + 2 + 3 + 4;
+    CPPUNIT_ASSERT_EQUAL(expected, accumulator);
+  }
+  auto Fixture::test_forward() -> void {
+    auto specimen = std::string{"dog"};
+    std::string accumulated;
+    for (auto c : ::want::ranges::forward(specimen)) {
+      accumulated.push_back(c);
+    }
+    CPPUNIT_ASSERT_EQUAL("dog"s, accumulated);
+  }
+  auto Fixture::test_reverse() -> void {
+    auto specimen = std::string{"cat"};
+    std::string accumulated;
+    for (auto c : ::want::ranges::reverse(specimen)) {
+      accumulated.push_back(c);
+    }
+    CPPUNIT_ASSERT_EQUAL("tac"s, accumulated);
+  }
+}
+#import rigging.suite.io
+auto tests::unit::want::ranges::fixture::Fixture::suite() -> cppunit::Test * {
+  using namespace rigging::suite;
+  auto series = Stream{"ranges"};
+  series << call("minmax", &Fixture::test_minmax)
+         << call("forward", &Fixture::test_forward)
+         << call("reverse", &Fixture::test_reverse)
+         << END;
+  return finalize(series);
+}
+#endiv

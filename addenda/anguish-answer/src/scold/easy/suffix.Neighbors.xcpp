@@ -1,0 +1,23 @@
+// This is C++ 23 -*- c++ -*- -std=c++23 in the stylings of the S.C.O.L.D. design method.
+// For terms and provenance see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace scold::easy::suffix {
+  //
+  // The neighbors of a suffix
+  //
+  // Usage: rly?
+  //
+  struct Neighbors;
+}
+#endiv
+#divert <hpp>
+#import scold.easy.suffix.Step
+#import std.optional
+struct scold::easy::suffix::Neighbors {
+  using Value = std::optional<Step>;
+  inline static constexpr auto NONE = Value{};
+  Neighbors() = default;
+  inline constexpr Neighbors(Value pred, Value succ) : pred{pred}, succ{succ} { }
+  Value pred, succ;
+};
+#endiv

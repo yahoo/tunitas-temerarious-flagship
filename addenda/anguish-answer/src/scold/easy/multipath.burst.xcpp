@@ -1,0 +1,117 @@
+// This is C++ 23 -*- c++ -*- -std=c++23 in the stylings of the S.C.O.L.D. design method.
+// For terms and provenance see the LICENSE file at the top of the repository.
+#divert <hpp>
+#forward scold.easy.multipath.Filepath
+#import scold.easy.name.Filepath
+#import scold.easy.Configuration
+namespace scold::easy::multipath {
+  //
+  // The multipath filepath, constructed via burst(...)
+  // ADL is not expected to find this.
+  //
+  // Concept:
+  //
+  //   Burst the filepath up and return its multipath conjugations
+  //   Perform some rudimentary checking on the names so constructed
+  //   being
+  //     non-empty         apple..cherry     (disallowed)
+  //     is_identifier     apple.!@#$.cherry (disallowed)
+  //
+  //   Leading ./ references are elided
+  //
+  // Design:
+  //
+  //   Explanatory messaging is provided against the Configuration.
+  //
+  // Exceptions
+  //
+  //   are thrown if the bursting cannot happen.
+  //
+  // Usage:
+  //
+  //   auto m = burst(cfg, "src/package/component/file.xcpp");
+  //
+  auto burst(Configuration const &, name::Filepath const &) -> Filepath;
+}
+#endiv
+#divert <ipp>
+#import scold.easy.multipath.Filepath
+#endiv
+#divert <cpp>
+#import scold.easy.exception.Failing
+#import scold.easy.multipath.detail
+#import scold.easy.multipath.prune
+#import scold.easy.suffix.Suffix
+#import std.move
+#import std.string
+auto scold::easy::multipath::burst(Configuration const &cfg, name::Filepath const &file_xcpp) -> Filepath {
+  using namespace suffix;
+  using namespace detail;
+  //
+  // let:
+  //
+  //   file_xcpp = "src/package/component.file.xcpp"
+  //   cfg.sources_area       is "." or "src"
+  //   cfg.local_objects_area is "." or "obj/src"
+  //   cfg.local_modules_area is "." or "obj/modules"
+  //
+  if (cfg.project.sources_area.empty() || cfg.project.local_objects_area.empty() || cfg.project.local_modules_area.empty()) {
+    (notice(cfg) << "the sources area is " << defined(cfg.project.sources_area) << end(cfg));
+    (notice(cfg) << "the objects area is " << defined(cfg.project.local_objects_area) << end(cfg));
+    (notice(cfg) << "the modules area is " << defined(cfg.project.local_modules_area) << end(cfg));
+    (error(cfg) << "all of the sources area, objects area and modules area must all be defined" << end(cfg));
+    throw exception::Failing{cfg.NAME};
+  }
+  auto stempath = [&cfg](name::Filepath const &source) -> name::Filepath {
+                    auto that = [source]() {
+                                  // but avoid adding a gratuitous "./" to the beginning
+                                  if (source.has_parent_path()) {
+                                    // "src/package/subpackage/component.subcomponent.Class"
+                                    return source.parent_path() / source.stem();
+                                  } else {
+                                    // "component.subcomponent.Class"
+                                    return source.stem();
+                                  }
+                                }();
+                    if (that.empty()) {
+                      (notice(cfg) << "the original " << source << end(cfg));
+                      (error(cfg) << "has an empty stem (cannot proceed)" << end(cfg));
+                      throw exception::Failing{cfg.NAME};
+                    }
+                    do {
+                      // remove all of the leading ././././ references.
+                      auto b = that.begin();
+                      auto const e = that.end();
+                      if (e == b) {
+                        break;
+                      } else if ("." == *b) {
+                        prune(that, ".");
+                      } else {
+                        break;
+                      }
+                    } while (true);
+                    prune(that, cfg.project.sources_area); //        "package/subpackage/component.subcomponent.Class"
+                    prune(that, cfg.project.local_objects_area); //       ... probably not necessary...
+                    prune(that, cfg.project.local_modules_area); //       ... probably not necessary...
+                    if (that.empty()) {
+                      (notice(cfg) << "the original " << source << end(cfg));
+                      (error(cfg) << "has been pruned away to nothing (cannot proceed)" << end(cfg));
+                      throw exception::Failing{cfg.NAME};
+                    }
+                    validate_module_name(cfg, source, that);
+                    return that;
+                  }(file_xcpp);
+  auto const dotpath = dedot(stempath);
+  return [&cfg, file_xcpp, stempath, dotpath]{
+           auto ret = Filepath{};
+           ret.original = file_xcpp;
+           ret.module = dotpath;
+           ret[Suffix::FPP] = cfg.project.local_modules_area / Suffix::FPP / dotpath;
+           ret[Suffix::HPP] = cfg.project.local_modules_area / Suffix::HPP / dotpath;
+           ret[Suffix::IPP] = cfg.project.local_modules_area / Suffix::IPP / dotpath;
+           ret[Suffix::TPP] = cfg.project.local_modules_area / dotpath;
+           ret[Suffix::CPP] = cfg.project.local_objects_area / stempath * Suffix::CPP;
+           return ret;
+         }();
+}
+#endiv

@@ -1,0 +1,51 @@
+// This is C++ 23 -*- c++ -*- -std=c++23 in the stylings of the S.C.O.L.D. design method.
+// For terms and provenance see the LICENSE file at the top of the repository.
+#divert <fpp>
+#forward scold.easy.core.Match.declaration
+namespace scold::easy::core {
+  //
+  // EDF = Empty Divert Fragment 
+  //
+  // Examples:
+  //
+  //   #divert <-------------- empty divert fragment
+  //
+  // Usage:
+  //
+  //   if (EDF edf; edf << line_object) {
+  //     ...
+  //   }
+  //
+  template<> struct Match<empty_divert_fragment>;
+}
+#endiv
+#divert <hpp>
+#import lite.regex.Pattern
+#import scold.easy.core // namespace regex
+#import scold.easy.line.Object
+namespace scold::easy::core {
+  template<> struct Match<empty_divert_fragment> {
+    inline Match();
+    inline auto operator()(line::Object const &) const -> bool;
+    inline auto operator<<(line::Object const &) -> bool; // same as operator()
+  protected:
+    regex::Pattern FRAGMENT;
+  };
+}
+#endiv
+#divert <ipp>
+#import scold.easy.core // namespace regex
+#import lite.regex.search
+namespace scold::easy::core {
+  Match<empty_divert_fragment>::Match()
+    : FRAGMENT{R"regex(^\s*#\s*divert\b.*)regex"}
+  { }
+  auto Match<empty_divert_fragment>::operator()(line::Object const &subject) const -> bool {
+    // No side effect on the object to recover captured values
+    return regex::search(subject, FRAGMENT);
+  }
+  auto Match<empty_divert_fragment>::operator<<(line::Object const &subject) -> bool {
+    return operator()(subject);
+  }
+}
+#endiv

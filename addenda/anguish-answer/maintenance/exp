@@ -1,0 +1,28 @@
+#!/bin/bash
+# For terms and provenance see the LICENSE file at the top of this repository.
+cd ${0%/*}/.. || exit 70
+: ${prefix:=/exp/scold}
+: ${with_std_scold:=/opt/scold}
+export PATH="$PATH:${prefix?}/bin:${with_std_scold?}/bin"
+: ${with_nonstd_half:=/opt/nonstd/half}
+: ${with_hypogeal_twilight:=${with_std_scold?}}
+: ${with_module_rigging:=${with_std_scold?}}
+: ${with_module_std:=${with_std_scold?}}
+: ${with_module_nonstd:=${with_std_scold?}}
+: ${with_module_half:=${with_std_scold?}}
+eval \
+    ${with_hypogeal_twilight:+with_hypogeal_twilight=$with_hypogeal_twilight} \
+    ./buildconf &&
+./configure \
+    ${prefix:+--prefix=$prefix} \
+    ${with_std_scold:+--with-std-scold=$with_std_scold} \
+    ${with_nonstd_half:+--with-nonstd-half=$with_nonstd_half} \
+    ${with_hypogeal_twilight:+--with-hypogeal-twilight=$with_hypogeal_twilight} \
+    ${with_module_half:+--with-module-half=$with_module_half} \
+    ${with_module_nonstd:+--with-module-nonstd=$with_module_nonstd} \
+    ${with_module_rigging:+--with-module-rigging=$with_module_rigging --with-module-rigging-unit=$with_module_rigging_unit} \
+    ${with_module_std:+--with-module-std=$with_module_std} \
+    ${end} && 
+make &&
+make check &&
+echo OK DONE

@@ -1,0 +1,50 @@
+// This is C++ 23 -*- c++ -*- -std=c++23 in the stylings of the S.C.O.L.D. design method.
+// For terms and provenance see the LICENSE file at the top of the repository.
+#divert <fpp>
+#forward scold.easy.core.Match.declaration
+namespace scold::easy::core {
+  //
+  // Examples:
+  //
+  //   #divert <fpp> <-------------- which is unexpected
+  //   #divert <hpp>
+  //   #divert <ipp>
+  //   #divert <tpp>
+  //   #divert <cpp>
+  //
+  // Usage:
+  //
+  //   if (UET uet; uet << line_object) {
+  //     ...
+  //   }
+  //
+  template<> struct Match<unexpected_start_tag>;
+}
+#endiv
+#divert <hpp>
+#import scold.easy.line.Object
+namespace scold::easy::core {
+  template<> struct Match<unexpected_start_tag> {
+    inline Match();
+    inline auto operator()(line::Object const &) const -> bool;
+    inline auto operator<<(line::Object const &) -> bool; // same as operator()
+  protected:
+    std::regex TAG_START_PP;
+  };
+}
+#divert <ipp>
+#import scold.easy.core // namespace regex
+#import lite.regex.search
+namespace scold::easy::core {
+  Match<unexpected_start_tag>::Match()
+    : TAG_START_PP{R"regex(^\s*#\s*divert\b.*)regex"}
+  { }
+  auto Match<unexpected_start_tag>::operator()(line::Object const &subject) const -> bool {
+    // no side effect on the object to recover captured values
+    return regex::search(subject, TAG_START_PP);
+  }
+  auto Match<unexpected_start_tag>::operator<<(line::Object const &subject) -> bool {
+    return operator()(subject);
+  }
+}
+#endiv

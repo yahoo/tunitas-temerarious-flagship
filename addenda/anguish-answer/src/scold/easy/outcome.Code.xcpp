@@ -1,0 +1,35 @@
+// This is C++ 23 -*- c++ -*- -std=c++23 in the stylings of the S.C.O.L.D. design method.
+// For terms and provenance see the LICENSE file at the top of the repository.
+#divert <fpp>
+#import scold.easy.outcome.Condition
+namespace scold::easy::outcome {
+  //
+  // The outcome (error) Codes
+  //
+  enum class Code
+    { SUCCESS = (int) Condition::SUCCESS,
+      FAILURE = (int) Condition::FAILURE,
+      OPTION_IS_UNKNOWN,
+      OPTION_VALUE_IS_MISSING,
+      OPTION_SET_IS_INCOMPLETE,
+      OPTION_SET_IS_INCONSISTENT };
+}
+#import std.is_error_code_enum
+namespace std {
+  template<> struct is_error_code_enum<scold::easy::outcome::Code>;
+}
+#endiv
+#divert <hpp>
+#import std.true_type
+template<> struct std::is_error_code_enum<scold::easy::outcome::Code> : public std::true_type { };
+#import std.error_code
+namespace scold::easy::outcome {
+  inline auto make_error_code(Code) -> std::error_code;
+};
+#endiv
+#divert <ipp>
+#import scold.easy.outcome.category
+inline auto scold::easy::outcome::make_error_code(Code c) -> std::error_code {
+  return std::error_code{(int) c, category()};
+}
+#endiv
