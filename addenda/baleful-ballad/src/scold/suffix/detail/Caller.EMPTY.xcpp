@@ -1,0 +1,35 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+#import scold.suffix.detail.Caller
+namespace scold {
+  namespace suffix {
+    namespace detail {
+      template<> struct Caller<>;
+    }
+  }
+}
+#endiv
+#divert <hpp>
+#import scold
+#import scold.Suffix
+#import mvr.SAV
+#import mvr.State
+#import mvr.status
+#import std.logic_error
+template<> struct scold::suffix::detail::Caller<> {
+  inline static auto c_str(Suffix) -> char const * { throw_fail(); return nullptr; }
+  inline static auto str(Suffix) -> std::string { throw_fail(); return std::string(); }
+  inline static auto to(std::string const &specimen) -> mvr::SAV<Suffix> {
+    using namespace mvr;
+    return status<Suffix>(State::NONE, Suffix()); // no definable value was found
+  }
+private:
+  inline static auto throw_fail() -> void {
+    // This indicates a programmer error.
+    // The Caller<...> series should have matched something by this time.
+    // That it did not means that there is a Definition missing in the
+    // type alias of scold::suffix::Definition::caller_type.
+    throw std::logic_error("caller fails");
+  }
+};
+#endiv

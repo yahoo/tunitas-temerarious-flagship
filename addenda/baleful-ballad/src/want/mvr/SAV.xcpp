@@ -1,0 +1,219 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace want {
+  namespace mvr {
+    // sav => Status-and-Value
+    template<typename TYPE> class SAV;
+  }
+}
+#endiv
+#divert <hpp>
+#import want.mvr.State
+#import std.tuple
+namespace want {
+  namespace mvr {
+    template<typename TYPE> inline auto operator==(SAV<TYPE> const &, SAV<TYPE> const &) -> bool;
+    template<typename TYPE> inline auto operator!=(SAV<TYPE> const &, SAV<TYPE> const &) -> bool;
+  }
+}
+
+// Want these declarations *right*now* (per #import) but defer the <ipp> and so on.
+#entail want.mvr.ok
+#entail want.mvr.value
+#entail want.mvr.status
+#entail want.mvr.andvalue
+
+template<typename TYPE> class want::mvr::SAV {
+public:
+  typedef TYPE value_type;
+  inline SAV();
+  inline explicit SAV(State);
+  // Not using 'bool' as the first argument here because that is rife with misunderstanding & confusion
+  template<typename... ARGS> inline explicit SAV(State, ARGS const &...);
+  template<typename ARG, typename... ARGS> inline explicit SAV(State, ARG &&, ARGS &&...);
+    
+  SAV(SAV const &) = default;
+  auto operator=(SAV const &) -> SAV & = default;
+  SAV(SAV &&) = default;
+  auto operator=(SAV &&) -> SAV & = default;
+
+  inline auto operator=(State) -> SAV &;
+  inline auto operator=(value_type const &) -> SAV &;
+  inline auto operator=(value_type &&) -> SAV &;
+
+  inline operator State() const;
+
+  // returns the truth of the three-valued logic
+  // returns the truth of "IS NOT NULL"
+  inline operator bool() const;           // deprecate?
+  inline auto operator!() const -> bool;  // deprecate?
+  inline auto ok() const -> bool;
+
+  // (implicitly) make it work conveniently with send(...) and recv(...)
+  inline SAV(std::tuple<bool, value_type> const &);
+  inline SAV(std::tuple<bool, value_type const &> const &);
+  inline SAV(std::tuple<bool, value_type &&> &&);
+  inline auto operator=(std::tuple<bool, value_type> const &) -> SAV &;
+  inline auto operator=(std::tuple<bool, value_type> &&) -> SAV &;
+  inline auto operator=(std::tuple<bool, value_type const &> const &) -> SAV &;
+  inline auto operator=(std::tuple<bool, value_type &&> &&) -> SAV &;
+
+  inline operator std::tuple<bool, value_type>() const;
+  inline operator std::tuple<bool, value_type const &>() const;
+  inline operator std::tuple<bool, value_type &>();
+
+  inline value_type const &value() const;
+  inline value_type &value();
+  
+  // Like std::move but forwards out the value itself, state gets State::NONE
+  inline value_type &&move(); // FIXME - overload std::move
+protected:
+  State state;
+  value_type captured_value;
+  friend auto mvr::value<>(SAV const &) -> TYPE const &;
+  friend auto mvr::value<>(SAV &) -> TYPE &;
+  friend auto mvr::value<>(SAV &&) -> TYPE &&;
+public:
+  struct tests { struct Suite; };
+  friend class tests::Suite;
+};
+#endiv
+#divert <ipp>
+#import std.forward
+#import std.get
+#import std.move
+
+template<typename TYPE> auto want::mvr::operator==(SAV<TYPE> const &a, SAV<TYPE> const &b) -> bool {
+  return ((State)(a) == (State)(b)) && (a.value() == b.value());
+}
+
+template<typename TYPE> auto want::mvr::operator!=(SAV<TYPE> const &a, SAV<TYPE> const &b) -> bool {
+  return ! operator==(a, b);
+}
+
+template<typename TYPE> want::mvr::SAV<TYPE>::SAV()
+  : state(State::NONE),
+    captured_value() {
+  ;
+}
+
+template<typename TYPE> want::mvr::SAV<TYPE>::SAV(State the_state)
+  : state(the_state),
+    captured_value() {
+  ;
+}
+
+template<typename TYPE> template<typename... ARGS> want::mvr::SAV<TYPE>::SAV(State the_state, ARGS const &...args)
+  : state(the_state),
+    captured_value(args...) {
+  ;
+}
+
+template<typename TYPE> template<typename ARG, typename... ARGS> want::mvr::SAV<TYPE>::SAV(State the_state, ARG &&arg, ARGS &&...args)
+  : state(the_state),
+    captured_value(std::forward<ARG>(arg), std::forward<ARGS>(args)...) {
+  ;
+}
+
+template<typename TYPE> want::mvr::SAV<TYPE>::SAV(std::tuple<bool, value_type> const &the_tuple)
+  : state(want::mvr::state(std::get<0>(the_tuple)))
+  , captured_value(std::get<1>(the_tuple)) {
+  ;
+}
+
+template<typename TYPE> want::mvr::SAV<TYPE>::SAV(std::tuple<bool, value_type const &> const &the_tuple)
+  : state(want::mvr::state(std::get<0>(the_tuple)))
+  , captured_value(std::get<1>(the_tuple)) {
+  ;
+}
+
+template<typename TYPE> want::mvr::SAV<TYPE>::SAV(std::tuple<bool, value_type &&> &&the_tuple)
+  : state(want::mvr::state(std::get<0>(the_tuple)))
+  , captured_value(std::forward<value_type>(std::get<1>(the_tuple))) {
+  ;
+}
+
+template<typename TYPE> auto want::mvr::SAV<TYPE>::operator=(State the_state) -> SAV & {
+  state = the_state;
+  // captured_value remains unmodified
+  return *this;
+}
+
+template<typename TYPE> auto want::mvr::SAV<TYPE>::operator=(value_type const &the_value) -> SAV & {
+  state = State::VALUE;
+  captured_value = the_value;
+  return *this;
+}
+
+template<typename TYPE> auto want::mvr::SAV<TYPE>::operator=(value_type &&the_xhs) -> SAV & {
+  state = State::VALUE;
+  captured_value = std::forward<value_type>(the_xhs);
+  return *this;
+}
+
+template<typename TYPE> auto want::mvr::SAV<TYPE>::operator=(std::tuple<bool, value_type> const &the_value) -> SAV & {
+  state = State::VALUE;
+  captured_value = std::move(the_value);
+  return *this;
+}
+
+template<typename TYPE> auto want::mvr::SAV<TYPE>::operator=(std::tuple<bool, value_type> &&xhs) -> SAV & {
+  state = want::mvr::state(std::get<0>(std::forward<std::tuple<bool, value_type>>(xhs)));
+  captured_value = std::move(std::get<1>(std::forward<std::tuple<bool, value_type>>(xhs)));
+  return *this;
+}
+
+template<typename TYPE> auto want::mvr::SAV<TYPE>::operator=(std::tuple<bool, value_type const &> const &the_tuple) -> SAV & {
+  state = want::mvr::state(std::get<0>(the_tuple));
+  captured_value = std::get<1>(the_tuple);
+  return *this;
+}
+
+template<typename TYPE> auto want::mvr::SAV<TYPE>::operator=(std::tuple<bool, value_type &&> &&xhs) -> SAV & {
+  state = want::mvr::state(std::get<0>(std::forward<std::tuple<bool, value_type &&>>(xhs)));
+  captured_value = std::move(std::get<1>(std::forward<std::tuple<bool, value_type &&>>(xhs)));
+  return *this;
+}
+
+template<typename TYPE> want::mvr::SAV<TYPE>::operator State() const {
+  return state;
+}
+
+template<typename TYPE> auto want::mvr::SAV<TYPE>::ok() const -> bool {
+  return State::NONE != state;
+}
+
+template<typename TYPE> want::mvr::SAV<TYPE>::operator bool() const {
+  return ok();
+}
+
+template<typename TYPE> auto want::mvr::SAV<TYPE>::operator!() const -> bool {
+  return ! ok();
+}
+
+template<typename TYPE> want::mvr::SAV<TYPE>::operator std::tuple<bool, value_type>() const {
+  return std::tuple<bool, value_type>(this->operator bool(), this->value());
+}
+
+template<typename TYPE> want::mvr::SAV<TYPE>::operator std::tuple<bool, value_type const &>() const {
+  return std::tuple<bool, value_type const &>(this->operator bool(), this->value());
+}
+
+template<typename TYPE> want::mvr::SAV<TYPE>::operator std::tuple<bool, value_type &>() {
+  return std::tuple<bool, value_type &>(this->operator bool(), this->value());
+}
+
+template<typename TYPE> auto want::mvr::SAV<TYPE>::value() const -> value_type const & {
+  return captured_value;
+}
+
+template<typename TYPE> auto want::mvr::SAV<TYPE>::value() -> value_type & {
+  return captured_value;
+}
+
+template<typename TYPE> auto want::mvr::SAV<TYPE>::move() -> value_type && {
+  // more of an "eject" ...really.
+  state = State::NONE; // the value is leaving us...
+  return captured_value;
+}
+#endiv

@@ -1,0 +1,69 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace tests {
+  namespace unit {
+    namespace to {
+      class Module;
+    }
+  }
+}
+#endiv
+#divert <hpp>
+class tests::unit::to::Module : public cppunit::test::Fixture {
+public:
+  auto test_1arg() -> void;
+  auto test_2arg() -> void;
+  auto test_3arg() -> void;
+
+  auto test_1arg_namespace() -> void;
+  auto test_2arg_namespace() -> void;
+
+  static auto suite() -> cppunit::Test *;
+};
+#endiv
+#divert <cpp>
+#import scold.Module
+#import scold.to
+
+auto tests::unit::to::Module::test_1arg() -> void {
+  ::scold::Module const expected{"apple", "banana", "cherry", "Class"};
+  ::scold::Module const actual = ::scold::to<::scold::Module>("apple/banana/cherry/Class");
+  CPPUNIT_ASSERT(expected == actual);
+}
+
+auto tests::unit::to::Module::test_2arg() -> void {
+  ::scold::Module const expected{"apple", "banana", "cherry", "Class"};
+  ::scold::Module const actual = ::scold::to<::scold::Module>("/obj/modules/apple/banana/cherry/Class", "/obj/modules");
+  CPPUNIT_ASSERT(expected == actual);
+}
+
+auto tests::unit::to::Module::test_3arg() -> void {
+  // there are none
+  // there are no 3-arg Module-returning 'to<...>(...)' functions
+  CPPUNIT_ASSERT(true);
+}
+
+auto tests::unit::to::Module::test_1arg_namespace() -> void {
+  ::scold::Module const expected{"apple", "banana", "cherry"};
+  ::scold::Module const actual = ::scold::to<::scold::Module>("apple/banana/cherry/namespace.xcpp");
+  CPPUNIT_ASSERT_EQUAL(expected, actual);
+}
+
+auto tests::unit::to::Module::test_2arg_namespace() -> void {
+  ::scold::Module const expected{"apple", "banana", "cherry"};
+  ::scold::Module const actual = ::scold::to<::scold::Module>("/obj/modules/apple/banana/cherry/namespace.xcpp", "/obj/modules");
+  CPPUNIT_ASSERT_EQUAL(expected, actual);
+}
+
+auto tests::unit::to::Module::suite() -> cppunit::Test * {
+  using namespace ::unit::rigging::suite;
+  Stream s("to<Module>");
+  s << call("1-arg", &Module::test_1arg)
+    << call("2-arg", &Module::test_2arg)
+    << call("3-arg", &Module::test_3arg)
+    << call("1-arg_namespace", &Module::test_1arg_namespace)
+    << call("2-arg_namespace", &Module::test_2arg_namespace)
+    ;
+  return finalize(s);
+}
+#endiv

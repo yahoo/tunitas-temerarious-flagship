@@ -1,0 +1,96 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace tests {
+  namespace unit {
+    namespace want {
+      namespace path {
+        class Dot;
+      }
+    }
+  }
+}
+#endiv
+#divert <hpp>
+class tests::unit::want::path::Dot : public cppunit::test::Fixture {
+public:
+  auto test_copy() -> void;
+  auto test_move() -> void;
+  auto test_finalize() -> void;
+
+  static auto suite() -> cppunit::Test *;
+};
+#endiv
+#divert <cpp>
+#import want.path.dot
+using ::want::path::dot;
+
+auto tests::unit::want::path::Dot::test_copy() -> void {
+  {
+    std::string const specimen("");
+    std::string const actual(dot(specimen));
+    std::string const expected("."); // <-------------- that's all this thing does
+    CPPUNIT_ASSERT_EQUAL(expected, actual);
+  } {
+    std::string const specimen(".");
+    std::string const actual(dot(specimen));
+    std::string const expected(specimen);
+    CPPUNIT_ASSERT_EQUAL(expected, actual);
+  } {
+    std::string const specimen("./");
+    std::string const actual(dot(specimen));
+    std::string const expected(specimen);
+    CPPUNIT_ASSERT_EQUAL(expected, actual);
+  }
+}
+
+#import std.move
+auto tests::unit::want::path::Dot::test_move() -> void {
+  {
+    std::string const specimen("");
+    std::string const expected(".");
+    std::string const actual(dot(std::string(specimen)));
+    CPPUNIT_ASSERT_EQUAL(expected, actual);
+  } {
+    std::string const specimen(".");
+    std::string const expected(specimen);
+    std::string const actual(dot(std::string(specimen)));
+    CPPUNIT_ASSERT_EQUAL(expected, actual);
+  } {
+    std::string const specimen("..");
+    std::string const expected(specimen);
+    std::string const actual(dot(std::string(specimen)));
+    CPPUNIT_ASSERT_EQUAL(expected, actual);
+  }
+}
+
+#import path.filename.workbench
+auto tests::unit::want::path::Dot::test_finalize() -> void {
+  using ::path::filename::workbench;
+  {
+      std::string const specimen("");
+      std::string const actual(dot(workbench() * specimen));
+      std::string const expected(".");
+      CPPUNIT_ASSERT_EQUAL(expected, actual);
+  } {
+    std::string const specimen(".");
+    std::string const actual(dot(workbench() * specimen));
+    std::string const expected(".");
+    CPPUNIT_ASSERT_EQUAL(expected, actual);
+  } {
+    std::string const specimen("..");
+    std::string const actual(dot(workbench() * specimen));
+    std::string const expected("..");
+    CPPUNIT_ASSERT_EQUAL(expected, actual);
+  }
+}
+
+auto tests::unit::want::path::Dot::suite() -> cppunit::Test * {
+  using namespace ::unit::rigging::suite;
+  Stream s("dot");
+  s << call("copy", &Dot::test_copy)
+    << call("move", &Dot::test_move)
+    << call("finalize", &Dot::test_finalize)
+    ;
+  return finalize(s);
+}
+#endiv

@@ -1,0 +1,94 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace scold {
+  namespace splitting {
+    enum class On { DOT, SLASH, COLONCOLON };
+  }
+}
+#endiv
+#divert <hpp>
+#import std.ostream
+#import std.string
+#import std.tuple
+#import std.vector
+#import scold.validate.Result
+namespace scold {
+  namespace splitting {
+    inline auto operator<<(std::ostream &, On) -> std::ostream &;
+
+    inline auto on_the_boundary(On, char) -> bool;
+    inline auto on_any_boundary(char) -> bool;
+
+    using past_result_type = std::tuple<std::string::const_iterator, validate::Result>;
+    inline auto past_the_boundary(On on, std::string::const_iterator i, std::string::const_iterator e) -> past_result_type;
+  }
+}
+#endiv
+#divert <ipp>
+#import std.logic_error
+auto scold::splitting::operator<<(std::ostream &o, On on) -> std::ostream & {
+  char const *token = nullptr;
+  switch (on) {
+  case On::DOT:
+    token = ".";
+    break;
+  case On::SLASH:
+    token = "/";
+    break;
+  case On::COLONCOLON:
+    token = "::";
+    break;
+  default:
+    throw std::logic_error("invalid scold::splitting::On");
+  }
+  return o << '\'' << token << '\'';
+}
+
+auto scold::splitting::on_the_boundary(On on, char subject) -> bool {
+  switch (on) {
+  case On::DOT:
+    return '.' == subject;
+  case On::SLASH:
+    return '/' == subject;
+  case On::COLONCOLON:
+    return ':' == subject;
+  default:
+    return false;
+  }
+}
+
+auto scold::splitting::on_any_boundary(char subject) -> bool {
+  return ('.' == subject
+	  ||
+	  '/' == subject
+	  ||
+	  ':' == subject);
+}
+
+#import std.logic_error
+#import mvr.send
+#import scold.validate.Result
+auto scold::splitting::past_the_boundary(On on, std::string::const_iterator i, std::string::const_iterator e) -> past_result_type {
+  switch (on) {
+  case On::DOT:
+    // no increment (++i) in the containing loop
+    break;
+  case On::SLASH:
+    // multiple '/' are gratuitous & ignored
+    for ( ++i; e != i && '/' == *i; ++i) {
+      continue;
+    }
+    --i; // one too far (expect an increment in the containing loop)
+    break;
+  case On::COLONCOLON:
+    ++i;
+    if (e == i || ':' != *i) {
+      return mvr::send(e, scold::validate::Result::is_invalid("expected '::' but found ':'"));
+    }
+    break;
+  default:
+    throw std::logic_error("invalid scold::splitting::On");
+  }
+  return mvr::send(i, scold::validate::Result::is_valid());
+}
+#endiv

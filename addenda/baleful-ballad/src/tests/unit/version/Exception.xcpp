@@ -1,0 +1,53 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace tests::unit::version { class Exception; }
+#endiv
+#divert <hpp>
+#import options.Program
+struct tests::unit::version::Exception : public cppunit::test::Fixture {
+  using Program = ::options::Program;
+  auto test_constructor() -> void;
+  auto test_version() -> void;
+  auto test_throwing() -> void;
+  static auto suite() -> cppunit::Test *;
+};
+#endiv
+#divert <cpp>
+#import scold.version.Exception
+#import format.curly
+namespace tests::unit::version {
+  auto Exception::test_constructor() -> void {
+    using Subject = ::scold::version::Exception;
+    auto program = Program{"a.out"s};
+    auto subject = Subject{program};
+    CPPUNIT_ASSERT(sizeof (subject)); // yes it constructed
+  }
+  auto Exception::test_version() -> void {
+    using Subject = ::scold::version::Exception;
+    auto program = Program{"a.out"s};
+    auto subject = Subject{program};
+    auto const text = subject.version();
+    std::cerr << "version string: " << format::curly(text) << '\n';
+    CPPUNIT_ASSERT(!text.empty()); // yes it constructed
+  }
+  auto Exception::test_throwing() -> void {
+    try {
+      using Subject = ::scold::version::Exception;
+      auto program = Program{"a.out"s};
+      throw Subject{program};
+    } catch (std::exception const &e) {
+      std::cerr << "as expected, caught " << e.what() << '\n';
+      CPPUNIT_ASSERT(true);
+    }
+  }
+}
+auto tests::unit::version::Exception::suite() -> cppunit::Test * {
+  using namespace ::rigging::suite;
+  Stream series("Exception");
+  series << call("constructor", &Exception::test_constructor)
+         << call("version", &Exception::test_version)
+         << call("throwing", &Exception::test_throwing)
+    ;
+  return finalize(series);
+}
+#endiv

@@ -1,0 +1,46 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace tests {
+  namespace unit {
+    namespace scold {
+      class Cleanup_Files;
+    }
+  }
+}
+#divert </fpp>
+#divert <hpp>
+#import scold.Filenames
+class tests::unit::scold::Cleanup_Files {
+public:
+  inline explicit Cleanup_Files(::scold::Filenames const &);
+  inline ~Cleanup_Files();
+  Cleanup_Files(Cleanup_Files const &) = delete;
+  auto operator=(Cleanup_Files const &) -> Cleanup_Files & = delete;
+  ::scold::Filenames filenames;
+};
+#endiv
+#divert <ipp>
+tests::unit::scold::Cleanup_Files::Cleanup_Files(::scold::Filenames const &arg_names)
+  : filenames(arg_names) {
+  ;
+}
+
+#import scold.Suffix
+#import sys.posix.unlink
+tests::unit::scold::Cleanup_Files::~Cleanup_Files() {
+  // Unlink to the best of our ability.
+  // We can't throw an exxception here because this is a destructor.
+  // Hope for the best.
+  using ::sys::posix::unlink;
+  using ::scold::Suffix;
+  unlink(filenames[Suffix::FPP]);
+  unlink(filenames[Suffix::HPP]);
+  unlink(filenames[Suffix::IPP]);
+  unlink(filenames[Suffix::TPP]);
+  unlink(filenames[Suffix::CPP]);
+  unlink(filenames[Suffix::XCPP]);
+  unlink(filenames[Suffix::MK]);
+  unlink(filenames[Suffix::O]);
+  unlink(filenames[Suffix::LO]); 
+}
+#endiv

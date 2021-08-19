@@ -1,0 +1,65 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace scold {
+  namespace module {
+    class Module;
+  }
+}
+#endiv
+#divert <hpp>
+#import std.istream
+#import std.ostream
+#import std.string
+#import std.vector
+namespace scold {
+  namespace module {
+    inline auto operator==(Module const &, Module const &) -> bool;
+    inline auto operator!=(Module const &, Module const &) -> bool;
+
+    inline auto operator<<(std::ostream &, Module const &) -> std::ostream &;
+    inline auto operator>>(std::istream &, Module &) -> std::istream &;
+  }
+}
+
+class scold::module::Module : public std::vector<std::string> {
+  using ancestor = std::vector<std::string>;
+public:
+  using ancestor::vector;
+};
+
+// because you'll need them, and putting them in <hpp> creates a cycle too tightly bound
+#entail scold.module.less
+#entail scold.module.operators
+#endiv
+#divert <ipp>
+
+#import std.equal
+auto scold::module::operator==(Module const &a, Module const &b) -> bool {
+  return std::equal(a.begin(), a.end(), b.begin(), b.end());
+}
+
+auto scold::module::operator!=(Module const &a, Module const &b) -> bool {
+  return !operator==(a, b);
+}
+
+auto scold::module::operator<<(std::ostream &o, Module const &m) -> std::ostream & {
+  char const *s = "";
+  for (auto const &n : m) {
+    o << s << n;
+    s = ".";
+  }
+  return o;
+}
+
+#import scold.to.Module
+auto scold::module::operator>>(std::istream &i, Module &m) -> std::istream & {
+  // recover a stringy token of the form a.b.c.d
+  // confounding: a.b.c.d(r.s.t)
+  // will produce a syntax error at '(' because the istream operator>> parses against whitespace.
+  std::string syntax;
+  if (i >> syntax) {
+    m = to<Module>(syntax);
+  }
+  return i;
+}
+#endiv

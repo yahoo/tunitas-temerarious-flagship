@@ -1,0 +1,21 @@
+// -*- c++ -*- in the SCOLD styling that is so fashionable these days
+#divert <hpp>
+#import scold.Accruals
+namespace scold {
+  template<> inline auto Accruals<IMPORT>::operator()(Phase) const -> streams::Range<Streams const>;
+  template<> inline auto Accruals<IMPORT>::operator()(Phase) -> streams::Range<Streams>;
+}
+#endiv
+#divert <ipp>
+template<> auto scold::Accruals<scold::IMPORT>::operator()(Phase start) const -> streams::Range<Streams const> {
+  phase::Incrementer inc(phase::succ);
+  auto specific = static_cast<Streams const *>(this);
+  return operator_call(specific, start, Phase::END, inc);
+}
+
+template<> auto scold::Accruals<scold::IMPORT>::operator()(Phase start) -> streams::Range<Streams> {
+  phase::Incrementer inc(phase::succ);
+  auto specific = static_cast<Streams *>(this);
+  return operator_call(specific, start, Phase::END, inc);
+}
+#endiv

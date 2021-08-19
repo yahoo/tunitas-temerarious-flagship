@@ -1,0 +1,49 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace scold {
+  namespace search {
+    namespace cache {
+      //
+      // The (shared) cache of previously searched results.
+      //
+      // The cache holds the association between the (stringified) module name
+      // and some directory modulesdir where the module is expected to appear.
+      // Search is implemented in the descendant, based on the descendant's scope & policy.
+      //
+      // mapping (stringified)module -> Entry(Type, (stringify)directory)
+      // e.g.
+      //     sys/types.h         -> { Type::INCLUDED, "/usr/include" }
+      //     c.argv              -> { Type::SUBMODULE, "./external/module-c-string/obj/modules" }
+      //     apple.banana.Cherry -> { Type::HEREIN, "./src" }
+      //
+      class Unit;
+    }
+  }
+}
+#endiv
+#divert <hpp>
+#forward scold.search.aspect.Prototype
+#forward scold.search.aspect.Modules
+#forward scold.search.aspect.Submodules
+#forward scold.search.aspect.Herein
+#import scold.search.cache.Entry
+#import std.map
+#import std.string
+class scold::search::cache::Unit {
+protected:
+  friend class aspect::Prototype;
+  friend class aspect::Modules;
+  friend class aspect::Submodules;
+  friend class aspect::Herein;
+  ~Unit() = default; // descendants only
+  Unit() = default;
+  // no copy semantic
+  Unit(Unit const &) = delete;
+  auto operator=(Unit const &) -> Unit &;
+  // only move semantic
+  Unit(Unit &&) = default;
+  auto operator=(Unit &&) -> Unit & = default;
+  using cache_type = std::map<std::string, Entry>;
+  cache_type cache;
+};
+#endiv

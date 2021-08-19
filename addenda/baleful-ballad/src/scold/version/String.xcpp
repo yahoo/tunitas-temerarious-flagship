@@ -1,0 +1,33 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace scold::version {
+  //
+  // The version string as a self-constructing type.
+  //
+  // Usage:
+  //
+  //   auto version = scold::version::String{};
+  //   cout << version << '\n';
+  //
+  struct String;
+}
+#endiv
+#divert <hpp>
+#import options.version.String
+#import autotools.autoconf.Config.scold.CONFIG
+class scold::version::String : public options::version::String {
+  using Ancestor = options::version::String;
+public:
+  inline String();
+private:
+  using Config = autotools::autoconf::Config<CONFIG>;
+};
+#endiv  
+#divert <ipp>
+namespace scold::version {
+  String::String()
+    : Ancestor{Config::package_major_number(), Config::package_minor_number(), Config::package_patch_number()}
+  { }
+}
+#endiv
+

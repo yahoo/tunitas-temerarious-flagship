@@ -1,0 +1,165 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace tests {
+  namespace unit {
+    namespace want {
+      namespace doppel {
+        class Iterator;
+      }
+    }
+  }
+}
+#endiv
+#divert <hpp>
+#import std.map
+#import std.set
+class tests::unit::want::doppel::Iterator : public cppunit::test::Fixture {
+public:
+  auto test_constructor_default() -> void;
+  auto test_operator_preincr() -> void;  // operator++()
+  auto test_operator_postincr() -> void; // operator++(int)
+  auto test_operator_star() -> void;
+  auto test_operator_eq() -> void;
+  auto test_operator_ne() -> void;
+  auto test_loop() -> void;
+
+  static auto suite() -> cppunit::Test *;
+
+  using map_type = std::map<int, char>;
+  using set_type = std::set<char>;
+};
+#endiv
+#divert <cpp>
+#import std.cerr
+#import std.move
+#import want.doppel.Iterator
+#import want.doppel.Ganger
+
+auto tests::unit::want::doppel::Iterator::test_constructor_default() -> void {
+  ::want::doppel::Iterator<map_type::iterator, set_type::iterator> i; // <---- prove that there is a default constructor
+  // yup, it constructed
+  CPPUNIT_ASSERT(true);
+}
+
+auto tests::unit::want::doppel::Iterator::test_operator_preincr() -> void {
+  map_type m{{1,'a'},{2,'b'}};
+  set_type s{'m', 'n'};
+  ::want::doppel::Ganger<map_type, set_type> g(m, s);
+  ::want::doppel::Iterator<map_type::iterator, set_type::iterator> e = g.end();
+  ::want::doppel::Iterator<map_type::iterator, set_type::iterator> i = g.begin();
+  ::want::doppel::Iterator<map_type::iterator, set_type::iterator> j = i;
+  ::want::doppel::Iterator<map_type::iterator, set_type::iterator> k = ++i;
+  ::want::doppel::Iterator<map_type::iterator, set_type::iterator> l = ++i;
+  CPPUNIT_ASSERT(1 == (*j).first.first);
+  CPPUNIT_ASSERT('a' == (*j).first.second);
+  CPPUNIT_ASSERT('m' == (*j).second);
+  CPPUNIT_ASSERT(2 == (*k).first.first);
+  CPPUNIT_ASSERT('b' == (*k).first.second);
+  CPPUNIT_ASSERT('n' == (*k).second);
+  CPPUNIT_ASSERT(e == i);
+  CPPUNIT_ASSERT(e == l);
+}
+
+auto tests::unit::want::doppel::Iterator::test_operator_postincr() -> void {
+  map_type m{{1,'a'},{2,'b'}};
+  set_type s{'m', 'n'};
+  ::want::doppel::Ganger<map_type, set_type> g(m, s);
+  ::want::doppel::Iterator<map_type::iterator, set_type::iterator> e = g.end();
+  ::want::doppel::Iterator<map_type::iterator, set_type::iterator> i = g.begin();
+  ::want::doppel::Iterator<map_type::iterator, set_type::iterator> j = i++;
+  ::want::doppel::Iterator<map_type::iterator, set_type::iterator> k = i++;
+  CPPUNIT_ASSERT(1 == (*j).first.first);
+  CPPUNIT_ASSERT('a' == (*j).first.second);
+  CPPUNIT_ASSERT('m' == (*j).second);
+  CPPUNIT_ASSERT(2 == (*k).first.first);
+  CPPUNIT_ASSERT('b' == (*k).first.second);
+  CPPUNIT_ASSERT('n' == (*k).second);
+  CPPUNIT_ASSERT(e == i);
+}
+
+auto tests::unit::want::doppel::Iterator::test_operator_star() -> void {
+  map_type m{{1,'a'},{2,'b'}};
+  set_type s{'m', 'n'};
+  ::want::doppel::Ganger<map_type, set_type> g(m, s);
+  ::want::doppel::Iterator<map_type::iterator, set_type::iterator> i = g.begin();
+  int i1_first_first = (*i).first.first;
+  int i1_first_second = (*i).first.second;
+  char i1_second = (*i).second;
+  CPPUNIT_ASSERT(1 == i1_first_first);
+  CPPUNIT_ASSERT('a' == i1_first_second);
+  CPPUNIT_ASSERT('m' == i1_second);
+  i++;
+  int i2_first_first = (*i).first.first;
+  int i2_first_second = (*i).first.second;
+  char i2_second = (*i).second;
+  CPPUNIT_ASSERT(2 == i2_first_first);
+  CPPUNIT_ASSERT('b' == i2_first_second);
+  CPPUNIT_ASSERT('n' == i2_second);
+}
+
+auto tests::unit::want::doppel::Iterator::test_operator_eq() -> void {
+  map_type m{{1,'a'},{2,'b'}};
+  set_type s{'a', 'b'};
+  ::want::doppel::Ganger<map_type, set_type> g(m, s);
+  ::want::doppel::Iterator<map_type::iterator, set_type::iterator> e = g.end();
+  ::want::doppel::Iterator<map_type::iterator, set_type::iterator> i = g.begin();
+  CPPUNIT_ASSERT( ! (i == e) );
+  i++;
+  CPPUNIT_ASSERT( ! (i == e) );
+  i++;
+  CPPUNIT_ASSERT(   (i == e) );
+}
+
+auto tests::unit::want::doppel::Iterator::test_operator_ne() -> void {
+  map_type m{{1,'a'},{2,'b'}};
+  set_type s{'a', 'b'};
+  ::want::doppel::Ganger<map_type, set_type> g(m, s);
+  ::want::doppel::Iterator<map_type::iterator, set_type::iterator> e = g.end();
+  ::want::doppel::Iterator<map_type::iterator, set_type::iterator> i = g.begin();
+  CPPUNIT_ASSERT( (i != e) );
+  i++;
+  CPPUNIT_ASSERT( (i != e) );
+  i++;
+  CPPUNIT_ASSERT(!(i != e) );
+}
+
+auto tests::unit::want::doppel::Iterator::test_loop() -> void {
+  map_type m{{1,'a'},{2,'b'}};
+  set_type s{'m', 'n'};
+  using ganger_type = ::want::doppel::Ganger<map_type, set_type>;
+  using iterator_type = ganger_type::iterator;
+  ganger_type g(m, s);
+  int summation1 = 0;
+  int summation2 = 0;
+  int summation3 = 0;
+  unsigned count = 0;
+  for (iterator_type i(g.begin()), e(g.end()); e != i; ++i) {
+    count++;
+    std::cerr << "test_loop sees " << (*i).first.first << ' ' << (*i).first.second << ' ' << (*i).second << '\n';
+    summation1 += (*i).first.first;
+    summation2 += (*i).first.second;
+    summation3 += (*i).second;
+  }
+  CPPUNIT_ASSERT(2 == count);
+  int const expected1 = 3;
+  int const expected2 = (int)('a') + (int)('b');
+  int const expected3 = (int)('m') + (int)('n');
+  CPPUNIT_ASSERT(expected1 == summation1);
+  CPPUNIT_ASSERT(expected2 == summation2);
+  CPPUNIT_ASSERT(expected3 == summation3);
+}
+
+auto tests::unit::want::doppel::Iterator::suite() -> cppunit::Test * {
+  using namespace ::unit::rigging::suite;
+  Stream s("Iterator");
+  s << call("constructor-default", &Iterator::test_constructor_default)
+    << call("operator++(int)", &Iterator::test_operator_postincr)
+    << call("operator++()", &Iterator::test_operator_preincr)
+    << call("operator*", &Iterator::test_operator_star)
+    << call("operator==", &Iterator::test_operator_eq)
+    << call("operator!=", &Iterator::test_operator_ne)
+    << call("loop", &Iterator::test_loop)
+    ;
+  return finalize(s);
+}
+#endiv

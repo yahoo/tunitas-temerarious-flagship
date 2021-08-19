@@ -1,0 +1,11 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+#import tests.unit
+namespace tests {
+  namespace unit {
+    namespace module {
+      // ancillary test fixtures for scold::Module
+    }
+  }
+}
+#divert </fpp>

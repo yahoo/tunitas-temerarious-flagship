@@ -1,0 +1,5 @@
+# yes, lib exists
+
+.libs
+*.la
+#end

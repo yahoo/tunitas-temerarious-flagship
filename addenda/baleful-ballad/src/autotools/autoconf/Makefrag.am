@@ -1,0 +1,13 @@
+# Of course this is a -*- Makefile -*- but it is included via automake
+
+#                                 /---- a for a.Makefrag.mk, a.b for a.b.Makefrag.mk, a.b.c for a.b.c.Makefrag.mk, etc.
+#                                 |
+#                                 v
+lib_libautotools_autoconf_la_NAME_a = scold
+
+lib_libautotools_autoconf_la = lib/libautotools-autoconf.la
+lib_libautotools_autoconf_la_LIBADD = $(none)
+lib_libautotools_autoconf_la_LDFLAGS = $(PACKAGE_LDFLAGS_SET)
+lib_libautotools_autoconf_la_MODULES = $(call HGTW_SOURCEStoMODULES, $(lib_libautotools_autoconf_la_SOURCES))
+lib_libautotools_autoconf_la_SOURCES = obj/src/autotools/autoconf/Config/scold/CONFIG.cpp 
+include $(hypogeal_twilight_datadir)/mk/autotools/autoconf/a.Makefrag.mk

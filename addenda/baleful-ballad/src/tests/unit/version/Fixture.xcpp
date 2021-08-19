@@ -1,0 +1,23 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace tests::unit::version { class Fixture; }
+#endiv
+#divert <hpp>
+class tests::unit::version::Fixture : public cppunit::test::Fixture {
+public:
+  // nothing (here)
+  static auto suite() -> cppunit::Test *;
+};
+#endiv
+#divert <cpp>
+#import tests.unit.version.Exception
+#import tests.unit.version.String
+auto tests::unit::version::Fixture::suite() -> cppunit::Test * {
+  using namespace ::rigging::suite;
+  Stream series("version");
+  series << add<Exception>()
+         << add<String>()
+    ;
+  return finalize(series);
+}
+#endiv

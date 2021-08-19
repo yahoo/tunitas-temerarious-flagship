@@ -1,0 +1,124 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace scold {
+  namespace search {
+    //
+    // Concept:
+    //
+    //   Search for locations throughout the whole build
+    //   1. Search the current build (herein)
+    //   2. Search the submodules built (below)
+    //   3. Search the (external) modules
+    //
+    // Design:
+    //
+    //   Two patterns of constructors:
+    //     1. supplying constructor with "&&" supplying prebuilt triples <src, obj, modules> for the aspects being prepared  scold::Submodule objects
+    //     2. converting constructor with "const &" supplying simple arguments (being file paths)
+    //
+    // Usage:
+    //
+    //     Build search(".", SUBMODULES, SEARCHPATH)
+    //     scold::Module module{"std", "iostream"}; <------------- probe that
+    //     auto searched = search(module);
+    //     if (ok(searched)) {
+    //         std::string directory = value(searched);
+    //         ...use directory...
+    //     }
+    //
+    // Reminder: the C++ code may or may not have been generated yet.
+    // If the C++ code has been generated then it is an "external module"
+    // It isn't generated when
+    //     it is to be built in a submodule.
+    //     it is in this tree herein.
+    //
+    class Build;
+  }
+}
+#endiv
+#divert <hpp>
+#import scold.Module
+#import scold.search.aspect.Herein
+#import scold.search.aspect.Submodules
+#import scold.search.aspect.Modules
+#import scold.search.cache.Unit
+#import std.string
+#import std.vector
+namespace scold {
+  namespace search {
+    using std::move;
+  }
+  class search::Build : protected aspect::Herein, protected aspect::Submodules, protected aspect::Modules, protected cache::Unit {
+    using here_aspect = aspect::Herein;
+    using subs_aspect = aspect::Submodules;
+    using mods_aspect = aspect::Modules;
+    using cache_aspect = cache::Unit;
+  public:
+    struct Arguments {
+      using Submodule = scold::Submodule;
+      using Submodules = std::vector<scold::Submodule>;
+      using Directories = std::vector<std::string>;
+    };
+    using directory_path_type [[deprecated("avoid")]] = Arguments::Directories;
+    // direct construction
+    inline Build(Arguments::Submodule &&herein, Arguments::Submodules &&therein, Arguments::Directories &&);
+    // indirect construction, converting submodules' directory path to submodule_series_type
+    inline Build(std::string const &builddir, directory_path_type const &submodules, directory_path_type const &external_modules);
+    inline Build(std::string &&builddir, directory_path_type &&submodules, directory_path_type &&external_modules);
+    inline auto operator()(std::string const &) -> result_type;
+    inline auto operator()(scold::Module const &) -> result_type;
+  };
+}
+#endiv
+#divert <ipp>
+#import std.forward
+namespace scold::search {
+  Build::Build(Arguments::Submodule &&herein, Arguments::Submodules &&therein, Arguments::Directories &&directories)
+    : here_aspect{std::forward<Arguments::Submodule>(herein)}
+    , subs_aspect{std::forward<Arguments::Submodules>(therein)}
+    , mods_aspect{std::forward<Arguments::Directories>(directories)}
+  { }
+}
+
+scold::search::Build::Build(std::string const &arg_builddir, directory_path_type const &arg_submodules, directory_path_type const &arg_directories)
+  : here_aspect(arg_builddir)
+  , subs_aspect(arg_submodules)
+  , mods_aspect(arg_directories)
+  , cache_aspect() {
+  ;
+}
+
+#import std.forward
+scold::search::Build::Build(std::string &&anon_builddir, directory_path_type &&anon_submodules, directory_path_type &&anon_directories)
+  : here_aspect(std::forward<std::string>(anon_builddir))
+  , subs_aspect(std::forward<directory_path_type>(anon_submodules))
+  , mods_aspect(std::forward<directory_path_type>(anon_directories))
+  , cache_aspect() {
+  ;
+}
+
+auto scold::search::Build::operator()(std::string const &basename) -> result_type {
+  // FIXME ... search the 'include' area of the 'here_aspect' and 'subs_aspect'
+  auto m = mods_aspect::operator_call(*this, basename);
+  if (ok(m)) {
+    return m;
+  }
+  return result_type();
+}
+
+auto scold::search::Build::operator()(scold::Module const &module) -> result_type {
+  auto h = here_aspect::operator_call(*this, module);
+  if (ok(h)) {
+    return h;
+  }
+  auto s = subs_aspect::operator_call(*this, module);
+  if (ok(s)) {
+    return s;
+  }
+  auto m = mods_aspect::operator_call(*this, module);
+  if (ok(m)) {
+    return m;
+  }
+  return result_type();
+}
+#endiv

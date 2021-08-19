@@ -1,0 +1,77 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace scold {
+  namespace filenames {
+    template<typename FILENAMES_CONSTY, typename NAME_CONSTY> class Iterator;
+  }
+}
+#endiv
+#divert <hpp>
+namespace scold {
+  namespace filenames {
+    template<typename FILENAMES_CONSTY, typename NAME_CONSTY> inline auto operator==(Iterator<FILENAMES_CONSTY, NAME_CONSTY> const &, Iterator<FILENAMES_CONSTY, NAME_CONSTY> const &) -> bool;
+    template<typename FILENAMES_CONSTY, typename NAME_CONSTY> inline auto operator!=(Iterator<FILENAMES_CONSTY, NAME_CONSTY> const &, Iterator<FILENAMES_CONSTY, NAME_CONSTY> const &) -> bool;
+  }
+}
+
+#import scold.Filenames
+#import scold.Phase
+#import std.iterator
+#import std.forward_iterator_tag
+#import std.string
+template<typename FILENAMES_CONSTY, typename NAME_CONSTY> class scold::filenames::Iterator : public std::iterator<std::forward_iterator_tag, NAME_CONSTY> {
+  using ancestor = std::iterator<std::forward_iterator_tag, NAME_CONSTY>;
+public:
+  using filenames_type = FILENAMES_CONSTY;
+  // ancestor::value_type is NAME_CONSTY
+  inline Iterator(filenames_type *, Phase position);
+  inline auto operator++() -> Iterator &;
+  inline auto operator++(int) -> Iterator;
+  // NO SUCH auto operator*() const -> value_type const &; (makes no sense; think about it ...)
+  inline auto operator*() -> typename ancestor::value_type &;
+protected:
+  filenames_type *owner;
+  Phase position;
+  friend auto filenames::operator== <>(Iterator const &, Iterator const &) -> bool;
+};
+#endiv
+#divert <ipp>
+#import scold.Files
+template<typename FILENAMES_CONSTY, typename NAME_CONSTY> auto scold::filenames::operator==(Iterator<FILENAMES_CONSTY, NAME_CONSTY> const &a, Iterator<FILENAMES_CONSTY, NAME_CONSTY> const &b) -> bool {
+  return a.owner == b.owner && a.position == b.position;
+}
+
+template<typename FILENAMES_CONSTY, typename NAME_CONSTY> auto scold::filenames::operator!=(Iterator<FILENAMES_CONSTY, NAME_CONSTY> const &a, Iterator<FILENAMES_CONSTY, NAME_CONSTY> const &b) -> bool {
+  return !operator==(a, b);
+}
+
+template<typename FILENAMES_CONSTY, typename NAME_CONSTY> scold::filenames::Iterator<FILENAMES_CONSTY, NAME_CONSTY>::Iterator(filenames_type *arg_owner, Phase arg_position)
+  : ancestor()
+  , owner(arg_owner)
+  , position(arg_position) {
+  ;
+}
+
+template<typename FILENAMES_CONSTY, typename NAME_CONSTY> auto scold::filenames::Iterator<FILENAMES_CONSTY, NAME_CONSTY>::operator++() -> Iterator & {
+  // FIXME ... put this into an incrementer so we can have operator-- too
+  // and use #import scold.phase.Incrementer just like STreams
+  position = succ(position);
+  return *this;
+}
+
+template<typename FILENAMES_CONSTY, typename NAME_CONSTY> auto scold::filenames::Iterator<FILENAMES_CONSTY, NAME_CONSTY>::operator++(int) -> Iterator {
+  Iterator old(*this);
+  operator++();
+  return *this;
+}
+
+#import scold.phase.Definition
+#include <cassert>
+template<typename FILENAMES_CONSTY, typename NAME_CONSTY> auto scold::filenames::Iterator<FILENAMES_CONSTY, NAME_CONSTY>::operator*() -> typename ancestor::value_type & {
+  // FIXME ... this is the single line of code that is distinct between scold::filenames::Iterator<...> and scold::files::Iterator<...>; see also scold::streams::Iterator<...>
+  phase::Definition def(position);
+  auto index = def.index();
+  assert(0 <= index && index < sizeof (owner->cxx_sources)/sizeof (owner->cxx_sources[0]));
+  return owner->cxx_sources[index];
+}
+#endiv

@@ -1,0 +1,59 @@
+// -*- c++ -*- but in the SCOLD stylings which are the fashion nowadays.
+#divert <hpp>
+#import want.regex.unbusted
+#import want.regex.basic_pattern
+#import want.regex.constants
+#import std.basic_string
+namespace want {
+  namespace regex {
+    //
+    // see http://www.cplusplus.com/reference/regex/regex_replace/
+    //
+    // Wow this is a long way to go to rename a function over vanity & small-minded symmetry.
+    //
+    template <class traits, class charT>
+    std::basic_string<charT> replace(const charT *s,
+                                     const basic_pattern<charT,traits> &rgx,
+                                     const charT *fmt,
+                                     constants::match_flag_type flags = constants::match_default) 
+    { return unbusted::regex_replace(s, rgx, fmt, flags); } 
+
+    template <class traits, class charT, class ST, class SA>
+    std::basic_string<charT> replace(const charT *s,
+                                     const basic_pattern<charT,traits> &rgx,
+                                     const std::basic_string<charT,ST,SA> &fmt,
+                                     constants::match_flag_type flags = constants::match_default)
+    { return unbusted::regex_replace(s, rgx, fmt, flags); } 
+
+    template <class traits, class charT, class ST, class SA>
+    std::basic_string<charT,ST,SA> replace(const std::basic_string<charT,ST,SA> &s,
+                                           const basic_pattern<charT,traits> &rgx,
+                                           const charT *fmt,
+                                           constants::match_flag_type flags = constants::match_default)
+    { return unbusted::regex_replace(s, rgx, fmt, flags); } 
+
+    template <class traits, class charT, class ST, class SA, class FST, class FSA>
+    std::basic_string<charT,ST,SA> replace(const std::basic_string<charT,ST,SA> &s,
+                                           const basic_pattern<charT,traits> &rgx,
+                                           const std::basic_string<charT,FST,FSA> &fmt,
+                                           constants::match_flag_type flags = constants::match_default)
+    { return unbusted::regex_replace(s, rgx, fmt, flags); } 
+
+    template <class OutputIterator, class BidirectionalIterator, class traits, class charT>
+    OutputIterator replace(OutputIterator out,
+                           BidirectionalIterator first, BidirectionalIterator last,
+                           const basic_pattern<charT,traits> &rgx,
+                           const charT *fmt,
+                           constants::match_flag_type flags = constants::match_default)
+    { return unbusted::regex_replace(out, first, last, rgx, fmt, flags); } 
+
+    template <class OutputIterator, class BidirectionalIterator, class traits, class charT, class ST, class SA>
+    OutputIterator replace(OutputIterator out,
+                           BidirectionalIterator first, BidirectionalIterator last,
+                           const basic_pattern<charT,traits> &rgx,
+                           const std::basic_string<charT,ST,SA> &fmt,
+                           constants::match_flag_type flags = constants::match_default)
+    { return unbusted::regex_replace(out, first, last, rgx, fmt, flags); } 
+  }
+}
+#endiv

@@ -1,0 +1,53 @@
+// -*- c++ -*- in the SCOLD styling that is so fashionable these days
+#divert <hpp>
+#import path.filename.mount.Value
+#import scold.line.Item
+#import std.string
+namespace scold {
+  namespace fragment {
+    namespace make {
+      //
+      // Make fragment lines (dependencies with no rhs)
+      //
+      enum class Rule { COLON, COLON_COLON };
+      inline auto str(Rule) -> std::string;
+      inline auto space(Rule) -> std::string;
+
+      //
+      // $(lhs_objdir)/$(lhs) : <----- supplied
+      //     ...script... <----------- not provided
+      //
+      inline auto declare(std::string const &lhs, Rule = Rule::COLON) -> line::Item;
+      inline auto declare(std::string const &lhs_objdir, std::string const &lhs, Rule = Rule::COLON) -> line::Item;
+      inline auto declare(std::string const &lhs_objdir, path::filename::mount::Value &&lhs, Rule = Rule::COLON) -> line::Item;
+    }
+  }
+}
+#endiv
+#divert <ipp>
+auto scold::fragment::make::str(Rule rule) -> std::string {
+  return Rule::COLON_COLON == rule ? "::" : ":";
+}
+
+auto scold::fragment::make::space(Rule rule) -> std::string {
+  return Rule::COLON_COLON == rule ? " ::" : " :";
+}
+
+auto scold::fragment::make::declare(std::string const &lhs, Rule rule) -> line::Item {
+  return line::Item(lhs + space(rule));
+}
+
+#import path.filename.workbench
+auto scold::fragment::make::declare(std::string const &lhs_objdir, std::string const &lhs_subpath, Rule rule) -> line::Item {
+  auto lhs = finalize(path::filename::workbench() * lhs_objdir / lhs_subpath);
+  lhs += space(rule);
+  return line::Item(lhs);
+}
+
+#import std.forward
+auto scold::fragment::make::declare(std::string const &lhs_objdir, path::filename::mount::Value &&lhs_subpath, Rule rule) -> line::Item {
+  auto lhs = finalize(lhs_objdir / std::forward<path::filename::mount::Value>(lhs_subpath));
+  lhs += space(rule);
+  return line::Item(lhs);
+}
+#endiv

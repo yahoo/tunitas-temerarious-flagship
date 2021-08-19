@@ -1,0 +1,33 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+#import std.uint64_t
+namespace com {
+  namespace example {
+    class Thing;
+  }
+}
+#endiv
+#divert <hpp>
+#import com.example.Other
+#import com.example.Alternate
+class com::example::Thing {
+  inline Thing();
+  template<typename VALUE> auto f(VALUE) -> void;
+  auto g(int) -> void;
+};
+#endiv
+#divert <ipp>
+#import org.anization.Go
+#import org.anization.pher
+com::example::Thing::Thing() {
+}
+#endiv
+#divert <tpp>
+template<typename VALUE> auto com::example::Thing::f(VALUE) -> void {
+}
+#endiv
+#divert <cpp>
+#import edu.teach.Me
+auto com::example::Thing::g(int) -> void {
+}
+#endiv

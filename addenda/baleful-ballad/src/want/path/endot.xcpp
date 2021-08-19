@@ -1,0 +1,54 @@
+// -*- c++ -*- in the SCOLD styling that is so fashionable these days
+#divert <hpp>
+#import path.filename.mount.Value
+#import std.string
+namespace want {
+  namespace path {
+    //
+    // If not present, and not a full path, then add a leading "./"
+    // With a variant like path::filename::finalize(...) which completes the Value
+    //
+    inline auto endot(::path::filename::mount::Value &&) -> std::string;
+    inline auto endot(std::string &&) -> std::string;
+    inline auto endot(std::string const &) -> std::string;
+  }
+}
+
+namespace path {
+  namespace filename {
+    namespace mount {
+      // Add it here so that ADL can find it.
+      using ::want::path::endot;
+    }
+  }
+}
+
+#endiv
+#divert <ipp>
+auto want::path::endot(std::string const &path) -> std::string {
+  return endot(std::string(path));
+}
+
+auto want::path::endot(std::string &&anon) -> std::string {
+  if (anon.empty()) {
+    anon += '.';
+  } else if ('/' != anon.front()) {
+    // not a full path, beginning with '/'
+    bool is_dot = 1 == anon.size() && '.' == anon[0];
+    bool has_dot = 1 < anon.size() && '.' == anon[0] && '/' == anon[1];
+    bool is_dotdot = 2 == anon.size() && '.' == anon[0] && '.' == anon[1];
+    bool has_dotdot = 2 < anon.size() && '.' == anon[0] && '.' == anon[1] && '/' == anon[2];
+    if (!is_dot && !has_dot && !is_dotdot && !has_dotdot) {
+      // not already ./something
+      // not already ../something
+      anon.insert(0, "./");
+    }
+  }
+  return std::forward<std::string>(anon);
+}
+
+auto want::path::endot(::path::filename::mount::Value &&anon) -> std::string {
+  std::string ret(std::forward<std::string>(anon.subject));
+  return endot(std::move(ret));
+}
+#endiv

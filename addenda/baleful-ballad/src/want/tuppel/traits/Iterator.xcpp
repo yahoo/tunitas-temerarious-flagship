@@ -1,0 +1,16 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace want {
+  namespace tuppel {
+    namespace traits {
+      //
+      // The traits of the tuppel::Iterator
+      //
+      template<typename... ITERATORS> struct Iterator;
+    }
+  }
+}
+#entail want.tuppel.traits.Iterator.ITERATOR1.ITERATORS
+#entail want.tuppel.traits.Iterator.EMPTY
+#entail want.tuppel.traits.Iterator.iterator_traits
+#endiv

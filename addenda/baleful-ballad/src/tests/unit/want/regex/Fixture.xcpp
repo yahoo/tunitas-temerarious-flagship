@@ -1,0 +1,181 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace tests {
+  namespace unit {
+    namespace want {
+      namespace regex {
+        class Fixture;
+      }
+    }
+  }
+}
+#endiv
+#divert <hpp>
+class tests::unit::want::regex::Fixture : public cppunit::test::Fixture {
+public:
+  auto test_basic_pattern() -> void;
+  auto test_error() -> void;
+  auto test_error_type() -> void;
+  auto test_iterator() -> void;
+  auto test_match() -> void;
+  auto test_match_results() -> void;
+  auto test_pattern() -> void;
+  auto test_replace() -> void;
+  auto test_search() -> void;
+  auto test_sub_match() -> void;
+  auto test_traits() -> void;
+
+  static auto suite() -> cppunit::Test *;
+};
+#endiv
+#divert <cpp>
+#import want.regex.basic_pattern
+auto tests::unit::want::regex::Fixture::test_basic_pattern() -> void {
+  // this blows up the std::regex of gcc 4.8, it throws an exception on "complex" patterns.
+  ::want::regex::basic_pattern<char> pattern("^\\s[0-9]"); 
+  // it constructs
+  CPPUNIT_ASSERT(true);
+}
+
+#import want.regex.error_type
+#import want.regex.error
+auto tests::unit::want::regex::Fixture::test_error() -> void {
+  try {
+    ::want::regex::error_type et = ::want::regex::error_type();
+    ::want::regex::error exc(et);
+    throw exc;
+  } catch (::want::regex::error const &e) {
+    CPPUNIT_ASSERT(true);
+  }
+}
+
+#import want.regex.error_type
+auto tests::unit::want::regex::Fixture::test_error_type() -> void {
+  ::want::regex::error_type et = ::want::regex::error_type();
+  // it constructs
+  CPPUNIT_ASSERT(::want::regex::error_type() == et);
+}
+
+#import want.regex.iterator
+#import want.regex.match
+#import want.regex.pattern
+#import want.regex.cmatch
+auto tests::unit::want::regex::Fixture::test_iterator() -> void {
+  bool tested_something = false;
+  ::want::regex::pattern pattern("^\\s*(\\S+)\\s*(\\S+)\\s*(\\S+)\\s*$");
+  ::want::regex::cmatch results;
+  auto r = ::want::regex::match(" apple banana cherry", results, pattern);
+  CPPUNIT_ASSERT(r);
+  for (auto const &r : results) {
+    std::cout << "test_iterator result q|" << r << "\n";
+    tested_something = true;
+  }
+  CPPUNIT_ASSERT(tested_something);
+}
+
+#import want.regex.pattern
+#import want.regex.match
+#import want.regex.cmatch
+auto tests::unit::want::regex::Fixture::test_match() -> void {
+  ::want::regex::pattern pattern("^\\s*(\\S+)\\s*(\\S+)\\s*(\\S+)\\s*$");
+  ::want::regex::cmatch results;
+  auto r = ::want::regex::match(" apple banana cherry", results, pattern);
+  CPPUNIT_ASSERT(r);
+}
+
+#import want.regex.match_results
+auto tests::unit::want::regex::Fixture::test_match_results() -> void {
+  // instantiaet one
+  ::want::regex::match_results<char const *> mr;
+  CPPUNIT_ASSERT(true);
+}
+
+#import want.regex.pattern
+auto tests::unit::want::regex::Fixture::test_pattern() -> void {
+  // this blows up the std::regex of gcc 4.8, it throws an exception on "complex" patterns.
+  ::want::regex::basic_pattern<char> pattern("^\\s[0-9]"); 
+  // it constructs
+  CPPUNIT_ASSERT(true);
+}
+
+#import want.regex.replace
+auto tests::unit::want::regex::Fixture::test_replace() -> void {
+  // From: http://www.cplusplus.com/reference/regex/regex_replace/
+  std::string s("there is a subsequence in the string\n");
+  ::want::regex::pattern e("\\b(sub)([^ ]*)");   // matches words beginning by "sub"
+
+  // using string/c-string (3) version:
+  std::cout << ::want::regex::replace(s,e,"sub-$2"); // <-------------- test this
+
+  // using range/c-string (6) version:
+  std::string result;
+  ::want::regex::replace(std::back_inserter(result), s.begin(), s.end(), e, "$2");
+  std::cout << result;
+
+  // with flags:
+  std::cout << ::want::regex::replace(s,e,"$1 and $2", ::want::regex::constants::format_no_copy);
+  std::cout << std::endl;
+}
+
+#import std.cout
+#import std.endl
+#import want.regex.search
+#import want.regex.pattern
+#import want.regex.smatch
+auto tests::unit::want::regex::Fixture::test_search() -> void {
+  // From: http://www.cplusplus.com/reference/regex/regex_search/
+  std::string s("this subject has a submarine as a subsequence");
+  ::want::regex::smatch m;
+  ::want::regex::pattern e ("\\b(sub)([^ ]*)");   // matches words beginning by "sub"
+
+  std::cout << "Target sequence: " << s << std::endl;
+  std::cout << "Regular expression: /\\b(sub)([^ ]*)/" << std::endl;
+  std::cout << "The following matches and submatches were found:" << std::endl;
+
+  do {
+    auto r = ::want::regex::search(s, m, e);
+    if (!r) {
+      break;
+    }
+    for (auto x: m) {
+      std::cout << x << " ";
+    }
+    std::cout << std::endl;
+    s = m.suffix().str();
+  } while (1);
+}
+
+#import want.regex.traits
+auto tests::unit::want::regex::Fixture::test_traits() -> void {
+  ::want::regex::traits<char> t;
+  // it instantiated
+  CPPUNIT_ASSERT(true);
+}
+
+
+#import want.regex.traits
+auto tests::unit::want::regex::Fixture::test_sub_match() -> void {
+  ::want::regex::sub_match<char const *> csm;
+  // it instantiated
+  CPPUNIT_ASSERT(true);
+}
+
+auto tests::unit::want::regex::Fixture::suite() -> cppunit::Test * {
+  using namespace ::unit::rigging::suite;
+  Stream s("regex");
+  s << call("basic_pattern", &Fixture::test_basic_pattern)
+    << call("error", &Fixture::test_error)
+    << call("error_type", &Fixture::test_error_type)
+    << call("iterator", &Fixture::test_iterator)
+    << call("match", &Fixture::test_match)
+    << call("match_results", &Fixture::test_match_results)
+    << call("pattern", &Fixture::test_pattern)
+    << call("replace", &Fixture::test_replace)
+    << call("search", &Fixture::test_search)
+    << call("sub_match", &Fixture::test_sub_match)
+    << call("traits", &Fixture::test_traits)
+
+    ;
+  return finalize(s);
+}
+#endiv

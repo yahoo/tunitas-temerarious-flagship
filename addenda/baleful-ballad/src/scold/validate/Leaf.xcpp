@@ -1,0 +1,56 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace scold {
+  namespace validate {
+    template<Name> class Leaf; 
+  }
+}
+#endiv
+#divert <hpp>
+#import scold.validate.detail.Leaf
+template<scold::validate::Name IDENTIFIER_NAME> class scold::validate::Leaf : public detail::Leaf {
+  using ancestor = detail::Leaf;
+public:
+  inline Leaf();
+  inline static auto factory() -> ancestor;
+  static constexpr Name const NAME = IDENTIFIER_NAME;
+public:
+  struct tests { struct Suite; };
+  friend struct tests::Suite;
+};
+
+namespace scold {
+  namespace validate {
+    template<> inline Leaf<MODULE>::Leaf();
+    template<> inline Leaf<NAMESPACE>::Leaf();
+    template<> inline Leaf<CLASS>::Leaf();
+  }
+}
+#endiv
+#divert <ipp>
+template<scold::validate::Name NAME> auto scold::validate::Leaf<NAME>::factory() -> ancestor {
+  // Construct the descendant, copy-return the ancestor
+  Leaf<NAME> constructed;
+  return static_cast<ancestor &>(constructed);
+}
+
+#import scold.validate.detail.is
+template<> scold::validate::Leaf<scold::validate::MODULE>::Leaf()
+  : ancestor("module", "snake_case or CamelCase", [](std::string const &subject) {
+      return detail::is_snake_case(subject) || detail::isCamelCase(subject);
+    }) {
+  ;
+}
+
+#import scold.validate.detail.is
+template<> scold::validate::Leaf<scold::validate::NAMESPACE>::Leaf()
+  : ancestor("namespace", "snake_case", &detail::is_snake_case) {
+  ;
+}
+
+#import scold.validate.detail.is
+template<> scold::validate::Leaf<scold::validate::CLASS>::Leaf()
+  : ancestor("class", "CamelCase", &detail::isCamelCase) {
+  ;
+}
+#endiv

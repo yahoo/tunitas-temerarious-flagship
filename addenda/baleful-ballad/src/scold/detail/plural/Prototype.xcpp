@@ -1,0 +1,41 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace scold {
+  namespace detail {
+    namespace plural {
+      template<typename INTEGER> class Prototype;
+    }
+  }
+}
+#endiv
+#divert <hpp>
+#import std.ostream
+namespace scold {
+  namespace detail {
+    namespace plural {
+      template<typename INTEGER> inline auto operator<<(std::ostream &, Prototype<INTEGER> const &) -> std::ostream &;
+    }
+  }
+}
+
+template<typename INTEGER> class scold::detail::plural::Prototype {
+protected:
+  ~Prototype() = default; // descendants only
+public:
+  using value_type = INTEGER;
+  value_type value;
+  std::string noun; // as pluralized in the descendant's constructor, according to the policy
+  inline explicit Prototype(value_type, std::string const &noun);
+};
+#endiv
+#divert <ipp>
+template<typename INTEGER> auto scold::detail::plural::operator<<(std::ostream &o, Prototype<INTEGER> const &p) -> std::ostream & {
+  return o << p.value << ' ' << p.noun;
+}
+
+template<typename INTEGER> scold::detail::plural::Prototype<INTEGER>::Prototype(value_type arg_value, std::string const &arg_noun)
+  : value(arg_value)
+  , noun(arg_noun) {
+  ;
+}
+#endiv

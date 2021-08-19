@@ -1,0 +1,15 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+#import scold.detail.plural.Policies
+namespace scold {
+  namespace detail {
+    namespace plural {
+      //
+      // See the commentariat around scold::plural(...)
+      //
+      template<typename INTEGER, typename POLICY> class Noun;     
+    }
+  }
+}
+#entail scold.detail.plural.Noun.AddS
+#endiv

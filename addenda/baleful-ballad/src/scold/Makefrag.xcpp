@@ -1,0 +1,31 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace scold {
+  class Makefrag;
+}
+#endiv
+#divert <hpp>
+#import std.ofstream
+#import scold.files
+#import scold.Filenames
+class scold::Makefrag : public std::ofstream {
+  using ancestor = std::ofstream;
+public:
+  Makefrag() = default;
+  inline explicit Makefrag(Filenames const &, files::openmode = files::default_open_flags);
+  Makefrag(Makefrag const &) = delete;
+  auto operator=(Makefrag const &) -> Makefrag & = delete;
+  inline auto open(Filenames const &, files::openmode = files::default_open_flags) -> void;
+};
+#endiv
+#divert <ipp>
+#import scold.Suffix
+scold::Makefrag::Makefrag(Filenames const &filenames, files::openmode mode)
+  : ancestor(filenames[Suffix::MK], mode) {
+  ;
+}
+
+auto scold::Makefrag::open(Filenames const &filenames, files::openmode mode) -> void {
+  ancestor::open(filenames[Suffix::MK], mode);
+}
+#endiv

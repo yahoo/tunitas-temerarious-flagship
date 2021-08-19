@@ -1,0 +1,110 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace tests {
+  namespace unit {
+    namespace fragment {
+      class Depend;
+    }
+  }
+}
+#endiv
+#divert <hpp>
+class tests::unit::fragment::Depend : public cppunit::test::Fixture {
+public:
+  auto test_depend_string_string() -> void;
+  auto test_depend_string_Value() -> void;
+  auto test_depend_string_string_Value() -> void;
+  auto test_depend_string_string_string_string() -> void;
+  auto test_depend_string_string_string_Value() -> void;
+  auto test_depend_string_Value_string_Value() -> void;
+
+  static auto suite() -> cppunit::Test *;
+};
+#endiv
+#divert <cpp>
+#import scold.fragment.workbench
+#import scold.fragment.make.depend
+#import std.move
+#import std.string
+
+auto tests::unit::fragment::Depend::test_depend_string_string() -> void {
+  std::string lhs_value = "$(lhs_objdir)/lhs_subpath";
+  std::string rhs_value = "$(rhs_objdir)/rhs_subpath"; 
+  auto actual = ::scold::fragment::make::depend(lhs_value, rhs_value);
+  auto expected = ::scold::line::Item("$(lhs_objdir)/lhs_subpath : $(rhs_objdir)/rhs_subpath");
+  CPPUNIT_ASSERT_EQUAL(value(expected), value(actual));
+}
+
+auto tests::unit::fragment::Depend::test_depend_string_Value() -> void {
+  using ::scold::fragment::workbench;
+  std::string lhs_value = "$(lhs_objdir)/lhs_subpath";
+  std::string rhs_objdir = "$(rhs_objdir)";
+  std::string rhs_subpath = "rhs_subpath";
+  auto rhs_value = workbench() * rhs_subpath;
+  auto actual = ::scold::fragment::make::depend(lhs_value, rhs_objdir, std::move(rhs_value));
+  auto expected = ::scold::line::Item("$(lhs_objdir)/lhs_subpath : $(rhs_objdir)/rhs_subpath");
+  CPPUNIT_ASSERT_EQUAL(value(expected), value(actual));
+}
+
+auto tests::unit::fragment::Depend::test_depend_string_string_Value() -> void {
+  using ::scold::fragment::workbench;
+  std::string lhs_value = "$(lhs_objdir)/lhs_subpath";
+  std::string rhs_objdir = "$(rhs_objdir)";
+  std::string rhs_subpath = "rhs_subpath";
+  auto rhs_value = workbench() * rhs_subpath;
+  auto actual = ::scold::fragment::make::depend(lhs_value, rhs_objdir, std::move(rhs_value));
+  auto expected = ::scold::line::Item("$(lhs_objdir)/lhs_subpath : $(rhs_objdir)/rhs_subpath");
+  CPPUNIT_ASSERT_EQUAL(value(expected), value(actual));
+}
+
+auto tests::unit::fragment::Depend::test_depend_string_string_string_string() -> void {
+  using ::scold::fragment::workbench;
+  std::string lhs_objdir = "$(lhs_objdir)";
+  std::string lhs_subpath = "lhs_subpath"; 
+  std::string rhs_objdir = "$(rhs_objdir)";
+  std::string rhs_subpath = "rhs_subpath";
+  auto actual = ::scold::fragment::make::depend(lhs_objdir, lhs_subpath, rhs_objdir, rhs_subpath);
+  auto expected = ::scold::line::Item("$(lhs_objdir)/lhs_subpath : $(rhs_objdir)/rhs_subpath");
+  CPPUNIT_ASSERT_EQUAL(value(expected), value(actual));
+}
+
+auto tests::unit::fragment::Depend::test_depend_string_string_string_Value() -> void {
+  using ::scold::fragment::workbench;
+  std::string lhs_objdir = "$(lhs_objdir)";
+  std::string lhs_subpath = "lhs_subpath";
+  auto lhs_value = lhs_subpath;
+  std::string rhs_objdir = "$(rhs_objdir)";
+  std::string rhs_subpath = "rhs_subpath";
+  auto rhs_value = workbench() * rhs_subpath;
+  auto actual = ::scold::fragment::make::depend(lhs_objdir, lhs_value, rhs_objdir, std::move(rhs_value));
+  auto expected = ::scold::line::Item("$(lhs_objdir)/lhs_subpath : $(rhs_objdir)/rhs_subpath");
+  CPPUNIT_ASSERT_EQUAL(value(expected), value(actual));
+}
+
+auto tests::unit::fragment::Depend::test_depend_string_Value_string_Value() -> void {
+  using ::scold::fragment::workbench;
+  std::string lhs_objdir = "$(lhs_objdir)";
+  std::string lhs_subpath = "lhs_subpath";
+  auto lhs_value = workbench() * lhs_subpath;
+  std::string rhs_objdir = "$(rhs_objdir)";
+  std::string rhs_subpath = "rhs_subpath";
+  auto rhs_value = workbench() * rhs_subpath;
+  auto actual = ::scold::fragment::make::depend(lhs_objdir, std::move(lhs_value), rhs_objdir, std::move(rhs_value));
+  auto expected = ::scold::line::Item("$(lhs_objdir)/lhs_subpath : $(rhs_objdir)/rhs_subpath");
+  CPPUNIT_ASSERT_EQUAL(value(expected), value(actual));
+}
+
+auto tests::unit::fragment::Depend::suite() -> cppunit::Test * {
+  using namespace ::unit::rigging::suite;
+  Stream s("depend");
+  s << call("string-string", &Depend::test_depend_string_string)
+    << call("string_string", &Depend::test_depend_string_string)
+    << call("string-Value", &Depend::test_depend_string_Value)
+    << call("string-string_Value", &Depend::test_depend_string_string_Value)
+    << call("string-string-string_string", &Depend::test_depend_string_string_string_string)
+    << call("string-string-string-Value", &Depend::test_depend_string_string_string_Value)
+    << call("string-Value-string-Value", &Depend::test_depend_string_Value_string_Value)
+    ;
+  return finalize(s);
+}
+#endiv

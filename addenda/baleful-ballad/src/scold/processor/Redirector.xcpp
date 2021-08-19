@@ -1,0 +1,43 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace scold {
+  namespace processor {
+    //
+    // The redirector, stuffs into the director.
+    //
+    class Redirector;
+  }
+}
+#endiv
+#divert <hpp>
+#import scold.Configuration
+#import scold.processor.Prototype
+#import scold.Director
+class scold::processor::Redirector : public Prototype {  
+  using ancestor = Prototype;
+protected:
+  ~Redirector() = default; // descendants only
+public:
+  using configuration_type = Configuration;
+  using context_type = config::Context;
+  using director_type = Director;
+  inline explicit Redirector(configuration_type const &, context_type const &, director_type &);
+  // The descendant must implement something.
+  //    It's all ad hoc (otherwise you'd have used a Generic descendant).
+  //    ... so there is no spec for what is expected.
+  //    ... probably though the descendant returns a Processor
+protected:
+  configuration_type const &cfg;
+  context_type const &ctx;
+  director_type &director;
+};
+#endiv
+#divert <ipp>
+scold::processor::Redirector::Redirector(configuration_type const &arg_cfg, context_type const &arg_ctx, director_type &arg_director)
+  : ancestor()
+  , cfg(arg_cfg)
+  , ctx(arg_ctx)
+  , director(arg_director) {
+  ;
+}
+#endiv

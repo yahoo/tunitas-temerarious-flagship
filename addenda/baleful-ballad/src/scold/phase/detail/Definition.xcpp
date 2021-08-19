@@ -1,0 +1,64 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+#import scold.Phase
+namespace scold {
+  namespace phase {
+    namespace detail {
+      template<Phase> struct Definition;
+      template<> struct Definition<Phase::BEG>;
+      template<> struct Definition<Phase::FPP>;
+      template<> struct Definition<Phase::HPP>;
+      template<> struct Definition<Phase::IPP>;
+      template<> struct Definition<Phase::TPP>;
+      template<> struct Definition<Phase::CPP>;
+      template<> struct Definition<Phase::END>;
+    }
+  }
+}
+#endiv
+#divert <hpp>
+#import scold.Phase
+#import std.string
+#import std.numeric_limits
+#forward scold.stream // steam::index_t
+
+template<scold::Phase PHASE> struct scold::phase::detail::Definition {
+  static_assert(0 == (int)(PHASE) && 0 != (int)(PHASE), "specializations only");
+};
+
+template<> struct scold::phase::detail::Definition<scold::Phase::BEG> {
+  inline static constexpr auto value() -> Phase { return Phase::BEG; }
+  inline static constexpr auto has_diversion() -> bool { return false; }
+  inline static constexpr auto diversion_counter(unsigned base) -> stream::index_t { return base+has_diversion(); }
+  inline static constexpr auto has_index() -> bool { return has_diversion(); }
+  inline static constexpr auto index() -> stream::index_t { return std::numeric_limits<stream::index_t>::max(); }
+  inline static constexpr auto can_endiv() -> bool { return false; }
+  inline static constexpr auto has_succ() -> bool { return true; }
+  inline static constexpr auto has_pred() -> bool { return false; }
+  inline static constexpr auto has_suffix() -> bool { return false; }
+  inline static constexpr auto c_str() -> char const * { return nullptr; }
+  inline static auto str() -> std::string { return std::string(); }
+};
+  
+#import scold.phase.detail.MidrangeDefinition
+template<> struct scold::phase::detail::Definition<scold::Phase::FPP> : public detail::MidrangeDefinition<Phase::FPP> { };
+template<> struct scold::phase::detail::Definition<scold::Phase::HPP> : public detail::MidrangeDefinition<Phase::HPP> { };
+template<> struct scold::phase::detail::Definition<scold::Phase::IPP> : public detail::MidrangeDefinition<Phase::IPP> { };
+template<> struct scold::phase::detail::Definition<scold::Phase::TPP> : public detail::MidrangeDefinition<Phase::TPP> { };
+template<> struct scold::phase::detail::Definition<scold::Phase::CPP> : public detail::MidrangeDefinition<Phase::CPP> { };
+
+template<> struct scold::phase::detail::Definition<scold::Phase::END> {
+  inline static constexpr auto value() -> Phase { return Phase::END; }
+  inline static constexpr auto has_diversion() -> bool { return false; }
+  inline static constexpr auto diversion_counter(unsigned base) -> stream::index_t { return base+has_diversion(); }
+  inline static constexpr auto has_index() -> bool { return false; }
+  inline static constexpr auto index() -> stream::index_t { return std::numeric_limits<stream::index_t>::max(); }
+  inline static constexpr auto can_endiv() -> bool { return false; }
+  inline static constexpr auto has_succ() -> bool { return false; }
+  inline static constexpr auto has_pred() -> bool { return true; }
+  inline static constexpr auto has_suffix() -> bool { return false; }
+  inline static constexpr auto c_str() -> char const * { return nullptr; }
+  inline static auto str() -> std::string { return std::string(); }
+};
+
+#endiv

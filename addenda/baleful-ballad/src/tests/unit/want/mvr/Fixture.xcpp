@@ -1,0 +1,128 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace tests {
+  namespace unit {
+    namespace want {
+      namespace mvr {
+        class Fixture;
+      }
+    }
+  }
+}
+#endiv
+#divert <hpp>
+#import std.string
+#import std.tuple
+#import tests.unit.want.mvr.Copywise
+class tests::unit::want::mvr::Fixture : public cppunit::test::Fixture {
+public:
+  auto test_State() -> void;
+  auto test_recv() -> void;
+  auto test_send() -> void;
+  auto test_usage() -> void;
+
+  static auto suite() -> cppunit::Test *;
+protected:
+  static auto sender_tuple_Copywise() -> std::tuple<char, int, Copywise>;
+  static auto sender_tuple_stringwise() -> std::tuple<char, int, std::string>;
+};
+#endiv
+#divert <cpp>
+#import want.mvr.State
+
+auto tests::unit::want::mvr::Fixture::test_State() -> void {
+  using namespace ::want::mvr;
+  auto t = state(true);
+  CPPUNIT_ASSERT(State::VALUE == t);
+  auto f = state(false);
+  CPPUNIT_ASSERT(State::NONE == f);
+}
+
+#import want.mvr.send
+auto tests::unit::want::mvr::Fixture::sender_tuple_stringwise() -> std::tuple<char, int, std::string> {
+  using namespace ::want::mvr;
+  return send('a', 1, (std::string)"yes");
+}
+
+#import want.mvr.recv
+auto tests::unit::want::mvr::Fixture::test_recv() -> void {
+  using namespace ::want::mvr;
+  char c;
+  int i;
+  std::string s;
+  auto receiver = recv(c, i, s); // recall: recv(...) creates an "object" that can receive, writing into the lhs
+  receiver = sender_tuple_stringwise();
+  CPPUNIT_ASSERT('a' == c);
+  CPPUNIT_ASSERT(1 == i);
+  CPPUNIT_ASSERT("yes" == s);
+}
+
+#import want.mvr.send
+auto tests::unit::want::mvr::Fixture::sender_tuple_Copywise() -> std::tuple<char, int, Copywise> {
+  using namespace ::want::mvr;
+  // show that it compiles and copies (or not)
+  Copywise w;
+  return send('a', 99, w);
+}
+
+#import want.mvr.recv
+auto tests::unit::want::mvr::Fixture::test_send() -> void {
+  using namespace ::want::mvr;
+  char c;
+  int i;
+  Copywise w;
+  recv(c, i, w) = sender_tuple_Copywise();
+  CPPUNIT_ASSERT('a' == c);
+  CPPUNIT_ASSERT(99 == i);
+  // copywise ... 
+}
+
+#import want.mvr.send
+#import want.mvr.recv
+#import std.clog
+#import std.abs
+auto tests::unit::want::mvr::Fixture::test_usage() -> void {
+  using namespace ::want::mvr;
+  char c, d, e;
+  int i, j, k;
+  float f, g, h;
+  recv(c, d, e, i, j, k, f, g, h) = send('a', 'b', 'c', 1, 2, 3, 4.1, 5.1, 6.1);
+  CPPUNIT_ASSERT('a' == c);
+  CPPUNIT_ASSERT('b' == d);
+  CPPUNIT_ASSERT('c' == e);
+  CPPUNIT_ASSERT(1 == i);
+  CPPUNIT_ASSERT(2 == j);
+  CPPUNIT_ASSERT(3 == k);
+  std::clog << "c='" << c << "', d='" << d << "', e='" << e << "'\n";
+  std::clog << "i=" << i << ", i=" << j << ", k=" << k << "\n";
+  std::clog << "f=" << f << ", g=" << g << ", g=" << h << "\n";
+  constexpr float const EPSILON = 1e-5; // floats aren't that precise
+  CPPUNIT_ASSERT(abs(4.1 - f) < EPSILON);
+  CPPUNIT_ASSERT(abs(5.1 - g) < EPSILON);
+  CPPUNIT_ASSERT(abs(6.1 - h) < EPSILON);
+}
+
+#import tests.unit.want.mvr.SAV
+#import std.string
+#import std.tuple
+auto tests::unit::want::mvr::Fixture::suite() -> cppunit::Test * {
+  using namespace ::unit::rigging::suite;
+  Stream s("mvr");
+  s << call("State", &Fixture::test_State)
+    << call("recv", &Fixture::test_recv)
+    << call("send", &Fixture::test_send)
+    << call("usage", &Fixture::test_usage)
+    << []() {
+         Stream v("sav");
+         v << add<SAV<bool>>()
+           << add<SAV<int>>()
+           << add<SAV<char const *>>()
+           << add<SAV<std::string>>()
+           << add<SAV<std::tuple<bool, int, std::string>>>()
+           ;
+         return move(v);
+       }()
+    ;
+  return finalize(s);
+}
+#endiv

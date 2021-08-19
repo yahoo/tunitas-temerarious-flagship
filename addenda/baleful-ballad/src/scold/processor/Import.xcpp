@@ -1,0 +1,108 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace scold {
+  namespace processor {
+    class Import;
+  }
+}
+#endiv
+#divert <hpp>
+#import scold.processor.Externals
+#import scold.processor.Ifdef
+#import scold.processor.Generic
+#import scold.search.Build
+#import std.string
+#import want.regex.pattern
+class scold::processor::Import : public Generic, public Externals {
+  using ancestor = Generic;
+public:
+  explicit Import(configuration_type const &, context_type &, search::Build /*nonconst*/ &);
+  auto operator()(phase_type, line_type &, output_type &, imports_type &, entails_type &, depends_type &) -> void override final;
+protected:
+  Ifdef ifdef;
+  // WATCHOUT - do not make this static because they can throw in the constructor.
+  want::regex::pattern const DIRECTIVE;
+  auto import(std::string const &module_syntax, phase_type, line_type &, output_type &, imports_type &, entails_type &, depends_type &) -> void;
+  auto body(Module const &module, std::string const &includedir, phase_type, line_type &, output_type &, imports_type &, entails_type &, depends_type &) -> void;
+};
+#endiv
+#divert <cpp>
+scold::processor::Import::Import(configuration_type const &arg_cfg, context_type &arg_ctx, search::Build &arg_build)
+  : ancestor(arg_cfg, arg_ctx)
+  , Externals(arg_build) 
+  , ifdef(this->cfg, this->ctx)
+  // WATCHOUT - don't use \S for the module; handle the case of a comment bleeding into the identifier
+  // e.g. #import apple.banana//cherry is not part of the
+  // extraneous dots, internal, leading and trailing are handled elsewhere
+  , DIRECTIVE(R"regex(^\s*#\s*import\s+([a-zA-Z0-9_.:]+)(.*)?)regex") {
+  ;
+}
+
+#import want.regex.match
+#import want.regex.smatch
+#import want.format.braket
+auto scold::processor::Import::operator()(phase_type phase, line_type &line, output_type &out, imports_type &imports, entails_type &entails, depends_type &depends) -> void {
+  using want::format::braket;
+  want::regex::smatch sm;
+  if (want::regex::match(value(line), sm, DIRECTIVE)) {
+    auto module_syntax = ifdef.fixup_sloppy_module_syntax(line, sm[1], sm[2]);
+    import(module_syntax, phase, line, out, imports, entails, depends);
+  } else {
+    error(cfg, ctx, line) << " at " << braket(braket(value(line))) << '\n';
+  }
+}
+
+#import scold.Filenames
+#import scold.Module
+#import scold.fragment.make.depend
+#import scold.fragment.preproc.include
+#import scold.fragment.workbench
+#import scold.phase.range
+#import scold.to
+#include <cassert>
+auto scold::processor::Import::import(std::string const &module_syntax, phase_type phase, line_type &line, output_type &out, imports_type &imports, entails_type &entails, depends_type &depends) -> void {
+  using want::format::braket;
+  using namespace scold::fragment; // preproc::include(...)
+  auto module = to<Module>(module_syntax);
+  depends.antecedents.insert(module);
+  //
+  // Two sorts of dependencies
+  //    1. cpp via #include
+  //    2. make via declarations
+  //
+  // 1. cpp 
+  //   #include "$phase/package.subpackage.component.Class"
+  // 2. make
+  //   $(objdir)/src/package/subpackage/component/Class.o : $(objdir)/src/package/subpackage/component/Class.hpp
+  //
+  auto r = probe(module);
+  if (include_interfaces_only(r)) {
+    // It is an external module, so "buy it all" at the interface surface.
+    debug(cfg) << "#import [1] module " << module << " at " << depends.modulesdir << "\n";
+    out << preproc::include(module);
+  } else {
+    assert(buildable_from_sources(r));
+    // It is built by us, nearby; or it is a submodule and we know where the interface lies
+    debug(cfg) << "#import [2] module " << module << " at " << directory(r) << "\n";
+    body(module, directory(r), phase, line, out, imports, entails, depends);
+  }
+}
+
+auto scold::processor::Import::body(Module const &module, std::string const &includedir, phase_type phase, line_type &line, output_type &out, imports_type &imports, entails_type &entails, depends_type &depends) -> void {
+  using namespace scold::fragment; // preproc::include(...), make::depend(...)
+  // Therefore it is an "internal" module, either in a submodule or in this build.
+  // where is it?
+  Filenames that = to<Filenames>(module);
+  {
+    auto const mint = min(Phase::TPP, phase);
+    out << preproc::include(that[mint]);
+    depends.out << make::depend(depends.lhs, includedir, that[mint]);
+  }
+  // End at Phase::CPP, not Phase::END. One cannot #include the ".cpp" files in each other as they have definitions.
+  auto const minc = min(Phase::CPP, succ(phase));
+  for (auto p : range(minc, Phase::CPP)) {
+    imports[p] << preproc::include(that[p]);
+    depends.out << make::depend(depends.lhs, includedir, that[p]);
+  }
+}
+#endiv

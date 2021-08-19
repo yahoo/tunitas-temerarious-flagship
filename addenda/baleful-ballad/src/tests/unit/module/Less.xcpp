@@ -1,0 +1,119 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace tests {
+  namespace unit {
+    namespace module {
+      class Less;
+    }
+  }
+}
+#endiv
+#divert <hpp>
+#import scold.Module
+#import std.less
+class tests::unit::module::Less : public cppunit::test::Fixture {
+public:
+  using module_type = ::scold::Module;
+  using less_type = std::less<module_type>;
+
+  auto test_empty_empty() -> void;
+  auto test_empty_some() -> void;
+  auto test_some_empty() -> void;
+  auto test_some_some() -> void;
+  auto test_lt() -> void;
+  auto test_eq() -> void;
+  auto test_gt() -> void;
+
+  static auto suite() -> cppunit::Test *;
+};
+#endiv
+#divert <cpp>
+#import scold.Module
+auto tests::unit::module::Less::test_empty_empty() -> void {
+  module_type v1;
+  module_type v2;
+  less_type lt;
+  CPPUNIT_ASSERT( ! lt(v1, v2) );
+}
+
+auto tests::unit::module::Less::test_empty_some() -> void {
+  module_type v1;
+  module_type v2{"something"};
+  less_type lt;
+  CPPUNIT_ASSERT( lt(v1, v2) );
+}
+
+auto tests::unit::module::Less::test_some_empty() -> void {
+  module_type v1{"something"};
+  module_type v2;
+  less_type lt;
+  CPPUNIT_ASSERT( ! lt(v1, v2) );
+}
+
+auto tests::unit::module::Less::test_some_some() -> void {
+  {
+    module_type v1{"something"};
+    module_type v2{"else"};
+    less_type lt;
+    CPPUNIT_ASSERT( ! lt(v1, v2) );
+  } {
+    module_type v1{"else"};
+    module_type v2{"something"};
+    less_type lt;
+    CPPUNIT_ASSERT( lt(v1, v2) );
+  }
+}
+
+auto tests::unit::module::Less::test_lt() -> void {
+  {
+    module_type v1{"com", "apple", "banana"};
+    module_type v2{"com", "apple", "banana", "Class"};
+    less_type lt;
+    CPPUNIT_ASSERT( lt(v1, v2) );
+  } {
+    module_type v1{"com", "apple", "banana", "Class"};
+    module_type v2{"com", "apple", "banana", "Classsssss"};
+    less_type lt;
+    CPPUNIT_ASSERT( lt(v1, v2) );
+  }
+}
+
+auto tests::unit::module::Less::test_eq() -> void {
+  module_type v1{"com", "apple", "banana"};
+  less_type lt;
+  CPPUNIT_ASSERT( ! lt(v1, v1) );
+}
+
+auto tests::unit::module::Less::test_gt() -> void {
+  {
+    module_type v1{"com", "apple", "banana", "Class"};
+    module_type v2{"com", "apple", "banana"};
+    less_type lt;
+    CPPUNIT_ASSERT( ! lt(v1, v2) );
+  } {
+    module_type v1{"com", "apple", "banana"};
+    module_type v2{"com", "apple", "banana", "Class"};
+    less_type lt;
+    CPPUNIT_ASSERT( lt(v1, v2) );
+  } {
+    module_type v1{"com", "apple", "banana", "Classsssss"};
+    module_type v2{"com", "apple", "banana", "Class"};
+    less_type lt;
+    CPPUNIT_ASSERT( ! lt(v1, v2) );
+  }
+}
+
+auto tests::unit::module::Less::suite() -> cppunit::Test * {
+  using namespace ::unit::rigging::suite;
+  Stream s("less");
+  s << call("empty-empty", &Less::test_empty_empty)
+    << call("empty-some", &Less::test_empty_some)
+    << call("some-empty", &Less::test_some_empty)
+    << call("some-some", &Less::test_some_some)
+    << call("lt", &Less::test_lt)
+    << call("eq", &Less::test_eq)
+    << call("gt", &Less::test_gt)
+    ;
+  return finalize(s);
+}
+#endiv

@@ -1,0 +1,4 @@
+tests_unit_processor_TESTS = \
+  tests/unit/processor/cases.test \
+  $(end)
+

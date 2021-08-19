@@ -1,0 +1,151 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace tests {
+  namespace unit {
+    namespace processor {
+      class Fixture;
+    }
+  }
+}
+#endiv
+#divert <hpp>
+#import tests.unit.processor.Dumper
+#import tests.unit.processor.Contextualization
+class tests::unit::processor::Fixture : public cppunit::test::Fixture, Dumper, Contextualization {
+public:
+  auto test_use_Forward() -> void;
+  auto test_use_Import() -> void;
+  auto test_use_Entail() -> void;
+  auto test_use_Nop() -> void;
+  auto test_use_Source() -> void;
+  auto test_use_Error() -> void;
+
+  static auto suite() -> cppunit::Test *;
+};
+#endiv
+#divert <cpp>
+#import scold.Phase
+#import scold.line.Item
+#import scold.Stream
+#import scold.Accruals
+#import scold.Processor
+#import scold.processor.Entail
+#import scold.processor.Forward
+#import scold.processor.Import
+#import scold.processor.Nop
+#import scold.processor.Source
+#import scold.processor.Error
+#import tests.unit.processor.Subprocessor
+
+auto tests::unit::processor::Fixture::test_use_Forward() -> void {
+  ::scold::processor::Forward forward(cfg, ctx, build_search);
+  ::scold::Phase ph(::scold::Phase::FPP);
+  ::scold::line::Item li(1, "#forward this.good.package");
+  Subprocessor process(li, forward); // <----- test this
+  ::scold::Stream ou;
+  ::scold::Accruals<::scold::IMPORT> im;
+  ::scold::Accruals<::scold::ENTAIL> en;
+  ::scold::Accruals<::scold::DEPEND> ds("file.o", "$(modulesdir)", "$(objdir)", "$(srcdir)", "$(DC-COMPILE)", ::scold::Regeneration::TWO_STEP);
+  process(ph, ou, im, en, ds); // <----- test this
+  dump(ph, li, ou, im, en, __FUNCTION__, __FILE__, __LINE__);
+}
+
+auto tests::unit::processor::Fixture::test_use_Import() -> void {
+  ::scold::processor::Import import(cfg, ctx, build_search);
+  ::scold::Phase ph(::scold::Phase::FPP);
+  ::scold::line::Item li(1, "#import this.good.package");
+  Subprocessor process(li, import); // <----- test this
+  ::scold::Stream ou;
+  ::scold::Accruals<::scold::IMPORT> im;
+  ::scold::Accruals<::scold::ENTAIL> en;
+  ::scold::Accruals<::scold::DEPEND> ds("file.o", "$(modulesdir)", "$(objdir)", "$(srcdir)", "$(DC-COMPILE)", ::scold::Regeneration::TWO_STEP);
+  process(ph, ou, im, en, ds); // <----- test this
+  dump(ph, li, ou, im, en, __FUNCTION__, __FILE__, __LINE__);
+  CPPUNIT_ASSERT(true);
+}
+
+auto tests::unit::processor::Fixture::test_use_Entail() -> void {
+  ::scold::processor::Entail entail(cfg, ctx, build_search);
+  ::scold::Phase ph(::scold::Phase::FPP);
+  ::scold::line::Item li(1, "#entail this.good.package");
+  Subprocessor process(li, entail); // <----- test this
+  ::scold::Stream ou;
+  ::scold::Accruals<::scold::IMPORT> im;
+  ::scold::Accruals<::scold::ENTAIL> en;
+  ::scold::Accruals<::scold::DEPEND> ds("file.o", "$(modulesdir)", "$(objdir)", "$(srcdir)", "$(DC-COMPILE)", ::scold::Regeneration::TWO_STEP);
+  process(ph, ou, im, en, ds); // <----- test this
+  dump(ph, li, ou, im, en, __FUNCTION__, __FILE__, __LINE__);
+  CPPUNIT_ASSERT(true);
+}
+
+auto tests::unit::processor::Fixture::test_use_Nop() -> void {
+  ::scold::processor::Nop nop(cfg, ctx);
+  ::scold::Phase ph(::scold::Phase::FPP);
+  ::scold::line::Item li(1, " nop does nothing ");
+  Subprocessor process(li, nop); // <----- test this
+  ::scold::Stream ou;
+  ::scold::Accruals<::scold::IMPORT> im;
+  ::scold::Accruals<::scold::ENTAIL> en;
+  ::scold::Accruals<::scold::DEPEND> ds("file.o", "$(modulesdir)", "$(objdir)", "$(srcdir)", "$(DC-COMPILE)", ::scold::Regeneration::TWO_STEP);
+  process(ph, ou, im, en, ds); // <----- test this
+  dump(ph, li, ou, im, en, __FUNCTION__, __FILE__, __LINE__);
+  CPPUNIT_ASSERT(true);
+}
+
+auto tests::unit::processor::Fixture::test_use_Source() -> void {
+  ::scold::processor::Source source(cfg, ctx);
+  ::scold::Phase ph(::scold::Phase::FPP);
+  ::scold::line::Item li(1, "int integer;");
+  Subprocessor process(li, source); // <----- test this
+  ::scold::Stream ou;
+  ::scold::Accruals<::scold::IMPORT> im;
+  ::scold::Accruals<::scold::ENTAIL> en;
+  ::scold::Accruals<::scold::DEPEND> ds("file.o", "$(modulesdir)", "$(objdir)", "$(srcdir)", "$(DC-COMPILE)", ::scold::Regeneration::TWO_STEP);
+  process(ph, ou, im, en, ds); // <----- test this
+  dump(ph, li, ou, im, en, __FUNCTION__, __FILE__, __LINE__);
+  CPPUNIT_ASSERT(true);
+}
+
+auto tests::unit::processor::Fixture::test_use_Error() -> void {
+  ::scold::processor::Error error(cfg, ctx);
+  ::scold::Phase ph(::scold::Phase::FPP);
+  ::scold::line::Item li(1, "#import // bad syntax");
+  Subprocessor process(li, error); // <----- test this
+  ::scold::Stream ou;
+  ::scold::Accruals<::scold::IMPORT> im;
+  ::scold::Accruals<::scold::ENTAIL> en;
+  ::scold::Accruals<::scold::DEPEND> ds("file.o", "$(modulesdir)", "$(objdir)", "$(srcdir)", "$(DC-COMPILE)", ::scold::Regeneration::TWO_STEP);
+  process(ph, ou, im, en, ds); // <----- test this
+  dump(ph, li, ou, im, en, __FUNCTION__, __FILE__, __LINE__);
+  CPPUNIT_ASSERT(true);
+}
+
+#import tests.unit.processor.Processor
+#import tests.unit.processor.Forward
+#import tests.unit.processor.Import
+#import tests.unit.processor.Entail
+#import tests.unit.processor.Nop
+#import tests.unit.processor.Source
+#import tests.unit.processor.Error
+#import tests.unit.processor.Injector_ENCLOSING
+auto tests::unit::processor::Fixture::suite() -> cppunit::Test * {
+  using namespace ::unit::rigging::suite;
+  Stream s("processor");
+  s << call("usage_of_Forward", &Fixture::test_use_Forward)
+    << call("usage_of_Import", &Fixture::test_use_Import)
+    << call("usage_of_Entail", &Fixture::test_use_Entail)
+    << call("usage_of_Nop", &Fixture::test_use_Nop)
+    << call("usage_of_Source", &Fixture::test_use_Source)
+    << call("usage_of_Error", &Fixture::test_use_Error)
+    << add<Processor>()
+    << add<Forward>()
+    << add<Import>()
+    << add<Entail>()
+    << add<Nop>()
+    << add<Source>()
+    << add<Error>()
+    << add<Injector_ENCLOSING>()
+    ;
+  return finalize(s);
+}
+#endiv

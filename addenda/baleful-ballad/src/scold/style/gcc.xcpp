@@ -1,0 +1,20 @@
+// -*- c++ -*- in the SCOLD styling that is so popular these days
+#divert <hpp>
+#import scold.config.Context
+#import scold.line.Item
+#import scold.style.detail.Compiler
+namespace scold {
+  namespace style {
+    //
+    // Usage:
+    //     std::cout << style::gcc(ctx, line) << " and that was really bad\n";
+    //
+    inline auto gcc(config::Context const &, line::Item const &) -> detail::Compiler<detail::GCC>;
+  }
+}
+#endiv
+#divert <ipp>
+auto scold::style::gcc(config::Context const &ctx, line::Item const &line) -> detail::Compiler<detail::GCC> {
+  return detail::Compiler<detail::GCC>(ctx, line);
+}
+#endiv

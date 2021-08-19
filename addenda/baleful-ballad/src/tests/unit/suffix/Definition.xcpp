@@ -1,0 +1,101 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace tests {
+  namespace unit {
+    namespace suffix {
+      class Definition;
+    }
+  }
+}
+#divert </fpp>
+#divert <hpp>
+class tests::unit::suffix::Definition : public cppunit::test::Fixture {
+public:
+  auto test_c_str() -> void;
+  auto test_str() -> void;
+  auto test_to_success() -> void;
+  auto test_to_failing() -> void;
+
+  static auto suite() -> cppunit::Test *;
+};
+#endiv
+#divert <cpp>
+#import scold.Suffix
+#import scold.suffix.Definition
+
+auto tests::unit::suffix::Definition::test_c_str() -> void {
+  // show that !has_suffix => (nullptr == c_str())
+  using ::scold::suffix::Definition;
+  using ::scold::Suffix;
+  { Definition d(Suffix::FPP);
+    CPPUNIT_ASSERT(std::string("fpp") == d.c_str()); }
+  { Definition d(Suffix::HPP);
+    CPPUNIT_ASSERT(std::string("hpp") == d.c_str()); }
+  { Definition d(Suffix::IPP);
+    CPPUNIT_ASSERT(std::string("ipp") == d.c_str()); }
+  { Definition d(Suffix::TPP);
+    CPPUNIT_ASSERT(std::string("tpp") == d.c_str()); }
+  { Definition d(Suffix::CPP);
+    CPPUNIT_ASSERT(std::string("cpp") == d.c_str()); }
+  { Definition d(Suffix::XCPP);
+    CPPUNIT_ASSERT(std::string("xcpp") == d.c_str()); }
+  { Definition d(Suffix::MK);
+    CPPUNIT_ASSERT(std::string("mk") == d.c_str()); }
+  { Definition d(Suffix::O);
+    CPPUNIT_ASSERT(std::string("o") == d.c_str()); }
+  { Definition d(Suffix::LO);
+    CPPUNIT_ASSERT(std::string("lo") == d.c_str()); }
+}
+
+auto tests::unit::suffix::Definition::test_str() -> void {
+  using ::scold::suffix::Definition;
+  using ::scold::Suffix;
+  { Definition d(Suffix::FPP);
+    CPPUNIT_ASSERT_EQUAL(std::string("fpp"), d.str()); }
+  { Definition d(Suffix::HPP);
+    CPPUNIT_ASSERT_EQUAL(std::string("hpp"), d.str()); }
+  { Definition d(Suffix::IPP);
+    CPPUNIT_ASSERT_EQUAL(std::string("ipp"), d.str()); }
+  { Definition d(Suffix::TPP);
+    CPPUNIT_ASSERT_EQUAL(std::string("tpp"), d.str()); }
+  { Definition d(Suffix::CPP);
+    CPPUNIT_ASSERT_EQUAL(std::string("cpp"), d.str()); }
+  { Definition d(Suffix::XCPP);
+    CPPUNIT_ASSERT_EQUAL(std::string("xcpp"), d.str()); }
+  { Definition d(Suffix::MK);
+    CPPUNIT_ASSERT_EQUAL(std::string("mk"), d.str()); }
+  { Definition d(Suffix::O);
+    CPPUNIT_ASSERT_EQUAL(std::string("o"), d.str()); }
+  { Definition d(Suffix::LO);
+    CPPUNIT_ASSERT_EQUAL(std::string("lo"), d.str()); }
+}
+
+auto tests::unit::suffix::Definition::test_to_success() -> void {
+  using d = ::scold::suffix::Definition;
+  using s = ::scold::Suffix;
+  CPPUNIT_ASSERT(s::FPP == value(d::to("fpp")));
+  CPPUNIT_ASSERT(s::HPP == value(d::to("hpp")));
+  CPPUNIT_ASSERT(s::IPP == value(d::to("ipp")));
+  CPPUNIT_ASSERT(s::TPP == value(d::to("tpp")));
+  CPPUNIT_ASSERT(s::CPP == value(d::to("cpp")));
+  CPPUNIT_ASSERT(s::XCPP == value(d::to("xcpp")));
+  CPPUNIT_ASSERT(s::MK == value(d::to("mk")));
+  CPPUNIT_ASSERT(s::O == value(d::to("o")));
+  CPPUNIT_ASSERT(s::LO == value(d::to("lo")));
+}
+
+auto tests::unit::suffix::Definition::test_to_failing() -> void {
+  CPPUNIT_ASSERT( !ok(::scold::suffix::Definition::to("bogus")) );
+}
+
+auto tests::unit::suffix::Definition::suite() -> cppunit::Test * {
+  using namespace ::unit::rigging::suite;
+  Stream s("Definition");
+  s << call("c_str", &Definition::test_c_str)
+    << call("str", &Definition::test_str)
+    << call("to-success", &Definition::test_to_success)
+    << call("to-failing", &Definition::test_to_failing)
+    ;
+  return finalize(s);
+}
+#endiv

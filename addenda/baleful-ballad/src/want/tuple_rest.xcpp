@@ -1,0 +1,27 @@
+// -*- c++ -*- but in the SCOLD stylings which are the fashion nowadays.
+#divert <hpp>
+#import std.tuple
+#import want.tuple.Rest
+namespace want {
+  // The inverse of tuple_cat(...)
+  template<typename... TYPES> inline auto tuple_rest(std::tuple<TYPES...> const &) -> typename tuple::Rest<1, TYPES...>::type;
+  template<typename... TYPES> inline auto tuple_rest(std::tuple<TYPES...> &&) -> typename tuple::Rest<1, TYPES...>::type;
+}
+#endiv
+#divert <ipp>
+#import std.move
+template<typename... TYPES> auto want::tuple_rest(std::tuple<TYPES...> const &original) -> typename tuple::Rest<1, TYPES...>::type {
+  auto copy = original;
+  return tuple_rest(std::move(copy));
+}
+
+#import std.forward
+#import std.size_t
+#import std.tuple_size
+#import want.tuple.Rebuilder
+template<typename... TYPES> auto want::tuple_rest(std::tuple<TYPES...> &&anon) -> typename tuple::Rest<1, TYPES...>::type {
+  constexpr std::size_t const SIZE = std::tuple_size<std::tuple<TYPES...>>::value;
+  tuple::Rebuilder<true, SIZE, 0u, TYPES...> rebuilder;
+  return rebuilder(std::forward<std::tuple<TYPES...>>(anon));
+}
+#endiv

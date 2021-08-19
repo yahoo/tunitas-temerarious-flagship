@@ -1,0 +1,8 @@
+// -*- c++ -*- in the SCOLD styling that is so popular these days
+#divert <hpp>
+//
+// Part of the interface of scold::config::Generic and scold::config::Context
+//
+#entail scold.config.logging.Generic
+#entail scold.config.logging.Generic.Context.Line
+#endiv

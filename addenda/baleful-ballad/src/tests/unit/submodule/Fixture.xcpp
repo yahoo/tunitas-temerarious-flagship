@@ -1,0 +1,72 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace tests {
+  namespace unit {
+    namespace submodule {
+      class Fixture;
+    }
+  }
+}
+#endiv
+#divert <hpp>
+class tests::unit::submodule::Fixture : public cppunit::test::Fixture {
+public:
+  auto test_constructor_1arg() -> void;
+  auto test_constructor_3arg() -> void;
+  auto test_modulesdir() -> void;
+  auto test_objdir() -> void;
+  auto test_srcdir() -> void;
+
+  static auto suite() -> cppunit::Test *;
+};
+#endiv
+#divert <cpp>
+#import scold.Module
+#import scold.Submodule
+#import std.string
+
+auto tests::unit::submodule::Fixture::test_constructor_1arg() -> void {
+  ::scold::Submodule specimen("here");
+  // Whee! it constructs
+  using s = std::string;
+  CPPUNIT_ASSERT_EQUAL(s("here/src"), specimen.srcdir());
+  CPPUNIT_ASSERT_EQUAL(s("here/obj/src"), specimen.objdir());
+  CPPUNIT_ASSERT_EQUAL(s("here/obj/modules"), specimen.modulesdir());
+}
+
+auto tests::unit::submodule::Fixture::test_constructor_3arg() -> void {
+  ::scold::Submodule specimen("here/obj/modules", "here/obj/src", "here/src");
+  // Whee! it constructs
+  using s = std::string;
+  CPPUNIT_ASSERT_EQUAL(s("here/src"), specimen.srcdir());
+  CPPUNIT_ASSERT_EQUAL(s("here/obj/src"), specimen.objdir());
+  CPPUNIT_ASSERT_EQUAL(s("here/obj/modules"), specimen.modulesdir());
+}
+
+auto tests::unit::submodule::Fixture::test_modulesdir() -> void {
+  ::scold::Submodule specimen("here/obj/modules", "here/obj/src", "here/src");
+  CPPUNIT_ASSERT_EQUAL(modulesdir(specimen), specimen.modulesdir());
+}
+
+auto tests::unit::submodule::Fixture::test_objdir() -> void {
+  ::scold::Submodule specimen("here/obj/modules", "here/obj/src", "here/src");
+  CPPUNIT_ASSERT_EQUAL(objdir(specimen), specimen.objdir());
+}
+
+auto tests::unit::submodule::Fixture::test_srcdir() -> void {
+  ::scold::Submodule specimen("here/obj/modules", "here/obj/src", "here/src");
+  CPPUNIT_ASSERT_EQUAL(srcdir(specimen), specimen.srcdir());
+}
+
+auto tests::unit::submodule::Fixture::suite() -> cppunit::Test * {
+  using namespace ::unit::rigging::suite;
+  Stream s("Submodule");
+  s << call("constructor-1arg", &Fixture::test_constructor_1arg)
+    << call("constructor-3arg", &Fixture::test_constructor_3arg)
+    << call("modulesdir", &Fixture::test_modulesdir)
+    << call("objdir", &Fixture::test_objdir)
+    << call("srcdir", &Fixture::test_srcdir)
+;
+  return finalize(s);
+}
+#endiv

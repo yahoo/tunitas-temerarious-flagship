@@ -1,0 +1,41 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+#import want.tuppel.Ganger
+namespace want {
+  namespace tuppel {
+    template<> class Ganger<>;
+  }
+}
+#endiv
+#divert <hpp>
+#import want.tuppel.Iterator
+#import std.tuple
+template<> class want::tuppel::Ganger<> {
+public:
+  using containers_type = std::tuple<>;
+  Ganger() = default;
+  using iterator = Iterator<>;
+  using const_iterator = Iterator<>;
+  inline auto begin() -> iterator;
+  inline auto end() -> iterator;
+  inline auto begin() const -> const_iterator;
+  inline auto end() const -> const_iterator;
+};
+#endiv
+#divert <ipp>
+auto want::tuppel::Ganger<>::begin() -> iterator {
+  return iterator();
+}
+
+auto want::tuppel::Ganger<>::end() -> iterator {
+  return iterator();
+}
+
+auto want::tuppel::Ganger<>::begin() const -> const_iterator {
+  return const_iterator();
+}
+
+auto want::tuppel::Ganger<>::end() const -> const_iterator {
+  return const_iterator();
+}
+#endiv

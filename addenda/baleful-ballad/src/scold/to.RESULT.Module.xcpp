@@ -1,0 +1,38 @@
+// -*- c++ -*- with SCOLD stylings
+#divert <hpp>
+// The module named <scold.to.RESULT.Module> corresponds to
+//     the functions to<...>(...)
+//     returning RESULT
+//     given a 1st argument of a scold::Module
+#forward scold.Module
+#import std.string
+namespace scold {
+  template<typename RESULT> inline auto to(Module const &) -> RESULT;
+  template<typename RESULT> inline auto to(Module const &, std::string const &) -> RESULT;
+  template<typename RESULT> inline auto to(Module const &, std::string const &, std::string const &) -> RESULT;
+  template<typename RESULT> inline auto to(Module const &, std::string const &, std::string const &, std::string const &) -> RESULT;
+}
+#endiv
+#divert <ipp>
+#import scold.Module
+template<typename RESULT> auto scold::to(Module const &) -> RESULT {
+  static_assert(0 == sizeof (RESULT) && 0 != sizeof (RESULT), "specializations only");
+  return RESULT();
+}
+
+template<typename RESULT> auto scold::to(Module const &, std::string const &) -> RESULT {
+  static_assert(0 == sizeof (RESULT) && 0 != sizeof (RESULT), "specializations only");
+  return RESULT();
+}
+
+template<typename RESULT> auto scold::to(Module const &, std::string const &, std::string const &) -> RESULT {
+  // This probably means that there is no 3-arg variant of this function (module + two string args)
+  static_assert(0 == sizeof (RESULT) && 0 != sizeof (RESULT), "specializations only");
+  return RESULT();
+}
+
+template<typename RESULT> auto scold::to(Module const &, std::string const &, std::string const &, std::string const &) -> RESULT {
+  static_assert(0 == sizeof (RESULT) && 0 != sizeof (RESULT), "specializations only");
+  return RESULT();
+}
+#endiv

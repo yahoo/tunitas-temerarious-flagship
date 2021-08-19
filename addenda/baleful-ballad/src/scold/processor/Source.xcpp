@@ -1,0 +1,27 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace scold {
+  namespace processor {
+    class Source;
+  }
+}
+#endiv
+#divert <hpp>
+#import scold.processor.Generic
+class scold::processor::Source : public Generic {
+  using ancestor = Generic;
+public:
+  explicit Source(configuration_type const &, context_type &);
+  auto operator()(phase_type, line_type &, output_type &, imports_type &, entails_type &, depends_type &) -> void override final;
+};
+#endiv
+#divert <cpp>
+scold::processor::Source::Source(configuration_type const &arg_cfg, context_type &arg_ctx)
+  : ancestor(arg_cfg, arg_ctx) {
+  ;
+}
+
+auto scold::processor::Source::operator()(phase_type phase, line_type &line, output_type &out, imports_type &imports, entails_type &entails, depends_type &depends) -> void {
+  out << line;
+}
+#endiv

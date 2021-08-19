@@ -1,0 +1,106 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace scold {
+  namespace streams {
+    template<typename STREAMS_CONSTY, typename STREAM_CONSTY> class Iterator;
+  }
+}
+#endiv
+#divert <hpp>
+namespace scold {
+  namespace streams {
+    template<typename STREAMS_CONSTY, typename STREAM_CONSTY> inline auto operator==(Iterator<STREAMS_CONSTY, STREAM_CONSTY> const &, Iterator<STREAMS_CONSTY, STREAM_CONSTY> const &) -> bool;
+    template<typename STREAMS_CONSTY, typename STREAM_CONSTY> inline auto operator!=(Iterator<STREAMS_CONSTY, STREAM_CONSTY> const &, Iterator<STREAMS_CONSTY, STREAM_CONSTY> const &) -> bool;
+  }
+}
+
+#import std.iterator
+#import std.forward_iterator_tag
+#import scold.Phase
+#import scold.phase.Incrementer
+#forward scold.Streams
+#forward scold.Stream
+#import std.is_same
+template<typename STREAMS_CONSTY, typename STREAM_CONSTY> class scold::streams::Iterator : public std::iterator<std::forward_iterator_tag, STREAM_CONSTY &, void, void, void> {
+  using ancestor = std::iterator<std::forward_iterator_tag, STREAM_CONSTY &, void, void, void>;
+public:
+  using streams_type = STREAMS_CONSTY;
+  using stream_type = STREAM_CONSTY;
+  static_assert((std::is_same<streams_type, scold::Streams>::value ||
+                 std::is_same<streams_type, scold::Streams const>::value),
+                "inappropriate type for STREAMS_CONSTY");
+  static_assert((std::is_same<stream_type, scold::Stream>::value ||
+                 std::is_same<stream_type, scold::Stream const>::value),
+                "inappropriate type for STREAM_CONSTY");
+  static_assert(std::is_same<stream_type &, typename ancestor::value_type>::value,
+                "unexpected value_type");
+  // suitable for constructing the "begin" iterator
+  inline Iterator(streams_type *, Phase position, phase::Incrementer);
+  // suitble for constructing the "end" iterator
+  inline Iterator(streams_type *, Phase position);
+  inline auto operator++() -> Iterator &;
+  inline auto operator++(int) -> Iterator;
+  inline auto operator*() const -> typename ancestor::value_type const &;
+  inline auto operator*() -> typename ancestor::value_type &;
+protected:
+  streams_type *owner;
+  Phase position;
+  phase::Incrementer incrementer;
+  friend auto streams::operator== <>(Iterator const &, Iterator const &) -> bool;
+  //...  so we don't have to write operator* twice or cut & paste
+  template<typename STREAM_CONSTY_CONSTY, typename STREAMS_CONSTY_CONSTY> inline static auto operator_indirect(STREAMS_CONSTY_CONSTY &owner_consty, Phase position) -> STREAM_CONSTY_CONSTY &;
+};
+#endiv
+#divert <ipp>
+#import scold.Streams
+#import scold.Stream
+template<typename STREAMS_CONSTY, typename STREAM_CONSTY> auto scold::streams::operator==(Iterator<STREAMS_CONSTY, STREAM_CONSTY> const &a, Iterator<STREAMS_CONSTY, STREAM_CONSTY> const &b) -> bool {
+  return a.owner == b.owner && a.position == b.position;
+}
+
+template<typename STREAMS_CONSTY, typename STREAM_CONSTY> auto scold::streams::operator!=(Iterator<STREAMS_CONSTY, STREAM_CONSTY> const &a, Iterator<STREAMS_CONSTY, STREAM_CONSTY> const &b) -> bool {
+  return !operator==(a, b);
+}
+
+template<typename STREAMS_CONSTY, typename STREAM_CONSTY> scold::streams::Iterator<STREAMS_CONSTY, STREAM_CONSTY>::Iterator(streams_type *arg_owner, Phase arg_position, phase::Incrementer arg_incrementer)
+  : ancestor()
+  , owner(arg_owner)
+  , position(arg_position)
+  , incrementer(arg_incrementer) {
+  ;
+}
+
+template<typename STREAMS_CONSTY, typename STREAM_CONSTY> scold::streams::Iterator<STREAMS_CONSTY, STREAM_CONSTY>::Iterator(streams_type *arg_owner, Phase arg_position)
+  : ancestor()
+  , owner(arg_owner)
+  , position(arg_position)
+  , incrementer() {
+  ;
+}
+
+template<typename STREAMS_CONSTY, typename STREAM_CONSTY> auto scold::streams::Iterator<STREAMS_CONSTY, STREAM_CONSTY>::operator++() -> Iterator & {
+  position = incrementer(position);
+  return *this;
+}
+
+
+template<typename STREAMS_CONSTY, typename STREAM_CONSTY> auto scold::streams::Iterator<STREAMS_CONSTY, STREAM_CONSTY>::operator++(int) -> Iterator {
+  Iterator old(*this);
+  operator++();
+  return *this;
+}
+
+#import scold.phase.Definition
+template<typename STREAMS_CONSTY, typename STREAM_CONSTY> template<typename STREAM_CONSTY_CONSTY, typename STREAMS_CONSTY_CONSTY> auto scold::streams::Iterator<STREAMS_CONSTY, STREAM_CONSTY>::operator_indirect(STREAMS_CONSTY_CONSTY &owner_consty, Phase position) -> STREAM_CONSTY_CONSTY & {
+  // The one-line template resolves the const-vs-musting of operator* without cut & paste.
+  return owner_consty[position];
+}
+
+template<typename STREAMS_CONSTY, typename STREAM_CONSTY> auto scold::streams::Iterator<STREAMS_CONSTY, STREAM_CONSTY>::operator*() const -> typename ancestor::value_type const & {
+  return operator_indirect<typename ancestor::value_type const>(*owner, position);
+}
+
+template<typename STREAMS_CONSTY, typename STREAM_CONSTY> auto scold::streams::Iterator<STREAMS_CONSTY, STREAM_CONSTY>::operator*() -> typename ancestor::value_type & {
+  return operator_indirect<typename ancestor::value_type>(*owner, position);
+}
+#endiv

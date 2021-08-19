@@ -1,0 +1,13 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+#import tests.unit.want
+namespace tests {
+  namespace unit {
+    namespace want {
+      namespace format {
+        // a test fixture for the doppelgang(...)
+      }
+    }
+  }
+}
+#divert </fpp>

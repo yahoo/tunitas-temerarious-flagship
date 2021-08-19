@@ -1,0 +1,9 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+#import want.regex.unbusted
+namespace want {
+  namespace regex {
+    template<class BidirectionalIterator> using sub_match = unbusted::sub_match<BidirectionalIterator>;
+  }
+}
+#endiv

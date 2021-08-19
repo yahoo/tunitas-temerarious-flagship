@@ -1,0 +1,26 @@
+#!/bin/sh
+source ${0%/*}/framework.sh || exit 1
+
+x99=x99_$b
+
+rm -rf tests/remonstrate/$x99
+mkdir -p tests/remonstrate/$x99
+cp tests/remonstrate/$b.xcpp tests/remonstrate/$x99/.
+
+srcdir=tests
+objdir=obj/tests
+
+# testing this
+# testing the --srcdir & --objdir options
+remonstrate ${module_std:+-I$module_std/modules} --verbose --debug --make-directories --modulesdir=obj/modules --objdir=obj/src/tests --srcdir=tests tests/remonstrate/x99_example03/example03.xcpp
+
+declare -a files=( \
+    obj/modules{/fpp,/hpp,/ipp,}/remonstrate.x99_example03.example03 \
+    obj/src/tests/remonstrate/x99_example03/example03.{cpp,mk} \
+    tests/remonstrate/x99_example03/example03.xcpp \
+)
+ls -ld ${files[@]}
+
+for file in ${files[@]}; do
+    sed -e "s|^|${file##*/}> |" < $file
+done

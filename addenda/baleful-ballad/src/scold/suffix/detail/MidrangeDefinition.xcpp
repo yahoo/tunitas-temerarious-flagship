@@ -1,0 +1,52 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+#import scold.Suffix
+namespace scold {
+  namespace suffix {
+    namespace detail {
+      template<Suffix PHASE> struct MidrangeDefinition;
+    }
+  }
+}
+#endiv
+#divert <hpp>
+#import std.string
+template<scold::Suffix PHASE> struct scold::suffix::detail::MidrangeDefinition {
+  inline static constexpr auto value() -> Suffix { return PHASE; } 
+  inline static constexpr auto c_str() -> char const *; // see the specialization
+  inline static auto str() -> std::string { return std::string(c_str()); }
+};
+
+namespace scold {
+  namespace suffix {
+    namespace detail {
+      template<> constexpr auto MidrangeDefinition<Suffix::FPP>::c_str() -> char const *;
+      template<> constexpr auto MidrangeDefinition<Suffix::HPP>::c_str() -> char const *;
+      template<> constexpr auto MidrangeDefinition<Suffix::IPP>::c_str() -> char const *;
+      template<> constexpr auto MidrangeDefinition<Suffix::TPP>::c_str() -> char const *;
+      template<> constexpr auto MidrangeDefinition<Suffix::CPP>::c_str() -> char const *;
+    }
+  }
+}
+#endiv
+#divert <ipp>
+template<> constexpr auto scold::suffix::detail::MidrangeDefinition<scold::Suffix::FPP>::c_str() -> char const * {
+  return "fpp";
+}
+
+template<> constexpr auto scold::suffix::detail::MidrangeDefinition<scold::Suffix::HPP>::c_str() -> char const * {
+  return "hpp";
+}
+
+template<> constexpr auto scold::suffix::detail::MidrangeDefinition<scold::Suffix::IPP>::c_str() -> char const * {
+  return "ipp";
+}
+
+template<> constexpr auto scold::suffix::detail::MidrangeDefinition<scold::Suffix::TPP>::c_str() -> char const * {
+  return "tpp";
+}
+
+template<> constexpr auto scold::suffix::detail::MidrangeDefinition<scold::Suffix::CPP>::c_str() -> char const * {
+  return "cpp";
+}
+#endiv

@@ -1,0 +1,16 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+#import std.function
+#import std.string
+#import scold.validate.Result
+namespace scold {
+  namespace validate {
+    namespace detail {
+      // predicates return the truth
+      using validation_predicate = std::function<bool (std::string const &)>;
+      // functions return the truth and an explanation on failure
+      using validation_function = std::function<Result (std::string const &)>;
+    }
+  }
+}
+#endiv

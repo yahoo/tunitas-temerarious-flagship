@@ -1,0 +1,74 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace tests {
+  namespace unit {
+    namespace want {
+      namespace tuple {
+        class Rest;
+      }
+    }
+  }
+}
+#endiv
+#divert <hpp>
+class tests::unit::want::tuple::Rest : public cppunit::test::Fixture {
+public:
+  auto test_caseN() -> void;
+  auto test_case0() -> void;
+  auto test_tuple_rest() -> void;
+
+  static auto suite() -> cppunit::Test *;
+  enum class Sausage { };
+};
+#endiv
+#divert <cpp>
+#import std.get
+#import std.tuple
+#import std.tuple_cat
+#import want.tuple.Rest
+auto tests::unit::want::tuple::Rest::test_caseN() -> void {
+  using type_r1 = ::want::tuple::Rest<1u, int, char, double, Sausage>::type;
+  type_r1 v1 = std::tuple<char, double, Sausage>('a', 1.2, Sausage());
+  CPPUNIT_ASSERT('a' == std::get<0>(v1));
+  using type_r2 = ::want::tuple::Rest<2u, int, char, double, Sausage>::type;
+  type_r2 v2 = std::tuple<double, Sausage>(1.3, Sausage());
+  CPPUNIT_ASSERT(1.3 == std::get<0>(v2));
+  using type_r3 = ::want::tuple::Rest<3u, int, char, double, Sausage>::type;
+  type_r3 v3 = std::tuple<Sausage>(Sausage());
+  CPPUNIT_ASSERT(Sausage() == std::get<0>(v3));
+  using type_r4 = ::want::tuple::Rest<4u, int, char, double, Sausage>::type;
+  type_r4 v4 = std::tuple<>();
+  CPPUNIT_ASSERT(std::tuple<>() == v4);
+}
+
+auto tests::unit::want::tuple::Rest::test_case0() -> void {
+  using type_r0 = ::want::tuple::Rest<0u, int, char, double, Sausage>::type;
+  type_r0 v0 = std::tuple<int, char, double, Sausage>(99, 'a', 1.2, Sausage());
+  CPPUNIT_ASSERT(99 == std::get<0>(v0));
+}
+
+#import std.make_tuple
+#import std.get
+#import want.tuple_rest
+auto tests::unit::want::tuple::Rest::test_tuple_rest() -> void {
+  auto r = std::make_tuple(1, 'a', std::string("puzzle"));
+  auto first = std::get<0>(r);
+  CPPUNIT_ASSERT(1 == first);
+  auto rest = ::want::tuple_rest(r); // <------------------------------------ test this
+  CPPUNIT_ASSERT('a' == std::get<0>(rest));
+  CPPUNIT_ASSERT("puzzle" == std::get<1>(rest));
+  std::tuple<char, std::string> const expected = std::make_tuple('a', std::string("puzzle"));
+  std::tuple<char, std::string> const actual = rest;
+  CPPUNIT_ASSERT(expected == actual);
+}
+
+auto tests::unit::want::tuple::Rest::suite() -> cppunit::Test * {
+  using namespace ::unit::rigging::suite;
+  Stream s("Rest");
+  s << call("caseN", &Rest::test_caseN)
+    << call("case0", &Rest::test_case0)
+    << call("rest", &Rest::test_tuple_rest);
+    ;
+    return finalize(s);
+}
+#endiv

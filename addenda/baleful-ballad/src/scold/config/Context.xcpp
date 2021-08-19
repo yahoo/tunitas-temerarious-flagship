@@ -1,0 +1,38 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace scold {
+  namespace config {
+    //
+    // The context in which a disaggregation process is run
+    // it consists of
+    //   the (single) filename
+    //   the error and warning count against the (insides) of the file
+    //      in contrast to the errors and warnings about opening/accessing the file which are not recorded
+    // ... other configuration is nearby config::Generic
+    //
+    // The error and warning acounts are incremented by error(...) and warning(...) respectively.
+    //
+    class Context;
+  }
+}
+#endiv
+#divert <hpp>
+#import std.string
+class scold::config::Context {
+public:
+  inline explicit Context(std::string const &filename);
+  std::string filename;
+  std::size_t error_count;
+  std::size_t warning_count;
+  // and other settings as may be necessary on a per-file/per-run basis.
+};
+#entail scold.config.logging.Generic.Context.Line
+#endiv
+#divert <ipp>
+scold::config::Context::Context(std::string const &arg_filename)
+  : filename(arg_filename)
+  , error_count(0)
+  , warning_count(0) {
+  ;
+}
+#endiv

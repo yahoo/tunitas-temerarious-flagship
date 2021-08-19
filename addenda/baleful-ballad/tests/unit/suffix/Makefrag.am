@@ -1,0 +1,4 @@
+tests_unit_suffix_TESTS = \
+  tests/unit/suffix/cases.test \
+  $(end)
+

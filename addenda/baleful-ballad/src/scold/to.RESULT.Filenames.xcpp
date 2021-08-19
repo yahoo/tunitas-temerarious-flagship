@@ -1,0 +1,29 @@
+// -*- c++ -*- with SCOLD stylings
+#divert <hpp>
+// The module named <scold.to.RESULT.Filenames> corresponds to
+//     the functions to<...>(...)
+//     returning RESULT
+//     given a 1st argument of a scold::Filenames
+// Specializations occur against RESULT
+#import scold.Filenames
+#import std.string
+namespace scold {
+  template<typename RESULT> inline auto to(Filenames const &) -> RESULT;
+  template<typename RESULT> inline auto to(Filenames const &, std::string const &) -> RESULT;
+  template<typename RESULT> inline auto to(Filenames const &, std::string const &, std::string const &) -> RESULT;
+}
+#endiv
+#divert <ipp>
+template<typename RESULT> auto scold::to(Filenames const &) -> RESULT {
+  static_assert(0 == sizeof (RESULT) && 0 != sizeof (RESULT), "specializations only");
+}
+
+template<typename RESULT> auto scold::to(Filenames const &, std::string const &) -> RESULT {
+  static_assert(0 == sizeof (RESULT) && 0 != sizeof (RESULT), "specializations only");
+}
+
+template<typename RESULT> auto scold::to(Filenames const &, std::string const &, std::string const &) -> RESULT {
+  static_assert(0 == sizeof (RESULT) && 0 != sizeof (RESULT), "specializations only");
+}
+
+#endiv

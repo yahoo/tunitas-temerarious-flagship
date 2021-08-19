@@ -1,0 +1,313 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace tests {
+  namespace unit {
+    namespace scold {
+      class Files;
+    }
+  }
+}
+#endiv
+#divert <hpp>
+#import scold.Filenames
+#import scold.Files
+#import scold.Module
+#import std.unique_ptr
+class tests::unit::scold::Files : public cppunit::test::Fixture {
+public:
+  auto setUp() -> void;
+  auto tearDown() -> void;
+
+  ::scold::Module module;
+  ::scold::Filenames filenames;
+
+  // Becuase these things musn't be copied or moved
+  std::unique_ptr<::scold::Files> files;
+
+  auto test_constructor_default() -> void;
+  auto test_constructor_1arg() -> void;
+  auto test_operator_bool_false() -> void;
+  auto test_operator_bool_true() -> void;
+  auto test_operator_not() -> void;
+  auto test_good() -> void;
+  auto test_eof() -> void;
+  auto test_bad() -> void;
+  auto test_fail() -> void;
+  auto test_rdstate() -> void;
+  auto test_setstate() -> void;
+  auto test_clear() -> void;
+  auto test_get_exceptions() -> void;
+  auto test_set_exceptions() -> void;
+  auto test_open() -> void;
+  auto test_is_open() -> void;
+  auto test_close() -> void;
+  auto test_begin_end_muting() -> void;
+  auto test_begin_end_consty() -> void;
+  auto test_usage1() -> void;
+  auto test_usage2() -> void;
+
+  static auto suite() -> cppunit::Test *;
+};
+#endiv
+#divert <cpp>
+#import scold.Files
+#import scold.to
+
+#import sys.posix.mkdirp
+#import std.move
+#import uuid.generate.random
+auto tests::unit::scold::Files::setUp() -> void {
+  std::string uniqueness = to_string(uuid::generate::random());
+  module = ::scold::Module{"tests", "unit", "scold", "t99_Files_" + uniqueness};
+  filenames = ::scold::to<::scold::Filenames>(module, "t99");
+  CPPUNIT_ASSERT(ok(sys::posix::mkdirp("t99/tests/unit/scold", 0777)));
+  CPPUNIT_ASSERT(ok(sys::posix::mkdirp("t99/fpp", 0777)));
+  CPPUNIT_ASSERT(ok(sys::posix::mkdirp("t99/hpp", 0777)));
+  CPPUNIT_ASSERT(ok(sys::posix::mkdirp("t99/ipp", 0777)));
+  files.reset(new ::scold::Files(filenames));
+  // The expectation is that this succeeded.  Let's show that now.
+  CPPUNIT_ASSERT_EQUAL(true, (bool)*files);
+  CPPUNIT_ASSERT_EQUAL(true, files->good());
+}
+
+auto tests::unit::scold::Files::tearDown() -> void {
+  module.clear();
+  filenames = ::scold::Filenames{};
+  files.reset();
+}
+
+auto tests::unit::scold::Files::test_constructor_default() -> void {
+  ::scold::Files f;
+  CPPUNIT_ASSERT(!f.is_open());
+}
+
+#import scold.Suffix
+#import sys.posix.OK
+#import sys.posix.access
+#import sys.posix.mkdirp
+#import uuid.generate.random
+#import tests.unit.scold.Cleanup_Files
+auto tests::unit::scold::Files::test_constructor_1arg() -> void {
+  using ::scold::Suffix;
+  using namespace sys::posix;
+  using sys::posix::mkdirp;
+  std::string uniqueness = to_string(uuid::generate::random());
+  ::scold::Module const module{"scold", "t99_Something_" + uniqueness};
+  ::scold::Filenames names;
+  names.define(module, "tests/unit");
+  CPPUNIT_ASSERT(ok(mkdirp("tests/unit/fpp", 0777)));
+  CPPUNIT_ASSERT(ok(mkdirp("tests/unit/hpp", 0777)));
+  CPPUNIT_ASSERT(ok(mkdirp("tests/unit/ipp", 0777)));
+  // Files are opened upon 1-arg construction as RAII
+  Cleanup_Files undo(names);
+  ::scold::Files files(names);
+  CPPUNIT_ASSERT(files.good());
+  CPPUNIT_ASSERT(ok(access(names[Suffix::FPP], OK::F)));
+  CPPUNIT_ASSERT(ok(access(names[Suffix::HPP], OK::F)));
+  CPPUNIT_ASSERT(ok(access(names[Suffix::IPP], OK::F)));
+  CPPUNIT_ASSERT(ok(access(names[Suffix::TPP], OK::F)));
+  CPPUNIT_ASSERT(ok(access(names[Suffix::CPP], OK::F)));
+  // Prove the thing is good enough to write into
+  CPPUNIT_ASSERT(files.good());
+}
+
+#import tests.unit.scold.Cleanup_Files
+#import uuid.generate.random
+#import sys.posix.OK
+auto tests::unit::scold::Files::test_operator_bool_false() -> void {
+  using sys::posix::access;
+  using sys::posix::mkdirp;
+  using OK = sys::posix::OK;
+  using ::scold::Suffix;
+  std::string uniqueness = to_string(uuid::generate::random());
+  ::scold::Module const module{"scold", "t99_Something_for_operator_bool_" + uniqueness};
+  ::scold::Filenames names;
+  names.define(module, "t99/t88/t77-does-not-exist");
+  Cleanup_Files undo(names);
+  ::scold::Files files(names);
+  bool b = (bool) files; // <-------------------------------------- test that
+  CPPUNIT_ASSERT_EQUAL(false, b);
+}
+
+auto tests::unit::scold::Files::test_operator_bool_true() -> void {
+  bool b = (bool) *files; // <--- test that
+  CPPUNIT_ASSERT_EQUAL(true, b);
+}
+
+auto tests::unit::scold::Files::test_operator_not() -> void {
+  bool bnot = ! *files; // <--- test that
+  CPPUNIT_ASSERT(false == bnot);
+}
+
+auto tests::unit::scold::Files::test_good() -> void {
+  CPPUNIT_ASSERT(files->good());
+}
+
+auto tests::unit::scold::Files::test_eof() -> void {
+  CPPUNIT_ASSERT(!files->eof());
+}
+
+auto tests::unit::scold::Files::test_bad() -> void {
+  CPPUNIT_ASSERT(!files->bad());
+}
+
+auto tests::unit::scold::Files::test_fail() -> void {
+  CPPUNIT_ASSERT(!files->fail());
+}
+
+auto tests::unit::scold::Files::test_rdstate() -> void {
+  auto rd = files->rdstate();
+  CPPUNIT_ASSERT(std::ios::goodbit == rd);
+}
+
+auto tests::unit::scold::Files::test_setstate() -> void {
+  files->setstate(files->rdstate());
+  CPPUNIT_ASSERT(true);
+}
+
+auto tests::unit::scold::Files::test_clear() -> void {
+  files->clear();
+  CPPUNIT_ASSERT(true);
+}
+
+auto tests::unit::scold::Files::test_get_exceptions() -> void {
+  auto ex = files->exceptions();
+  CPPUNIT_ASSERT(std::ios::goodbit == ex);
+}
+
+auto tests::unit::scold::Files::test_set_exceptions() -> void {
+  files->exceptions(files->exceptions());
+}
+
+#import scold.Suffix
+#import sys.posix.access
+#import sys.posix.OK
+auto tests::unit::scold::Files::test_open() -> void {
+  files->close();
+  files->open(filenames);
+  // Are the files still there?
+  using ::scold::Suffix;
+  using namespace sys::posix;
+  CPPUNIT_ASSERT(ok(access(filenames[Suffix::FPP], OK::F)));
+  CPPUNIT_ASSERT(ok(access(filenames[Suffix::HPP], OK::F)));
+  CPPUNIT_ASSERT(ok(access(filenames[Suffix::IPP], OK::F)));
+  CPPUNIT_ASSERT(ok(access(filenames[Suffix::TPP], OK::F)));
+  CPPUNIT_ASSERT(ok(access(filenames[Suffix::CPP], OK::F)));
+}
+
+auto tests::unit::scold::Files::test_is_open() -> void {
+  files->open(filenames);
+  CPPUNIT_ASSERT(files->is_open());
+}
+
+auto tests::unit::scold::Files::test_close() -> void {
+  files->close();
+  files->open(filenames);
+  CPPUNIT_ASSERT(true);
+}
+
+auto tests::unit::scold::Files::test_begin_end_muting() -> void {
+  unsigned stream_number = 0;
+  for (auto &s : *files) {
+    s << "stream number " << ++stream_number;
+  }
+  CPPUNIT_ASSERT(true);
+}
+
+auto tests::unit::scold::Files::test_begin_end_consty() -> void {
+  for (auto const &s : *files) {
+    bool g = s.good();
+    CPPUNIT_ASSERT(g);
+  }
+}
+
+#import scold.Module
+#import scold.Filenames
+#import scold.Files
+#import scold.Streams
+#import scold.line.Item
+#import scold.Phase
+auto tests::unit::scold::Files::test_usage1() -> void {
+  ::scold::Module module{"scold", "t88_Files"};
+  ::scold::Filenames names;
+  names.define(module, "tests/unit");
+  ::scold::Files files(filenames);
+  ::scold::Streams outs;
+  using l = ::scold::line::Item;
+  outs[::scold::Phase::FPP] << l(1, "the fpp");
+  outs[::scold::Phase::HPP] << l(1, "the hpp");
+  outs[::scold::Phase::IPP] << l(1, "the ipp");
+  outs[::scold::Phase::TPP] << l(1, "the tpp");
+  outs[::scold::Phase::CPP] << l(1, "the cpp");
+  files << outs;
+  files.close();
+}
+
+#import scold.Files
+#import scold.Filenames
+#import scold.Streams
+#import scold.Phase
+#import sys.posix.access
+#import sys.posix.mkdirp
+#import slurp.file.read
+auto tests::unit::scold::Files::test_usage2() -> void {
+  ::scold::Files files;
+  ::scold::Module const module{"tests", "unit", "scold", "t99_test_usage2"};
+  ::scold::Filenames names;
+  names.define(module, "t99/usage2"); // put the file right here in our unit testing
+  CPPUNIT_ASSERT(ok(sys::posix::mkdirp("t99/usage2/tests/unit/scold", 0777)));
+  CPPUNIT_ASSERT(ok(sys::posix::mkdirp("t99/usage2/fpp", 0777)));
+  CPPUNIT_ASSERT(ok(sys::posix::mkdirp("t99/usage2/hpp", 0777)));
+  CPPUNIT_ASSERT(ok(sys::posix::mkdirp("t99/usage2/ipp", 0777)));
+  // WATCHOUT - if 'trunc' isn't mentioned here then the file contents are from whatever wrote there before.
+  files.open(names, std::ios::out | std::ios::trunc);
+  // are they all open?
+  CPPUNIT_ASSERT(files.is_open());
+  // did the files get created?
+  CPPUNIT_ASSERT(ok(sys::posix::access(names[::scold::Phase::FPP], sys::posix::OK::EXISTS)));
+  CPPUNIT_ASSERT(ok(sys::posix::access(names[::scold::Phase::HPP], sys::posix::OK::EXISTS)));
+  CPPUNIT_ASSERT(ok(sys::posix::access(names[::scold::Phase::IPP], sys::posix::OK::EXISTS)));
+  CPPUNIT_ASSERT(ok(sys::posix::access(names[::scold::Phase::TPP], sys::posix::OK::EXISTS)));
+  CPPUNIT_ASSERT(ok(sys::posix::access(names[::scold::Phase::CPP], sys::posix::OK::EXISTS)));
+  ::scold::Streams info;
+  using line = ::scold::line::Item;
+  info[::scold::Phase::FPP] << line(1, "the fpp stanza");
+  info[::scold::Phase::HPP] << line(1, "the hpp stanza");
+  info[::scold::Phase::IPP] << line(1, "the ipp stanza");
+  info[::scold::Phase::TPP] << line(1, "the tpp stanza");
+  info[::scold::Phase::CPP] << line(1, "the cpp stanza");
+  // write something
+  files << info;
+  files.close();
+}
+
+auto tests::unit::scold::Files::suite() -> cppunit::Test * {
+  using namespace ::unit::rigging::suite;
+  Stream s("Files");
+  s << call("constructor_default", &Files::test_constructor_default)
+    << call("constructor_1arg", &Files::test_constructor_1arg)
+    << call("constructor_default", &Files::test_constructor_default)
+    << call("constructor_1arg", &Files::test_constructor_1arg)
+    << call("operator_bool-false", &Files::test_operator_bool_false)
+    << call("operator_bool-true", &Files::test_operator_bool_true)
+    << call("operator_not", &Files::test_operator_not)
+    << call("good", &Files::test_good)
+    << call("eof", &Files::test_eof)
+    << call("bad", &Files::test_bad)
+    << call("fail", &Files::test_fail)
+    << call("rdstate", &Files::test_rdstate)
+    << call("setstate", &Files::test_setstate)
+    << call("clear", &Files::test_clear)
+    << call("get_exceptions", &Files::test_get_exceptions)
+    << call("set_exceptions", &Files::test_set_exceptions)
+    << call("open", &Files::test_open)
+    << call("is_open", &Files::test_is_open)
+    << call("close", &Files::test_close)
+    << call("begin_end_muting", &Files::test_begin_end_muting)
+    << call("begin_end_consty", &Files::test_begin_end_consty)
+    << call("usage1", &Files::test_usage1)
+    << call("usage1", &Files::test_usage2)
+    ;
+  return finalize(s);
+}
+#endiv

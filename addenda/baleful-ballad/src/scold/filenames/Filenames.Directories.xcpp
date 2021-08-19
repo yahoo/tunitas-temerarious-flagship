@@ -1,0 +1,10 @@
+// -*- c++ -*- in the SCOLD styling that is so fashionable these days
+#divert <hpp>
+#import scold.filenames.Filenames
+#import std.set
+#import std.string
+class scold::filenames::Filenames::Directories : public std::set<std::string> {
+public:
+  Directories() = default;
+};
+#endiv

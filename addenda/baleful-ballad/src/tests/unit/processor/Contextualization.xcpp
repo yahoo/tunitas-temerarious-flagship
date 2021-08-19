@@ -1,0 +1,35 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace tests {
+  namespace unit {
+    namespace processor {
+      // A mixin which suppolies the Configuration & Context
+      struct Contextualization;
+    }
+  }
+}
+#divert </fpp>
+#divert <hpp>
+#import scold.Configuration
+#import scold.config.Context
+#import scold.search.Build
+class tests::unit::processor::Contextualization {
+protected:
+  // descendants only
+  inline Contextualization();
+  ~Contextualization() = default;
+public:
+  // Used by descendants in the various testers...
+  ::scold::Configuration const cfg;
+  // ctx is non-const because it accrues error- (warning-) counts
+  ::scold::config::Context ctx;
+  ::scold::search::Build /*nonconst*/ build_search;
+};
+#endiv
+#divert <ipp>
+tests::unit::processor::Contextualization::Contextualization()
+  : ctx("file.xcpp")
+  , build_search(".", {"."}, {"."}) {
+  ;
+}
+#endiv

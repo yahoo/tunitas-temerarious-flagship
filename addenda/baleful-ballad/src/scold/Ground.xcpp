@@ -1,0 +1,89 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace scold {
+  // Foreground and Background for the file
+  //
+  // foreground -> is inside a #divert...#endiv
+  // background -> is outside such
+  // unuseable -> are unuseable erroneous lines (throw away)
+  //
+  // thesaurus says that both spellings are viable
+  enum class Ground { BACK = 0, FORE = 1, UNUSABLE = -1, UNUSEABLE = UNUSABLE  };
+}
+#endiv
+#divert <hpp>
+#import std.ostream
+#import std.istream
+namespace scold {
+  // The three-valued logic where UNUEABLE is sticky
+  inline auto invert(Ground) -> Ground;
+  inline auto operator!(Ground) -> Ground;
+
+  inline auto operator<<(std::ostream &, Ground) -> std::ostream &;
+  auto operator>>(std::istream &, Ground &) -> std::istream &;
+}
+#endiv
+#divert <ipp>
+auto scold::invert(Ground ground) -> Ground {
+  return ground == Ground::UNUSEABLE ? ground : (ground == Ground::FORE ? Ground::BACK : Ground::FORE);
+}
+
+auto scold::operator!(Ground ground) -> Ground {
+  return invert(ground);
+}
+
+auto scold::operator<<(std::ostream &o, Ground value) -> std::ostream & {
+  if (Ground::FORE == value) {
+    return o << "foreground";
+  } else if (Ground::BACK == value) {
+    return o << "background";
+  } else if (Ground::UNUSEABLE == value) {
+    return o << "unuseable";
+  } else {
+    // These are invalid values
+    return o << "Ground-" << (int)(value);
+  }
+}
+#endiv
+#divert <cpp>
+auto scold::operator>>(std::istream &in, Ground &fill) -> std::istream & {
+  //
+  // Ten characters "foreground" and "background"
+  //
+  //     0123456789 (ten)
+  //     foreground
+  //     background
+  //     unuseable
+  //
+  bool found = false;
+  char c[10];
+  if (in >> c[0] >> c[1] >> c[2] >> c[3] >> c[4] >> c[5] >> c[6] >> c[7] >> c[8]) {
+    bool unuseable = 'u' == c[0] && 'n' == c[1] && 'u' == c[2] && 's' == c[3] && 'e' == c[4] && 'a' == c[5] && 'b' == c[6] && 'l' == c[7] && 'e' == c[8];
+    if (unuseable) {
+      fill = Ground::UNUSEABLE;
+      found = true;
+    } else {
+      if (in >> c[9]) {
+        bool ground = 'g' == c[4] && 'r' == c[5] && 'o' == c[6] && 'u' == c[7] && 'n' == c[8]  && 'd' == c[9];
+        if (ground) {
+          bool fore = 'f' == c[0] && 'o' == c[1] && 'r' == c[2] && 'e' == c[3];
+          if (fore) {
+            fill = Ground::FORE;
+            found = true;
+          } else {
+            bool back = 'b' == c[0] && 'a' == c[1] && 'c' == c[2] && 'k' == c[3];
+            if (back) {
+              fill = Ground::BACK;
+              found = true;
+            }
+          }
+        }
+      }
+    }
+  }
+  if (!found) {
+    in.setstate(std::ios::failbit); // might throw
+  }
+  return in;
+}
+#endiv

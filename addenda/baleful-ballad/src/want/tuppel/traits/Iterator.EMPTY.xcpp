@@ -1,0 +1,25 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+#import want.tuppel.traits.Iterator
+namespace want {
+  namespace tuppel {
+    namespace traits {
+      template<> struct Iterator<>;
+    }
+  }
+}
+#endiv
+#divert <hpp>
+#import std.forward_iterator_tag
+#import std.iterator
+template<> struct want::tuppel::traits::Iterator<> {
+  using iterator_category = std::forward_iterator_tag;
+  using value_type = std::tuple<>;
+  using difference = void;
+  using pointer = void;
+  using reference = void;
+  // capture the result of the decisions recorded herein
+  using iterator = std::iterator<iterator_category, value_type, difference, pointer, reference>;
+  using traits_type = iterator; // ahem, in case you forget
+};
+#endiv

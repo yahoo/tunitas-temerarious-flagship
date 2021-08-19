@@ -1,0 +1,42 @@
+// -*- c++ -*- in the SCOLD styling that is so fashionable these days
+#divert <hpp>
+#forward scold.module.Module
+#import path.filename.mount.Value
+#import path.filename.mount.Unbound
+namespace scold {
+  namespace module {
+    //
+    // entailed from <scold.fragment.workbench>
+    //
+    // Usage:
+    //     auto fpp = Phase::FPP;
+    //     auto module = ... some module ... e.g. Module{"com", "example", "Class"};
+    //     finalize(workbench() * fpp / module)
+    //
+    // declared in namespace scold near scold::Module so that ADL will find it.
+    inline auto operator/(Module const &, path::filename::mount::Value &&) -> path::filename::mount::Value;
+    inline auto operator/(path::filename::mount::Value &&, Module const &) -> path::filename::mount::Value;
+    inline auto operator*(path::filename::mount::Unbound &&, Module const &) -> path::filename::mount::Value;
+  }
+}
+#endiv
+#divert <ipp>
+#import scold.module.Module
+#import scold.to.string
+#import std.forward
+
+auto scold::module::operator/(Module const &module, path::filename::mount::Value &&anon) -> path::filename::mount::Value {
+  anon.subject.insert(0, '/' + to<std::string>(module));
+  return std::forward<path::filename::mount::Value>(anon);
+}
+
+auto scold::module::operator/(path::filename::mount::Value &&anon, Module const &module) -> path::filename::mount::Value {
+  anon.subject += '/';
+  anon.subject += to<std::string>(module);
+  return std::forward<path::filename::mount::Value>(anon);
+}
+
+auto scold::module::operator*(path::filename::mount::Unbound &&, Module const &module) -> path::filename::mount::Value {
+  return path::filename::mount::Value(to<std::string>(module));
+}
+#endiv

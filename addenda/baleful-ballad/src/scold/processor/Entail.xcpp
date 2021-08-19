@@ -1,0 +1,96 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace scold {
+  namespace processor {
+    class Entail;
+  }
+}
+#endiv
+#divert <hpp>
+#import scold.processor.Externals
+#import scold.processor.Generic
+#import scold.processor.Ifdef
+#import scold.search.Build
+#import want.regex.pattern
+class scold::processor::Entail : public Generic, public Externals {
+  using ancestor = Generic;
+public:
+  explicit Entail(configuration_type const &, context_type &, search::Build /*nononst*/ &);
+  auto operator()(phase_type, line_type &, output_type &, imports_type &, entails_type &, depends_type &) -> void override final;
+protected:
+  Ifdef ifdef;
+  // WATCHOUT - do not make these static because they can throw in the constructor.
+  want::regex::pattern const DIRECTIVE;
+  auto entail(std::string const &module_syntax, phase_type, line_type &, output_type &, imports_type &, entails_type &, depends_type &) -> void;
+  auto body(Module const &module, std::string const &includedir, phase_type, line_type &, output_type &, imports_type &, entails_type &, depends_type &) -> void;
+};
+#endiv
+#divert <cpp>
+scold::processor::Entail::Entail(configuration_type const &arg_cfg, context_type &arg_ctx, search::Build &arg_build)
+  : ancestor(arg_cfg, arg_ctx)
+  , Externals(arg_build) 
+  , ifdef(this->cfg, this->ctx)
+  // WATCHOUT - don't use \S for the module; handle the case of a comment bleeding into the identifier
+  // e.g. #import apple.banana//cherry is not part of the
+  // extraneous dots, internal, leading and trailing are handled elsewhere
+  , DIRECTIVE(R"regex(^\s*#\s*entail\s+([a-zA-Z0-9_.:]+)(.*)?)regex") {
+  ;
+}
+
+#import scold.Filenames
+#import scold.Module
+#import scold.fragment.make.depend
+#import scold.fragment.preproc.include
+#import scold.fragment.workbench
+#import scold.to
+#import scold.phase.range
+#import want.regex.match
+#import want.regex.smatch
+#import want.format.braket
+auto scold::processor::Entail::operator()(phase_type phase, line_type &line, output_type &out, imports_type &imports, entails_type &entails, depends_type &depends) -> void {
+  using want::format::braket;
+  want::regex::smatch sm;
+  if (want::regex::match(value(line), sm, DIRECTIVE)) {
+    auto module_syntax = ifdef.fixup_sloppy_module_syntax(line, sm[1], sm[2]);
+    entail(module_syntax, phase, line, out, imports, entails, depends);
+  } else {
+    error(cfg, ctx, line) << " at " << braket(braket(value(line))) << '\n';
+  }
+}
+
+#include <cassert>
+auto scold::processor::Entail::entail(std::string const &module_syntax, phase_type phase, line_type &line, output_type &out, imports_type &imports, entails_type &entails, depends_type &depends) -> void {
+  using want::format::braket;
+  using namespace scold::fragment; // preproc::include(...)
+  auto module = to<Module>(module_syntax);
+  depends.antecedents.insert(module);
+  //
+  // #entail is like #import, but happens last.
+  // See the commentariat in scold::processor::Import::operator()(...)
+  //
+  auto r = probe(module);
+  if (include_interfaces_only(r)) {
+    // It is an external module, so "buy it all" at the interface surface.
+    out << preproc::include(module);
+  } else {
+    assert(buildable_from_sources(r));
+    body(module, directory(r), phase, line, out, imports, entails, depends);
+  }
+}
+
+auto scold::processor::Entail::body(Module const &module, std::string const &includedir, phase_type phase, line_type &line, output_type &out, imports_type &imports, entails_type &entails, depends_type &depends) -> void {
+  using namespace scold::fragment;
+  Filenames that = to<Filenames>(module);
+  {
+    auto const mint = min(Phase::TPP, phase);
+    out << preproc::include(that[mint]);
+    depends.out << make::depend(depends.lhs, includedir, that[mint]);
+  }
+  // End at Phase::CPP, not Phase::END. One cannot #include the ".cpp" files in each other as they have definitions.
+  auto const minc = min(Phase::CPP, succ(phase));
+  for (auto p : range(minc, Phase::CPP)) {
+    entails[p] << preproc::include(that[p]);
+    depends.out << make::depend(depends.lhs, includedir, that[p]);
+  }
+}
+#endiv

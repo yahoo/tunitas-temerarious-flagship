@@ -1,0 +1,47 @@
+// -*- c++ -*- in the SCOLD styling that is so popular these days
+#divert <fpp>
+#import std.string
+#import std.tuple
+namespace scold {
+  namespace module {
+    namespace detail {
+      namespace filebase {
+        //
+        // The return value of module::probe(...) which is in turn an implementation detail of scold::filebase
+        //
+        enum class ADL { };
+        using Result = std::tuple<ADL, bool, std::string>;
+      }
+    }
+  }
+}
+#endiv
+#divert <hpp>
+namespace scold {
+  namespace module {
+    namespace detail {
+      namespace filebase {
+        inline auto ok(Result const &) -> bool;
+        inline auto value(Result const &) -> std::string const &;
+        inline auto value(Result &&) -> std::string;
+      }
+    }
+  }
+}
+#endiv
+#divert <ipp>
+#import std.get
+auto scold::module::detail::filebase::ok(Result const &r) -> bool {
+  return std::get<1>(r);
+}
+
+auto scold::module::detail::filebase::value(Result const &r) -> std::string const & {
+  return std::get<2>(r);
+}
+
+#import std.forward
+auto scold::module::detail::filebase::value(Result &&anon) -> std::string {
+  return std::get<2>(std::forward<Result>(anon));
+}
+#endiv
+

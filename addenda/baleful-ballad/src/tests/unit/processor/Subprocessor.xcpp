@@ -1,0 +1,24 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace tests {
+  namespace unit {
+    namespace processor {
+      // Because we have to subclass scold::Processor to make use of it
+      struct Subprocessor;
+    }
+  }
+}
+#divert </fpp>
+#divert <hpp>
+#import scold.processor.Generic
+#import scold.Processor
+struct tests::unit::processor::Subprocessor : public ::scold::Processor {
+  inline Subprocessor(line_type &, ::scold::processor::Generic &);
+};
+#endiv
+#divert <ipp>
+tests::unit::processor::Subprocessor::Subprocessor(line_type &l, ::scold::processor::Generic &g)
+  : Processor(l, g) {
+  ;
+}
+#endiv

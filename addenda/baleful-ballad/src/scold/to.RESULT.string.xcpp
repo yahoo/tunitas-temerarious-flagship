@@ -1,0 +1,32 @@
+// -*- c++ -*- with SCOLD stylings
+#divert <hpp>
+// The module named <scold.to.RESULT.string> corresponds to
+//     the functions to<...>(...)
+//     returning RESULT
+//     given a 1st argument of a std::string
+// Specializations occur against RESULT
+#import std.string
+namespace scold {
+  template<typename RESULT> inline auto to(std::string const &) -> RESULT;
+  template<typename RESULT> inline auto to(std::string const &, std::string const &) -> RESULT;
+  template<typename RESULT> inline auto to(std::string const &, std::string const &, std::string const &) -> RESULT;
+  template<typename RESULT> inline auto to(std::string const &, std::string const &, std::string const &, std::string const &) -> RESULT;
+}
+#endiv
+#divert <ipp>
+template<typename RESULT> auto scold::to(std::string const &) -> RESULT {
+  static_assert(0 == sizeof (RESULT) && 0 != sizeof (RESULT), "specializations only");
+}
+
+template<typename RESULT> auto scold::to(std::string const &, std::string const &) -> RESULT {
+  static_assert(0 == sizeof (RESULT) && 0 != sizeof (RESULT), "specializations only");
+}
+
+template<typename RESULT> auto scold::to(std::string const &, std::string const &, std::string const &) -> RESULT {
+  static_assert(0 == sizeof (RESULT) && 0 != sizeof (RESULT), "specializations only");
+}
+
+template<typename RESULT> auto scold::to(std::string const &, std::string const &, std::string const &, std::string const &) -> RESULT {
+  static_assert(0 == sizeof (RESULT) && 0 != sizeof (RESULT), "specializations only");
+}
+#endiv

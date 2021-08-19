@@ -1,0 +1,66 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace scold {
+  namespace validate {
+    namespace detail {
+      class Nested;
+    }
+  }
+}
+#endiv
+#divert <hpp>
+#import std.string
+#import scold.splitting.On
+#import scold.validate.Result
+#import scold.validate.detail.Leaf
+class scold::validate::detail::Nested : public Leaf {
+  using ancestor = Leaf;
+public:
+  inline Nested(splitting::On separator, std::string const &identifier_adjective, Leaf leaf);
+  auto operator()(std::string const &subject) -> Result;
+  splitting::On separator;
+  Leaf leaf;
+public:
+  struct test { struct Suite; };
+  friend struct test::Suite;
+};
+#endiv
+#divert <ipp>
+#import scold.validate.detail.is
+scold::validate::detail::Nested::Nested(splitting::On the_separator, std::string const &the_adjective, Leaf the_leaf)
+  : ancestor(the_adjective, "snake_case (and lower case)", &is_snake_case)
+  , separator(the_separator)
+  , leaf(the_leaf) {
+  ;
+}
+#endiv
+#divert <cpp>
+#import mvr.recv
+#import std.all_of
+#import std.ostringstream
+#import std.vector
+#import scold.splitting.split
+auto scold::validate::detail::Nested::operator()(std::string const &subject) -> Result {
+  std::vector<std::string> series;
+  Result result;
+  mvr::recv(series, result) = splitting::split(this->separator, subject);
+  if ( ! result ) {
+    return result;
+  }
+  if ( ! series.empty() ) {
+    std::ostringstream err;
+    err << this->identifier_adjective << " path is empty";
+    return Result::is_invalid(err.str());
+  }
+  if ( ! std::all_of(series.begin(), series.end()-1, this->condition) ) {
+    std::ostringstream err;
+    err << "some " << this->identifier_adjective << " name elements are not appropriate in this context";
+    return Result::is_invalid(err.str());
+  }
+  Result tmp;
+  if ( ! (tmp = this->leaf(series.back())) ) {
+    return tmp;
+  }
+  return Result::is_valid();
+}
+#endiv

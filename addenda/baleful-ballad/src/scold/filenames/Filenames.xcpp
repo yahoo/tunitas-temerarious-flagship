@@ -1,0 +1,173 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace scold {
+  namespace filenames {
+    class Filenames;
+  }
+}
+#endiv
+#divert <hpp>
+#forward scold.filenames.Iterator
+#import scold.filenames.detail.Index
+#import scold.Phase
+#import scold.phase.Definition
+#import scold.Module
+#import scold.Suffix
+#forward scold.Files
+#import std.size_t
+#import std.string
+class scold::filenames::Filenames {
+public:
+  // Use scold::to<Module>(...) as a constructor convenience
+  //   declarationdir is for fpp, hpp, ipp, tpp
+  //   definitiondir is for cpp, the basis of the translation unit, and foundation of the ODR
+  //   srcdir is for xcpp
+  inline auto define(Module const &) -> void;
+  inline auto define(Module const &, std::string srcdir) -> void;
+  auto define(Module const &, std::string declarationdir, std::string definitiondir, std::string srcdir) -> void;
+  Filenames() = default;
+  using name_type = std::string; // which is referenced in the Iterator
+  // indexable via Phase::FPP .. Phase::CPP
+  // else std::out_of_range is thrown
+  inline auto operator[](Phase) const -> name_type const &;
+  inline auto operator[](Phase) -> name_type &;
+  inline auto operator[](Suffix) const -> name_type const &;
+  inline auto operator[](Suffix) -> name_type &;
+  // running an iteration FPP .. CPP (ignoring XCPP) 
+  using iterator = filenames::Iterator<Filenames, name_type>;
+  inline auto begin() -> iterator;
+  inline auto end() -> iterator;
+  using const_iterator = filenames::Iterator<Filenames const, name_type const>;
+  inline auto begin() const -> const_iterator;
+  inline auto end() const -> const_iterator;
+  // the acquire the directories of this Filenames with nearby scold::dirnames(Filenames, ...)
+  class Directories;
+protected:
+  friend class scold::Files; // which reaches in to get the SIZE
+  constexpr static std::size_t const SIZE = phase::Definition::diversion_size();
+  static_assert(1 <= Filenames::SIZE, "bad size");
+  static_assert(2 <= Filenames::SIZE, "bad size");
+  static_assert(3 <= Filenames::SIZE, "bad size");
+  static_assert(4 <= Filenames::SIZE, "bad size");
+  static_assert(5 == Filenames::SIZE, "bad size");
+  template<typename FILENAMES_CONSTY, typename NAME_CONSTY> friend class filenames::Iterator; // which reaches in to get cxx_sources
+  name_type cxx_sources[SIZE];
+  name_type scold_source;            // e.g. .../a/b/c/Class.xcpp
+  name_type enclosing_module_source; // e.g. .../a/b/c/namespace.xcpp
+  name_type mk_source;
+  name_type obj_sources[2];
+  // so we don't have to cut & paste operator[](...) twice for the consty and muting case.
+  template<typename FILENAMES_CONSTY> static inline auto operator_index(FILENAMES_CONSTY &object, Phase) -> typename detail::Index<Phase, FILENAMES_CONSTY>::name_type &;
+  template<typename FILENAMES_CONSTY> static inline auto operator_index(FILENAMES_CONSTY &object, Suffix) -> typename detail::Index<Suffix, FILENAMES_CONSTY>::name_type &;
+};
+#endiv
+#divert <ipp>
+#import std.out_of_range
+template<typename FILENAMES_CONSTY> auto scold::filenames::Filenames::operator_index(FILENAMES_CONSTY &object_consty, Phase phase) -> typename detail::Index<Phase, FILENAMES_CONSTY>::name_type & {
+  if (phase < Phase::FPP || Phase::CPP < phase) {
+    throw std::out_of_range("phase out of range");
+  }
+  auto index = (int)(phase) - (int)(Phase::FPP);
+  return object_consty.cxx_sources[index];
+}
+
+auto scold::filenames::Filenames::operator[](Phase phase) const -> name_type const & {
+  return operator_index(*this, phase);
+}
+
+auto scold::filenames::Filenames::operator[](Phase phase) -> name_type & {
+  return operator_index(*this, phase);
+}
+
+#import std.out_of_range
+#include <cassert>
+template<typename FILENAMES_CONSTY> auto scold::filenames::Filenames::operator_index(FILENAMES_CONSTY &object_consty, Suffix suffix) -> typename detail::Index<Suffix, FILENAMES_CONSTY>::name_type & {
+  if (Suffix::XCPP == suffix) {
+    return object_consty.scold_source;
+  } else if (Suffix::NS == suffix) {
+    return object_consty.enclosing_module_source;
+  } else if (Suffix::MK == suffix) {
+    return object_consty.mk_source;
+  } else if (Suffix::O == suffix || Suffix::LO == suffix) {
+    static_assert((int)Suffix::O < (int)Suffix::LO, "object_consty suffixes are out of order");
+    auto index = (int)(suffix) - (int)(Suffix::O);
+    // guard that index is not negative
+    assert(0 <= index && (decltype(sizeof object_consty.obj_sources))(index) < sizeof (object_consty.obj_sources)/sizeof (object_consty.obj_sources[0]));
+    return object_consty.obj_sources[index];
+  } else {
+    if (suffix < Suffix::FPP || Suffix::CPP < suffix) {
+      throw std::out_of_range("suffix out of range");
+    }
+    auto index = (int)(suffix) - (int)(Suffix::FPP);
+    // guard that decltype is not negative
+    assert(0 <= index && (decltype(sizeof object_consty.cxx_sources))(index) < sizeof (object_consty.cxx_sources)/sizeof (object_consty.cxx_sources[0]));
+    return object_consty.cxx_sources[index];
+  }
+}
+
+auto scold::filenames::Filenames::operator[](Suffix suffix) const -> name_type const & {
+  return operator_index(*this, suffix);
+}
+
+auto scold::filenames::Filenames::operator[](Suffix suffix) -> name_type & {
+  return operator_index(*this, suffix);
+}
+
+#import scold.filenames.Iterator
+auto scold::filenames::Filenames::begin() -> iterator {
+  return iterator(this, Phase::FPP);
+}
+
+auto scold::filenames::Filenames::end() -> iterator {
+  return iterator(this, Phase::END);
+}
+
+auto scold::filenames::Filenames::begin() const -> const_iterator {
+  return const_iterator(this, Phase::FPP);
+}
+
+auto scold::filenames::Filenames::end() const -> const_iterator {
+  return const_iterator(this, Phase::END);
+}
+
+auto scold::filenames::Filenames::define(Module const &module) -> void {
+  define(module, ".", ".", ".");
+}
+
+auto scold::filenames::Filenames::define(Module const &module, std::string srcdir) -> void {
+  define(module, srcdir, srcdir, srcdir);
+}
+#endiv
+#divert <cpp>
+#import ish.shell.dirname
+#import path.filename.workbench
+#import scold.module.filebase
+#import scold.phase.operators
+#import scold.suffix.operators
+#import scold.phase.range
+#import want.path.dot
+#import want.path.dedot
+auto scold::filenames::Filenames::define(Module const &module, std::string declarationdir, std::string definitiondir, std::string srcdir) -> void {
+  using ::ish::shell::dirname;
+  using ::want::path::dedot;
+  using ::want::path::dot;
+  using path::filename::workbench;
+  declarationdir = dot(declarationdir);
+  definitiondir = dot(definitiondir);
+  srcdir = dot(srcdir);
+  Filenames &self(*this);
+  std::string base = filebase(module, srcdir);
+  std::string directory = dirname(base);
+  self[Suffix::FPP]  = dedot(workbench() * declarationdir / Phase::FPP / module);
+  self[Suffix::HPP]  = dedot(workbench() * declarationdir / Phase::HPP / module);
+  self[Suffix::IPP]  = dedot(workbench() * declarationdir / Phase::IPP / module);
+  self[Suffix::TPP]  = dedot(workbench() * declarationdir / module);
+  self[Suffix::CPP]  = dedot(workbench() * definitiondir  / base * Suffix::CPP);
+  self[Suffix::MK]   = dedot(workbench() * definitiondir  / base * Suffix::MK);
+  self[Suffix::O]    = dedot(workbench() * definitiondir  / base * Suffix::O);
+  self[Suffix::LO]   = dedot(workbench() * definitiondir  / base * Suffix::LO);
+  // See the commentariat in module::enclosing(...)
+  self[Suffix::XCPP] = dedot(workbench() * srcdir         / base * Suffix::XCPP);
+  self[Suffix::NS]   = dedot(workbench() * srcdir         / directory / "namespace" * Suffix::NS);
+}
+#endiv

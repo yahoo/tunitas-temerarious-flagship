@@ -1,0 +1,60 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace tests {
+  namespace unit {
+    namespace name {
+      class Fixture;
+    }
+  }
+}
+#endiv
+#divert <hpp>
+class tests::unit::name::Fixture : public cppunit::test::Fixture {
+public:
+  auto test_use_Filenames() -> void;
+  auto test_use_Module() -> void;
+
+  static auto suite() -> cppunit::Test *;
+};
+#endiv
+#divert <cpp>
+#import scold.Phase
+#import scold.Suffix
+#import scold.Filenames
+#import scold.to
+auto tests::unit::name::Fixture::test_use_Filenames() -> void {
+  ::scold::Module m{"apple", "banana", "cherry", "Dog"};
+  std::string const declarationdir = "/var/tmp/workarea/obj/modules";
+  std::string const definitiondir = "/var/tmp/workarea/obj/src";
+  std::string const srcdir = "/var/tmp/workarea/src";
+  ::scold::Filenames f = ::scold::to<::scold::Filenames>(m, declarationdir, definitiondir, srcdir);
+  CPPUNIT_ASSERT_EQUAL(f[::scold::Phase::FPP],   std::string("/var/tmp/workarea/obj/modules/fpp/apple.banana.cherry.Dog"));
+  CPPUNIT_ASSERT_EQUAL(f[::scold::Phase::HPP],   std::string("/var/tmp/workarea/obj/modules/hpp/apple.banana.cherry.Dog"));
+  CPPUNIT_ASSERT_EQUAL(f[::scold::Phase::IPP],   std::string("/var/tmp/workarea/obj/modules/ipp/apple.banana.cherry.Dog"));
+  CPPUNIT_ASSERT_EQUAL(f[::scold::Phase::TPP],   std::string("/var/tmp/workarea/obj/modules/apple.banana.cherry.Dog"));
+  CPPUNIT_ASSERT_EQUAL(f[::scold::Phase::CPP],   std::string("/var/tmp/workarea/obj/src/apple/banana/cherry/Dog.cpp"));
+  CPPUNIT_ASSERT_EQUAL(f[::scold::Suffix::XCPP], std::string("/var/tmp/workarea/src/apple/banana/cherry/Dog.xcpp"));
+  CPPUNIT_ASSERT_EQUAL(f[::scold::Suffix::MK],   std::string("/var/tmp/workarea/obj/src/apple/banana/cherry/Dog.mk"));
+  CPPUNIT_ASSERT_EQUAL(f[::scold::Suffix::O],    std::string("/var/tmp/workarea/obj/src/apple/banana/cherry/Dog.o"));
+  CPPUNIT_ASSERT_EQUAL(f[::scold::Suffix::LO],   std::string("/var/tmp/workarea/obj/src/apple/banana/cherry/Dog.lo"));
+}
+
+#import scold.Module
+#import std.istringstream
+auto tests::unit::name::Fixture::test_use_Module() -> void {
+  ::scold::Module m;
+  std::istringstream buf("apple.banana.cherry.Dog");
+  auto &r = buf >> m;
+  CPPUNIT_ASSERT((bool) r);
+  CPPUNIT_ASSERT(4 == m.size());
+}
+
+auto tests::unit::name::Fixture::suite() -> cppunit::Test * {
+  using namespace ::unit::rigging::suite;
+  Stream s("name");
+  s << call("usage_of_Module", &Fixture::test_use_Module)
+    << call("usage_of_Filenames", &Fixture::test_use_Filenames)
+    ;
+  return finalize(s);
+}
+#endiv

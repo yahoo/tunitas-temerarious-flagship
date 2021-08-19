@@ -1,0 +1,4 @@
+tests_unit_scold_TESTS = \
+  tests/unit/scold/cases.test \
+  $(end)
+

@@ -1,0 +1,46 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace tests {
+  namespace unit {
+    namespace processor {
+      struct Dumper;
+    }
+  }
+}
+#divert </fpp>
+#divert <hpp>
+#import scold.Phase
+#import scold.phase.sequence
+#import scold.Suffix
+#import scold.line.Item
+#import scold.Stream
+#import scold.Streams
+#import scold.Accruals
+#import want.doppelgang
+struct tests::unit::processor::Dumper {
+  static auto dump(::scold::Phase phase, ::scold::line::Item const &line, ::scold::Stream const &out, ::scold::Accruals<::scold::IMPORT> const &imports, ::scold::Accruals<::scold::ENTAIL> const &entails, char const *cppfunction, char const *cppfile, int cppline) -> void;
+};
+#endiv
+#divert <cpp>
+#import std.cerr
+#import std.cout
+auto tests::unit::processor::Dumper::dump(::scold::Phase phase, ::scold::line::Item const &line, ::scold::Stream const &out, ::scold::Accruals<::scold::IMPORT> const &imports, ::scold::Accruals<::scold::ENTAIL> const &entails, char const *cppfunction, char const *cppfile, int cppline) -> void {
+  std::cerr << cppfunction << ' ' << cppfile << ':' << cppline << '\n';
+  std::cerr << "phase=" << phase << '\n';
+  std::cerr << "line=" << lineno(line) << ", qq!" << value(line) << "!\n";
+  for (auto const &l : out) {
+    std::cerr << "out line=" << lineno(l) << ", qq!" << value(l) << "!\n";
+  }
+  auto phases = ::scold::phase::sequence();
+  for (auto const &ps : want::doppelgang(phases, imports)) {
+    for (auto const &l : ps.second) {
+      std::cerr << "import " << ps.first << " line=" << lineno(l) << ", qq!" << value(l) << "!\n";
+    }
+  }
+  for (auto const &ps : want::doppelgang(phases, entails)) {
+    for (auto const &l : ps.second) {
+      std::cerr << "entails " << ps.first << " line=" << lineno(l) << ", qq!" << value(l) << "!\n";
+    }
+  }
+}
+#endiv

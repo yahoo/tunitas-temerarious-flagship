@@ -1,0 +1,61 @@
+// -*- c++ -*- but in the SCOLD stylings which are the fashion nowadays.
+#divert <hpp>
+#import want.regex.unbusted
+#import want.regex.basic_pattern
+#import want.regex.constants
+#import want.regex.match_results
+#import std.basic_string
+namespace want {
+  namespace regex {
+    //
+    // See http://www.cplusplus.com/reference/regex/regex_match/
+    // Following C++14
+    // 
+    // Wow this is a long way to go to rename a functionn over vanity & small-minded symmetry.
+    //
+    template <class charT, class traits>
+    bool match(const charT *s, const basic_pattern<charT,traits> &rgx,
+               constants::match_flag_type flags = constants::match_default)
+    { return unbusted::regex_match(s, rgx, flags); }
+
+    template <class ST, class SA, class charT, class traits>
+    bool match(const std::basic_string<charT,ST,SA> &s,
+               const basic_pattern<charT,traits> &rgx,
+               constants::match_flag_type flags = constants::match_default)
+    { return unbusted::regex_match(s, rgx, flags); }
+
+    template <class BidirectionalIterator, class charT, class traits>
+    bool match(BidirectionalIterator first, BidirectionalIterator last,
+               const basic_pattern<charT,traits> &rgx,
+               constants::match_flag_type flags = constants::match_default)
+    { return unbusted::regex_match(first, last, rgx, flags); }
+
+    template <class charT, class Alloc, class traits>
+    bool match(const charT *s, match_results<const charT*, Alloc> &m,
+               const basic_pattern<charT,traits> &rgx,
+               constants::match_flag_type flags = constants::match_default)
+    { return unbusted::regex_match(s, m, rgx, flags); }
+
+    template <class ST, class SA, class Alloc, class charT, class traits>
+    bool match(const std::basic_string<charT,ST,SA> &s,
+               match_results<typename std::basic_string<charT,ST,SA>::const_iterator,Alloc> &m,
+               const basic_pattern<charT,traits> &rgx,
+               constants::match_flag_type flags = constants::match_default)
+    { return unbusted::regex_match(s, m, rgx, flags); }
+
+    template <class BidirectionalIterator, class Alloc, class charT, class traits>
+    bool match(BidirectionalIterator first, BidirectionalIterator last,
+               match_results<BidirectionalIterator, Alloc> &m,
+               const basic_pattern<charT,traits> &rgx,
+               constants::match_flag_type flags = constants::match_default)
+    { return unbusted::regex_match(first, last, m, rgx, flags); }
+
+    template <class ST, class SA, class Alloc, class charT, class traits>
+    bool match(const std::basic_string<charT,ST,SA>&&,
+               match_results<typename std::basic_string<charT,ST,SA>::const_iterator,Alloc>&,
+               const basic_pattern<charT,traits>&,
+               constants::match_flag_type=constants::match_default) = delete;
+
+  }
+}
+#endiv

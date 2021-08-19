@@ -1,0 +1,119 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+#import scold
+#import scold.Phase
+namespace scold {
+  namespace phase {
+    struct Definition;
+  }
+}
+#endiv
+#divert <hpp>
+#import std.string
+#import scold.Phase
+#import scold.phase.detail.Caller
+#import scold.phase.detail.Definition
+#forward scold.stream // steam::index_t
+#import mvr.SAV
+struct scold::phase::Definition {
+  inline explicit Definition(Phase);
+  Phase const value;
+  inline auto has_diversion() const -> bool;
+  // how many diversion streams are there across the whole Phase series?
+  inline static constexpr auto diversion_size() -> stream::index_t;
+  inline auto has_index() const -> bool;
+  inline auto index() const -> stream::index_t;
+  inline auto can_endiv() const -> bool;
+  inline auto has_succ() const -> bool;
+  inline auto has_pred() const -> bool;
+  inline auto has_suffix() const -> bool;
+  inline auto c_str() const -> char const *;
+  inline auto str() const -> std::string;
+  // parse ... convert "to" a Phase, returning the status of success
+  inline static auto to(std::string const &specimen) -> mvr::SAV<Phase>;
+protected:
+  using caller_type = detail::Caller<detail::Definition<Phase::BEG>,
+                                     detail::Definition<Phase::FPP>,
+                                     detail::Definition<Phase::HPP>,
+                                     detail::Definition<Phase::IPP>,
+                                     detail::Definition<Phase::TPP>,
+                                     detail::Definition<Phase::CPP>,
+                                     detail::Definition<Phase::END>>;
+};
+
+// Prove base case works
+static_assert(1 == scold::phase::detail::Definition<scold::Phase::FPP>::diversion_counter(0), "FPP fails");
+static_assert(1 == scold::phase::detail::Definition<scold::Phase::HPP>::diversion_counter(0), "FPP fails");
+static_assert(1 == scold::phase::detail::Definition<scold::Phase::IPP>::diversion_counter(0), "FPP fails");
+static_assert(1 == scold::phase::detail::Definition<scold::Phase::TPP>::diversion_counter(0), "FPP fails");
+static_assert(1 == scold::phase::detail::Definition<scold::Phase::CPP>::diversion_counter(0), "FPP fails");
+
+// prove Caller<...> works
+static_assert(1 == scold::phase::detail::Caller<scold::phase::detail::Definition<scold::Phase::FPP>>::diversion_counter(0), "FPP fails");
+static_assert(1 == scold::phase::detail::Caller<scold::phase::detail::Definition<scold::Phase::HPP>>::diversion_counter(0), "FPP fails");
+static_assert(1 == scold::phase::detail::Caller<scold::phase::detail::Definition<scold::Phase::IPP>>::diversion_counter(0), "FPP fails");
+static_assert(1 == scold::phase::detail::Caller<scold::phase::detail::Definition<scold::Phase::TPP>>::diversion_counter(0), "FPP fails");
+static_assert(1 == scold::phase::detail::Caller<scold::phase::detail::Definition<scold::Phase::CPP>>::diversion_counter(0), "FPP fails");
+
+// prove composition (addition) works
+static_assert(2 == scold::phase::detail::Caller<scold::phase::detail::Definition<scold::Phase::FPP>, scold::phase::detail::Definition<scold::Phase::FPP>>::diversion_counter(0), "FPP fails");
+static_assert(2 == scold::phase::detail::Caller<scold::phase::detail::Definition<scold::Phase::HPP>, scold::phase::detail::Definition<scold::Phase::HPP>>::diversion_counter(0), "FPP fails");
+static_assert(2 == scold::phase::detail::Caller<scold::phase::detail::Definition<scold::Phase::IPP>, scold::phase::detail::Definition<scold::Phase::IPP>>::diversion_counter(0), "FPP fails");
+static_assert(2 == scold::phase::detail::Caller<scold::phase::detail::Definition<scold::Phase::TPP>, scold::phase::detail::Definition<scold::Phase::TPP>>::diversion_counter(0), "FPP fails");
+static_assert(2 == scold::phase::detail::Caller<scold::phase::detail::Definition<scold::Phase::CPP>, scold::phase::detail::Definition<scold::Phase::CPP>>::diversion_counter(0), "FPP fails");
+
+constexpr auto scold::phase::Definition::diversion_size() -> stream::index_t {
+  static_assert(1 <= caller_type::diversion_counter(0), "fail 1");
+  static_assert(2 <= caller_type::diversion_counter(0), "fail 2");
+  static_assert(3 <= caller_type::diversion_counter(0), "fail 3");
+  static_assert(4 <= caller_type::diversion_counter(0), "fail 4");
+  static_assert(5 == caller_type::diversion_counter(0), "fail 5");
+  return caller_type::diversion_counter(0);
+}
+#endiv
+#divert <ipp>
+scold::phase::Definition::Definition(Phase arg_value)
+  : value(arg_value) {
+  ;
+}
+
+auto scold::phase::Definition::has_diversion() const -> bool {
+  return caller_type::has_diversion(value);
+}
+
+auto scold::phase::Definition::has_index() const -> bool {
+  return caller_type::has_index(value);
+}
+
+auto scold::phase::Definition::index() const -> stream::index_t {
+  return caller_type::index(value);
+}
+
+auto scold::phase::Definition::can_endiv() const -> bool {
+  return caller_type::can_endiv(value);
+}
+
+auto scold::phase::Definition::has_succ() const -> bool {
+  return caller_type::has_succ(value);
+}
+
+auto scold::phase::Definition::has_pred() const -> bool {
+  return caller_type::has_pred(value);
+}
+
+auto scold::phase::Definition::has_suffix() const -> bool {
+  return caller_type::has_suffix(value);
+}
+
+auto scold::phase::Definition::c_str() const -> char const * {
+  return caller_type::c_str(value);
+}
+
+auto scold::phase::Definition::str() const -> std::string {
+  return caller_type::str(value);
+}
+
+auto scold::phase::Definition::to(std::string const &specimen) -> mvr::SAV<Phase> {
+  return caller_type::to(specimen);
+}
+#endiv

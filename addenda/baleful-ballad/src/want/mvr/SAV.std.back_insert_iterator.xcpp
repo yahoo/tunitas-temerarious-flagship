@@ -1,0 +1,67 @@
+// -*- c++ -*- in the SCOLD styling that is so popular these days
+#divert <hpp>
+#import want.mvr.SAV
+#import std.back_insert_iterator
+#import std.iterator
+#import std.iterator_traits
+namespace std {
+  //
+  // A specialization of back_insert_iterator that accepts binds against a SAV<CONTAINER>
+  //
+  template<typename CONTAINER> class back_insert_iterator<want::mvr::SAV<CONTAINER>>;
+  template<typename CONTAINER> struct iterator_traits<back_insert_iterator<want::mvr::SAV<CONTAINER>>>;
+}
+
+template<typename CONTAINER> class std::back_insert_iterator<want::mvr::SAV<CONTAINER>> : public iterator<output_iterator_tag, void, void, void, void> {
+  using ancestor = iterator<output_iterator_tag, void, void, void, void>;
+public:
+  using subject_type = want::mvr::SAV<CONTAINER>;
+  using container_type = CONTAINER;
+  using value_type = typename container_type::value_type;
+  using traits = iterator_traits<back_insert_iterator<want::mvr::SAV<CONTAINER>>>;
+  inline explicit back_insert_iterator(subject_type &subject);
+  inline auto operator=(value_type const &rhs) -> back_insert_iterator &;
+  inline auto operator=(value_type &&xhs) -> back_insert_iterator &;
+  inline auto operator*() -> back_insert_iterator &;
+  inline auto operator++() -> back_insert_iterator &;
+  inline auto operator++(int) -> back_insert_iterator &;
+protected:
+  subject_type &subject;    
+public:
+  struct tests { struct Suite; };
+  friend class tests::Suite;
+};
+#endiv
+#divert <ipp>
+#import std.forward
+#import std.move
+template<typename CONTAINER> std::back_insert_iterator<want::mvr::SAV<CONTAINER>>::back_insert_iterator(subject_type &the_subject)
+    : ancestor()
+    , subject(the_subject) {
+    ;
+}
+
+template<typename CONTAINER> auto std::back_insert_iterator<want::mvr::SAV<CONTAINER>>::operator=(value_type const &rhs) -> back_insert_iterator & {
+    subject.value().push_back(rhs);
+    subject = want::mvr::State::VALUE;
+    return *this;
+}
+
+template<typename CONTAINER> auto std::back_insert_iterator<want::mvr::SAV<CONTAINER>>::operator=(value_type &&xhs) -> back_insert_iterator & {
+    subject.value().push_back(std::forward<value_type>(xhs));
+    subject = want::mvr::State::VALUE;
+    return *this;
+}
+
+template<typename CONTAINER> auto std::back_insert_iterator<want::mvr::SAV<CONTAINER>>::operator*() -> back_insert_iterator & {
+    return *this;
+}
+
+template<typename CONTAINER> auto std::back_insert_iterator<want::mvr::SAV<CONTAINER>>::operator++() -> back_insert_iterator & {
+    return *this;
+}
+
+template<typename CONTAINER> auto std::back_insert_iterator<want::mvr::SAV<CONTAINER>>::operator++(int) -> back_insert_iterator & {
+    return *this;
+}
+#endiv

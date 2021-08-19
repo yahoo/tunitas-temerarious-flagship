@@ -1,0 +1,90 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace tests {
+  namespace unit {
+    namespace want {
+      namespace path {
+        class Fixture;
+      }
+    }
+  }
+}
+#endiv
+#divert <hpp>
+class tests::unit::want::path::Fixture : public cppunit::test::Fixture {
+public:
+  // detailed testing is want::in tests::unit::path::Functions
+  auto test_dot() -> void;
+  auto test_dedot() -> void;
+  auto test_endot() -> void;
+
+  static auto suite() -> cppunit::Test *;
+};
+#endiv
+#divert <cpp>
+#import want.path.dot
+auto tests::unit::want::path::Fixture::test_dot() -> void {
+  using ::want::path::dot;
+  using std::string;
+  CPPUNIT_ASSERT_EQUAL(string("."), dot("")); // <---------- that's all that thing does
+  CPPUNIT_ASSERT_EQUAL(string("."), dot("."));
+  CPPUNIT_ASSERT_EQUAL(string(".."), dot(".."));
+  CPPUNIT_ASSERT_EQUAL(string("./"), dot("./")); // <--- does not modify
+  CPPUNIT_ASSERT_EQUAL(string("a"), dot("a"));
+  CPPUNIT_ASSERT_EQUAL(string("ab"), dot("ab"));
+  CPPUNIT_ASSERT_EQUAL(string("./ab"), dot("./ab"));
+}
+
+#import want.path.dedot
+auto tests::unit::want::path::Fixture::test_dedot() -> void {
+  using ::want::path::dedot;
+  using std::string;
+  CPPUNIT_ASSERT_EQUAL(string("."), dedot(""));
+  CPPUNIT_ASSERT_EQUAL(string("."), dedot("."));
+  CPPUNIT_ASSERT_EQUAL(string(".."), dedot(".."));
+  CPPUNIT_ASSERT_EQUAL(string("."), dedot("./"));
+  CPPUNIT_ASSERT_EQUAL(string("a"), dedot("a"));
+  CPPUNIT_ASSERT_EQUAL(string("ab"), dedot("ab"));
+  CPPUNIT_ASSERT_EQUAL(string("ab"), dedot("./ab"));
+  CPPUNIT_ASSERT_EQUAL(string("ab"), dedot("././ab"));
+  CPPUNIT_ASSERT_EQUAL(string("ab"), dedot("./././ab"));
+  CPPUNIT_ASSERT_EQUAL(string("ab"), dedot(".//ab"));
+  CPPUNIT_ASSERT_EQUAL(string("ab"), dedot(".////////////ab"));
+  CPPUNIT_ASSERT_EQUAL(string("ab"), dedot(".//.//.//ab"));
+}
+
+#import want.path.endot
+auto tests::unit::want::path::Fixture::test_endot() -> void {
+  using ::want::path::endot;
+  using std::string;
+  CPPUNIT_ASSERT_EQUAL(string("."), endot(""));
+  CPPUNIT_ASSERT_EQUAL(string("."), endot("."));
+  CPPUNIT_ASSERT_EQUAL(string(".."), endot(".."));
+  CPPUNIT_ASSERT_EQUAL(string("./"), endot("./"));
+  CPPUNIT_ASSERT_EQUAL(string("../"), endot("../"));
+  CPPUNIT_ASSERT_EQUAL(string("./a"), endot("a"));
+  CPPUNIT_ASSERT_EQUAL(string("./ab"), endot("ab"));
+  CPPUNIT_ASSERT_EQUAL(string("./ab"), endot("./ab"));
+  CPPUNIT_ASSERT_EQUAL(string("././ab"), endot("././ab"));
+  CPPUNIT_ASSERT_EQUAL(string("./././ab"), endot("./././ab"));
+  CPPUNIT_ASSERT_EQUAL(string(".//ab"), endot(".//ab"));
+  CPPUNIT_ASSERT_EQUAL(string(".////////////ab"), endot(".////////////ab"));
+  CPPUNIT_ASSERT_EQUAL(string(".//.//.//ab"), endot(".//.//.//ab"));
+}
+
+#import tests.unit.want.path.Dot
+#import tests.unit.want.path.Dedot
+#import tests.unit.want.path.Endot
+auto tests::unit::want::path::Fixture::suite() -> cppunit::Test * {
+  using namespace ::unit::rigging::suite;
+  Stream s("path");
+  s << call("dot", &Fixture::test_dot)
+    << call("dedot", &Fixture::test_dedot)
+    << call("endot", &Fixture::test_endot)
+    << add<Dot>()
+    << add<Dedot>()
+    << add<Endot>()
+    ;
+  return finalize(s);
+}
+#endiv

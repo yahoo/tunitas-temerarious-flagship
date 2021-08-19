@@ -1,0 +1,4 @@
+tests_unit_phase_TESTS = \
+  tests/unit/phase/cases.test \
+  $(end)
+

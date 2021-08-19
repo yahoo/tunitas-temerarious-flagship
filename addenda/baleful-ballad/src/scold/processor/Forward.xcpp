@@ -1,0 +1,89 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace scold {
+  namespace processor {
+    class Forward;
+  }
+}
+#endiv
+#divert <hpp>
+#import scold.processor.Externals
+#import scold.processor.Generic
+#import scold.processor.Ifdef
+#import scold.search.Build
+#import std.string
+class scold::processor::Forward : public Generic, public Externals {
+  using ancestor = Generic;
+public:
+  explicit Forward(configuration_type const &, context_type &, search::Build /*nonconst*/ &);
+  auto operator()(phase_type, line_type &, output_type &, imports_type &, entails_type &, depends_type &) -> void override final;
+protected:
+  Ifdef ifdef;
+  // WATCHOUT - do not make this static because they can throw in the constructor.
+  want::regex::pattern const DIRECTIVE;
+  auto forward(std::string const &module_syntax, phase_type, line_type &, output_type &, imports_type &, entails_type &, depends_type &) -> void;
+  auto body(Module const &module, std::string const &includedir, phase_type, line_type &, output_type &, imports_type &, entails_type &, depends_type &) -> void;
+};
+#endiv
+#divert <cpp>
+scold::processor::Forward::Forward(configuration_type const &arg_cfg, context_type &arg_ctx, search::Build &arg_build)
+  : ancestor(arg_cfg, arg_ctx)
+  , Externals(arg_build) 
+  , ifdef(this->cfg, this->ctx)
+  // WATCHOUT - don't use \S for the module; handle the case of a comment bleeding into the identifier
+  // e.g. #forward apple.banana//cherry is not part of the
+  // extraneous dots, internal, leading and trailing are handled elsewhere
+  , DIRECTIVE(R"regex(^\s*#\s*forward\s+([a-zA-Z0-9_.:]+)(.*)?)regex") {
+  ;
+}
+
+#import want.regex.match
+#import want.regex.smatch
+#import want.format.braket
+auto scold::processor::Forward::operator()(phase_type phase, line_type &line, output_type &out, imports_type &imports, entails_type &entails, depends_type &depends) -> void {
+  using want::format::braket;
+  want::regex::smatch sm;
+  if (want::regex::match(value(line), sm, DIRECTIVE)) {
+    auto module_syntax = ifdef.fixup_sloppy_module_syntax(line, sm[1], sm[2]);
+    forward(module_syntax, phase, line, out, imports, entails, depends);   
+  } else {
+    error(cfg, ctx, line) << " at " << braket(braket(value(line))) << '\n';
+  }
+}
+
+#import scold.Filenames
+#import scold.Module
+#import scold.to
+#import scold.fragment.preproc.include
+#import scold.fragment.make.depend
+#import scold.fragment.workbench
+#include <cassert>
+auto scold::processor::Forward::forward(std::string const &module_syntax, phase_type phase, line_type &line, output_type &out, imports_type &imports, entails_type &entails, depends_type &depends) -> void {
+  using namespace scold::fragment; // preproc::include(...)
+  using want::format::braket;
+  //
+  // See Import for the commentariat.
+  // #forward is just like #import except that it does not embellish the subsequent imports[p]
+  //
+  auto module = to<Module>(module_syntax);
+  depends.antecedents.insert(module);
+  auto r = probe(module);
+  if (include_interfaces_only(r)) {
+    // It is an external module, so "buy it all" at the interface surface.
+    notice(cfg, ctx, line) << "the use of #forward is the same as #import for the external module " << braket(module) << '\n';
+    out << preproc::include(module);
+  } else {
+    assert(buildable_from_sources(r));
+    // see the commentariat for #import
+    body(module, directory(r), phase, line, out, imports, entails, depends);
+  }
+}
+
+auto scold::processor::Forward::body(Module const &module, std::string const &includedir, phase_type phase, line_type &line, output_type &out, imports_type &imports, entails_type &entails, depends_type &depends) -> void {
+  using namespace scold::fragment;
+  Filenames that = to<Filenames>(module);
+  auto const forw = Phase::FPP;
+  out << preproc::include(that[forw]);
+  depends.out << make::depend(depends.lhs, includedir, that[forw]);
+}
+#endiv

@@ -1,0 +1,118 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace tests {
+  namespace unit {
+    namespace search {
+      namespace cache {
+        class Entry;
+      }
+    }
+  }
+}
+#endiv
+#divert <hpp>
+class tests::unit::search::cache::Entry : public cppunit::test::Fixture {
+public:
+  auto test_constructor() -> void;
+  auto test_type() -> void;
+  auto test_directory() -> void;
+  auto test_buildable_from_sources() -> void;
+  auto test_include_interfaces_only() -> void;
+
+  static auto suite() -> cppunit::Test *;
+};
+#endiv
+#divert <cpp>
+#import scold.search.cache.Type
+#import scold.search.cache.Entry
+#import std.string
+
+auto tests::unit::search::cache::Entry::test_constructor() -> void {
+  using ::scold::search::cache::Entry;
+  using ::scold::search::cache::Type;
+  using s = std::string;
+
+  Entry e0(Type::INCLUDE, "a");
+  CPPUNIT_ASSERT(Type::INCLUDE == type(e0));
+  CPPUNIT_ASSERT_EQUAL(s("a"), directory(e0));
+  
+  Entry e1(Type::HEREIN, "b");
+  CPPUNIT_ASSERT(Type::HEREIN == type(e1));
+  CPPUNIT_ASSERT_EQUAL(s("b"), directory(e1));
+
+  Entry e2(Type::SUBMODULE, "c");
+  CPPUNIT_ASSERT(Type::SUBMODULE == type(e2));
+  CPPUNIT_ASSERT_EQUAL(s("c"), directory(e2));
+}
+
+#import std.move
+auto tests::unit::search::cache::Entry::test_type() -> void {
+  using ::scold::search::cache::Entry;
+  using ::scold::search::cache::Type;
+  using s = std::string;
+  {
+    Entry e(Type::SUBMODULE, "c");
+    CPPUNIT_ASSERT(Type::SUBMODULE == type(e)); // <---------------------- copy
+    CPPUNIT_ASSERT_EQUAL(s("c"), directory(e));
+  } {
+    Entry e(Type::SUBMODULE, "c");
+    CPPUNIT_ASSERT(Type::SUBMODULE == type(std::move(e))); // <------------ move
+    CPPUNIT_ASSERT_EQUAL(s("c"), directory(e));
+  }
+}
+
+auto tests::unit::search::cache::Entry::test_directory() -> void {
+  using ::scold::search::cache::Entry;
+  using ::scold::search::cache::Type;
+  using s = std::string;
+  {
+    Entry e(Type::SUBMODULE, "c");
+    CPPUNIT_ASSERT_EQUAL(s("c"), directory(e)); // <---------------------- copy
+  } {
+    Entry e(Type::SUBMODULE, "c");
+    CPPUNIT_ASSERT_EQUAL(s("c"), directory(std::move(e))); // <----------- move
+  }
+}
+
+auto tests::unit::search::cache::Entry::test_buildable_from_sources() -> void {
+  using ::scold::search::cache::Type;
+  using ::scold::search::cache::Entry;
+  {
+    Entry e(Type::INCLUDE, "b");
+    CPPUNIT_ASSERT( ! buildable_from_sources(e) );
+  } {
+    Entry e(Type::HEREIN, "a");
+    CPPUNIT_ASSERT(   buildable_from_sources(e) );
+  } {
+    Entry e(Type::SUBMODULE, "c");
+    CPPUNIT_ASSERT(   buildable_from_sources(e) );
+  }
+}
+
+auto tests::unit::search::cache::Entry::test_include_interfaces_only() -> void {
+  using ::scold::search::cache::Type;
+  using ::scold::search::cache::Entry;
+  {
+    Entry e(Type::INCLUDE, "a");
+    CPPUNIT_ASSERT( include_interfaces_only(e) );
+  } {
+    Entry e(Type::HEREIN, "a");
+    CPPUNIT_ASSERT( ! include_interfaces_only(e) );
+  } {
+    Entry e(Type::SUBMODULE, "a");
+    CPPUNIT_ASSERT( ! include_interfaces_only(e) );
+  }
+}
+
+auto tests::unit::search::cache::Entry::suite() -> cppunit::Test * {
+  using namespace ::unit::rigging::suite;
+  Stream s("Entry");
+  s << call("constructor", &Entry::test_constructor)
+    << call("type", &Entry::test_type)
+    << call("directory", &Entry::test_directory)
+    << call("buildable_from_sources", &Entry::test_buildable_from_sources)
+    << call("include_from_interfaces_only", &Entry::test_include_interfaces_only)
+    ;
+  return finalize(s);
+}
+#endiv
