@@ -1,0 +1,5 @@
+#!/bin/sh
+source ${0%/*}/library/rigging.sh || exit 255
+# no mention of --enable-mock-build or --disable-mock-build
+# no mention of --enable-specfile or --disable-specfile
+testify # none

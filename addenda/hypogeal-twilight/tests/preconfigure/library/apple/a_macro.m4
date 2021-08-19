@@ -1,0 +1,3 @@
+AC_DEFUN([APPLE], [A is for Apple])
+
+AC_DEFUN([APPLE_NEEDS], [BANANA_NEEDS])

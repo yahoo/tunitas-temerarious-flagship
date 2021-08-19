@@ -1,0 +1,4 @@
+*.state
+*.log
+# directories of output trash
+o.*.d

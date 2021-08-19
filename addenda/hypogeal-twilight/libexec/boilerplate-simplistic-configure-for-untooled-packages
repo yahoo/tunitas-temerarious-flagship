@@ -1,0 +1,883 @@
+#!/bin/sh
+# For terms and provenance see the LICENSE file at the top of this repository.
+#
+# usage:
+#
+#     cat <<EOF > configure; chmod a+x configure
+#     #!/bin/sh
+#     exec ${hypogeal_twilight_libexecdir}/ac/boilerplate-simplistic-configure-for-untooled-packages
+#     EOF
+#
+
+# DO NOT
+# cd ${0%/*}
+# this will be called from the top-level of some some (package-module)
+declare LONG_NAME=${0##*/}
+declare SHORT_NAME=${LONG_NAME%%-*}
+declare NAME="${SHORT_NAME?}[${PWD##*/}]"
+cat <<EOF
+${NAME}: notice, the name '${SHORT_NAME?}' is '${LONG_NAME?}'
+${NAME}: notice, which is located at $0
+${NAME}: hint, to highlight problems
+${NAME}: hint, apply '--enable-configure-verbose' or '--verbose'
+${NAME}: hint, apply '--enable-configure-debug' or '--debug'
+EOF
+
+declare -i debug_mode=0
+declare -i verbose_mode=0
+declare -i dry_run_mode=0
+
+function exhibit_output() {
+    # the caller is responsible for trimming $tag down to something reasonable
+    local tag=$1; shift
+    if ((verbose_mode)) ; then
+        sed -e "s,^,${NAME}: ${tag?}-----> ,"
+    else
+        cat > /dev/null
+    fi
+}
+
+{
+    function version_subcommand() {
+        echo "${LONG_NAME}: version v0.45.1-0.devel of hypogeal-twilight"
+        exit 0
+    }
+
+    function usage_subcommand() {
+        local -i e=$1; shift
+        cat <<__USAGE__
+usage: configure [ ...options... ]
+
+--prefix=PREFIX       the prefix, where to install
+           default: --prefix=$default_prefix
+
+--define-specfile=FILE )preferred)
+--enable-specfile=FILE
+  --rpm-spec-file=FILE
+       --specfile=FILE       the rpm spec file, will default relative to  \${PWD}
+           default: --specfile=${default_package_spec_file:-unset}
+--undefine-package-spec-file (preferred)
+ --disable-package-spec-file
+ --disable-specfile
+
+  --use-hypogeal-twilight=DIRECTORY (preferred)
+--using-hypogeal-twilight=DIRECTORY (deprecating)
+ --with-hypogeal-twilight=DIRECTORY (current)
+      --hypogeal-twilight=DIRECTORY
+           default: --using-hypogeal-twilight=${default_eval_hypogeal_twilight_prefix:-unset}
+
+  --use-vernacular-doggerel=DIRECTORY (preferred)
+--using-vernacular-doggerel=DIRECTORY (deprecating)
+ --with-vernacular-doggerel=DIRECTORY (current)
+      --vernacular-doggerel=DIRECTORY
+           default: --using-vernacular-doggerel=${default_eval_vernacular_doggerel_prefix:-unset}
+  --ignore-vernacular-doggerel (preferred)
+ --without-vernacular-doggerel (current)
+
+--mock-cfg-name=NAME.cfg
+           default: --mock-cfg-name=${default_mock_cfg_name:-unset}
+           advice:  --mock-cfg-name=${advice_mock_cfg_name:-unset}
+
+--mock-rpmbuild-root=DIRECTORY
+           default: --mock-rpmbuild-root=${default_mock_rpm_build:-unset}
+           advice:  --mock-rpmbuild-root=${advice_mock_rpm_build:-unset}
+
+--mock-git-branch=BRANCH
+           default: --mock-git-banch=${default_mock_git_branch:-unset}
+           advice:  --mock-git-banch=${advice_mock_git_branch:-unset}
+
+--with-rpmbuild-handoff-topdir=DIRECTOROY
+           default: (e.g.) /fedora/local/handoff
+           disable: cannot be disabled, follows --enable-mock-build
+           advice:  leave with the default
+           also:    make HANDOFF_TOPDIR=/fedora/local/handoff
+__USAGE__
+        exit ${e:-2}
+    }
+    function peek_at_the_first_few_arguments() {
+        local -i peek_limit=$1; shift
+        local -i count=0
+        for a in "$@" ; do
+            case $a in
+            ( --version | -V )
+                version_subcommand
+                ;;
+            ( --usage | --help | -h )
+                usage_subcommand 0
+                ;;
+            esac
+            count=$((count+1))
+            if ((count >= peek_limit)); then
+                break
+            fi
+        done
+    }
+    # do this to get the simple stuff out of the way
+    # the default settings computations can warn and prattle an awful lot.
+    peek_at_the_first_few_arguments 10 "$@"
+}
+
+if [ -n "${CONFIG_SITE}" ] ; then
+    case ${CONFIG_SITE} in
+    ( /* ) source "${CONFIG_SITE}" || exit 1 ;;
+    ( * ) {
+        echo "${NAME}: warning, CONFIG_SITE is not a full path, ignoring it"
+        echo "${NAME}: info, environment variable CONFIG_SITE=${CONFIG_SITE}"
+        } 1>&2 ;;
+    esac
+fi
+
+# essentially these are the default default-values
+declare advice_package_spec_file=$(basename $(pwd)).spec
+declare advice_prefix=/opt/scold
+declare advice_eval_hypogeal_twilight_prefix='${prefix}'
+declare advice_eval_hypogeal_twilight_libexecdir='${eval_hypogeal_twilight_prefix}/libexec/hypogeal-twilight'
+declare advice_eval_hypogeal_twilight_datarootdir='${eval_hypogeal_twilight_prefix}/share/hypogeal-twilight'
+declare advice_eval_hypogeal_twilight_libdir='${eval_hypogeal_twilight_prefix}/lib/hypogeal-twilight'
+declare advice_eval_vernacular_doggerel_prefix='${prefix}'
+declare advice_eval_vernacular_doggerel_libexecdir='${eval_vernacular_doggerel_prefix}/libexec/vernacular-doggerel'
+declare advice_eval_vernacular_doggerel_datarootdir='${eval_vernacular_doggerel_prefix}/share/vernacular-doggerel'
+declare advice_eval_vernacular_doggerel_libdir='${eval_vernacular_doggerel_prefix}/lib/vernacular-doggerel'
+declare advice_mock_cfg_name=$(hostname -s)
+declare advice_mock_rpmbuild_root=/build/mock
+declare advice_mock_git_branch=master
+
+function is_development_tree_of_hypogeal_twilight() { (
+    set -e
+    test -f hypogeal-twilight.spec
+    test -f Makefile
+    test -x configure
+    test -x buildconf
+    test -d ac
+    test -d mk
+    test -d rpm
+); }
+
+function is_development_tree_of_vernacular_doggerel() { (
+    set -e
+    test -f vernacular-doggerel.spec
+    test -f Makefile
+    test -x configure
+    test -x buildconf
+    test -d mk
+    test -d rpm
+); }
+
+function need_default_prefix() {
+    if [ -n "$prefix" ] ; then
+        # already specified, e.g. from $CONFIG_SITE
+        return 1;
+    else
+        for arg in "$@" ; do
+            case $arg in
+            ( --prefix=* )
+                # specified in the arguments, looking ahead
+                return 1 ;;
+            esac
+        done
+    fi
+    return 0
+}
+
+# Some of these values may be derived from CONFIG_SITE
+declare default_package_spec_file=$(if [ -f release/package.spec ] ; then echo release/package.spec ; else echo ${advice_package_spec_file}; fi)
+declare default_prefix
+if need_default_prefix "$@"; then
+    warn_about_default_prefix_choice=0
+    case ${0%/*} in
+    ( */libexec )
+        # a development area (this is nearly always wrong)
+        default_prefix=${0%/*/*}
+        warn_about_default_prefix_choice=1
+        ;;
+    ( */libexec/hypogeal-twilight )
+        # an installation area (this is a reasonable choice)
+        default_prefix=${0%/*/*/*}
+        ;;
+    ( * )
+        # huh???
+        default_prefix=/usr/local
+        warn_about_default_prefix_choice=1
+        ;;
+    esac
+    if ((warn_about_default_prefix_choice)) ; then {
+        echo "${NAME}: warning, the default prefix is not obvious, so a guess of $default_prefix is estimated"
+        echo "${NAME}: info, to override the guess, use --prefix=DIRECTORY"
+        echo "${NAME}: info, or override with the environment with_hypogeal_twilight=DIRECTORY"
+        echo "${NAME}: info, or override with the (deprecating) HYPOGEAL_TWILIGHT=DIRECTORY"
+        echo "${NAME}: info, or override with settings in the file CONFIG_SITE=.../config.site"
+    } 1>&2; fi
+fi
+declare prefix
+: ${prefix:=$default_prefix}
+: ${prefix:=/usr/local}
+declare default_eval_hypogeal_twilight_prefix
+: ${default_eval_hypogeal_twilight_prefix:=${with_hypogeal_twilight}}
+: ${default_eval_hypogeal_twilight_prefix:=${HYPOGEAL_TWILIGHT}}
+if [ -z "$default_eval_hypogeal_twilight_prefix" ] && is_development_tree_of_hypogeal_twilight; then
+    default_eval_hypogeal_twilight_prefix=${PWD}
+fi
+: ${default_eval_hypogeal_twilight_prefix:='${prefix}'}
+declare default_eval_vernacular_doggerel_prefix
+: ${default_eval_vernacular_doggerel_prefix:=${with_vernacular_doggerel}}
+if [ -z "$default_eval_vernacular_doggerel_prefix" ] && is_development_tree_of_vernacular_doggerel; then
+    default_eval_vernacular_doggerel_prefix=${PWD}
+fi
+# this guess is a wild shot in the dark, there is no environment variable VERNACULAR_DOGGEREL
+: ${default_eval_vernacular_doggerel_prefix:=${HYPOGEAL_TWILIGHT:+${HYPOGEAL_TWILIGHT%/*}/vernacular-doggerel}}
+: ${default_eval_vernacular_doggerel_prefix:='${prefix}'}
+declare default_mock_cfg_name=${advice_mock_cfg_name}
+declare default_mock_rpmbuild_root=$(rpm --eval '%_topdir')
+# reminder, this may be executed in a location which is not a git repo, so git branch will fail (loudly)
+declare default_mock_git_branch=$(set -o pipefail ; git branch -l 2>/dev/null | sed -ne '/^\* / {; s/^..//p; }' || echo none)
+
+# cycling among --with --using --use
+declare GOOD_TAG=use
+
+declare package_spec_file=$default_package_spec_file
+declare require_package_spec_file=0
+declare disable_package_spec_file=0
+declare origin_adjective_package_spec_file=default
+declare prefix=$default_prefix
+declare eval_hypogeal_twilight_prefix=$default_eval_hypogeal_twilight_prefix
+declare eval_vernacular_doggerel_prefix=$default_eval_vernacular_doggerel_prefix
+declare without_vernacular_doggerel=0
+declare require_vernacular_doggerel=0
+declare mock_cfg_name=$default_mock_cfg_name
+declare mock_rpmbuild_root=$default_mock_rpmbuild_root
+declare mock_git_branch=$default_mock_git_branch
+declare configured_mk_fragment="# Configurations via --with-nonstd-NAME and --with-std-NAME configurations"
+declare mk_directory=mk
+
+while ((0 != $#)); do
+    # configure: running /bin/sh ./configure --disable-option-checking '--prefix=/usr/local'  --cache-file=/dev/null --srcdir=.
+    case $1 in
+    ( --version | -V )
+        version_subcommand
+        ;;
+    ( --usage | --help | -h )
+        usage_subcommand 0
+        ;;
+    ( --dry-run | --dry-run-mode | --dryrun | --dryrun-mode )
+        shift
+        dry_run_mode=1
+        ;;
+    ( --debug | --debug-mode )
+        shift
+        # debug implies verbose mode
+        debug_mode=1
+        verbose_mode=1
+        ;;
+    ( --verbose | --verbose-mode )
+        shift
+        # debug and verbose are the same thing herein
+        verbose_mode=1
+        ;;
+    ( --enable-configure-verbose | --enable-configure-debug )
+        shift
+        verbose_mode=1
+        ;;
+    ( --disable-configure-verbose | --disable-configure-debug )
+        shift
+        # ibidem.
+        verbose_mode=0
+        ;;
+    ( --prefix=* )
+        option=$1; shift
+        prefix=$(expr "x$option" : 'x--prefix=\(.*\)')
+        if [ -z "$prefix" ] ; then
+            echo "${NAME}: info, option $option"
+            echo "${NAME}: error, the prefix cannot be declared as the empty string"
+            exit 1
+        fi 1>&2
+        if ! [ -d "$prefix" ] ; then
+            echo "${NAME}: info, option $option"
+            echo "${NAME}: warning, the prefix $prefix does not exist, continuing anyway"
+        fi 1>&2
+        ;;
+    ( --enable-mk-directory= | --mk-directory= )
+        option=$1; shift
+        mk_directory=$(expr "x$option" : 'x--[^=]*=\(.*\)')
+        if [ -z "$mk_directory" ] ; then
+            echo "${NAME}: info, option $option"
+            echo "${NAME}: error, the mk-directory cannot be declared as the empty string"
+            exit 1
+        fi 1>&2
+        if ! [ -d "$mk_directory" ] ; then
+            echo "${NAME}: info, option $option"
+            echo "${NAME}: warning, the mk-directory $mk_directory does not exist, continuing anyway"
+        fi 1>&2
+        ;;
+    ( --define-package-spec-file | --enable-package-spec-file | --enable-specfile )
+        shift
+        disable_package_spec_file=0
+        require_package_spec_file=1
+        package_spec_file=$default_package_spec_file
+        ;;
+    ( --define-package-spec-file=* | --define-package-specfile=* | --define-specfile=* \
+    | --enable-package-spec-file=* | --enable-package-specfile=* | --enable-specfile=* \
+    | --specfile=* | --rpm[-_]spec[-_]file=* )
+        option=$1; shift
+        disable_package_spec_file=0
+        require_package_spec_file=1
+        package_spec_file=$(expr "x$option" : 'x--[^=]*=\(.*\)')
+        if [ -z "$package_spec_file" ] ; then
+            echo "${NAME}: info, option $option"
+            echo "${NAME}: error, the package-spec-file cannot be declared as the empty string"
+            exit 1
+        fi 1>&2
+        origin_adjective_package_spec_file='command line'
+        ;;
+    ( --undefine-package-spec-file | --undef-package-spec-file \
+    | --undefine-spec-file | --undef-spec-file  \
+    | --undefine-specfile | --undef-specfile  \
+    | --disable-package-spec-file | --disable-specfile )
+        shift
+        disable_package_spec_file=1
+        ;;
+    ( --*package_spec* | --*spec_file* )
+        option=$1; shift
+        {
+            echo "${NAME}: info, use package-spec-file (with dashes), there is no variant with an underscore"
+            echo "${NAME}: error, invalid option $option"
+            exit 1
+        } 1>&2
+        ;;
+    ( --*hypogeal_twilight* )
+        option=$1; shift
+        {
+            echo "${NAME}: info, use hypogeal-twilight (with a dash) not hypogeal_twilight (with an underscore)"
+            echo "${NAME}: error, invalid option $option"
+            exit 1
+        } 1>&2
+        ;;
+    ( --ignore-hypogeal-twilight | --avoid-hypogeal-twilight | --disuse-hypogeal-twilight | --without-hypogeal-twilight )
+        option=$1; shift
+        {
+            tag=$(expr "x$option" : 'x--without-\([^=]*\)*')
+            echo "${NAME}: info, option $option"
+            echo "${NAME}: error, cannot do without $tag, that makes no sense"
+            exit 1
+        } 1>&2
+        ;;
+    ( --use-hypogeal-twilight=* | --using-hypogeal-twilight=* | --with-hypogeal-twilight=* | --hypogeal-twilight=* )
+        option=$1; shift
+        if ! expr "x$option" : "x--${GOOD_TAG?}-.*=.*" >/dev/null ; then
+            current_tag=$(expr "x$option" : 'x\(--[^=]*\)=.*')
+            # not any more ---> echo "${NAME}: reminder, use --${GOOD_TAG?}-hypogeal-twilight=DIRECTORY, not ${current_tag?}=DIRECTORY"
+        fi 1>&2
+        eval_hypogeal_twilight_prefix=$(expr "x$option" : 'x--[^=]*=\(.*\)')
+        if [ -z "$eval_hypogeal_twilight_prefix" ] ; then
+            echo "${NAME}: info, option $option"
+            echo "${NAME}: error, hypogeal-twilight cannot be declared as the empty string"
+            exit 1
+        fi 1>&2
+        if [[ no == "$eval_hypogeal_twilight_prefix" ]] ; then
+            without_hypogeal_twilight=1
+            require_hypogeal_twilight=0
+        else
+            if ! [ -d "$eval_hypogeal_twilight_prefix" ] ; then
+                echo "${NAME}: info, option $option"
+                echo "${NAME}: warning, hypogeal-twilight does not name a directory, continuing anyway"
+            fi 1>&2
+        fi
+        ;;
+    ( --*vernacular_doggerel* )
+        option=$1; shift
+        {
+            echo "${NAME}: info, use vernacular-doggerel (with a dash) not vernacular_doggerel (with an underscore)"
+            echo "${NAME}: error, invalid option $option"
+            exit 1
+        } 1>&2
+        ;;
+    ( --ignore-vernacular-doggerel | --avoid-vernacular-doggerel | --disuse-vernacular-doggerel | --without-vernacular-doggerel )
+        shift
+        without_vernacular_doggerel=1
+        ;;
+    ( --use-vernacular-doggerel=* | --using-vernacular-doggerel=* | --with-vernacular-doggerel=* | --vernacular-doggerel=* )
+        option=$1; shift
+        without_vernacular_doggerel=0
+        require_vernacular_doggerel=1
+        if ! expr "x$option" : "x--${GOOD_TAG?}-.*=.*" >/dev/null ; then
+            current_tag=$(expr "x$option" : 'x\(--[^=]*\)=.*')
+            # not any more ---> echo "${NAME}: reminder, use --${GOOD_TAG?}-vernacular-doggerel=DIRECTORY, not ${current_tag?}=DIRECTORY"
+        fi 1>&2
+        eval_vernacular_doggerel_prefix=$(expr "x$option" : 'x--[^=]*=\(.*\)')
+        if [ -z "$eval_vernacular_doggerel_prefix" ] ; then
+            echo "${NAME}: info, option $option"
+            echo "${NAME}: error, vernacular-doggerel cannot be declared as the empty string"
+            exit 1
+        fi 1>&2
+        if [[ no == "$eval_vernacular_doggerel_prefix" ]] ; then
+            without_vernacular_doggerel=1
+            require_vernacular_doggerel=0
+        else
+            if ! [ -d "$eval_vernacular_doggerel_prefix" ] ; then
+                echo "${NAME}: info, option $option"
+                echo "${NAME}: warning, vernacular-doggerel does not name a directory, continuing anyway"
+            fi 1>&2
+        fi
+        ;;
+    ( --mock[-_]cfg[-_]name=* )
+        mock_cfg_name=$(expr "x$1" : 'x--[^=]*=\(.*\)')
+        shift
+        # FIXME ... check for empty
+        ;;
+    ( --mock[-_]rpmbuild[-_]name=* )
+        mock_rpmbuild_name=$(expr "x$1" : 'x--[^=]*=\(.*\)')
+        shift
+        # FIXME ... check for empty
+        ;;
+    ( --mock[-_]git[-_]branch=* )
+        mock_git_branch=$(expr "x$1" : 'x--[^=]*=\(.*\)')
+        shift
+        # FIXME ... check for empty
+        ;;
+    ( --cache-file=* | --srcdir=* )
+        : ignore as irrelvant
+        shift
+        ;;
+    ( --with-prefix=* )
+        {
+            echo "${NAME}: info, option $1 is invalid"
+            echo "${NAME}: hint, instead, use --${1#--with-}"
+            echo "${NAME}: error, quitting at $1"
+            exit 1
+        } 1>&2
+        ;;
+    ( --without-rpmbuild-handoff-topdir )
+        option=$1; shift
+        with_name=$(expr "x$option" : 'x--without-\([^=]*\)')
+        {
+            echo "${NAME}: info, the ${with_name} option must appear as --with-${with_name?}=DIRECTORY"
+            echo "${NAME}: error, $option is invalid"
+            exit 1
+        } 1>&2
+        ;;
+    ( --with-rpmbuild-handoff-topdir )
+        {
+            echo "${NAME}: info, instead use $1=DIRECTORY"
+            echo "${NAME}: error, $1 requires a value"
+            exit 1
+        } 1>&2
+        ;;
+    ( --with-rpmbuild-handoff-topdir=* )
+        #
+        # Matches and mirrors HGTW_WITH_RPMBUILD_HANDOFF_TOPDIR
+        # --with-rpmbuild-handoff-topdir=DIRECTORY
+        #
+        option=$1; shift
+        with_name=$(expr "x$option" : 'x--with-\([^=]*\)=.*')
+        with_value=$(expr "x$option" : 'x--with-[^=]*=\(.*\)')
+        if [ -z "$with_value" ] ; then
+            echo "${NAME}, info, option $option"
+            echo "${NAME}: error, the value component of the --with-${with_name:-NAME}=VALUE cannot be empty"
+            exit 1
+        fi 1>&2 
+        HANDOFF_TOPDIR=$with_value
+        if ! [ -d $HANDOFF_TOPDIR ] ; then
+            echo "${NAME}, info, option $option"
+            echo "${NAME}: error, the directory ${HANDOFF_TOPDIR?} does not exist"
+        fi
+        for subdir in SOURCES SPECS SRPMS; do
+            __handoff_subdir="$HANDOFF_TOPDIR/$subdir"
+            if ! [ -e "$__handoff_subdir" ] ; then
+                __failure=1
+                echo "${NAME}: warning, the directory ${__handoff_subdir?} is missing" 1>&2
+            elif ! [ -d "$__handoff_subdir" ] ; then
+                __failure=1
+                echo "${NAME}: warning, the name ${__handoff_subdir?} exists but is not a directory" 1>&@
+            fi
+        done
+        if ((__failure)) ; then
+            echo "${NAME}: error, the directory ${HANDOFF_TOPDIR} is incomplete and cannot be used])"
+            exit 1
+        fi 1>&2
+        configured_mk_fragment="${configured_mk_fragment}
+HANDOFF_TOPDIR = ${HANDOFF_TOPDIR}"
+        ;;
+    ( --with-nonstd-*=* | --with-std-*=* )
+        option=$1; shift
+        with_nonstd_name=$(expr "x$option" : 'x--with-\([^=]*\)=.*')
+        with_name=$(expr "x$option" : 'x--with-[nonstd]*-\([^=]*\)=.*' | tr -c '[\na-zA-Z0-9]' _)
+        if [ -z "$with_nonstd_name" ] || [ -z "$with_name" ] ; then
+            echo "${NAME}: info, option $option"
+            echo "${NAME}: error, the name component of the --with-${with_nonstd_name:-NAME}=VALUE cannot be empty"
+            exit 1
+        fi 1>&2
+        with_value=$(expr "x$option" : 'x--with-[^=]*=\(.*\)')
+        if [ -z "$with_value" ] ; then
+            echo "${NAME}: info, option $option"
+            echo "${NAME}: error, the value component of the --with-${with_nonstd_name:-NAME}=VALUE cannot be empty"
+            exit 1
+        fi 1>&2
+        # no is the same as --without
+        if [[ no != $with_value ]]; then
+            if ! [ -d "$with_value" ] ; then
+                echo "${NAME}, info, option $option"
+                echo "${NAME}: warning, directory $with_value does not exist, continuing anyway"
+            fi 1>&2
+            # unchecked: value being empty.
+            configured_mk_fragment="${configured_mk_fragment}
+${with_nonstd_name//-/_}_prefix = ${with_value?}"
+        fi
+        ;;
+    ( --disable-*=* | --without-*=* )
+        option=$1; shift
+        {
+            tag=$(expr "x$option" : 'x--\([^=]*\)=.*')
+            echo "${NAME}: info, option $option"
+            echo "${NAME}: warning, in $option, the --$tag cannot have a value"
+        } 1>&2
+        ;;
+    ( --enable-* | --disable-* | --with-* | --without-* )
+        # ignore as unknown but acceptable
+        shift
+        ;;
+    ( --build=* | --host=* | --program-prefix=* | --exec-prefix=* | --*dir=* )
+        # ibidem.
+        shift
+        ;;
+    ( -- )
+        shift
+        break
+        ;;
+    ( '' )
+        {
+            echo "${NAME}: error, unexpected empty argument"
+            echo "${NAME}: info, check the calling buildconf (if relevant)"
+            exit 1
+        } 1>&2
+        ;;
+    ( --* | *=* )
+        option=$1
+        shift
+        {
+            echo "${NAME}: warning, ignoring unexpected option '$option'"
+        } 1>&2
+        # e.g. %%configure (%%doggerel_configure)
+        #
+        # Specimens (as captured in the wild):
+        #
+        #   circa Fedora 19?
+        #
+        #    ./configure --build=x86_64-redhat-linux-gnu --host=x86_64-redhat-linux-gnu --program-prefix= --disable-dependency-tracking --prefix=/opt/scold --exec-prefix=/opt/scold --bindir=/opt/scold/bin --sbindir=/opt/scold/sbin --sysconfdir=/etc --datadir=/opt/scold/share --includedir=/opt/scold/include --libdir=/opt/scold/lib64 --libexecdir=/opt/scold/libexec --localstatedir=/var --sharedstatedir=/var/lib --mandir=/opt/scold/share/man --infodir=/opt/scold/share/info --enable-specfile=module-mysql++.spec --with-std-scold=/opt/scold --without-baleful-ballad --without-anguish-answer --with-nonstd-gcc=/opt/gcc
+        #
+        #   circa Fedora 27 (note the NAME=VALUE variable settings
+        #
+        #    /bin/sh ./configure --disable-option-checking '--prefix=/exp/echoback-peername/20180811'  '--with-submodules=/builddir/build/BUILD/echoback-peername-0.4.0/submodules' '--with-submodules=/builddir/build/BUILD/echoback-peername-0.4.0/submodules' '--with-siblings=/builddir/build/BUILD' '--with-siblings=/builddir/build/BUILD' '--without-nearby' '--without-external' '--with-std-scold=/opt/scold' '--with-nonstd-gcc=no' '--with-hypogeal-twilight=/builddir/build/BUILD/echoback-peername-0.4.0/submodules/hypogeal-twilight' '--with-incendiary-sophist=/opt/scold' '--with-module-c=/opt/scold' '--with-module-string=/opt/scold' '--with-module-format=/opt/scold' '--with-module-ip=/opt/scold' '--with-module-ish=/opt/scold' '--with-module-nonstd=/builddir/build/BUILD/echoback-peername-0.4.0/submodules/module-nonstd' '--with-module-options=/builddir/build/BUILD/echoback-peername-0.4.0/submodules/module-options' '--with-module-posix=/builddir/build/BUILD/echoback-peername-0.4.0/submodules/module-posix' '--with-module-semver=/opt/scold' '--with-module-std=/opt/scold' '--with-module-sys=/builddir/build/BUILD/echoback-peername-0.4.0/submodules/module-sys' '--with-module-cppunit=/opt/scold' '--with-module-rigging-unit=/opt/scold' '--with-nonstd-gcc=no' '--with-nonstd-cppunit=no' '--with-std-scold=/opt/scold' '--with-hypogeal-twilight=/builddir/build/BUILD/echoback-peername-0.4.0/submodules/hypogeal-twilight' '--with-incendiary-sophist=/opt/scold' --enable-dynamic-subconfigure-arguments '--build=x86_64-redhat-linux-gnu' '--host=x86_64-redhat-linux-gnu' '--program-prefix=' '--disable-dependency-tracking' '--exec-prefix=/exp/echoback-peername/20180811' '--bindir=/exp/echoback-peername/20180811/bin' '--sbindir=/exp/echoback-peername/20180811/sbin' '--sysconfdir=/etc' '--datadir=/exp/echoback-peername/20180811/share' '--includedir=/exp/echoback-peername/20180811/include' '--libdir=/exp/echoback-peername/20180811/lib64' '--libexecdir=/exp/echoback-peername/20180811/libexec' '--localstatedir=/var' '--sharedstatedir=/var/lib' '--mandir=/exp/echoback-peername/20180811/share/man' '--infodir=/exp/echoback-peername/20180811/share/info' '--with-std-scold=/opt/scold' '--without-submodules' '--without-external' '--disable-mock-build' '--disable-specfile' '--without-anguish-answer' '--without-baleful-ballad' '--with-submodules' '--without-vernacular-doggerel' '--with-nonstd-half=/opt/nonstd/half' '--with-hypogeal-twilight=/builddir/build/BUILD/echoback-peername-0.4.0/submodules/hypogeal-twilight' 'build_alias=x86_64-redhat-linux-gnu' 'host_alias=x86_64-redhat-linux-gnu' 'CFLAGS=-O2 -g -pipe -Wall -Werror=format-security -Wp,-D_FORTIFY_SOURCE=2 -fexceptions -fstack-protector-strong --param=ssp-buffer-size=4 -grecord-gcc-switches -specs=/usr/lib/rpm/redhat/redhat-hardened-cc1 -m64 -mtune=generic -fasynchronous-unwind-tables' 'LDFLAGS=-Wl,-z,relro -specs=/usr/lib/rpm/redhat/redhat-hardened-ld' 'CXXFLAGS=-O2 -g -pipe -Wall -Werror=format-security -Wp,-D_FORTIFY_SOURCE=2 -fexceptions -fstack-protector-strong --param=ssp-buffer-size=4 -grecord-gcc-switches -specs=/usr/lib/rpm/redhat/redhat-hardened-cc1 -m64 -mtune=generic -fasynchronous-unwind-tables' --cache-file=/dev/null --srcdir=.
+        ;;
+    ( * )
+        {
+            echo "${NAME}: error, unknown non-option value '$1'"
+            echo "${NAME}: info, try --usage for supported options"
+            exit 1
+        } 1>&2
+        ;;
+    esac
+done
+if ((0 != $#)); then
+    usage_subcommand 1
+fi 1>&2
+
+if ((disable_package_spec_file)); then
+    unset package_spec_file
+else
+    if ! [ -f "${package_spec_file?}" ] ; then
+        __message="the ${origin_adjective_package_spec_file} package-spec-file, ${package_spec_file?}, does not exist (or is not a file)"
+        if ((require_package_spec_file)) ; then
+            # have to quit ... the configuration is about examining the package spec file, and it is missing
+            echo "${NAME}: error, ${__message?}"
+            exit 1
+        else
+            echo "${NAME}: warning, ${__message}"
+            echo "${NAME}: info, continuing anyway, operating as if --disable-package-spec-file"
+            disable_package_spec_file=1
+            unset package_spec_file
+        fi
+    fi 1>&2
+fi
+
+# We want this to fail early and hard if a necessary package is not available
+# this will fail if, for example, the mock rpmbuild does not have
+# packages git, hostname, rpm
+# The nearby *.spec file should mention such in the BuildRequires
+if ! ( set -o pipefail
+       { rpm -q git hostname &&
+         type -p git &&
+         type -p hostname &&
+         true; } 2>&1 | exhibit_output "git+hostname" ) ; then
+    echo "${NAME}: error, failing because critical components among git or hostname are missing (see above)"
+    exit 2
+fi 1>&2
+
+function evalN() {
+    local N=$1; shift;
+    local expression=$1; shift
+    if ((0 == $N)); then
+        echo "$expression"
+    else
+        evalN $((N-1)) "$(eval "echo \"$expression\"")"
+    fi
+}
+
+: hypogeal-twilight && {
+    declare hypogeal_twilight_prefix=$(evalN 3 "${eval_hypogeal_twilight_prefix}")
+    if [ ! -d "$hypogeal_twilight_prefix" ] ; then
+        echo "${NAME}: info, use --using-hypogeal-twilight=DIRECTORY to declare an explicit location"
+        echo "${NAME}: error, the hypogeal-twilight components do not appear in the tree rooted at ${hypogeal_twilight_prefix:-undefined}"
+        exit 1
+    fi 1>&2
+
+    declare default_eval_hypogeal_twilight_libexecdir
+    declare default_eval_hypogeal_twilight_datarootdir
+    declare default_eval_hypogeal_twilight_libdir
+    #
+    # prefer the installed area  (.../libexec/hypogeal-twilight .../share/hypogeal-twilight/{m4,am})
+    # allow the development area (.../ac, .../am .../m4 .../rpm)
+    #
+    declare proposed_hypogeal_twilight_datarootdir="${hypogeal_twilight_prefix}/share/hypogeal-twilight"
+    if [ -d "${proposed_hypogeal_twilight_datarootdir}/ac" ] ; then
+        # a production install
+        # e.g. /opt/scold/share/hypogeal-twilight
+        eval_hypogeal_twilight_libexecdir="${hypogeal_twilight_prefix?}/libexec/hypogeal-twilight"
+        eval_hypogeal_twilight_datarootdir="${proposed_hypogeal_twilight_datarootdir?}"
+        eval_hypogeal_twilight_libdir="${hypogeal_twilight_prefix?}/lib/hypogeal-twilight"
+    else
+        proposed_hypogeal_twilight_datarootdir="${hypogeal_twilight_prefix}"
+        if [ -d "${proposed_hypogeal_twilight_datarootdir}/ac" ] ; then
+            # a development install
+            # e.g. ../hypogeal-twilight
+            #      /build/scold/hypogeal-twilight
+            eval_hypogeal_twilight_libexecdir="${hypogeal_twilight_prefix?}/libexec"
+            eval_hypogeal_twilight_datarootdir="${proposed_hypogeal_twilight_datarootdir?}"
+            eval_hypogeal_twilight_libdir="${hypogeal_twilight_prefix?}/lib"
+        else
+            # and as such, the actual values used here does not matter (failure is recognized later)
+            eval_hypogeal_twilight_libexecdir="${hypogeal_twilight_prefix?}/libexec/hypogeal-twilight"
+            eval_hypogeal_twilight_datarootdir="${hypogeal_twilight_prefix?}/share/hypogeal-twilight"
+            eval_hypogeal_twilight_libdir="${hypogeal_twilight_prefix?}/lib/hypogeal-twilight"
+        fi
+    fi
+
+    function hypogeal_twilight_is_missing() {
+        local noun=$1; shift
+        local prefix=$1; shift
+        local somedir=$1; shift
+        echo "${NAME}: info, perhaps the installation at ${prefix:-undefined} is corrupted because the other consistency checks passed"
+        echo "${NAME}: info, use --using-hypogeal-twilight=DIRECTORY to declare an explicit location"
+        echo "${NAME}: error, the hypogeal-twilight ${noun?} does not exist at ${somedir:-undefined}"
+        exit 1
+    }
+
+    declare hypogeal_twilight_libexecdir=$(evalN 3 "${eval_hypogeal_twilight_libexecdir}")
+    if [ ! -d "$hypogeal_twilight_libexecdir" ] ; then
+        hypogeal_twilight_is_missing libexec "${hypogeal_twilight_prefix:-undefined}" "${hypogeal_twilight_libexecdir:-undefined}"
+    fi 1>&2
+
+    declare hypogeal_twilight_libdir=$(evalN 3 "${eval_hypogeal_twilight_libdir}")
+    if [ ! -d "$hypogeal_twilight_libdir" ] ; then
+        hypogeal_twilight_is_missing libdir "${hypogeal_twilight_prefix:-undefined}" "${hypogeal_twilight_libdir:-undefined}"
+    fi 1>&2
+
+    declare hypogeal_twilight_datarootdir=$(evalN 3 "${eval_hypogeal_twilight_datarootdir}")
+    if [ ! -d "$hypogeal_twilight_datarootdir" ] ; then
+        hypogeal_twilight_is_missing datarootdir "${hypogeal_twilight_prefix:-undefined}" "${hypogeal_twilight_datarootdir:-undefined}"
+    fi 1>&2
+
+    # this is just a intra-make variable reference
+    declare hypogeal_twilight_datadir='$(hypogeal_twilight_datarootdir)'
+}
+if ((!without_vernacular_doggerel)) ; then {
+    declare vernacular_doggerel_prefix=$(evalN 3 "${eval_vernacular_doggerel_prefix}")
+    if [ ! -d "$vernacular_doggerel_prefix" ] ; then
+        echo "${NAME}: info, use --using-vernacular-doggerel=DIRECTORY to specify a location"
+        echo "${NAME}: error, the vernacular-doggerel components do not appear in the tree rooted at ${vernacular_doggerel_prefix:-undefined}"
+        exit 1
+    fi 1>&2
+
+    declare default_eval_vernacular_doggerel_libexecdir
+    declare default_eval_vernacular_doggerel_datarootdir
+    declare default_eval_vernacular_doggerel_libdir
+    #
+    # prefer the installed area  (.../libexec/vernacular-doggerel .../share/vernacular-doggerel/{m4,am})
+    # allow the development area (.../mk, .../rpm)
+    #
+    declare proposed_vernacular_doggerel_datarootdir="${vernacular_doggerel_prefix}/share/vernacular-doggerel"
+    if [ -f "${proposed_vernacular_doggerel_datarootdir}/mk/build.mk" ] ; then
+        # a production install
+        # e.g. /opt/scold/share/vernacular-doggerel
+        eval_vernacular_doggerel_libexecdir="${vernacular_doggerel_prefix}/libexec/vernacular-doggerel"
+        eval_vernacular_doggerel_datarootdir="$proposed_vernacular_doggerel_datarootdir"
+        eval_vernacular_doggerel_libdir="${vernacular_doggerel_prefix}/lib/vernacular-doggerel"
+    else
+        proposed_vernacular_doggerel_datarootdir="${vernacular_doggerel_prefix}"
+        if [ -f "${vernacular_doggerel_prefix}/mk/build.mk" ] ; then
+            # a development install
+            # e.g. ../vernacular-doggerel
+            #      /build/scold/vernacular-doggerel
+            #      /build/master/vernacular-doggerel
+            #      /build/everything/vernacular-doggerel
+            eval_vernacular_doggerel_libexecdir="${vernacular_doggerel_prefix}/libexec"
+            eval_vernacular_doggerel_datarootdir="${vernacular_doggerel_prefix}"
+            eval_vernacular_doggerel_libdir="${vernacular_doggerel_prefix}/lib"
+        else
+            # and as such, the actual values used here does not matter (failure is recognized later)
+            eval_vernacular_doggerel_libexecdir="${vernacular_doggerel_prefix}/libexec/vernacular-doggerel"
+            eval_vernacular_doggerel_datarootdir="${vernacular_doggerel_prefix}/share/vernacular-doggerel"
+            eval_vernacular_doggerel_libdir="${vernacular_doggerel_prefix}/lib/vernacular-doggerel"
+        fi
+    fi
+
+    function vernacular_doggerel_is_missing() {
+        local noun=$1; shift
+        local prefix=$1; shift
+        local somedir=$1; shift
+        __message="the vernacular-doggerel ${noun?} does not exist at ${somedir:-undefined}"
+        echo "${NAME}: info, perhaps the installation at ${prefix:-undefined} is corrupted because the other consistency checks have passed"
+        if ((require_vernacular_doggerel)); then
+            echo "${NAME}: error, ${__message}"
+            exit 1
+        else
+            echo "${NAME}: info, use --using-vernacular-doggerel=DIRECTORY to declare an explicit location"
+            echo "${NAME}: warning, ${__message}"
+            echo "${NAME}: info, continuing anyway, operating as if --without-vernacular-doggerel --disable-package-spec-file"
+            without_vernacular_doggerel=1
+            disable_package_spec_file=1
+        fi
+    }
+
+    declare vernacular_doggerel_libexecdir=$(evalN 3 "${eval_vernacular_doggerel_libexecdir}")
+    if [ ! -d "$vernacular_doggerel_libexecdir" ] ; then
+        vernacular_doggerel_is_missing libexec "${vernacular_doggerel_prefix:-undefined}" "${vernacular_doggerel_libexecdir:-undefined}"
+    fi 1>&2
+
+    declare vernacular_doggerel_datarootdir=$(evalN 3 "${eval_vernacular_doggerel_datarootdir}")
+    if [ ! -d "$vernacular_doggerel_datarootdir" ] ; then
+        vernacular_doggerel_is_missing datarootdir "${vernacular_doggerel_prefix:-undefined}" "${vernacular_doggerel_datarootdir:-undefined}"
+    fi 1>&2
+
+    declare vernacular_doggerel_libdir=$(evalN 3 "${eval_vernacular_doggerel_libdir}")
+    if [ ! -d "$vernacular_doggerel_libdir" ] ; then
+        vernacular_doggerel_is_missing lib "${vernacular_doggerel_prefix:-undefined}" "${vernacular_doggerel_libdir:-undefined}"
+    fi 1>&2
+
+    # this is just an intra-make variable reference
+    declare vernacular_doggerel_datadir='$(vernacular_doggerel_datarootdir)'
+
+    #
+    # These are what is substituted
+    #
+    vernacular_doggerel_prefix_or_error="${vernacular_doggerel_prefix:-\$(error vernacular_doggerel_prefix is unset)}"
+    vernacular_doggerel_libexecdir_or_error="${vernacular_doggerel_libexecdir:-\$(error vernacular_doggerel_libexecdir is unset)}"
+    vernacular_doggerel_datarootdir_or_error="${vernacular_doggerel_datarootdir:-\$(error vernacular_doggerel_datarootdir is unset)}"
+    vernacular_doggerel_datadir_or_error="${vernacular_doggerel_datadir:-\$(error vernacular_doggerel_datadir is unset)}"
+    vernacular_doggerel_libdir_or_error="${vernacular_doggerel_libdir:-\$(error vernacular_doggerel_libdir is unset)}"
+}; fi
+
+if ((without_vernacular_doggerel)) ; then
+    disable_package_spec_file=1
+    unset vernacular_doggerel_prefix
+    unset vernacular_doggerel_datadir
+    unset vernacular_doggerel_datarootdir
+    unset vernacular_doggerel_libdir
+    unset vernacular_doggerel_libexecdir
+    vernacular_doggerel_prefix_or_error=""
+    vernacular_doggerel_datadir_or_error=""
+    vernacular_doggerel_datarootdir_or_error=""
+    vernacular_doggerel_libdir_or_error=""
+    vernacular_doggerel_libexecdir_or_error=""
+fi
+if ((disable_package_spec_file)); then
+    unset package_spec_file
+fi
+
+if ((disable_package_spec_file)) ; then
+    module_name=disabled
+    module_version=disabled
+    module_release=disabled
+else
+    extract="${vernacular_doggerel_libexecdir?}/extract-rpm-specfile-value"
+    if ! [ -x "$extract" ] ; then
+        echo "${NAME}: error, cannot find ${extract}"
+        # this is a mis-installation problem
+        exit 99
+    fi 1>&2
+    # DO NOT 'declare' as the exit code of the initializer is not respected
+    # DO NOT just do the assignment as the exit code is not recovered
+    # DO perform the work two times
+    if ! ( set -o pipefail
+           { ${extract?} Name ${package_spec_file?} &&
+             ${extract?} Version ${package_spec_file?} &&
+             ${extract?} Release ${package_spec_file?} &&
+             true; } 2>&1 | exhibit_output "${extract##*/} ${package_spec_file?}" ; ) then
+        # huh?
+        echo "${NAME}: hint, review the error messages which are exhibited above"
+        echo "${NAME}: hint, $(type -p rpmspec) is being used at the core of ${extract?}"
+        echo "${NAME}: hint, the spec file must be completely correct and substantially warning-free"
+        echo "${NAME}: hint, there may be new stricter checks from the rpm-build system in package $(rpm -q rpm-build)"
+        echo "${NAME}: info, the file ${package_spec_file?} $(if test -f "$package_spec_file" ; then echo "exists"; else echo "does not exist or is not readable"; fi)"
+        echo "${NAME}: info, the extractor ${extract?} $(if test -x "$extract" ; then echo "exists and is executable"; else echo "does not exist or is not executable"; fi)"
+        echo "${NAME}: error, cannot extract the NEVR (Name, Epoch, Version, Release) from ${package_spec_file?} using ${extract?}"
+        exit 2
+    fi 1>&2
+    module_name=$(${extract} Name ${package_spec_file})
+    module_version=$(${extract} Version ${package_spec_file})
+    module_release=$(${extract} Release ${package_spec_file})
+fi
+
+declare CONFIGFILE=${mk_directory?}/configured.mk
+declare tCONFIGFILE="${CONFIGFILE%/*}/t99.${CONFIGFILE##*/}.$$.mk~"
+
+declare EXTRACTFILE=${mk_directory?}/extracted.mk
+declare tEXTRACTFILE="${EXTRACTFILE%/*}/t99.${EXTRACTFILE##*/}.$$.mk~"
+
+# accepts the file on stdin
+function emit_file() {
+    local tfile=$1; shift
+    local file=$1; shift
+    if ((dry_run_mode)) ; then
+        echo "${NAME}: info, not creating ${file?}"
+        exhibit_output "${file##*/}"
+    else
+        echo "${NAME}: info, creating ${file?}"
+        mkdir -p ${tfile%/*} &&
+        tee ${tfile} | exhibit_output "${file##*/}" &&
+        mv -f "${tfile}" "${file}" 
+    fi
+}
+
+declare ecode
+emit_file "${tCONFIGFILE?}" "${CONFIGFILE?}" <<__EOF__ ; : ${ecode:=$?}
+# matches the refresh in code in vernacular-doggerel .../mk/build.mk
+prefix = \$(if \$(DESTDIR),\$(DESTDIR)/)${prefix}
+hypogeal_twilight_prefix = ${hypogeal_twilight_prefix:-\$(error hypogeal_twilight_prefix is unset)}
+hypogeal_twilight_libexecdir = ${hypogeal_twilight_libexecdir:-\$(error hypogeal_twilight_libexecdir is unset)}
+hypogeal_twilight_libdir = ${hypogeal_twilight_libdir:-\$(error hypogeal_twilight_libdir is unset)}
+hypogeal_twilight_datarootdir = ${hypogeal_twilight_datarootdir:-\$(error hypogeal_twilight_datarootdir is unset)}
+hypogeal_twilight_datadir = ${hypogeal_twilight_datadir:-\$(error hypogeal_twilight_datadir is unset)}
+vernacular_doggerel_prefix = ${vernacular_doggerel_prefix_or_error?}
+vernacular_doggerel_libexecdir = ${vernacular_doggerel_libexecdir_or_error?}
+vernacular_doggerel_libdir = ${vernacular_doggerel_libdir_or_error?}
+vernacular_doggerel_datarootdir = ${vernacular_doggerel_datarootdir_or_error?}
+vernacular_doggerel_datadir = ${vernacular_doggerel_datadir_or_error?}
+# Moved to within ${EXTRACTFILE}, which is nearby
+#   MODULE_NAME = ${module_name}
+#   MODULE_VERSION = ${module_version}
+#   MODULE_RELEASE = ${module_release}
+# Deprecated
+#   RPM_SPEC_FILE = ${package_spec_file}, a.k.a. PACKAGE_SPEC_FILE
+#   MOCK_CFG_NAME = ${mock_cfg_name}
+#   MOCK_RPMBUILD_ROOT = ${mock_rpmbuild_root}
+#   MOCK_GIT_BRANCH = ${mock_git_branch}
+${configured_mk_fragment:-# none}
+__EOF__
+
+emit_file "${tEXTRACTFILE?}" "${EXTRACTFILE?}" <<__EOF__ ; : ${ecode:=$?}
+# These settings are refreshed from vernacular-doggerel's .../build.mk as needed
+MODULE_NAME = ${module_name}
+MODULE_VERSION = ${module_version}
+MODULE_RELEASE = ${module_release}
+__EOF__
+
+exit ${ecode:-0}

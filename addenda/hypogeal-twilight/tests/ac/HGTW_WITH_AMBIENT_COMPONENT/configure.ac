@@ -1,0 +1,14 @@
+# -*- autoconf -*-test code; but see the LICENSE file nearby.
+dnl
+dnl WATCHOUT - you MUST NOT have the macro name HGTW_WITH_USR_LOCAL as the package name (unquoted)
+AC_INIT([testy-mctestface], [0.0.0], [testy@scold-lang.org])
+HGTW_INIT(AC_PACKAGE_NAME, AC_PACKAGE_VERSION, AC_PACKAGE_BUGREPORT)
+AC_CONFIG_FILES([Makefile])
+AC_CONFIG_MACRO_DIR([m4])
+AC_CONFIG_HEADERS([config.h])
+dnl we expect submodules/high-plains to exist so that it be found herein
+if ! test -d submodules/high-plains ; then
+    HGTW_MSG_ERROR([missing directory submodules/high-plains])
+fi
+HGTW_WITH_AMBIENT_COMPONENT([high-plains], [high_plains], [High Plains]) dnl <----------------- test this, show it has correct shellcode and "is legal"
+HGTW_FINALIZE

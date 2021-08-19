@@ -1,0 +1,4 @@
+// -*- c++ -*- hand-coded
+#pragma once
+namespace autotools { }
+

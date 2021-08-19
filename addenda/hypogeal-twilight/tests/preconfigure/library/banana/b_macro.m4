@@ -1,0 +1,4 @@
+AC_DEFUN([BANANA], [B is for Banana])
+
+AC_DEFUN([BANANA_NEEDS], [CHERRY_NEEDS])
+

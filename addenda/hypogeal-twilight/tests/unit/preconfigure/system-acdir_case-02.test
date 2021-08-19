@@ -1,0 +1,4 @@
+#!/bin/sh
+source ${0%/*}/../library/rigging.sh || exit 255
+# one of these is potent
+autotools-local-preconfigure -I m4 --system-acdir=here --system-acdir=there --dry-run

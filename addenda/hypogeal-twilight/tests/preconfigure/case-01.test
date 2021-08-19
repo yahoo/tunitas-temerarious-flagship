@@ -1,0 +1,10 @@
+#!/bin/sh
+source ${0%/*}/library/rigging.sh || exit 255
+explanation="no arguments, preconfigures"
+if testify ; then
+    echo "OK ($explanation)"
+    exit 0
+else
+    echo "FAIL ($explanation)"
+    exit 1
+fi

@@ -1,0 +1,19 @@
+Support for the SCOLD build system, which uses autotools.
+But the autotools are best used with some project-specific macros and aclocal.
+
+Building and Installing the Package
+
+  ( ./buildconf && ./configure && make check && make install ) >& o.make.out
+
+Building the package
+
+  ( ./buildconf && ./configure && make ) >& o.make.out
+
+Testing the package
+
+  make check
+  
+Installing the package
+
+  make install
+
