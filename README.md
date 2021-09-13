@@ -109,10 +109,10 @@ In another configuration mangement regimen they might be versioned separately.
 Please refer to [contributions statement](Contributing.md) for information about how to get involved. We welcome issues, questions. Pull Requests are welcome.
 
 ## Maintainers
-- Wendell Baker <wbaker@verizonmedia.com>
-- The Tunitas Team at Verizon Media.
+- Wendell Baker <wbaker@yahooinc.com>
+- The Tunitas Team at Yahoo.
 
-You may contact us at least at <tunitas@verizonmedia.com>
+You may contact us at least at <tunitas@yahooinc.com>
 
 ## License
 
