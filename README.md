@@ -96,7 +96,7 @@ In another configuration mangement regimen they might be versioned separately.
 
 ### Selected Commentary
 
-* [P0804R0](http://open-std.org/JTC1/SC22/WG21/docs/papers/2017/p0804r0.html) <em>Impact of the Modules TS on the C++ Tools Ecosystem, 2017-10-15.
+* [P0804R0](http://open-std.org/JTC1/SC22/WG21/docs/papers/2017/p0804r0.html) <em>Impact of the Modules TS on the C++ Tools Ecosystem</em>, 2017-10-15.
 
 ### Implementations
 
