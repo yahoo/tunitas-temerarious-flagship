@@ -55,7 +55,7 @@ namespace tunitas::flagship::temerarious::input::exception {
   Present::Present(string::View missing_filepath, std::error_code ec, string::View reason) : Ancestors::Exception{string::Storage{missing_filepath.begin(), missing_filepath.end()}, ec, reason} { }
   Present::Present(string::Storage const &missing_filepath, std::error_code ec, string::View reason) : Ancestors::Exception{missing_filepath, ec, reason} { }
   Present::Present(file::Path const &missing_filepath, std::error_code ec, string::View reason) : Ancestors::Exception{missing_filepath, ec, reason} { }
-  Present::Present(source::Name const &missing, std::error_code ec, string::View reason) : Ancestors::Exception{missing.filepath(), ec, reason} { }
+  Present::Present(source::Name const &missing, std::error_code ec, string::View reason) : Ancestors::Exception{missing.fileview(), ec, reason} { }
 }
 #endiv
 #divert <cpp>

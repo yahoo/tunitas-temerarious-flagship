@@ -31,10 +31,10 @@ namespace tunitas::flagship::temerarious::stream {
 namespace tunitas::flagship::temerarious {
   namespace stream {
     using std::swap;
-    inline auto swap(Base &, Base &) noexcept -> void;
+    inline auto swap(Base &, Base &) noexcept -> void { } // indeed, there is nothing to swap
   }
   class stream::Base {
-    friend auto stream::swap(Base &, Base &) noexcept -> void { } // indeed, there is nothing to swap
+    friend auto stream::swap(Base &, Base &) noexcept -> void;
   protected:
     virtual ~Base() = default;
   public:

@@ -84,7 +84,7 @@ namespace tunitas::flagship::temerarious {
 #divert <ipp>
 namespace tunitas::flagship::temerarious {
   auto source::swap(Name &a, Name &b) noexcept -> void { swap(a.stored_fileview, b.stored_fileview); }
-  auto source::operator<<(std::ostream &o, Name const &l) -> std::ostream & { return o << l.filepath() << ':' << ' '; }
+  auto source::operator<<(std::ostream &o, Name const &l) -> std::ostream & { return o << l.fileview() << ':' << ' '; }
   namespace source {
     Name::Name(std::source_location sl) : stored_fileview{sl.file_name()} { }
     Name::Name(Fileview f) : stored_fileview{f} { }

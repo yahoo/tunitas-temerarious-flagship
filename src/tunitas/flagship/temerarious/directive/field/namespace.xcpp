@@ -38,7 +38,7 @@ namespace tunitas::flagship::temerarious::directive::field {
     // Used also by the command line to establish -D<NAME>=<VALUE>
     //
     inline auto is_identifier(string::View) -> bool;
-    [[deprecated("instaed prefer the underscored one as is_identifier(...)")]] inline auto isidentifier(string::View) -> bool;
+    [[deprecated("instead prefer the underscored one as is_identifier(...)")]] inline auto isidentifier(string::View) -> bool;
   }
   namespace package_field::package_body_field::body {
     //

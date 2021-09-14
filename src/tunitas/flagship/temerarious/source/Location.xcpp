@@ -81,7 +81,7 @@ namespace tunitas::flagship::temerarious {
     swap(aa, bb);
     swap(a.stored_line, b.stored_line);
   }
-  auto source::operator<<(std::ostream &o, Location const &l) -> std::ostream & { return o << l.filepath() << ':' << underlying(l.line()) << ':' << ' '; }
+  auto source::operator<<(std::ostream &o, Location const &l) -> std::ostream & { return o << l.fileview() << ':' << underlying(l.line()) << ':' << ' '; }
   namespace source {
     Location::Location(std::source_location sl)
       : Ancestor{sl}

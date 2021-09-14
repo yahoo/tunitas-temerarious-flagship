@@ -1,20 +1,30 @@
 #!/bin/bash
-# Copyright Verizon Media
+# Copyright Yahoo Inc, 2021.
 # Licensed under the terms of the Apache-2.0 license.
 # For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
 # For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#
 : ${with_build:=/build}
 : ${with_worktrees:=${with_build?}/worktrees}
+: ${TAG:=STABLE}
 
-with_hypogeal_twilight=${with_hypogeal_twilight:-${with_worktrees?}/hypogeal-twilight/v0.LATEST} \
-with_module_langu=${with_module_langu:-${with_worktrees?}/langu/v0.LATEST} \
-with_module_nonstd=${with_module_nonstd:-${with_worktrees?}/nonstd/v2.LATEST} \
-with_module_options=${with_module_options:-${with_worktrees?}/options/v2.LATEST} \
-with_module_sys=${with_module_sys:-${with_worktrees?}/sys/v2.LATEST} \
-with_module_rigging=${with_module_rigging:-${with_worktrees?}/rigging/v2.LATEST} \
+: ${with_module_rigging_core:=${with_module_rigging_core:-${with_worktrees?}/rigging-core/v1.${TAG?}}}
+: ${with_module_rigging=${with_module_rigging:-${with_module_rigging_core?}}}
+
+with_hypogeal_twilight=${with_hypogeal_twilight:-${with_worktrees?}/hypogeal-twilight/v0.${TAG?}} \
+with_module_langu=${with_module_langu:-${with_worktrees?}/langu/v0.${TAG?}} \
+with_module_nonstd=${with_module_nonstd:-${with_worktrees?}/nonstd/v2.${TAG?}} \
+with_module_options=${with_module_options:-${with_worktrees?}/options/v2.${TAG?}} \
+with_module_sys=${with_module_sys:-${with_worktrees?}/sys/v2.${TAG?}} \
+\
+with_module_rigging_core=${with_module_rigging_core?} \
+with_module_rigging=${with_module_rigging?} \
 \
 with_module_c=${with_module_c:-no} \
 with_module_std=${with_module_std:-no} \
 with_module_posix=${with_module_posix:-no} \
+with_module_string=${with_module_string:-no} \
+\
+with_tunitas_basics=${with_tunitas_basics:-${with_worktrees?}/basics/v2.${TAG?}} \
 \
 exec ${0%/*}/nearby

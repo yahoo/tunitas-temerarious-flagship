@@ -114,7 +114,7 @@ function UNUSED_set_all_defaults_relatively() {
     : ${with_module_string:=$1/module-string}
     : ${with_module_sys:=$1/module-sys}
 }
-: ${with_nonstd_gcc:=/exp/gcc/9} # ... WATCHOUT you, the caller must ensure that PATH is set consistenly with this
+: ${with_nonstd_gcc:=/exp/gcc/${GCC:-11}} # ... WATCHOUT you, the caller must ensure that PATH is set consistenly with this
 # check whether this is different than what PATH finds in the natural course.
 if type -p gcc >/dev/null ; then
     exe=$(type -p gcc 2>/dev/null)

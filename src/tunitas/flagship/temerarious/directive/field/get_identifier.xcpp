@@ -54,7 +54,7 @@ namespace tunitas::flagship::temerarious::directive::field::package_field {
     if (has_blanks(payload)) {
       throw exception::Statement{where, "there are multiple words here (only one is allowed)"sv};
     }
-    if (!isidentifier(payload)) {
+    if (!is_identifier(payload)) {
       throw exception::Field{where, "the identifier does not match m!^[a-z][-_/a-z0-9]*$!i"sv};
     }
     return payload;

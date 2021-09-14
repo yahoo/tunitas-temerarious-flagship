@@ -53,7 +53,8 @@ namespace tunitas::flagship::temerarious::error {
     using Contained = std::error_condition;
   public:
     using Companion = COMPANION;
-#if 10 <= __GNUC__
+#if 0 && 10 <= __GNUC__
+    // gcc (GCC) 11.2.1 20210827 says error: ‘using enum’ of dependent type ‘tunitas::flagship::temerarious::error::condition::Package<COMPANION>::Companion’
     using enum Companion; // one day C++20 will allow implicit construction by ...... {Condition::FAILURE}
 #else
     using E = Companion; // in the meanwhile, some implicit construction by ......... {error::Condition::E::FAILURE}
