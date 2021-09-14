@@ -1,0 +1,192 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+#import tunitas.Tuple
+#import tunitas.flagship.temerarious.directive.Directive
+namespace tunitas::flagship::temerarious::parser {
+  enum class Assessment { DIRECTIVE, ERROR, IGNORE, PASSTHROUGH };
+  using Assessed = Tuple<Assessment, directive::Directive, View>;
+}
+#endiv
+#divert <hpp>
+#import std.underlying_type
+namespace tunitas::flagship::temerarious::parser {
+  //
+  // Assess an individual line to see if it is an "ifdef" line
+  //
+  // Specification:
+  //
+  //   begins with a dot ('.')
+  //   Identify the known particles
+  //   Bind the particle processor
+  //   Identify the (trimmed) rest of the line as a view on the original line
+  //
+  //   Directive processors are responsible for parsing the rest of the line (single or multiple words, etc.)
+  //
+  // Design:
+  //
+  //   Not very general.
+  //   Not looking for speed or elegance.
+  //   But maybe simplicity.
+  //
+  // Examples:
+  //
+  //   .i ./filename                  include ./filename
+  //   ." ....blah blah blah...       comments are ignored
+  //   .' ....blah blah blah...       that is not a comment line
+  //
+  // Usage:
+  //
+  //   auto line = string::view{...somehow...};
+  //
+  //   auto assessed = assess(line)
+  //
+  inline constexpr auto underlying(Assessment a) { return std::underlying_type_t<Assessment>(a); }
+  inline constexpr auto ERROR = Assessed{Assessment::ERROR, {}, {}};
+  inline constexpr auto PASSTHROUGH = Assessed{Assessment::PASSTHROUGH, {}, {}};
+  auto assess(View line) -> Assessed;
+}
+#endiv
+#divert <cpp>
+#import tunitas.flagship.temerarious.parser.trim
+#import tunitas.flagship.temerarious.directives
+#import std.isspace
+#import std.isalpha
+namespace tunitas::flagship::temerarious {
+  auto parser::assess(View line) -> Assessed {
+    auto size=line.size();
+    auto first = [line, size]{
+                   auto first=0u;
+                   while (first < size && std::isspace(line.at(first))) {
+                     ++first;
+                   }
+                   return first;
+                 }();
+    if (first < size) {
+      if (auto const dot=line.at(first++); '.' == dot) {
+        if (first == size) {
+          // found: . (just a dot alone)
+          return ERROR;
+        } else {
+          //
+          // .????   (found a dot, wht is next?)
+          //
+          auto const code = line.at(first++);
+          // pass &first by reference so that it can be modifed by trimmed() in the if-elseif-...-else
+          auto untrimmed = [&first, line, size] { return View{first+line.data(), size-first}; };
+          auto trimmed = [&first, line, size]   { return trim(View{first+line.data(), size-first}); };
+          auto isspace = [&first, size, line]{
+                          if (first+1 < size) {
+                            return ' ' == line.at(first++);
+                          } else {
+                            return false;
+                          }
+                       };
+          if (std::isalpha(code)) {
+            auto accept = [&]{
+                            if (first == size) {
+                              //
+                              // special-case those directivs that have zero arguments
+                              //
+                              // /---------- . (first dot)
+                              // |/--------- ? is any character
+                              // ||/-------- end-of-string
+                              // |||
+                              // vvv
+                              // .?<----- end after the ?
+                              //
+                              switch (code) {
+                              case 'e': // .endef
+                              case 'f': // .endif
+                              case 's': // .else
+                              case 'x': // .exit
+                                return true;
+                              default:
+                                return false;
+                              }
+                            } else if (isspace()) {
+                              //
+                              // any directive with a space after it gets a second look
+                              //
+                              // /---------- . (first dot)                              // |/--------- ? is any character
+                              // ||////----- space(s)
+                              // ||||||
+                              // vvvvvv
+                              // .?    <----- trailing spaces or other characters
+                              //
+                              return true;
+                            } else {
+                              return false;
+                            }
+                          }();
+            if (accept) {
+              switch (code) {
+              case 'b': // a.k.a. "block" (and push)
+                return {Assessment::DIRECTIVE, directive::block, trimmed()};
+              case 'd': // a.k.a. "define" (no push, just that line)
+                return {Assessment::DIRECTIVE, directive::define, trimmed()};
+              case 'e': // a.k.a. "endef"" (endblock)  (and pop)
+                return {Assessment::DIRECTIVE, directive::endef, trimmed()};
+              case 'f': // a.k.a. "endif"  (and pop)
+                return {Assessment::DIRECTIVE, directive::endif, trimmed()};
+              case 'i': // a.k.a. "ifdef"
+                return {Assessment::DIRECTIVE, directive::ifdef, trimmed()};
+              case 'l': // a.k.a. "elifdef"
+                return {Assessment::DIRECTIVE, directive::elifdef, trimmed()};
+              case 's': // a.k.a. "else"
+                return {Assessment::DIRECTIVE, directive::elsedef, trimmed()};
+              case 'r': // a.k.a. "read"
+                return {Assessment::DIRECTIVE, directive::read, trimmed()};
+              case 'u': // a.k.a. "undef"
+                return {Assessment::DIRECTIVE, directive::undef, trimmed()};
+              case 'n': // a.k.a. "notice" or "info"
+                return {Assessment::DIRECTIVE, directive::notice, trimmed()};
+              case 'w': // a.k.a. "warn"
+                return {Assessment::DIRECTIVE, directive::warning, trimmed()};
+              case 'x': // a.k.a. "exit" or "fatal"
+                return {Assessment::DIRECTIVE, directive::fatal, trimmed()};
+              }
+            }
+          } else {
+            switch (code) {
+            case '"':
+              // found ."    (doesn't matter what comes next)
+              return {Assessment::DIRECTIVE, directive::comment, trimmed()};
+            case '\'':
+            case '#':
+              // found .'    (doesn't matter what comes next)
+              return {Assessment::DIRECTIVE, directive::uncomment, trimmed()};
+            case '\\':
+              // the ".\" captures the rest of the line ... so one can have leading dots on a line by uttering ".\.cshrc"
+              return {Assessment::DIRECTIVE, directive::passage, untrimmed()};
+            case '/':
+              // the "./" occurs frequently enough with "./configure" that we allow it as a passthrough
+              return {Assessment::DIRECTIVE, directive::passage, line}; // we return line, not even untrimmed()
+            case '$':
+              // substitute the variable
+              return {Assessment::DIRECTIVE, directive::substitute, trimmed()};
+            case '_':
+              // dump
+              return {Assessment::DIRECTIVE, directive::dump, trimmed()};
+            case '?': // a.k.a. "help"
+              return {Assessment::DIRECTIVE, directive::help, trimmed()};
+            }
+          }
+          //
+          // Found a dot, but the rest of the line was incomprehensible
+          // Among:
+          //   (e.g. ".ab") no space after the leading alpha
+          //   (e.g. ".1") not an alpha after the dot 
+          //   (e.g. ".z") not known single-character directive
+          //
+          return ERROR;
+        }
+      }
+    }
+    return PASSTHROUGH;
+  }
+}
+#endiv

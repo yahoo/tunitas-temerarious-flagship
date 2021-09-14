@@ -1,0 +1,5 @@
+#!/bin/bash --norc
+source ${0%/*}/../rigging.sh || exit ${EX_RIGGING:-117}
+#
+# the point here is that the search path is (a) provided and (b) interesting
+tf roff -I${directory?}/{abc,def,ghi} ${directory?}/top.roff ${directory?}/o.top.roffed

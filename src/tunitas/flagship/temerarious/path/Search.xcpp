@@ -1,0 +1,79 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+namespace tunitas::flagship::temerarious::path {
+  //
+  // A search path for finding relative paths
+  //
+  // Specification:
+  //
+  //   Like "-I" in the C++ system
+  //
+  //   Implicitly -I. is always first in the path.
+  //
+  // Design
+  //
+  //   That the elements of push_{front,back} are actual directories is unchecked
+  //   The path need not exist.
+  //   The path might be a file (in which case it will never match on find(...)
+  //
+  // Usage:
+  //
+  //   Yes.
+  //
+  struct Search;
+}
+#endiv
+#divert <hpp>
+#import std.deque
+#import tunitas.flagship.temerarious.path.File
+#import tunitas.Outcome
+struct tunitas::flagship::temerarious::path::Search : private std::deque<File> {
+  using Ancestor = std::deque<File>;
+public:
+  using Ancestor::empty;
+  using Ancestor::size;
+  using Ancestor::begin;
+  using Ancestor::end;
+  using Ancestor::push_back;
+  using Ancestor::push_front;
+  inline auto find(File const &suffix) const -> Outcome<File>;
+  auto find(File const &relative, File const &suffix) const -> Outcome<File>;
+};
+#endiv
+#divert <ipp>
+namespace tunitas::flagship::temerarious::path {
+  auto Search::find(File const &suffix) const -> Outcome<File> {
+    // [[FIXTHIS]] a gratuitous copy in it which could be optimized away.
+    return find(".", suffix);
+  }
+}
+#endiv
+#divert <cpp>
+#import sys.posix.E
+#import sys.posix.exists
+#import std.error_code
+namespace tunitas::flagship::temerarious::path {
+  auto Search::find(File const &relative_directory, File const &suffix) const -> Outcome<File> {
+    if (suffix.is_absolute()) {
+      return suffix;
+    } else {
+      if (auto relatively = relative_directory / suffix; sys::posix::exists(relatively)) {
+        // This is or isn't the common case, so we do the copy here rather than at the call site.
+        return {move(relatively)};
+      } else {
+        for (auto const &prefix : *this) {
+          auto proposal = prefix / suffix;
+          if (sys::posix::exists(proposal)) {
+            return {move(proposal)};
+          }
+        }
+        return std::error_code{sys::posix::E::NOENT};
+      }
+    }
+  }
+}
+#endiv

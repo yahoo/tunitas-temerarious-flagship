@@ -1,0 +1,113 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+#import tunitas.flagship.temerarious.input.exception
+#import tunitas.flagship.temerarious.source
+namespace tests::unit::exception::input {
+  namespace [[eponymous]] fixture {
+    struct Fixture;
+    namespace library = ::tunitas::flagship::temerarious::input::exception;
+    namespace source = ::tunitas::flagship::temerarious::source;
+  }
+  using fixture::Fixture;
+}
+#endiv
+#divert <hpp>
+#import tunitas.flagship.temerarious.input.exception.Present
+#import tunitas.flagship.temerarious.input.exception.Missing
+#import tunitas.flagship.temerarious.source.Name
+#import tests.unit.Here
+namespace tests::unit::exception::input {
+  struct fixture::Fixture : public cppunit::test::Fixture, private Here {
+    template<typename EXCEPTION> auto test_constructor_path_reason() -> void;
+    template<typename EXCEPTION> auto test_Aspect() -> void;
+    static auto suite() -> cppunit::Test *;
+  protected:
+    template<typename EXCEPTION> static auto generate() -> EXCEPTION;
+  };
+  namespace fixture {
+    template<> auto Fixture::generate<library::Present>() -> library::Present;
+    template<> auto Fixture::generate<library::Missing>() -> library::Missing;
+    template<> auto Fixture::test_constructor_path_reason<library::Present>() -> void;
+  }
+}
+#endiv
+#divert <tpp>
+#import tunitas.flagship.temerarious.exception.Aspect
+#import tunitas.flagship.temerarious.input.exception.Aspect
+#import tunitas.exception.Aspect
+// v2 only #import substd.exception.Exception
+#import nonstd.exception.Exception
+#import nonstd.same_as
+namespace tests::unit::exception::input::fixture {
+  template<typename EXCEPTION> auto Fixture::test_constructor_path_reason() -> void {
+    using Subject = EXCEPTION;
+    // This template is only going to work for Missing ... the Present will require a specialization
+    auto subject = Subject{hereabout(), "something pickled, something spackled, something borrowed, something blue"sv};
+    CPPUNIT_ASSERT(nullptr != subject.what());
+    CPPUNIT_ASSERT(! subject.whence().filepath().empty());
+  }
+  template<typename EXCEPTION> auto Fixture::test_Aspect() -> void try {
+    // Prove that these exceptions are throwable and that they are catchable with a library::Aspect
+    auto copied = generate<EXCEPTION>();
+    throw copied; // <---------------------------------------- prove the copy constructor
+  } catch (library::Aspect const &) {
+    CPPUNIT_ASSERT(true);
+  } catch (::tunitas::flagship::temerarious::exception::Aspect const &) {
+    CPPUNIT_ASSERT(false);
+  } catch (::tunitas::exception::Aspect const &) {
+    CPPUNIT_ASSERT(false);
+#if 0
+  } catch (substd::exception::Exception const &) {
+#else
+  } catch (nonstd::exception::Exception const &) {
+    static_assert(nonstd::same_as<nonstd::exception::Exception, std::exception>);
+#endif
+    CPPUNIT_ASSERT(false);
+  }
+}
+#endiv
+#divert <cpp>
+#import std.source_location
+#import std.error_code
+#import tests.unit.exception.input.Missing
+#import tests.unit.exception.input.Present
+namespace tests::unit::exception::input::fixture {
+  template<> auto Fixture::generate<library::Present>() -> library::Present {
+    auto reason = "already exists and that is a problem for us"sv;
+    return library::Present{hereabout(), std::error_code{}, reason};
+  }
+  template<> auto Fixture::generate<library::Missing>() -> library::Missing {
+    auto reason = "did you look in the cushions on the couch?"sv;
+    return library::Missing{hereabout(), reason};
+  }
+  template<> auto Fixture::test_constructor_path_reason<library::Present>() -> void {
+    using Subject = library::Present;
+    auto filepath = file::Path{"/dev/badplace"};
+    auto ec = std::error_code{};
+    auto subject = Subject{filepath, ec, "something pickled, something spackled, something borrowed, something blue"sv};
+    CPPUNIT_ASSERT(nullptr != subject.what());
+    CPPUNIT_ASSERT(! subject.whence().filepath().empty());
+  }
+  auto Fixture::suite() -> cppunit::Test * {
+    using namespace rigging::suite;
+    auto series = Stream{"input"};
+    series << call("Present", &Fixture::test_constructor_path_reason<library::Present>)
+           << call("Missing", &Fixture::test_constructor_path_reason<library::Missing>)
+           << []{
+                auto asp = Stream{"Aspect"};
+                asp << call("Present", &Fixture::test_Aspect<library::Present>)
+                    << call("Missing", &Fixture::test_Aspect<library::Missing>)
+                    << END;
+                return move(asp);
+              }()
+           << add<Missing>()
+           << add<Present>()
+           << END;
+    return finalize(series);
+  }
+}
+#endiv

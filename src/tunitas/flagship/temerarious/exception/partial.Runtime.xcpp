@@ -1,0 +1,59 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+namespace tunitas::flagship::temerarious::exception::partial {
+  //
+  // Partial completion of a "something happened at runtime" exception.
+  // Descendants only.
+  //
+  // Semantic: this is a problem with the environment/luser which/who supplied bad data.
+  //
+  // Specification:
+  //
+  //   This is the partial completion of an Runtime exception.
+  //   This indicates an environmental error; it could not have been checked prior to runtime.
+  //   For example, this indicates an exceptional condition with the input data.
+  //   https://en.cppreference.com/w/cpp/error/runtime_error
+  //
+  // Design:
+  //
+  //   from the Non-Standard Library 
+  //
+  // Usage:
+  //
+  //   try {
+  //      ...
+  //      throw directive::exception::Payload{where, "...explanation..."};
+  //      throw directive::exception::Processor{where, "...explanation..."};
+  //      ...
+  //   } catch (exception::Aspect const &) {
+  //      ...ours...
+  //   } catch (substd::exception::Runtime const &) {
+  //      ...either one of the nonstd ones (not shown)...
+  //   }
+  //
+  class Runtime;
+}
+#endiv
+#divert <hpp>
+#import tunitas.exception.Aspect
+#import tunitas.flagship.temerarious.exception.Aspect
+#import tunitas.string.View
+#import nonstd.exception.Runtime
+class tunitas::flagship::temerarious::exception::partial::Runtime : public virtual temerarious::exception::Aspect,
+                                                                    public virtual tunitas::exception::Aspect,
+                                                                    public nonstd::exception::Runtime<string::View> {
+  struct Ancestors {
+    struct Aspects { /* ... who cares... */ };
+    using Exception = nonstd::exception::Runtime<string::View>;
+  };
+protected:
+  ~Runtime() = default;
+public:
+  using Ancestors::Exception::View; // you "just have to know..." that the constructor is named View
+  auto what() const noexcept -> char const * override { return Ancestors::Exception::what(); }
+};
+#endiv

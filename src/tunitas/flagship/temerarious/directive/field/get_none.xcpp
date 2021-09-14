@@ -1,0 +1,52 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <hpp>
+namespace tunitas::flagship::temerarious::directive::field::package_field::interface {
+  //
+  // get_none ... zero argument directives
+  //
+  // Specification:
+  //
+  //   Returns nothing.
+  //   Verify that there are no fields on the rest of the line.
+  //   Else throw that certain exception.
+  //
+  // Preconditions:
+  //
+  //   The leading and trailing blanks have been removed from the payload range.
+  //
+  // Example:
+  //
+  //      /--------------- dot
+  //      |
+  //      |/-------------- directive 'x'
+  //      ||
+  //      ||   /---------- blanks (zero or more trailing blanks)
+  //      ||   |
+  //      vv<--+--->|
+  //     |.x        |<----- end
+  //
+  // Usage:
+  //
+  //   auto some_directive(State &, Outbound &, Location where, Payload payload) -> void {
+  //      get_none(where, payload);
+  //      ...blah blah blah...
+  //   }
+  //
+  inline auto get_none(Location where, Payload payload) -> void;
+}
+#endiv
+#divert <ipp>
+#import std.isspace
+#import std.all_of
+namespace tunitas::flagship::temerarious::directive::field::package_field {
+  auto interface::get_none(Location where, Payload payload) -> void {
+    if (!all_of(payload.begin(), payload.end(), [](char c) { return isspace(c); })) {
+      throw exception::Statement{where, "no arguments are allowed on this directive"};
+    }
+  }
+}
+#endiv

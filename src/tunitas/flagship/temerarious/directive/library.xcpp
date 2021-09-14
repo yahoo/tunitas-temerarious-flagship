@@ -1,0 +1,176 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <hpp>
+namespace tunitas::flagship::temerarious::directive::package_directive {
+  namespace interface {
+    //
+    // The simple directives
+    //
+    // Specification:
+    //
+    //   ."
+    //   .'
+    //   .i filename
+    //
+    // Design:
+    //
+    //   Sure, why do you ask?
+    //
+    // Usage:
+    //
+    //   see parser::assess(...)
+    //
+    //
+    auto passage(State &, Output &, Location, Payload) -> void;
+    auto comment(State &, Output &, Location, Payload) -> void;
+    auto uncomment(State &, Output &, Location, Payload) -> void;
+    auto block(State &, Output &, Location, Payload) -> void;
+    auto define(State &, Output &, Location, Payload) -> void;
+    auto endef(State &, Output &, Location, Payload) -> void;
+    auto substitute(State &, Output &, Location, Payload) -> void;
+    auto ifdef(State &, Output &, Location, Payload) -> void;
+    auto elifdef(State &, Output &, Location, Payload) -> void;
+    auto elsedef(State &, Output &, Location, Payload) -> void;
+    auto endif(State &, Output &, Location, Payload) -> void;
+    auto undef(State &, Output &, Location, Payload) -> void;
+    auto notice(State &, Output &, Location, Payload) -> void;
+    auto warning(State &, Output &, Location, Payload) -> void;
+    auto fatal(State &, Output &, Location, Payload) -> void;
+    auto help(State &, Output &, Location, Payload) -> void;
+    auto dump(State &, Output &, Location, Payload) -> void;
+    auto help(State &, Output &, Location, Payload) -> void;
+  }
+  namespace package_body_directive::body {
+    inline auto throw_not_in_a_condition_frame(Location where) -> void;
+  }
+}
+#endiv
+#divert <ipp>
+namespace tunitas::flagship::temerarious::directive::package_directive {
+  namespace package_body_directive {
+    auto body::throw_not_in_a_condition_frame(Location where) -> void {
+      throw exception::State{where, "not currently in a condition frame (not in a a .ifdef/.elifdef/.else/.endif)"sv};
+    }
+  }
+}
+#endiv
+#divert <cpp>
+#import std.clog
+#import nonstd.exception.Unimplemented
+namespace tunitas::flagship::temerarious::directive::package_directive {
+  auto interface::passage(State &state, Output &output, Location, Payload payload) -> void {
+    state.passthrough(payload);
+  }
+  auto interface::comment(State &, Output &, Location, Payload) -> void {
+    // Yes, do nothing with the commentariat
+  }
+  auto interface::uncomment(State &s, Output &o, Location w, Payload p) -> void {
+    warning(s, o, w, "inappropriate comment character (treating it as a comment where anyway)"sv);
+    comment(s, o, w, p);
+  }
+  auto interface::block(State &state, Output &, Location where, Payload payload) -> void {
+    if (state.is_enabled()) {
+      auto identifier = get_identifier(where, payload);
+      state.push_diversion(identifier);
+    }
+  }
+  auto interface::endef(State &state, Output &, Location where, Payload payload) -> void try {
+    if (state.is_enabled()) {
+      get_none(where, payload);
+      state.pop_diversion();
+    }
+  } catch (processor::exception::Diversion const &) {
+    throw exception::State{where, "not currently defining any variable (not in a .divert/.endiv)"sv};
+  }
+  auto interface::define(State &state, Output &, Location where, Payload payload) -> void {
+    if (state.is_enabled()) {
+      auto [identifier, remaining] = get_identifier_and_more(where, payload);
+      state.define_variable(identifier, remaining);
+    }
+  }
+  auto interface::undef(State &state, Output &, Location where, Payload payload) -> void {
+    if (state.is_enabled()) {
+      state.undefine_variable(get_identifier(where, payload));
+    }
+  }
+  auto interface::substitute(State &state, Output &, Location where, Payload payload) -> void {
+    if (state.is_enabled()) {
+      auto reference = get_identifier(where, payload);
+      if (auto defined = state.recover_variable(reference); good(defined)) {
+        state.passthrough(value(defined));
+      } else {
+        //
+        // See the receiving catch site in run(...)
+        // grammar: ...?
+        //
+        throw exception::Variable{reference, where, "there is no such variable"};
+      }
+    }
+  }
+  auto interface::ifdef(State &state, Output &, Location where, Payload payload) -> void {
+    if (state.is_enabled()) {
+      state.push_condition(get_identifier(where, payload));
+    } else {
+      // We're still processing matching ifdef...endef pairs, even in disabled mode.
+      state.push_condition(false);
+    }
+  }
+  auto interface::elifdef(State &state, Output &outbound, Location where, Payload payload) -> void {
+    // Treat this as closing the .ifdef / .endif and starting a new .ifdef
+    state.pop_condition();
+    ifdef(state, outbound, where, payload);
+  }
+  auto interface::elsedef(State &state, Output &, Location where, Payload payload) -> void try {
+    auto now = state.is_enabled();
+    state.pop_condition();
+    if (state.is_enabled()) {
+      get_none(where, payload);
+    }
+    state.push_condition(!now);
+  } catch (processor::exception::Condition const &) {
+    throw_not_in_a_condition_frame(where);
+  }
+  auto interface::endif(State &state, Output &, Location where, Payload payload) -> void try {
+    if (state.is_enabled()) {
+      get_none(where, payload);
+    }
+    state.pop_condition();
+  } catch (processor::exception::Condition const &) {
+    throw_not_in_a_condition_frame(where);
+  }
+  auto interface::notice(State &state, Output &, Location where, Payload payload) -> void {
+    if (state.is_enabled()) {
+      if (payload.empty()) { payload = "is given"sv; }
+      std::clog << where << "notice, " << payload << '\n';
+    }
+  }
+  auto interface::warning(State &state, Output &, Location where, Payload payload) -> void {
+    if (state.is_enabled()) {
+      if (payload.empty()) { payload = "is noted"sv; }
+      std::clog << where << "warning, " << payload << '\n';
+    }
+  }
+  auto interface::fatal(State &state, Output &, Location where, Payload payload) -> void {
+    if (state.is_enabled()) {
+      if (payload.empty()) { payload = "quitting the processor"sv; }
+      std::clog << where << "error, " << payload << '\n';
+      state.fatal(payload);
+    }
+  }
+  auto interface::help(State &state, Output &, Location where, Payload payload) -> void {
+    if (state.is_enabled()) {
+      get_none(where, payload);
+      throw exception::Unimplemented{};
+    }
+  }
+  auto interface::dump(State &state, Output &, Location where, Payload payload) -> void {
+    if (state.is_enabled()) {
+      get_none(where, payload);
+      state.dump(std::clog);
+    }
+  }
+}
+#endiv

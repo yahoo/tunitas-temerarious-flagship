@@ -1,0 +1,39 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+#import tunitas.flagship.temerarious
+namespace tunitas::flagship::temerarious::directive {
+  inline namespace package_directive {
+           namespace package_body_directive::body { }
+           inline namespace interface { using namespace package_body_directive::body; }
+  }
+}
+#import tunitas.string.View
+#import tunitas.flagship.temerarious.stream.Output
+#import tunitas.flagship.temerarious.source.Location
+#import tunitas.flagship.temerarious.processor.State
+#import std
+namespace tunitas::flagship::temerarious::directive::package_directive {
+  namespace package_body_directive::body {
+    using State = processor::State;
+    using Output = stream::Output;
+    using Location = source::Location;
+    using Payload = string::View; // a place where one or more fields can be found
+    using namespace std;
+  }
+}
+#endiv
+#divert <ipp>
+#import tunitas.flagship.temerarious.directive.exception.Statement // and may throw such exceptions as are available
+#import tunitas.flagship.temerarious.directive.exception.State
+#import tunitas.flagship.temerarious.directive.exception.Variable
+#import tunitas.flagship.temerarious.directive.fields // Every directive will need something one or more of the payload parsers
+namespace tunitas::flagship::temerarious::directive::package_directive {
+  namespace package_body_directive::body {
+    using namespace field; // all the field parser-validators will be visible en masse from tunitas.flagship.temerarious.fields
+  }
+}
+#endiv

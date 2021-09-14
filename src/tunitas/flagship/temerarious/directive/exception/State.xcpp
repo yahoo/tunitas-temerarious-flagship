@@ -1,0 +1,31 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+namespace tunitas::flagship::temerarious::directive::exception {
+  //
+  // There was some problem with the 'roff processor state after processing some 'roff
+  //
+  // Semantic:
+  //
+  //  This exception pertains to the (untenable) state of the processor when attempting the directive
+  //  This means that the directive (function) cannot perform its job; is refusing to perform.
+  //  Such problems are recoverable errors (contrast with processor::exception::State, which isn't)
+  //
+  // Specification, Design, Lifetimes Usage:
+  //
+  //   See partial::Directive.
+  //
+  class [[nodiscard]] State;
+}
+#endiv
+#divert <hpp>
+#import tunitas.flagship.temerarious.directive.exception.partial.Directive
+class tunitas::flagship::temerarious::directive::exception::State final : public partial::Directive {
+  using Ancestor = partial::Directive;
+public:
+  using Ancestor::Directive;
+};
+#endiv

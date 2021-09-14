@@ -1,1 +1,6 @@
+# Some of the *.mk are versioned objects (e.g. check-ac.mk)
+# Obviously, don't list the versioned objects as trash.
+#
+# The rest of the *.mk are known-trash
 configured.mk
+buildconfed.mk

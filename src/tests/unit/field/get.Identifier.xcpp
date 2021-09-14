@@ -1,0 +1,151 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+namespace tests::unit::field::get { class Identifier; }
+#endiv
+#divert <hpp>
+#import tunitas.string.Storage
+#import std.vector
+struct tests::unit::field::get::Identifier : public cppunit::test::Fixture, private Here {
+  auto test_good() -> void;
+  auto test_fail_empty() -> void;
+  auto test_fail_multiple() -> void;
+  auto test_fail_badform() -> void;
+  auto test_case_1() -> void;
+  auto test_case_2() -> void;
+  auto test_case_3() -> void;
+  static auto suite() -> cppunit::Test *;
+protected:
+  using Generated = std::vector<tunitas::string::Storage>;
+  static auto generate_some_goodness() -> Generated;
+  static auto generate_some_badness() -> Generated;
+  static auto generate_some_pathologies() -> Generated;
+};
+#endiv
+#divert <cpp>
+namespace tests::unit::field::get {
+  auto Identifier::generate_some_pathologies() -> Generated {
+    return {"HEAD_TUNITAS_REPOSITORY_URL/",
+            "URL/"};
+  }
+  auto Identifier::generate_some_badness() -> Generated {
+    // The precondition is that there is no leading or trailing blanks ... don't violate that.
+    // All of these are invalid identifiers for one reason or another
+    return {"a b c",
+            "\b",
+            "/a/b/c",
+            "123",
+            "4.56",
+            ".",
+            "..",
+            "...",
+            ".cshrc"};
+  }
+  auto Identifier::generate_some_goodness() -> Generated {
+    return {"a"s,
+            "ab"s,
+            "a1"s,
+            "_a"s,
+            "__"s,
+            "_-"s,
+            "_1"s,
+            "a-b"s,
+            "a--"s};
+  }
+  auto Identifier::test_good() -> void try {
+    auto got = library::get_identifier(hereinat(), "cabbage-headded-monster"sv);
+    CPPUNIT_ASSERT("cabbage-headded-monster"sv == got);
+  } catch (exception::Aspect const &) {
+    CPPUNIT_ASSERT(false);
+  }
+  auto Identifier::test_fail_empty() -> void try {
+    library::get_identifier(hereinat(), ""sv);
+    CPPUNIT_ASSERT(false);
+  } catch (exception::Aspect const &) {
+    CPPUNIT_ASSERT(true);
+  }
+  auto Identifier::test_fail_multiple() -> void try {
+    library::get_identifier(hereinat(), ""sv);
+    CPPUNIT_ASSERT(false);
+  } catch (exception::Aspect const &) {
+    CPPUNIT_ASSERT(true);
+  }
+  auto Identifier::test_fail_badform() -> void try {
+    library::get_identifier(hereinat(), ""sv);
+    CPPUNIT_ASSERT(false);
+  } catch (exception::Aspect const &) {
+    CPPUNIT_ASSERT(true);
+  }
+}
+#import tests.cppunit.Exception
+#import std.exception
+#import langu.age.q
+namespace tests::unit::field::get {
+  // http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2020/p2012r0.pdf
+  auto Identifier::test_case_1() -> void {
+    // The precondition is that there is no leading or trailing blanks ... don't violate that.
+    [p2012=generate_some_goodness()]{
+      for (auto const &item : p2012) {
+        try {
+          auto const got = library::get_identifier(hereinat(), item);
+          CPPUNIT_ASSERT(got == item);
+        } catch (exception::Aspect const &) {
+          CPPUNIT_ASSERT(false);
+        }
+      }
+    }();
+  }
+  auto Identifier::test_case_2() -> void {
+    [p2012=generate_some_badness()]{
+      for (auto const &item : p2012) {
+        try {
+          library::get_identifier(hereinat(), item);
+          CPPUNIT_ASSERT(false);
+        } catch (exception::Aspect const &) {
+          CPPUNIT_ASSERT(true);
+        }
+      }
+    }();
+  }
+  auto Identifier::test_case_3() -> void {
+    [p2012=generate_some_pathologies()]{
+      for (auto const &item : p2012) {
+        auto expected = library::is_identifier(item);
+        std::cerr << "DEBUG " << langu::age::q(item) << " expected " << expected << '\n';
+        try {
+          auto const got = library::get_identifier(hereinat(), item);
+          CPPUNIT_ASSERT(expected && got == item);
+        } catch (exception::Aspect const &) {
+          CPPUNIT_ASSERT(!expected);
+        }
+      }
+    }();
+  }
+  auto Identifier::suite() -> cppunit::Test * {
+    using namespace rigging::suite;
+    auto series = Stream{"identifier(...)"};
+    series << call("good", &Identifier::test_good)
+           << []{
+                auto bad = Stream{"fail"};
+                bad << call("empty", &Identifier::test_fail_empty)
+                    << call("multiple", &Identifier::test_fail_multiple)
+                    << call("badform", &Identifier::test_fail_badform)
+                    << END;
+                return move(bad);
+              }()
+           << []{
+                auto cas = Stream{"case"};
+                cas << call("1", &Identifier::test_case_1)
+                    << call("2", &Identifier::test_case_2)
+                    << call("3", &Identifier::test_case_3)
+                    << END;
+                return move(cas);
+              }()
+           << END;
+    return finalize(series);
+  }
+}
+#endiv

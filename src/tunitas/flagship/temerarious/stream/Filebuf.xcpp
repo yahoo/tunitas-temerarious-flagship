@@ -1,0 +1,66 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+#import nonstd.uninitialized
+namespace tunitas::flagship::temerarious::stream {
+  //
+  // The file aspect
+  // Descendants only.
+  //
+  // Specification:
+  //
+  //   Manage the filebuf
+  //
+  // Design:
+  //
+  //   The opened_file_steambuf need not be live (non-null).
+  //   That occurs when the descendant {Input,Output} is borrowing the rdbuf of another stream
+  //
+  // Usage:
+  //
+  //   By inheritance into stream::Iutput or stream::Output
+  //
+  namespace [[eponymous]] filebuf {
+    struct Filebuf;
+    using namespace nonstd::uninitialized;
+  }
+  using filebuf::Filebuf;
+}
+#endiv
+#divert <hpp>
+#import std.filebuf
+#import std.unique_ptr
+#import nonstd.uninitialized
+namespace tunitas::flagship::temerarious::stream {
+  namespace filebuf {
+    using std::swap;
+    inline auto swap(Filebuf &, Filebuf &) noexcept -> void;
+  }
+  class filebuf::Filebuf {
+    friend auto filebuf::swap(Filebuf &, Filebuf &) noexcept -> void;
+  protected:
+    std::unique_ptr<std::filebuf> opened_file_streambuf;
+    virtual ~Filebuf() = default;
+    inline static constexpr auto UNINITIALIZED = filebuf::UNINITIALIZED;
+  public:
+    inline Filebuf();
+    inline Filebuf(Uninitialized);
+    Filebuf(Filebuf &&) = default;
+    auto operator=(Filebuf &&) -> Filebuf & = default;
+  };
+}
+#endiv
+#divert <ipp>
+namespace tunitas::flagship::temerarious::stream {
+  auto filebuf::swap(Filebuf &a, Filebuf &b) noexcept -> void {
+    swap(a.opened_file_streambuf, b.opened_file_streambuf);
+  }
+  namespace filebuf {
+    Filebuf::Filebuf() : opened_file_streambuf{std::make_unique<std::filebuf>()}  { }
+    Filebuf::Filebuf(Uninitialized)  { }
+  }
+}
+#endiv

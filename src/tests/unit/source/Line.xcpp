@@ -1,0 +1,64 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+namespace tests::unit::source { struct Line; }
+#endiv
+#divert <hpp>
+#import tunitas.flagship.temerarious.source.Line
+struct tests::unit::source::Line : public cppunit::test::Fixture {
+  using Subject = library::Line;
+  auto test_constructor() -> void;
+  auto test_operator_inc_pre() -> void;
+  auto test_operator_inc_post() -> void;
+  auto test_operator_insert() -> void;
+  //
+  static auto suite() -> cppunit::Test *;
+};
+#endiv
+#divert <cpp>
+#import std.ostringstream
+namespace tests::unit::source {
+  auto Line::test_constructor() -> void {
+    auto l0 = Subject{0};
+    l0++;
+    CPPUNIT_ASSERT(1 == underlying(l0));
+  }
+  auto Line::test_operator_inc_pre() -> void {
+    auto l0 = Subject{0};
+    auto &again = ++l0;
+    ++again;
+    CPPUNIT_ASSERT(2 == underlying(l0));
+  }
+  auto Line::test_operator_inc_post() -> void {
+    auto l0 = Subject{0};
+    auto still = l0++;
+    CPPUNIT_ASSERT(1 == underlying(l0));
+    CPPUNIT_ASSERT(0 == underlying(still));
+  }
+  auto Line::test_operator_insert() -> void {
+    auto buf = std::ostringstream{};
+    auto l99 = Subject{99};
+    buf << l99 << "Dark Side!\n";
+    auto const actual = buf.str();
+    std::cerr << "SHOW: " << actual;
+    CPPUNIT_ASSERT(!actual.empty());
+  }
+  auto Line::suite() -> cppunit::Test * {
+    using namespace rigging::suite;
+    auto series = Stream{"Line"};
+    series << []{
+                auto inc = Stream{"operator++"};
+                inc << call("pre", &Line::test_operator_inc_pre)
+                    << call("post", &Line::test_operator_inc_post)
+                    << END;
+                return move(inc);
+              }()
+           << call("operator<<", &Line::test_operator_insert)
+           << END;
+    return finalize(series);
+  }
+}
+#endiv

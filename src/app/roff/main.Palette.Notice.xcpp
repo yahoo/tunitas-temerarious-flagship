@@ -1,0 +1,22 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+#include <hpp/app.roff.main.Palette>
+#endiv
+#divert <hpp>
+#import std.ostream
+namespace app::roff::package_body_main::body {
+  inline auto notice(Palette const &) -> Palette::Notice;
+  template<typename TYPE> auto operator<<(Palette::Notice const &, TYPE const &) -> std::ostream &;
+  struct Palette::Notice : public Base { using Base::Base; };
+}
+#endiv
+#divert <ipp>
+namespace app::roff::package_body_main {
+  auto body::notice(Palette const &y) -> Palette::Notice { return {y}; }
+  template<typename TYPE> auto body::operator<<(Palette::Notice const &e, TYPE const &t) -> std::ostream & { return e.palette.outbound << e.palette.program << ": notice, " << t; }
+}
+#endiv

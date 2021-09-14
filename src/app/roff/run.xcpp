@@ -1,0 +1,83 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+namespace app::roff {
+  namespace package_body_run {
+    namespace interface { }
+    namespace body { using namespace interface; }
+  }
+  inline namespace package_run {
+    inline namespace interface { using namespace package_body_run::body; }
+  }
+}
+#import sys.exits.constants // [[FIXTHIS]] move to cli.exits.constants when module-options >= 2.0 is ready
+#import tunitas.file
+#import tunitas.flagship.temerarious.processor.Preparation
+#import tunitas.string
+#import tunitas.flagship.temerarious.processor
+#import tunitas.flagship.temerarious.stream
+namespace app::roff::package_body_run {
+  namespace interface {
+    using Exit = sys::exits::Code;
+    namespace file = tunitas::file;
+    using tunitas::flagship::temerarious::processor::Preparation;
+  }
+  namespace body {
+    using namespace sys::exits::constants;
+    namespace string = tunitas::string;
+    namespace processor = tunitas::flagship::temerarious::processor;
+    namespace stream = tunitas::flagship::temerarious::stream;
+  }
+}
+#endiv
+#divert <hpp>
+#import std.istream
+#import std.ostream
+#import tunitas.file.Path
+namespace app::roff::package_body_run::interface {
+  //
+  // This is much simpler now that the core off the processor has moved into the library
+  //
+  // Specification:
+  //
+  //    process input ... write output
+  //
+  // Usage:
+  //
+  //   return run(cin, cout);
+  // 
+  inline auto run(std::istream &, std::ostream &, Preparation = {}) -> Exit;
+  inline auto run(file::Path const &in, file::Path const &out, Preparation = {}) -> Exit;
+}
+#endiv
+#divert <ipp>
+#import app.roff.exception.File
+#import std.clog
+#import tunitas.flagship.temerarious.stream.Input
+#import tunitas.flagship.temerarious.stream.Output
+#import tunitas.flagship.temerarious.processor.run
+namespace app::roff::package_body_run {
+  auto interface::run(file::Path const &infile, file::Path const &outfile, Preparation preparation) -> Exit {
+    auto erroneity = stream::Output{std::clog};
+    // The use of the temerarious streams (just std fstreams) also captures the name of the file for error messaging
+    if (auto in = stream::Input{infile}; !in) {
+      throw exception::File{"reading", infile};
+    } else if (auto out = stream::Output{outfile}; !out) {
+      throw exception::File{"writing", outfile};
+    } else {
+      auto ess = processor::run(move(in), out, erroneity, move(preparation));
+      return good(ess) ? OK : FAIL;
+    }
+  }
+  auto interface::run(std::istream &in, std::ostream &out, Preparation preparation) -> Exit {
+    auto erroneity = stream::Output{std::clog};
+    auto outbound = stream::Output{out};
+    auto inbound = stream::Input{in};
+    auto ess = processor::run(move(inbound), outbound, erroneity, move(preparation));
+    return good(ess) ? OK : FAIL;
+  }
+}
+#endiv

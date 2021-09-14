@@ -1,0 +1,149 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+namespace tunitas::flagship::temerarious::stream {
+  //
+  // The input stream
+  //
+  // Specification:
+  //
+  //   An istream
+  //   A "filename" even if it is stdin
+  //
+  // Lifetimes
+  //
+  //   The istream referenced in the Input(std::istream &) constructor must live longer than the Input.
+  //   In that case, the original istream is the owner of the streambuf.
+  //
+  // Design:
+  //
+  //   https://en.cppreference.com/w/cpp/io/basic_ostream/basic_istream
+  //   <quote>
+  //     3) The move constructor uses basic_ios<CharT, Traits>::move(rhs) to move all basic_ios members, except for the rdbuf(), from rhs into *this.
+  //     This move constructor is protected: it is called by the move constructors of movable output stream classes std::basic_ofstream and std::basic_ostringstream, which know how to correctly move the associated streambuffer.
+  //   </quote>
+  //
+  // Usage:
+  //
+  //   auto inbound = Input{std::cin};
+  //   auto inbound = Input{file::Path{...somehow...}};
+  //
+  struct Input;
+}
+#endiv
+#divert <hpp>
+#import tunitas.flagship.temerarious.path.File
+#import tunitas.flagship.temerarious.stream.Base
+#import tunitas.flagship.temerarious.stream.Filebuf
+#import tunitas.flagship.temerarious.stream.Directory
+#import tunitas.flagship.temerarious.source.Name
+#import std.istream
+#import tunitas.file.Path
+#import tunitas.string.View
+#import tunitas.string.Storage
+namespace tunitas::flagship::temerarious {
+  namespace stream {
+    using std::move;
+    using std::swap;
+    inline auto swap(Input &a, Input &b) noexcept -> void;
+  }    
+  class stream::Input : public std::istream, public Base, private Filebuf, private Directory {
+    using Ancestor = std::istream;
+    friend auto swap(Input &a, Input &b) noexcept -> void;
+  public:
+    inline explicit Input(std::istream &);
+    inline explicit Input(std::istream &, string::View name);
+    inline explicit Input(path::File const &, Mode = IN);
+    inline explicit Input(Input &&);
+    inline auto operator=(Input &&) -> Input &;
+    [[deprecated("prefer whence()")]] inline auto input_name() const -> string::View; // suitable for use in input::exception::Present{...}
+    inline auto whence() const -> source::Name; // suitable for use in input::exception::Present{...}
+    inline auto directory() const -> file::Path const &;
+  private:
+    string::Storage input_description; // i.e. file name
+    inline auto swap_streamstuff(Input &) noexcept -> void;
+  };
+}
+#endiv
+#divert <ipp>
+namespace tunitas::flagship::temerarious {
+  auto stream::swap(Input &a, Input &b) noexcept -> void {
+    Input::Base &a_base{a}, &b_base{b};
+    swap(a_base, b_base);
+    Input::Filebuf &a_filebuf{a}, &b_filebuf{b};
+    swap(a_filebuf, b_filebuf);
+    Input::Directory &a_directory{a}, &b_directory{b};
+    swap(a_directory, b_directory);
+    // polish
+    a.swap_streamstuff(b);
+    swap(a.input_description, b.input_description);
+  }
+  namespace stream {
+    auto Input::swap_streamstuff(Input &that) noexcept -> void {
+      // This accesses protected interfaces up in the Ancestor
+      this->swap(that); // ................... swaps the format bits, but nothing else
+      auto a_rdbuf = this->rdbuf(); // ....... swap the streambuf pointer
+      auto b_rdbuf = that.rdbuf();
+      this->set_rdbuf(b_rdbuf);
+      that.set_rdbuf(a_rdbuf);
+    }
+    Input::Input(std::istream &inbound) : Input{inbound, "<input>"} { }
+    Input::Input(std::istream &inbound, string::View name)
+      : Ancestor{inbound.rdbuf()}
+      , Filebuf{UNINITIALIZED}
+      , input_description{string::Storage{name.begin(), name.end()}}
+    { }
+    Input::Input(path::File const &filepath, Mode mode)
+      : input_description{filepath} {
+      this->init(opened_file_streambuf.get());
+      if (!opened_file_streambuf->open(filepath, mode)) {
+        this->setstate(ios_base::failbit);
+      } else {
+        this->clear();
+      }
+    }
+    Input::Input(Input &&other)
+      : Ancestor{}
+      , Base{forward<Input>(other)}
+      , Filebuf{forward<Input>(other)}
+      , Directory{forward<Input>(other)}
+      , input_description{stream::move(other.input_description)} {
+        swap_streamstuff(other);
+    }
+    auto Input::operator=(Input &&other) -> Input & {
+      swap_streamstuff(other);
+      Base::operator=(forward<Input>(other));
+      Filebuf::operator=(forward<Input>(other));
+      Directory::operator=(forward<Input>(other));
+      input_description = stream::move(other.input_description); // because Ancestor::move(...) occludes
+      return *this;
+    }
+    auto Input::input_name() const -> string::View { return input_description; }
+    auto Input::whence() const -> source::Name { return {input_description}; }
+    auto Input::directory() const -> file::Path const & {
+      if (nullptr == opened_file_streambuf.get()) {
+        intern_cached_directory(".");
+      } else {
+        intern_cached_directory(input_description);
+      }
+      return *cached_directory;
+    }
+  }
+}
+#endiv
+#divert <cpp>
+namespace {
+  namespace testate {
+    using namespace std;
+    using namespace tunitas::flagship::temerarious::stream;
+    static_assert(!is_default_constructible_v<Input>);
+    static_assert(!is_copy_constructible_v<Input>);
+    static_assert(!is_copy_assignable_v<Input>);
+    static_assert(is_move_constructible_v<Input>);
+    static_assert(is_move_assignable_v<Input>);
+  }
+}
+#endiv

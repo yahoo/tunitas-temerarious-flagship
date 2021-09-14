@@ -131,6 +131,9 @@ if [[ -n ${prefix} ]] ; then
     else
         if __candidate=submodules/temerarious-flagship; [ -d ${__candidate?} ] ; then
             with_temerarious_flagship=${__candidate?}
+        elif __candidate=${PWD}; [ -d ${__candidate?}/bc ] && [ -d ${__candidate?}/ac ] && [ -d ${__candidate?}/am ] ; then
+            echo "${NAME}: warning, guessing that the default value of with_temerarious_flagship is ${with_temerarious_flagship?} RIGHT HERE in ${RIVER_CITY:-${PWD}}"
+            with_temerarious_flagship=${__candidate?}
         elif __candidate=${PWD%/*}/temerarious-flagship; [ -d ${__candidate?} ] ; then
             with_temerarious_flagship=${__candidate?}
         else

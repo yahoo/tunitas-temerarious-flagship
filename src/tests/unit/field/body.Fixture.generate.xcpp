@@ -1,0 +1,53 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+#import tests.unit.field.body.Fixture
+#endiv
+#divert <cpp>
+namespace tests::unit::field::body {
+  auto Fixture::generate_identifier_goodness() -> Series {
+    return {"a",
+            "banana",
+            "cherry",
+            "_dog",
+            "e.agle",
+            "f-rog",
+            "g1oat"};
+  }
+  auto Fixture::generate_identifier_failures() -> Series {
+    return {"",
+            "-",
+            "1",
+            " ",
+            "a b",
+            ".ab"};
+  }
+  auto Fixture::generate_filepath_goodness() -> Series {
+    return {"/",
+            ".",
+            "..",
+            "...",
+            "a",
+            "ab",
+            "a/b/c"};
+  }
+  auto Fixture::generate_filepath_failures() -> Series {
+    return {"",
+            "space space\ttab",
+            "\b"};
+  }
+  auto Fixture::generate_text_goodness() -> Series {
+    return {"",
+            "a",
+            "space space",
+            "and !@#$%^&*()_+{}[];':\",.<>/?`~"};
+  }
+  auto Fixture::generate_text_failures() -> Series {
+    return {"\001",
+            "\n\f\v\b\001\002\100\101\x80\x81"};
+  }
+}
+#endiv

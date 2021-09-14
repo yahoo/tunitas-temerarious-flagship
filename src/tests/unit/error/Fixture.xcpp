@@ -1,0 +1,50 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+namespace tests::unit::error { struct Fixture; }
+#endiv
+#divert <hpp>
+struct tests::unit::error::Fixture : public cppunit::test::Fixture {
+  auto test_companion_Code() -> void;
+  auto test_companion_Condition() -> void;
+  static auto suite() -> cppunit::Test *;
+};
+#endiv
+#divert <cpp>
+#import tests.unit.error.code.Fixture
+#import tests.unit.error.condition.Fixture
+namespace tests::unit::error {
+  auto Fixture::test_companion_Code() -> void {
+    using Subject = library::code::Companion;
+    auto subject = Subject{};
+    CPPUNIT_ASSERT(0 == underlying(subject));
+    CPPUNIT_ASSERT(success(subject));
+    CPPUNIT_ASSERT(!failure(subject));
+  }
+  auto Fixture::test_companion_Condition() -> void {
+    using Subject = library::condition::Companion;
+    auto subject = Subject{};
+    CPPUNIT_ASSERT(0 == underlying(subject));
+    CPPUNIT_ASSERT(success(subject));
+    CPPUNIT_ASSERT(!failure(subject));
+  }
+  auto Fixture::suite() -> cppunit::Test * {
+    using namespace rigging::suite;
+    auto series = Stream{"error"};
+    series << []{
+                auto com = Stream{"companion"};
+                com << call("Code", &Fixture::test_companion_Code)
+                    << call("Condition", &Fixture::test_companion_Condition)
+                    << END;
+                return move(com);
+              }()
+           << add<code::Fixture>()
+           << add<condition::Fixture>()
+           << END;
+    return finalize(series);
+  }
+}
+#endiv

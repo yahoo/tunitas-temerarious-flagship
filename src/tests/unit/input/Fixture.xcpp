@@ -1,0 +1,59 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+#import tunitas.flagship.temerarious.stream
+namespace tests::unit::input {
+  namespace [[eponymous]] fixture {
+    struct Fixture;
+    namespace stream = ::tunitas::flagship::temerarious::stream;
+  }
+  using fixture::Fixture;
+}
+#endiv
+#divert <hpp>
+struct tests::unit::input::Fixture : public cppunit::test::Fixture {
+  auto test_usage_Frame() -> void;
+  auto test_usage_Stack() -> void;
+  //
+  static auto suite() -> cppunit::Test *;
+};
+#endiv
+#divert <cpp>
+#import tunitas.flagship.temerarious.input.Frame
+#import tunitas.flagship.temerarious.input.Stack
+#import tunitas.flagship.temerarious.stream.Input
+#import tunitas.flagship.temerarious.stream.Output
+#import std.istringstream
+#import std.ostringstream
+namespace tests::unit::input {
+  auto Fixture::test_usage_Frame() -> void {
+    using Subject = library::Frame;
+    auto bufin = std::istringstream{};
+    auto bufout = std::ostringstream{};
+    auto inbound = stream::Input{bufin};
+    auto outbound = stream::Output{bufout};
+    auto subject = Subject{move(inbound), outbound};
+    CPPUNIT_ASSERT(sizeof (subject));
+  }
+  auto Fixture::test_usage_Stack() -> void {
+    using Subject = library::Stack;
+    auto subject = Subject{};
+  }
+  auto Fixture::suite() -> cppunit::Test * {
+    using namespace rigging::suite;
+    auto series = Stream{"input"};
+    series << []{
+                auto use = Stream{"usage"};
+                use << call("Frame", &Fixture::test_usage_Frame)
+                    << call("Frame", &Fixture::test_usage_Stack)
+                    << END;
+                return move(use);
+              }()
+           << END;
+    return finalize(series);
+  }
+}
+#endiv

@@ -42,6 +42,14 @@ AC_DEFUN([TF_PROG_DC], [
     fi
 ])
 
+AC_DEFUN([TF_PROG_GCC], [
+    ifdef([HT_PROG_GCC],
+          [HT_PROG_GCC],
+          [ifdef([HGTW_PROG_GCC],
+                 [HGTW_PROG_GCC],
+                 [AC_PROG_CXX])])
+])
+
 AC_DEFUN([TF_PROG_PROTOC], [
     ifdef([HGTW_PROG_PROTOC], [HGTW_PROG_PROTOC], [
         AC_ARG_VAR([PROTOC], [The Protocol Buffer Compiler])

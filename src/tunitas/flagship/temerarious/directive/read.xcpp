@@ -1,0 +1,63 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <hpp>
+namespace tunitas::flagship::temerarious::directive::package_directive {
+  namespace interface {
+    //
+    // The read directives
+    //
+    // Specification:
+    //
+    //   .r filename
+    //
+    // Design:
+    //
+    //   Sure, why do you ask?
+    //
+    // Usage:
+    //
+    //   see parser::assess(...)
+    //
+    //
+    auto read(State &, Output &, Location, Payload) -> void;
+  }
+}
+#endiv
+#divert <cpp>
+#import nonstd.errcode
+#import tunitas.flagship.temerarious.stream.Input
+#import tunitas.flagship.temerarious.input.exception.Missing
+#import tunitas.flagship.temerarious.input.exception.Present
+namespace tunitas::flagship::temerarious::directive::package_directive {
+  auto interface::read(State &state, Output &outbound, Location where, Payload payload) -> void {
+    if (state.is_enabled()) {
+      auto suffix = get_filepath(where, payload);
+      if (auto found = state.search(suffix); fail(found)) {
+        // There is no such candidate file in the search path.
+        //
+        // grammar:
+        //
+        //   README.roff:7: notice, could not find 'personalization.roff'
+        //   README.roff:7: error, failed roff directive <<.r>> because does not exist in the search path
+        //
+        throw input::exception::Missing{suffix, "there is no such file in the search path"};
+      } else {
+        auto resolved = value(move(found));
+        auto inbound = stream::Input{resolved};
+        if (!inbound) {
+          // It does exist in the search path, but the operating system refused to grant access; so errcode() explains it.
+          //
+          // grammar: the file $reason because $message
+          //
+          throw input::exception::Present{resolved, nonstd::errcode(), "could not be opened"};
+        } else {
+          state.push_input(move(inbound));
+        }
+      }
+    }
+  }
+}
+#endiv

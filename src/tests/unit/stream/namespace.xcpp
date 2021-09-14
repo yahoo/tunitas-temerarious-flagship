@@ -1,0 +1,22 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+#import tests.unit
+#import tunitas.flagship.temerarious.stream
+#import rigging.suite // WATCHOUT - this is tricky, affects filey and streamy adn changes between teh v1- and v2-API
+namespace tests::unit::stream {
+  namespace library = ::tunitas::flagship::temerarious::stream;
+  namespace [[nodirectory]] input { }
+  namespace [[nodirectory]] output { }
+  //
+  // within namespace rigging::suite (rigging::stream) there are at least
+  // the three comopnents Stream{...}, call(...), add<...>()
+  // which need to be available for the suite() and subsuite() assemblies
+  //
+  namespace [[nodirectory]] filey   { using namespace rigging::suite; }
+  namespace [[nodirectory]] streamy { using namespace rigging::suite; }
+}
+#endiv

@@ -1,0 +1,84 @@
+# This is a GNU -*- Makefile -*- which is managed by automake.
+# Copyright Verizon Media
+# Licensed under the terms of the Apache-2.0 license.
+# For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+# For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#
+lib_libtunitas_flagship_temerarious_la_CURRENT = 2
+lib_libtunitas_flagship_temerarious_la_REVISION = 1
+lib_libtunitas_flagship_temerarious_la_AGE = 1
+lib_libtunitas_flagship_temerarious_la_CRA = $(lib_libtunitas_flagship_temerarious_la_CURRENT):$(lib_libtunitas_flagship_temerarious_la_REVISION):$(lib_libtunitas_flagship_temerarious_la_AGE)
+#
+lib_libtunitas_flagship_temerarious_la = lib/libtunitas-flagship-temerarious.la
+lib_libtunitas_flagship_temerarious_la_LIBADD = \
+  $(lib_libaddenda_nonstd_la) \
+  $(lib_libstd_temerarious_flagship_la) \
+  -ltunitas \
+  -lsys-posix-module \
+  -lnonstd-module # [[TODO]] remove the -module suffix when module-options, module-nonstd >= 2.0 is ready
+  $(end)
+lib_libtunitas_flagship_temerarious_la_LDFLAGS = $(PACKAGE_LDFLAGS_SET) $(lib_libtunitas_flagship_temerarious_la_CRA)
+lib_libtunitas_flagship_temerarious_la_MODULES = $(call TF_SOURCEStoMODULES, $(lib_libtunitas_flagship_temerarious_la_SOURCES))
+lib_libtunitas_flagship_temerarious_la_SOURCES = \
+  obj/src/tunitas/flagship/namespace.cpp \
+  obj/src/tunitas/flagship/temerarious/namespace.cpp \
+  $(obj_src_tunitas_flagship_temerarious_directive_SUBSOURCES) \
+  $(obj_src_tunitas_flagship_temerarious_diversion_SUBSOURCES) \
+  $(obj_src_tunitas_flagship_temerarious_error_SUBSOURCES) \
+  $(obj_src_tunitas_flagship_temerarious_exception_SUBSOURCES) \
+  $(obj_src_tunitas_flagship_temerarious_input_SUBSOURCES) \
+  $(obj_src_tunitas_flagship_temerarious_path_SUBSOURCES) \
+  $(obj_src_tunitas_flagship_temerarious_parser_SUBSOURCES) \
+  $(obj_src_tunitas_flagship_temerarious_processor_SUBSOURCES) \
+  $(obj_src_tunitas_flagship_temerarious_required_SUBSOURCES) \
+  $(obj_src_tunitas_flagship_temerarious_source_SUBSOURCES) \
+  $(obj_src_tunitas_flagship_temerarious_stream_SUBSOURCES) \
+  $(obj_src_tunitas_flagship_temerarious_variable_SUBSOURCES) \
+  obj/src/tunitas/flagship/temerarious/version.String.cpp \
+  obj/src/tunitas/flagship/temerarious/version.Generator.cpp \
+  $(end)
+#
+include src/tunitas/flagship/temerarious/diversion/Makefrag.am
+include src/tunitas/flagship/temerarious/directive/Makefrag.am
+include src/tunitas/flagship/temerarious/error/Makefrag.am
+include src/tunitas/flagship/temerarious/exception/Makefrag.am
+include src/tunitas/flagship/temerarious/input/Makefrag.am
+include src/tunitas/flagship/temerarious/path/Makefrag.am
+include src/tunitas/flagship/temerarious/parser/Makefrag.am
+include src/tunitas/flagship/temerarious/processor/Makefrag.am
+include src/tunitas/flagship/temerarious/required/Makefrag.am
+include src/tunitas/flagship/temerarious/source/Makefrag.am
+include src/tunitas/flagship/temerarious/stream/Makefrag.am
+include src/tunitas/flagship/temerarious/variable/Makefrag.am
+#
+$(scold_cxxdir)/tunitas/flagship/temerarious/dependencies.mk: $(lib_libtunitas_flagship_temerarious_la_SOURCES)
+$(lib_libtunitas_flagship_temerarious_la_SOURCES) : obj/src/%.cpp : src/%.xcpp
+	$(TF_V_DIS) $(call TF_XCPP2CPP, $<)
+	$(TF_V_DONE) test -e $@
+$(scold_cxxdir)/tunitas/flagship/temerarious/dependencies.mk:
+	$(TF_V_DEP) $(call TF_DEPENDENCIES, $^)
+	$(TF_V_DONE) test -e $@
+include $(scold_cxxdir)/tunitas/flagship/temerarious/dependencies.mk
+clean-dependencies::
+	rm -f $(scold_cxxdir)/tunitas/flagship/temerarious/dependencies.mk
+#
+# The documentariat on the DSO C:R:A system
+#
+# DSO API versioning; see the README which is nearby.
+# else https://wiki.scold-lang.org/page/DSO
+#
+#   CURRENT <= CURRENT+1 if any interfaces were added
+#           <= CURRENT+1 if any interfaces were removed
+#           <= CURRENT+1 if any interfaces were changed
+#           <= CURRENT   if no interface change, but any other (source code) change
+#
+#   REVISION <= 0          if any interfaces were added
+#            <= 0          if any interfaces were removed
+#            <= 0          if any interfaces were changed
+#            <= REVISION+1 if no interface change, but any other (source code) change
+#
+#   AGE <= AGE+1 if any interaces were added
+#       <= 0     if any interfaces were removed
+#       <= 0     if any interfaces were changed
+#       <= AGE   if no interface change, but any other (source code) change
+#

@@ -1,0 +1,28 @@
+# This is a GNU -*- Makefile -*- which is managed by automake.
+# Copyright Verizon Media
+# Licensed under the terms of the Apache-2.0 license.
+# For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+# For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#
+lib_libstd_temerarious_flagship_la = lib/libstd-temerarious-flagship.la
+lib_libstd_temerarious_flagship_la_LIBADD = $(none)
+lib_libstd_temerarious_flagship_la_LDFLAGS = $(PACKAGE_LDFLAGS_SET)
+lib_libstd_temerarious_flagship_la_MODULES = $(call TF_SOURCEStoMODULES, $(lib_libstd_temerarious_flagship_la_SOURCES))
+lib_libstd_temerarious_flagship_la_SOURCES = \
+  obj/src/std/is_error_code_enum/tunitas.flagship.temerarious.error.code.Companion.cpp \
+  obj/src/std/is_error_condition_enum/tunitas.flagship.temerarious.error.condition.Companion.cpp \
+  $(end)
+#
+$(lib_libstd_temerarious_flagship_la_SOURCES) : DC_OPTIONS+=--no-insert-namespace
+$(lib_libstd_temerarious_flagship_la_SOURCES) : bbDC_OPTIONS+=--no-insert-namespace
+#
+$(scold_cxxdir)/std/dependencies.mk: $(lib_libstd_temerarious_flagship_la_SOURCES)
+$(lib_libstd_temerarious_flagship_la_SOURCES) : obj/src/%.cpp : src/%.xcpp
+	$(TF_V_DIS) $(call TF_XCPP2CPP, $<)
+	$(TF_V_DONE) test -e $@
+$(scold_cxxdir)/std/dependencies.mk:
+	$(TF_V_DEP) $(call TF_DEPENDENCIES, $^)
+	$(TF_V_DONE) test -e $@
+include $(scold_cxxdir)/std/dependencies.mk
+clean-dependencies::
+	rm -f $(scold_cxxdir)/std/dependencies.mk

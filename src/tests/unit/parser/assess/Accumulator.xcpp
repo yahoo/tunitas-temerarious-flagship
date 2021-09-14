@@ -1,0 +1,102 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+namespace tests::unit::parser::assess {
+  //
+  // Accumulate a number of failures
+  //
+  // Specification:
+  //
+  //   Register the failure in finalize()
+  //   else in the destructor (which throws in the destructor)
+  //
+  // Usage:
+  //
+  //   Hack The Spew!
+  //   This is a test rig... 
+  //
+  // Usage (and yet)
+  //
+  //   auto acc = Accumulator{};
+  //   acc.drive(expected, "something");
+  //   acc.drive(expected, "something else");
+  //   acc.drive(expected, "Dark Side!");
+  //   acc.finalize();
+  //
+  struct Accumulator;
+}
+#endiv
+#divert <hpp>
+#import tunitas.flagship.temerarious.parser.assess
+#import tunitas.string.View
+#import tests.cppunit.Message // ...... the compatibility shims
+#import tests.cppunit.SourceLine // ... ibidem.
+#import rigging.source.Location // ... slightly different in v1 and v2
+struct tests::unit::parser::assess::Accumulator {
+  using Location = rigging::source::Location;
+  inline explicit Accumulator(Location of_accumulator = Location::current());
+  inline ~Accumulator() noexcept(false); // we plan to throw exceptions out of the destructor
+  Accumulator(Accumulator const &) = delete;
+  auto operator=(Accumulator const &) -> Accumulator & = delete;
+  //
+  using Expected = library::Assessment;
+  using Specimen = ::tunitas::string::View;
+  auto observe(Expected, Specimen, Location of_observation = Location::current()) -> void;
+  auto finalize() -> void; // idempotent; also called in the destructor
+private:
+  bool success{true}; // start at success and prove failure as we go along
+  bool armed{true};
+  Location of_accumulator;
+  cppunit::Message message;
+};
+#endiv
+#divert <ipp>
+namespace tests::unit::parser::assess {
+  Accumulator::Accumulator(Location of_accumulator)
+    : of_accumulator{of_accumulator}
+    , message{[of_accumulator]() -> std::string {
+                // reminder: in v1 API (module-rigging  < 2.0), a std;:string is required
+                //; against the v2 API (module-rigging >= 2.0), this is a duplicate copy
+                auto view = of_accumulator.function();
+                return {view.data(), view.size()};
+              }()}
+  { }
+  Accumulator::~Accumulator() noexcept(false) { finalize(); }
+}
+#endiv
+#divert <cpp>
+#import tests.unit.parser.assess.Exception
+#import std.ostringstream
+namespace tests::unit::parser::assess {
+  auto Accumulator::finalize() -> void {
+    if (armed) {
+      armed = false;
+      if (!success) {
+        throw Exception{std::move(message), std::move(of_accumulator)};
+      }
+    }
+  }
+  auto Accumulator::observe(Expected expected, Specimen specimen, Location of_observation) -> void {
+    //
+    // This is is the test application ------\ (right here)
+    //                                       |
+    //                                       |
+    //            <--------------------------|--------->
+    auto actual = std::get<0>(library::assess(specimen));
+    //
+    //
+    if (expected != actual) {
+      this->success = false;
+      auto buf = std::ostringstream{};
+      buf << of_observation.filepath() << ':' << of_observation.line() << ':' << " FAILING "
+          << " expected=" << underlying(expected)
+          << " actual=" << underlying(actual)
+          << " specimen=\"" << specimen << "\"\n";
+      message.addDetail(buf.str());
+    }
+  }
+}
+#endiv

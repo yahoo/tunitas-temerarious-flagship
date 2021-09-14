@@ -1,0 +1,50 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+namespace tests::unit::error::code { struct Fixture; }
+#endiv
+#divert <hpp>
+#import tunitas.flagship.temerarious.error.Code
+struct tests::unit::error::code::Fixture : public cppunit::test::Fixture {
+  using Subject = library::Code;
+  using Companion = Subject::Companion;
+  auto test_constructor_default() -> void;
+  auto test_constructor_conversion_Companion() -> void;
+  static auto suite() -> cppunit::Test *;
+};
+#endiv
+#divert <cpp>
+namespace tests::unit::error::code {
+  auto Fixture::test_constructor_default() -> void {
+    auto subject = Subject{};
+    auto ec = (std::error_code const &) subject;
+    CPPUNIT_ASSERT(0 == ec.value());
+  }
+  auto Fixture::test_constructor_conversion_Companion() -> void {
+    auto subject = Subject{Companion{}};
+    auto ec = (std::error_code const &) subject;
+    CPPUNIT_ASSERT(0 == ec.value());
+  }
+  auto Fixture::suite() -> cppunit::Test * {
+    using namespace rigging::suite;
+    auto series = Stream{"Code"};
+    series << []{
+                auto con = Stream{"constructor"};
+                con << call("default", &Fixture::test_constructor_default)
+                    << []{
+                         auto ver = Stream{"conversion"};
+                         ver << call("Companion", &Fixture::test_constructor_conversion_Companion)
+                             << END;
+                         return move(ver);
+                       }()
+                    << END;
+                return move(con);
+              }()
+           << END;
+    return finalize(series);
+  }
+}
+#endiv

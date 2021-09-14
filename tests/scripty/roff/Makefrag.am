@@ -1,0 +1,12 @@
+# This is a GNU -*- Makefile -*- which is managed by automake.
+# Copyright Verizon Media
+# Licensed under the terms of the Apache-2.0 license.
+# For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+# For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#
+tests_scripty_roff_XFAIL_TESTS =
+tests_scripty_roff_TESTS = \
+  tests/scripty/roff/all.test \
+  tests/scripty/roff/one.test \
+  $(tests_scripty_roff_XFAIL_TESTS) \
+  $(end)

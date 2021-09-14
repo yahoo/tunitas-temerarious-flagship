@@ -39,7 +39,30 @@
 #    TESTS = ...
 #    ...etc...
 #    
-# implementation details
+ifneq "0" "$(words $(wildcard $(hypogeal_twilight_datadir)/mk/sys.o.DUMMIES.mk))"
+# not (yet) available in hypogeal-twilight 0.46, so look to the else clause
+include $(hypogeal_twilight_datadir)/mk/sys.o.DUMMIES.mk
+else
+# not (yet) available in temerarious-flagship 1.6
+ifneq "0" "$(words $(wildcard $(temerarious_flagship_datadir)/mk/sys.o.DUMMIES.mk))"
+include $(temerarious_flagship_datadir)/mk/sys.o.DUMMIES.mk
+else
+# last hope ... is there a development area available?
+module_sys_datadir = $(dir $(word 1, $(wildcard $(addsuffix /mk /share/module-sys/mk,$(module_sys_prefix) $(std_tunitas_prefix) $(std_scold_prefix) $(prefix)))))
+# $(info DEBUG guessing $(module_sys_datadir)/mk/sys.o.DUMMIES.mk)
+# $(info DEBUG wildcard $(wildcard $(module_sys_datadir)/mk/sys.o.DUMMIES.mk))
+ifneq "0" "$(words $(wildcard $(module_sys_datadir)/mk/sys.o.DUMMIES.mk))"
+include $(module_sys_datadir)/mk/sys.o.DUMMIES.mk
+else
+#
+# WATCHOUT - this isn't an idle omission.  Fix this before you proceed
+# Find this makefile fragment before proceeding.
+# It allows make to treat "sys.o" as a C++ header in #import, rather than a compiler output.
+#
+$(warning Missing "support" for import sys.o with the '.o' suffix)
+endif
+endif
+endif
 ifneq "0" "$(words $(wildcard $(hypogeal_twilight_datadir)/am/compile.am))"
 # current as of hypogeal-twilight >= 0.45.0-0.devel (mainline, Epoch:0)
 # WATCHOUT because this idiom MAY NOT be in the "ahead release" series Epoch:2 viz hypogeal-twilight >= 2:0.45

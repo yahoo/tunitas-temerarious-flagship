@@ -1,0 +1,75 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+namespace tunitas::flagship::temerarious::directive::exception {
+  //
+  // The variable problem
+  //
+  // Specification:
+  //
+  //   The variable is unusable.
+  //   The variable reference is to a non-existent definition.
+  //   The variable definition is duplicated.
+  //   The variable name is unacceptable.
+  //
+  //   This condition is a runtime problem pertaining to the luser's input
+  //   https://en.cppreference.com/w/cpp/error/runtime_argument
+  //
+  // Design:
+  //
+  //   They all (all exceptions) follow the Design Language Guidelines.
+  //   Can't return identifier() const as a string::View because that is not noexcept
+  //   MUST return identifier() const as a constie reference to the stored string
+  //
+  // Background:
+  //
+  //   The luser attempted something.  It is denied.
+  //
+  // Usage:
+  //
+  //   try {
+  //      ...
+  //      throw directive::exception::Variable{identifier, "because ...reasons..."sv};
+  //      ...
+  //   } catch (directive::exception::Aspect const &) {
+  //      ...ours...
+  //   } catch (temerarious::exception::Aspect const &) {
+  //      ...wider and more generally...
+  //   }
+  //
+  class [[nodiscard]] Variable;
+}
+#endiv
+#divert <hpp>
+#import tunitas.flagship.temerarious.directive.exception.partial.Directive
+#import tunitas.string.Storage
+#import std.shared_ptr
+class tunitas::flagship::temerarious::directive::exception::Variable final : public partial::Directive {
+  using Ancestor = partial::Directive;
+public:
+  inline explicit Variable(string::View identifier, Location, string::View reason);
+  auto what() const noexcept -> char const * override;
+  inline auto identifier() const noexcept -> string::Storage const &;
+private:
+  std::shared_ptr<string::Storage> offending_identifier;
+};
+#endiv
+#divert <ipp>
+namespace tunitas::flagship::temerarious::directive::exception {
+  Variable::Variable(string::View identifier, Location where, string::View reason)
+    : Ancestor{where, reason}
+    , offending_identifier{std::make_shared<string::Storage>(identifier.begin(), identifier.end())}
+  { }
+  auto Variable::identifier() const noexcept -> string::Storage const & { return *offending_identifier; }
+}
+#endiv
+#divert <cpp>
+#import std.declval
+namespace tunitas::flagship::temerarious::directive::exception {
+  static_assert(noexcept(Variable{std::declval<Variable const>()}));
+  auto Variable::what() const noexcept -> char const * { return Ancestor::what(); }
+}
+#endiv

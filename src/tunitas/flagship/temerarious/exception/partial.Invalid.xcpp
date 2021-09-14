@@ -1,0 +1,65 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+namespace tunitas::flagship::temerarious::exception::partial {
+  //
+  // Partial completion of a "something is invalid" exception.
+  // Descendants only.
+  //
+  // Semantic: this is the programmer's fault (a logic error).
+  //
+  // Specification:
+  //
+  //   This is the partial completion of an Invalid exception.
+  //   This indicates a programmer error because it could have been checked previously.
+  //   This is NOT an exceptional condition with the input data.
+  //   https://en.cppreference.com/w/cpp/error/invalid_argument
+  //
+  // Design:
+  //
+  //   from the Non-Standard Library 
+  //
+  // Examples:
+  //
+  //   See exception::Null{} or exception::Empty{}
+  //
+  // Usage:
+  //
+  //   try {
+  //      ...
+  //      throw temerarious::exception::Empty{};
+  //      throw temerarious::exception::Empty{...somehow...};
+  //      throw temerarious::exception::Null{...somehow...};
+  //      throw temerarious::exception::Null{};
+  //      ...
+  //   } catch (exception::Aspect const &) {
+  //      ...ours...
+  //   } catch (substd::exception::Invalid const &) {
+  //      ...either one of the nonstd ones (not shown)...
+  //   }
+  //
+  class Invalid;
+}
+#endiv
+#divert <hpp>
+#import tunitas.exception.Aspect
+#import tunitas.flagship.temerarious.exception.Aspect
+#import tunitas.string.View
+#import nonstd.exception.Invalid
+class tunitas::flagship::temerarious::exception::partial::Invalid : public virtual temerarious::exception::Aspect,
+                                                                    public virtual tunitas::exception::Aspect,
+                                                                    public nonstd::exception::Invalid<string::View> {
+  struct Ancestors {
+    struct Aspects { /* ... who cares... */ };
+    using Exception = nonstd::exception::Invalid<string::View>;
+  };
+protected:
+  ~Invalid() = default;
+public:
+  using Ancestors::Exception::View; // you "just have to know..." that the constructor is named View
+  auto what() const noexcept -> char const * override { return Ancestors::Exception::what(); }
+};
+#endiv

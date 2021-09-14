@@ -1,0 +1,35 @@
+." this code looks like -*- nroff -*- but is the 'roff language of Temerarious Flagship
+."
+.\This is a test of "elseifdef"
+.\
+.\
+.\Usage:
+.\
+.\  .i NAME
+.\  ...if NAME is defined...
+.\  .s
+.\  ...if  NAME is not defined...
+.\  .f
+.\
+.\  As before, the value of NAME is arbitrary or even empty.
+.\  see .d
+.\  see .u
+.\
+.d YES 1
+.u NO
+."
+.i YES
+1-GOOD (if YES)
+.f
+.i YES
+2-GOOD (if YES)
+.s
+2-FAIL (else YES)
+.x
+.f
+.i NO
+3-FAIL
+.x
+.s
+3-GOOD (else NO)
+.f

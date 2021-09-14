@@ -1,0 +1,182 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+namespace tunitas::flagship::temerarious::processor {
+  namespace package_body_run {
+    namespace interface { }
+    namespace body { using namespace interface; }
+  }
+  inline namespace package_run { inline namespace interface { using namespace package_body_run::body; } }
+}
+#import tunitas.flagship.temerarious.parser.assess
+#import langu.age
+#import nonstd
+namespace tunitas::flagship::temerarious::processor::package_body_run {
+  namespace body {
+    using namespace langu::age; // ... the pretty quoting in error messages
+    using namespace nonstd; // ....... for visit, Visitor
+    using namespace parser; // ....... assess(...) Assessed, Assessment (you get the idea)
+  }
+}
+#endiv
+#divert <hpp>
+#import tunitas.Success
+#import tunitas.flagship.temerarious.stream.Input
+#import tunitas.flagship.temerarious.stream.Output
+#import tunitas.flagship.temerarious.processor.Preparation
+namespace tunitas::flagship::temerarious::processor::package_run::interface {
+  //
+  // Run the processor.
+  //
+  // Specification:
+  //
+  //   Run it either on cin or on an actual file.
+  //
+  // Design:
+  //
+  //   In the heraneutics which is the style of these things.
+  //
+  // Usage:
+  //
+  //   
+  //   auto erroneity = source::Output{std::clog};
+  //   auto outbound = source::Output{std::cout};
+  //   auto inbound = source::Input{std::cin}; .............................. or get an ifstream on an actual file
+  //   auto ess = processor::run(move(inbound), outbound, erroneity);
+  //
+  // And when do you use which?
+  // https://en.cppreference.com/w/cpp/language/value_category (prvalue, rvalue, lvalue, etc.)
+  //
+  //                            /----------------------------------- prvalue, the Input is accepted by the State.
+  //                            |
+  //                            |                  /---------------- lvalue, the Output is referenced to an existing one.
+  //                            |                  |
+  //                            v                  v
+  inline auto run(stream::Input &&, stream::Output &) -> Success;
+  inline auto run(stream::Input &&, stream::Output &, Preparation) -> Success;
+  inline auto run(stream::Input &&, stream::Output &out, stream::Output &err) -> Success;
+  auto run(stream::Input &&, stream::Output &out, stream::Output &err, Preparation) -> Success;
+}
+#endiv
+#divert <ipp>
+#import std.clog
+namespace tunitas::flagship::temerarious::processor::package_run {
+  auto interface::run(stream::Input &&inbound, stream::Output &outbound) -> Success {
+    auto erroneous = stream::Output{std::clog};
+    return run(forward<stream::Input>(inbound), outbound, erroneous, Preparation{});
+  }
+  auto interface::run(stream::Input &&inbound, stream::Output &outbound, Preparation preparation) -> Success {
+    auto erroneous = stream::Output{std::clog};
+    return run(forward<stream::Input>(inbound), outbound, erroneous, move(preparation));
+  }
+  auto interface::run(stream::Input &&inbound, stream::Output &outbound, stream::Output &erroneity) -> Success {
+    return run(forward<stream::Input>(inbound), outbound, erroneity, Preparation{});
+  }
+}
+#endiv
+#divert <cpp>
+#import langu.age.braket
+#import langu.age.q
+#import nonstd.exception.Unreachable
+#import tunitas.flagship.temerarious.error.Code
+static_assert(sizeof (tunitas::flagship::temerarious::error::code::Companion));
+static_assert(sizeof (std::is_error_code_enum<tunitas::flagship::temerarious::error::code::Companion>));
+static_assert(std::is_error_code_enum<tunitas::flagship::temerarious::error::code::Companion>::value);
+// [[TODO]] v2-series #import substd.exception.Filesystem, nonstd::exception::Filesystem<string::View>
+#import tunitas.flagship.temerarious.exception // cascade namespace exception
+#import tunitas.flagship.temerarious.directive.exception.Aspect
+#import tunitas.flagship.temerarious.directive.exception.Variable
+#import tunitas.flagship.temerarious.input.exception.Aspect
+#import tunitas.flagship.temerarious.input.exception.Present
+#import tunitas.flagship.temerarious.parser.assess
+#import tunitas.flagship.temerarious.processor.exception.Aspect
+#import tunitas.flagship.temerarious.processor.State
+#import tunitas.flagship.temerarious.source.Line
+#import tunitas.string.Storage
+namespace tunitas::flagship::temerarious::processor::package_run {
+  auto interface::run(stream::Input &&inbound_moved_into_state, stream::Output &outbound, stream::Output &errbound, Preparation preparation) -> Success {
+    auto state = State{forward<stream::Input>(inbound_moved_into_state), outbound, move(preparation)};
+    try {
+      auto erroneous = Success{SUCCESS};
+      auto buffer = string::Storage{};
+      do {
+        // Every time through the loop, the frame referenced by inbounds.top() may change
+        auto &in = state.inbounds.top();
+        if (getline(in, buffer)) {
+          auto where = in.where();
+          //
+          // One more line
+          //
+          if (auto [directive, process, rest]=assess(buffer); Assessment::IGNORE == directive) {
+            // Yup, ignore the line
+          } else if (Assessment::ERROR == directive) {
+            // This frequently happens when multiple letters are used instead of the single letter scheme
+            //   e.g. ".def" instead of ".d"
+            // So we give as much context as possible in the hopes that more is more useful.
+            errbound << where << "found-->| " << buffer << '\n';
+            errbound << where << "error, invalid roff directive is ignored\n";
+            erroneous = {error::Code::DIRECTIVE};
+          } else if (Assessment::PASSTHROUGH == directive) {
+            state.passthrough(buffer);
+          } else if (Assessment::DIRECTIVE == directive) {
+            // These are recovereable errors ... by policy, we will continue grinding after an error ... until we can't
+            try {
+              process(state, outbound, where, rest);
+            } catch (input::exception::Present const &e) {
+              errbound << where << "notice, could not open " << q(e.whence()) << " because " << e.code().message() << '\n';
+              errbound << where << "error, failed roff directive " << braket(braket(buffer.substr(0, 2))) << '\n';
+              erroneous = {error::Code::FILE};
+            } catch (input::exception::Aspect const &e) {
+              errbound << where << "notice, could not find " << q(e.whence().filepath()) << '\n';
+              errbound << where << "error, failed roff directive " << braket(braket(buffer.substr(0, 2))) << " because " << e.what() << '\n';
+              erroneous = {error::Code::FILE};
+            } catch (directive::exception::Variable const &e) {
+              errbound << where << "could not interpolate " << q(e.identifier()) << " because " << e.what() << '\n';
+              erroneous = {error::Code::DIRECTIVE};
+            } catch (directive::exception::Aspect const &e) {
+              errbound << where << "found-->|" << buffer << '\n';
+              errbound << where << "error, " << e.what() << '\n';
+              erroneous = {error::Code::DIRECTIVE};
+            }
+          } else {
+            throw exception::Unreachable{};
+          }
+        } else {
+          //
+          // at EOF
+          //
+          [&erroneous, &errbound, &in, whence=in.whence()]{
+            if (1 != in.diversions.size()) {
+              errbound << whence << "error, there are unterminated block definitions at the end of the file\n"
+                        << whence << "notice, closing them and continuing anyway\n";
+              erroneous = {error::Code::DIVERSION_UNCLOSED};
+            }
+            if (1 != in.conditions.size()) {
+              errbound << whence << "error, there are unclosed conditional blocks at the end of the file\n"
+                        << whence << "notice, closing them and continuing anyway\n";
+              erroneous = {error::Code::CONDITION_UNCLOSED};
+            }
+          }();
+          state.inbounds.pop();
+        }
+      } while (state.inbounds.size());
+      return erroneous;
+    } catch (processor::exception::Aspect const &e) {
+      // [[FIXTHIS]] it is also true that the .x directive goes through here with bad UX
+      //
+      // These are unexpected; it means that some more specific error treatment (above) did not obtain.
+      // These are typically a programmer error; they signal incorrect operation of the processor machinery itself.
+      auto header = [&state, &errbound]() -> auto & {
+                      if (state.inbounds.size()) { errbound << state.inbounds.top().inbound.whence(); }
+                      return errbound;
+                    };
+      header() << "error, the roff processor finished in an inconsistent state\n";
+      header() << "error, (uh) there was some problem, " << e.what() << '\n';
+      return {error::Code::PROCESSOR_INVALID};
+    }
+  }
+}
+#endiv

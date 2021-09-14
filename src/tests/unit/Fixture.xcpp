@@ -1,0 +1,49 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+namespace tests::unit { struct Fixture; }
+#endiv
+#divert <hpp>
+struct tests::unit::Fixture : public cppunit::test::Fixture {
+  static auto suite() -> cppunit::Test *;
+};
+#endiv
+#divert <cpp>
+#import tests.unit.app.Fixture
+#import tests.unit.roff.Fixture
+#import tests.unit.tf.Fixture
+#import tests.unit.directive.Fixture
+#import tests.unit.error.Fixture
+#import tests.unit.exception.Fixture
+#import tests.unit.field.Fixture
+#import tests.unit.input.Fixture
+#import tests.unit.parser.Fixture
+#import tests.unit.processor.Fixture
+#import tests.unit.source.Fixture
+#import tests.unit.stream.Fixture
+#import tests.unit.variable.Fixture
+namespace tests::unit {
+  auto Fixture::suite() -> cppunit::Test * {
+    using namespace rigging::suite;
+    auto series = Stream{"unit"};
+    series << add<app::Fixture>()
+           << add<roff::Fixture>()
+           << add<tf::Fixture>()
+           << add<directive::Fixture>()
+           << add<error::Fixture>()
+           << add<exception::Fixture>()
+           << add<field::Fixture>()
+           << add<input::Fixture>()
+           << add<parser::Fixture>()
+           << add<processor::Fixture>()
+           << add<source::Fixture>()
+           << add<stream::Fixture>()
+           << add<variable::Fixture>()
+           << END;
+    return finalize(series);
+  }
+}
+#endiv

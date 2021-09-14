@@ -1,0 +1,38 @@
+# This is a GNU -*- Makefile -*- which is managed by automake.
+# Copyright Verizon Media
+# Licensed under the terms of the Apache-2.0 license.
+# For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+# For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#
+libexec_temerarious_flagship_roff = libexec/temerarious-flagship/roff
+libexec_temerarious_flagship_roff_LDADD = $(lib_libapp_roff_la)
+libexec_temerarious_flagship_roff_LDFLAGS = $(PACKAGE_LDFLAGS_SET)
+libexec_temerarious_flagship_roff_MODULES = $(none)
+libexec_temerarious_flagship_roff_SOURCES = obj/src/app/roff/c.main.cpp
+#
+lib_libapp_roff_la = lib/libapp-roff.la
+lib_libapp_roff_la_LIBADD = -ltunitas $(lib_libtunitas_flagship_temerarious_la)
+lib_libapp_roff_la_LDFLAGS = $(PACKAGE_LDFLAGS_SET)
+lib_libapp_roff_la_MODULES = $(call TF_SOURCEStoMODULES, $(lib_libapp_roff_la_SOURCES))
+lib_libapp_roff_la_SOURCES = \
+  obj/src/app/roff/namespace.cpp \
+  obj/src/app/roff/main.cpp \
+  obj/src/app/roff/main.Palette.cpp \
+  obj/src/app/roff/main.Palette.Error.cpp \
+  obj/src/app/roff/main.Palette.Warning.cpp \
+  obj/src/app/roff/main.Palette.Notice.cpp \
+  obj/src/app/roff/run.cpp \
+  obj/src/app/roff/usage.Message.cpp \
+  obj/src/app/roff/exception.File.cpp \
+  $(end)
+#
+$(scold_cxxdir)/app/roff/dependencies.mk: $(libexec_temerarious_flagship_roff_SOURCES) $(lib_libapp_roff_la_SOURCES)
+$(libexec_temerarious_flagship_roff_SOURCES) $(lib_libapp_roff_la_SOURCES) : obj/src/%.cpp : src/%.xcpp
+	$(TF_V_DIS) $(call TF_XCPP2CPP, $<)
+	$(TF_V_DONE) test -e $@
+$(scold_cxxdir)/app/roff/dependencies.mk:
+	$(TF_V_DEP) $(call TF_DEPENDENCIES, $^)
+	$(TF_V_DONE) test -e $@
+include $(scold_cxxdir)/app/roff/dependencies.mk
+clean-dependencies::
+	rm -f $(scold_cxxdir)/app/roff/dependencies.mk

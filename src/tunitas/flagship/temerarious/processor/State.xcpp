@@ -1,0 +1,285 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+#import tunitas.string.literals
+#import langu.age
+namespace tunitas::flagship::temerarious::processor {
+  //
+  // The processor state
+  //
+  // Specification:
+  //
+  //   Stack of stream::Input
+  //   A searchpath
+  //
+  //   The input source provided at initial construction becomes "the document"
+  //
+  // Design:
+  //
+  //   Sure, in the a "how buildings lean" sort of way.
+  //
+  // Usage:
+  //
+  //   auto state = State{};
+  //
+  namespace [[eponymous]] state {
+    struct State;
+    using namespace string::literals;
+    using namespace langu::age; // specifically for State:;Dumper(...)
+  }
+  using state::State;
+}
+#endiv
+#divert <hpp>
+#import tunitas.Outcome
+#import tunitas.file.Path
+#import tunitas.string.View
+#import tunitas.string.Storage
+#import tunitas.flagship.temerarious.path.Search
+#import tunitas.flagship.temerarious.error.Code
+#import tunitas.flagship.temerarious.input.Frame
+#import tunitas.flagship.temerarious.input.Stack
+#import tunitas.flagship.temerarious.processor.Preparation
+#forward tunitas.flagship.temerarious.stream.Input
+#forward tunitas.flagship.temerarious.stream.Output
+#import std.ostream
+#import std.is_const
+#import std.conditional
+namespace tunitas::flagship::temerarious::processor {
+  namespace state {
+    // any ADL-found nearby API?
+  }
+  struct state::State {
+    //
+    // And when do you use which?
+    // https://en.cppreference.com/w/cpp/language/value_category (prvalue, rvalue, lvalue, etc.)
+    //
+    //                                  /----------------------------------- prvalue, the Input is accepted by the State.
+    //                                  |
+    //                                  |                  /---------------- lvalue, the Output is referenced to an existing one.
+    //                                  |                  |
+    //                                  v                  v
+    inline explicit State(stream::Input &&, stream::Output &);
+    inline explicit State(stream::Input &&, stream::Output &, Preparation);
+    State(State const &) = default;
+    auto operator=(State const &) -> State & = default;
+    input::Stack inbounds;
+    variable::Frame globals;
+    path::Search directories;
+    [[deprecated("instead prefer state::is_enbled()")]] inline auto enabled() const -> bool;
+    inline auto is_enabled() const -> bool;
+    inline auto define_variable(string::View identifier, string::View value) -> void;
+    inline auto undefine_variable(string::View identifier) -> void;
+    inline auto recover_variable(string::View identifier) const -> Outcome<string::View>;
+    inline auto push_input(stream::Input &&) -> void;
+    inline auto pop_input() -> void;
+    inline auto search(file::Path const &suffix) const -> Outcome<file::Path>;
+    inline auto push_diversion(stream::Output &) -> void;
+    inline auto push_diversion(string::View identifier) -> void;
+    inline auto pop_diversion() -> void;
+    inline auto push_condition(string::View condition, bool negate = false) -> void;
+    inline auto push_condition(bool condition) -> void;
+    inline auto push_condition(char const *) -> void = delete; // avoid the ambiguity with bool
+    inline auto pop_condition() -> void;
+    inline auto passthrough(string::View line) -> void;
+    inline auto fatal(string::View message = "fatal error, the processor is exiting") -> void;
+    inline auto dump(std::ostream &) const -> void;
+  private:
+    struct Dumper;
+    friend struct Dumper;
+    inline static auto s(string::View view) -> string::Storage; // because std::map<...> requires std::string, never std::view
+    inline auto ensure_condition() const -> bool;
+    inline auto ensure_condition() -> bool &; // a.k.a. condition::Frame &
+    inline auto ensure_conditions() -> input::condition::Stack &;
+    inline auto ensure_diversion() -> diversion::Frame &;
+    inline auto ensure_diversions() -> diversion::Stack &;
+    template<typename STATE> inline static auto ensure_inbounds(STATE &) -> std::conditional_t<std::is_const_v<STATE>, input::Stack const, input::Stack> &;
+    inline auto ensure_inbound() -> input::Frame &;
+    inline auto ensure_inbound() const -> input::Frame const &;
+    inline auto ensure_inbounds() -> input::Stack &;
+    inline auto ensure_inbounds() const -> input::Stack const &;
+    // This number SHOULD be less than the maximum number of open files.
+    // If it is not then the maximum number of open files will trigger first and you'll see that failure mode instead.
+    inline static constexpr auto INPUT_RECURSION_LIMIT = 100ul;
+  };
+}
+#endiv
+#divert <ipp>
+#import tunitas.flagship.temerarious.processor.exception.Diversion
+#import tunitas.flagship.temerarious.processor.exception.Condition
+#import tunitas.flagship.temerarious.processor.exception.Input
+#import tunitas.flagship.temerarious.processor.exception.State
+#import tunitas.flagship.temerarious.processor.State.Dumper
+#import std.to_string
+namespace tunitas::flagship::temerarious::processor {
+  namespace state {
+    State::State(stream::Input &&in, stream::Output &out) { inbounds.push({forward<stream::Input>(in), out}); }
+    State::State(stream::Input &&in, stream::Output &out, Preparation prep)
+      : globals{prep.defines}
+      , directories{prep.search} {
+      inbounds.push({forward<stream::Input>(in), out});
+    }
+    auto State::enabled() const -> bool    { return is_enabled(); }
+    auto State::is_enabled() const -> bool { return ensure_condition(); }
+    auto State::fatal(string::View message) -> void { throw exception::State{message}; }
+    auto State::passthrough(string::View buffer) -> void {
+      if (ensure_condition()) {
+        ensure_diversion().emplace(buffer);
+      }
+    }
+  }
+  auto State::dump(std::ostream &outbound) const -> void {
+    Dumper{outbound, *this}.dump();
+  }
+}
+namespace tunitas::flagship::temerarious::processor::state {
+  //
+  // Variable Operations (operations on the global variables)
+  //
+  auto State::define_variable(string::View identifier, string::View value) -> void {
+    globals[s(identifier)] = value; // this allows overwriting of old variables with new values 
+  }
+  auto State::undefine_variable(string::View identifier) -> void {
+    auto found = globals.find(s(identifier));
+    auto const end = globals.end();
+    if (end != found) {
+      globals.erase(found);
+    }
+  }
+  auto State::recover_variable(string::View identifier) const -> Outcome<string::View> {
+    auto found = globals.find(s(identifier));
+    auto const end = globals.end();
+    if (end == found) {
+      return (std::error_code) error::Code{error::Code::VARIABLE_UNFOUND};
+    } else {
+      return (string::View) found->second;
+    }
+  }
+}
+namespace tunitas::flagship::temerarious::processor::state {
+  //
+  // Input Operations
+  //
+  auto State::push_input(stream::Input &&noob) -> void {
+    if (auto limit=INPUT_RECURSION_LIMIT; limit < inbounds.size()) {
+      throw exception::Input{"(is there infinite recursion?) reached the input depth limit of "s + std::to_string(limit)};
+    } else {
+      noob.unsetf(std::ios::skipws);
+      // Can push on an empty stack.
+      inbounds.push({forward<stream::Input>(noob), ensure_inbound()});
+    }
+  }
+  auto State::pop_input() -> void {
+    // Independent of whether the input frame is "good to close" then ... close it.
+    // The caller is responsible for probing the input frame and messaging about problems.
+    // Such happens in processor::run(...) in the main event loop at EOF of the input frame.
+    ensure_inbounds().pop();
+  }
+}
+namespace tunitas::flagship::temerarious::processor::state {
+  //
+  // Directory Search (searchpath) Operations
+  //
+  auto State::search(file::Path const &suffix) const -> Outcome<file::Path> { return directories.find(ensure_inbound().inbound.directory(), suffix); }
+}
+namespace tunitas::flagship::temerarious::processor::state {
+  //
+  // Diversion Operations
+  //
+  auto State::push_diversion(string::View identifier) -> void {
+    auto *sink = [identifier, this]{
+                   auto sidentifier = s(identifier);
+#if 1
+                   // Either the insertion was performed true==inserted.second and inserted.first is that place
+                   // Or else the insertion was refused false==inserted.second and inserted.first is old item.
+                   auto inserted = globals.insert({s(identifier), string::Storage{}});
+                   return &inserted.first->second;
+#else
+                   auto found = globals.find(sidentifier);
+                   auto const end = globals.end();
+                   if (end == found) {
+                     auto &lhs = globals.at(sidentifier);
+                     return &lhs;
+                   } else {
+                     return &found->second;
+                   }
+#endif
+                 }();
+    ensure_diversions().push(sink);
+  }
+  auto State::pop_diversion() -> void {
+    auto &d = ensure_diversions();
+    d.pop();
+    if (d.empty()) {
+      throw exception::Diversion{"diversions are exhausted"}; // an .divert/.endiv
+    }
+  }
+}
+namespace tunitas::flagship::temerarious::processor::state {
+  //
+  // Condition Operations
+  //
+  auto State::push_condition(string::View identifier, bool negate) -> void {
+    auto &cs = ensure_conditions();
+    auto site = [identifier, &t=this->globals]{
+                  auto found = t.find(s(identifier));
+                  auto const end = t.end();
+                  return end != found;
+                };
+    cs.push(cs.top() && (site() ^ negate));
+  }
+  auto State::push_condition(bool condition) -> void {
+    ensure_conditions().push(condition);
+  }
+  auto State::pop_condition() -> void {
+    auto &c = ensure_conditions();
+    c.pop();
+    if (c.empty()) {
+      throw exception::Condition{"conditions are exhausted"}; // unbalanced .if/.elif/.else/.endif"sv};
+    }
+  }
+}
+namespace tunitas::flagship::temerarious::processor::state {
+  // utilities and privates (protecteds)
+  auto State::s(string::View view) -> string::Storage { return {view.begin(), view.end()}; }
+  auto State::ensure_inbound() -> input::Frame &             { return ensure_inbounds(*this).top(); }
+  auto State::ensure_inbound() const -> input::Frame const & { return ensure_inbounds(*this).top(); }
+  auto State::ensure_diversion() -> diversion::Frame & { return ensure_diversions().top(); }
+  auto State::ensure_condition() -> bool &             { return ensure_conditions().top(); }
+  auto State::ensure_condition() const -> bool {
+    // redo everything from the ground up in constie mode.
+    if (!inbounds.empty()) {
+      if (auto &t = inbounds.top().conditions; !t.empty()) {
+        return t.top();
+      }
+    }
+    // this still indicates a programmer error: mismatched diversion push-pop (somewhere)
+    throw exception::Condition{__FUNCTION__};
+  }
+  auto State::ensure_inbounds() -> input::Stack &             { return ensure_inbounds(*this); }
+  auto State::ensure_inbounds() const -> input::Stack const & { return ensure_inbounds(*this); }
+  template<typename STATE> auto State::ensure_inbounds(STATE &state) -> std::conditional_t<std::is_const_v<STATE>, input::Stack const, input::Stack> & {
+    if (state.inbounds.empty()) {
+      throw exception::Input{__FUNCTION__}; // this indicates a programmer error: mismatched inbounds.push-pop
+    }
+    return state.inbounds;
+  }
+  auto State::ensure_diversions() -> diversion::Stack & {
+    if (auto &t = ensure_inbound().diversions; t.empty()) {
+      throw exception::Diversion{__FUNCTION__}; // this indicates a programmer error: mismatched diversion push-pop
+    } else {
+      return t;
+    }
+  }
+  auto State::ensure_conditions() -> input::condition::Stack & {
+    if (auto &t = ensure_inbound().conditions; t.empty()) {
+      throw exception::Condition{__FUNCTION__}; // this indicates a programmer error: mismatched diversion push-pop
+    } else {
+      return t;
+    }
+  }
+}
+#endiv

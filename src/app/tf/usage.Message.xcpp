@@ -1,0 +1,69 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+namespace app::tf::usage {
+  //
+  // The usage message generator
+  //
+  // Usage:
+  //
+  //   auto generator = usage::Message{program};
+  //   std::cout << generator() << '\n';
+  //
+  //   auto generator = usage::Message{program};
+  //   std::cout << usage::Message{program} << '\n';
+
+  //
+  struct Message;
+}
+#endiv
+#divert <hpp>
+#import tunitas.application.options.Program
+#import tunitas.string.Storage
+#import std.ostream
+namespace app::tf {
+  namespace usage {
+    inline auto operator<<(std::ostream &, Message const &) -> std::ostream &;
+  }
+  class usage::Message {
+    using Program = tunitas::application::options::Program;
+    using String = tunitas::string::Storage;
+  public:
+    inline explicit Message(Program const &);
+    inline auto operator()() const -> String;
+    inline auto emit_onto(std::ostream &) const -> std::ostream &;
+  private:
+    Program program;
+  };
+}
+#endiv
+#divert <ipp>
+#import std.ostringstream
+namespace app::tf {
+  auto usage::operator<<(std::ostream &o, Message const &m) -> std::ostream & { return m.emit_onto(o); }
+  namespace usage {
+    Message::Message(Program const &program) : program{program} { }
+    auto Message::operator()() const -> String {
+      std::ostringstream buf;
+      emit_onto(buf);
+      return buf.str();
+    }
+    auto Message::emit_onto(std::ostream &outbound) const -> std::ostream & {
+      outbound << "usage: " << program << " [...options...] <subprogram> ...arguments..."
+               << "\n"
+               << "\nWhere <subprogram> is one of"
+               << "\nlist, ls ...... list the available subprograms"
+               << "\nroff .......... \"run-off\" the Mark{off,up,down} templating language."
+               << "\nusage, help ... this message"
+               << "\n"
+               << "\nWhere the [...options...] comprise"
+               << "\n--version ...................... emit the version of the this package"
+               << "\n--help, --usage ................ this message."; // no final \n
+      return outbound;
+    }
+  }
+}
+#endiv

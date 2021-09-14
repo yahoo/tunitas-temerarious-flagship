@@ -1,0 +1,76 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+namespace tunitas::flagship::temerarious::input::exception {
+  //
+  // A problem with a "present" file.
+  //
+  // Semantic: file that is present (or expected to be present at the time of open(...))
+  //           as such, this is a descendant of the "system error" and there is an error code.
+  //
+  // Design:
+  //
+  //   Avoid all of the ambiguities; the path2 of the ancestor in partial::Filesystem is unused & unusable.
+  //
+  // Lifetimes:
+  //
+  //   The whence() returns a view on a string (a description of a filepath) which last longer than the exception.
+  //   This obligation is triivally satisfied by using stream;:Input::input_name()
+  //
+  // Specification, Design, Usage: see partial::Filesystem
+  //
+  struct [[nodiscard]] Present;
+}
+#endiv
+#divert <hpp>
+#import tunitas.flagship.temerarious.input.exception.Aspect
+#import tunitas.flagship.temerarious.exception.partial.Filesystem
+#import tunitas.flagship.temerarious.source.Name
+#import std.error_code
+#import tunitas.string.View
+#import tunitas.string.Storage
+#import tunitas.file.Path
+struct tunitas::flagship::temerarious::input::exception::Present final : public virtual input::exception::Aspect,
+                                                                         public partial::Filesystem {
+  struct Ancestors {
+    struct Aspects  { /* ... who cares ... */ };
+    using Exception = partial::Filesystem;
+  };
+public:
+  // Same rough constructor argument alignment as the ancestor nonstd::exception::Filesystem<string::View>
+  inline explicit Present(char const *, std::error_code, string::View reason) = delete; // no pointers!
+  inline explicit Present(string::View filepath, std::error_code, string::View reason);
+  inline explicit Present(string::Storage const & filepath, std::error_code, string::View reason);
+  inline explicit Present(file::Path const & filepath, std::error_code, string::View reason);
+  inline explicit Present(source::Name const &, std::error_code, string::View reason); // and source::Location works too
+  auto what() const noexcept -> char const * override;
+  auto whence() const noexcept -> source::Name override;
+};
+#endiv
+#divert <ipp>
+namespace tunitas::flagship::temerarious::input::exception {
+  Present::Present(string::View missing_filepath, std::error_code ec, string::View reason) : Ancestors::Exception{string::Storage{missing_filepath.begin(), missing_filepath.end()}, ec, reason} { }
+  Present::Present(string::Storage const &missing_filepath, std::error_code ec, string::View reason) : Ancestors::Exception{missing_filepath, ec, reason} { }
+  Present::Present(file::Path const &missing_filepath, std::error_code ec, string::View reason) : Ancestors::Exception{missing_filepath, ec, reason} { }
+  Present::Present(source::Name const &missing, std::error_code ec, string::View reason) : Ancestors::Exception{missing.fileview(), ec, reason} { }
+}
+#endiv
+#divert <cpp>
+namespace tunitas::flagship::temerarious::input::exception {
+  auto Present::what() const noexcept -> char const * { return Ancestors::Exception::what(); }
+  auto Present::whence() const noexcept -> source::Name {
+    //
+    // Here the constie references are returned so the lifetime invariant supported
+    //   auto Filesystem::path1() const -> Path const &
+    //   auto Path::native() const -> string::Storage const &;
+    // Per
+    //   https://en.cppreference.com/w/cpp/filesystem/path/native
+    //   https://en.cppreference.com/w/cpp/filesystem/filesystem_error/path
+    //
+    return {Ancestors::Exception::path1().native()};
+  }
+}
+#endiv

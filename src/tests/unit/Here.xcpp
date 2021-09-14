@@ -1,0 +1,58 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+#import tunitas.flagship.temerarious.source
+namespace tests::unit {
+  //
+  // Here ... provide implementations of hereinat(), hereabout()
+  // Descendants only
+  //
+  // Specification:
+  //
+  //   Provide for the generation of *some* source::Location, source:Name in descendant fixtures.
+  //   Trivial MI mixin with private inheritance
+  //
+  // Design:
+  //
+  //   Use std::source_location::current() because it is convenient, not because it is a good idea.
+  //   In "real usage" the filename would be some sort of 'roff file from the lusr.
+  //
+  // Lifetimes:
+  //
+  //   The string::View returned within Location::filepath() or Name::filepath() must last the lifetime of the test.
+  //
+  // Usage:
+  //
+  //   Hack the Spew (and yet since definition is so very far from the sites of usage)
+  //
+  //   class my::Fixture : public cppunit::test::Fixture, private Here {
+  //      ...testers will do as testers do...
+  //   };
+  //
+  namespace [[eponymous]] here {
+    struct Here;
+    namespace source = ::tunitas::flagship::temerarious::source;
+  }
+  using here::Here;
+}
+#endiv
+#divert <hpp>
+#import tunitas.flagship.temerarious.source.Location
+#import tunitas.flagship.temerarious.source.Name
+class tests::unit::here::Here {
+protected:
+  virtual ~Here() = default;
+protected:
+  static auto hereinat() -> source::Location;
+  static auto hereabout() -> source::Name;
+};
+#endiv
+#divert <cpp>
+namespace tests::unit::here {
+  auto Here::hereinat() -> source::Location { return {std::source_location::current()}; }
+  auto Here::hereabout() -> source::Name    { return {std::source_location::current()}; }
+}
+#endiv

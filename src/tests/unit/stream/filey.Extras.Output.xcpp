@@ -1,0 +1,37 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+#import tests.unit.stream.filey.Extras.template
+#forward tunitas.flagship.temerarious.stream.Output
+namespace tests::unit::stream::filey {
+  template<> struct Extras<library::Output>;
+}
+#divert <hpp>
+#forward tests.unit.stream.Filey
+#import tunitas.file.Path
+namespace tests::unit::stream::filey {
+  template<> struct Extras<library::Output> {
+    // no extras (they are all on the library::Input side
+    using Subject = library::Output;
+  protected:
+    static auto subsuite() -> Stream;
+    using Filepath = ::tunitas::file::Path;
+    auto generate_existing_filepath() -> Filepath; // The file is suitable for writing
+  };
+}
+#endiv
+#divert <cpp>
+#import tests.unit.stream.filey.Filey.Output // see the full type so we can take member pointers off of it
+namespace tests::unit::stream::filey {
+  auto Extras<library::Output>::generate_existing_filepath() -> Filepath { return "tests/specimens/WRITETHIS"; }
+  auto Extras<library::Output>::subsuite() -> Stream {
+    auto sub = Stream{"specifics"};
+    sub // none
+      << END;
+    return sub;
+  }
+}
+#endiv

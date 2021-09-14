@@ -1,0 +1,92 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+#import tunitas.application.exits.constants
+#import tunitas.flagship.temerarious.stream
+#import tunitas.application.options
+#import tunitas.flagship.temerarious
+#import langu.age
+namespace tests::catty {
+  inline namespace package_main {
+           namespace package_body_main::body { }
+           inline namespace interface { using namespace package_body_main::body; } }
+  namespace package_main::package_body_main::body {
+    inline namespace constants { using namespace tunitas::application::exits::constants; } 
+    namespace exits = tunitas::application::exits;
+    using namespace langu::age;
+    namespace options = tunitas::application::options;
+    namespace stream = tunitas::flagship::temerarious::stream;
+    namespace version = tunitas::flagship::temerarious::version;
+  }
+}
+#endiv
+#divert <hpp>
+#import tunitas.application.exits.Code
+#import tunitas.application.options.c.Argv
+namespace tests::catty::package_main::interface {
+  inline auto main(int, char *[]) -> exits::Code;
+  auto main(options::c::Argv) -> exits::Code;
+}
+#endiv
+#divert <ipp>
+namespace tests::catty::package_main {
+  inline auto interface::main(int cc, char *vv[]) -> exits::Code { return main(options::c::Argv(cc, vv)); }
+}
+#endiv
+#divert <cpp>
+#import std.clog
+#import tunitas.application.options.Program
+#import tunitas.application.options.Arguments
+#import tunitas.flagship.temerarious.stream.Input
+#import tunitas.flagship.temerarious.stream.Output
+#import tunitas.flagship.temerarious.version.Generator
+#import langu.age.q
+#import nonstd.same_as
+namespace tests::catty::package_main {
+  auto interface::main(options::c::Argv av) -> exits::Code {
+    auto program = options::Program{av.front()};
+    auto arguments = options::Arguments{1+av.begin(), av.end()};
+    while (!arguments.empty()) {
+      static_assert(nonstd::same_as<tunitas::string::Storage, options::Arguments::value_type>);
+      auto const &item = arguments.front();
+      if (item.empty()) {
+        std::clog << program << ": error, the <subprogram> cannot be empty\n";
+        return USAGE;
+      } else if ("--usage"s == item || "--help"s == item || "-h"s == item) {
+        std::cout << "usage catty < cin > cout\n";
+        return OK;
+      } else if ("--version"s == item || "-V"s == item) {
+        std::cout << version::Generator{} << '\n';
+        return OK;
+      } else if ("--"s == item) {
+        // The options formally end at an explicit "--"
+        arguments.pop_front();
+        break;
+      } else if ('-' == item.front()) {
+        std::clog << program << ": error, invalid option (use --usage to explore)\n";
+        return USAGE;
+      } else {
+        // The options have ended
+        break;
+      }
+    }
+    if (0 != arguments.size()) {
+      std::clog << program << ": error, there must no (zero) words following the options\n";
+      std::clog << program << ": notice, use " << q("--usage") << " to see the options\n";
+      return USAGE;
+    }
+    std::cerr << "reminder: reading fromc in\n";
+    auto in = stream::Input{std::cin}; // <------------------------------------------------------------ test this
+    auto out = stream::Output{std::cout};
+    auto count{0lu};
+    for (auto buffer=string::Storage{}; getline(in, buffer); ++count) { // <--------------------------- test this
+      out << "read: " << buffer.size() << " " << buffer << '\n';
+    }
+    std::cerr << "finally: read " << count << ' ' << (1 == count ? "line" : "lines") << '\n';
+    return OK;
+  }
+}
+#endiv

@@ -1,0 +1,109 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+namespace tests::unit::exception::input { struct Missing; }
+#endiv
+#divert <hpp>
+#import tests.unit.Here
+#import tunitas.flagship.temerarious.input.exception.Missing
+struct tests::unit::exception::input::Missing : public cppunit::test::Fixture, private Here {
+  using Subject = library::Missing;
+  auto test_constructor_view() -> void;
+  auto test_constructor_storage() -> void;
+  auto test_constructor_path() -> void;
+  auto test_constructor_name() -> void;
+  auto test_constructor_location() -> void;
+  auto test_what() -> void;
+  auto test_whence() -> void;
+  static auto suite() -> cppunit::Test *;
+};
+#endiv
+#divert <cpp>
+namespace tests::unit::exception::input {
+  auto Missing::test_constructor_view() -> void {
+    //
+    // test the constructor with the varying first argument
+    //                     / ---------right here
+    //                     |
+    //                     v
+    auto subject = Subject{string::View{"/dev/bogus"}, "no such device or address"sv};
+    CPPUNIT_ASSERT(sizeof (subject));
+    CPPUNIT_ASSERT(nullptr != subject.what());
+    CPPUNIT_ASSERT(!subject.whence().fileview().empty());
+  }
+  auto Missing::test_constructor_storage() -> void {
+    //
+    // test the constructor with the varying first argument
+    //                     / ---------right here
+    //                     |
+    //                     v
+    auto subject = Subject{string::Storage{"/dev/bogus"}, "no such device or address"sv};
+    CPPUNIT_ASSERT(sizeof (subject));
+    CPPUNIT_ASSERT(nullptr != subject.what());
+    CPPUNIT_ASSERT(!subject.whence().fileview().empty());
+  }
+  auto Missing::test_constructor_path() -> void {
+    //
+    // test the constructor with the varying first argument
+    //                     / ---------right here
+    //                     |
+    //                     v
+    auto subject = Subject{file::Path{"/dev/bogus"}, "no such device or address"sv};
+    CPPUNIT_ASSERT(sizeof (subject));
+    CPPUNIT_ASSERT(nullptr != subject.what());
+    CPPUNIT_ASSERT(!subject.whence().fileview().empty());
+  }
+  auto Missing::test_constructor_name() -> void {
+    //
+    // test the constructor with the varying first argument
+    //                     / ---------right here
+    //                     |
+    //                     v
+    auto subject = Subject{hereabout(), "no such device or address"sv};
+    CPPUNIT_ASSERT(sizeof (subject));
+    CPPUNIT_ASSERT(nullptr != subject.what());
+    CPPUNIT_ASSERT(!subject.whence().fileview().empty());
+  }
+  auto Missing::test_constructor_location() -> void {
+    //
+    // test the constructor with the varying first argument
+    //                     / ---------right here
+    //                     |
+    //                     v
+    auto subject = Subject{hereinat(), "no such device or address"sv};
+    CPPUNIT_ASSERT(sizeof (subject));
+    CPPUNIT_ASSERT(nullptr != subject.what());
+    CPPUNIT_ASSERT(!subject.whence().fileview().empty());
+  }
+  auto Missing::test_what() -> void {
+    // already tested
+  }
+  auto Missing::test_whence() -> void {
+    // already tested
+  }
+  auto Missing::suite() -> cppunit::Test * {
+    using namespace rigging::suite;
+    auto series = Stream{"Missing"};
+    series << []{
+                auto con = Stream{"constructor{THING,error_code,reason}"};
+                con
+#if 0
+                  << call("string::View", &Missing::test_constructor_view)
+                    << call("string::Storage", &Missing::test_constructor_storage)
+                    << call("file::Path", &Missing::test_constructor_path)
+#endif
+                    << call("source::Name", &Missing::test_constructor_name)
+                    << call("source::Location", &Missing::test_constructor_location)
+                    << END;
+                return move(con);
+              }()
+           << call("what", &Missing::test_what)
+           << call("whence", &Missing::test_whence)
+           << END;
+    return finalize(series);
+  }
+}
+#endiv

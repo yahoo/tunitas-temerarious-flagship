@@ -1,0 +1,50 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+namespace tests::unit::stream {
+  //
+  // Exercise the newly-created stream.
+  // Descendants only.
+  //
+  // Usage:
+  //
+  //   Hack the Spew.
+  //
+  template<typename LIBRARY_STREAM> struct Exerciser;
+}
+#endiv
+#divert <hpp>
+namespace tests::unit {
+  template<typename LIBRARY_STREAM> class stream::Exerciser {
+  protected:
+    virtual ~Exerciser() = default;
+  public:
+    using Exercise_Stream = LIBRARY_STREAM; // avoid naming this Subject because the descendant does that too
+    static auto exercise(Exercise_Stream &) -> void;
+  };
+}
+#endiv
+#divert <tpp>
+#import std.is_base_of
+#import std.istream
+#import std.ostream
+#import std.string
+namespace tests::unit::stream {
+  template<typename _> auto Exerciser<_>::exercise(Exercise_Stream &subject) -> void {
+    // [[FIXTHIS]] this is copy-pasta with tests.unit.stream.filey.filey.template
+    if constexpr(std::is_base_of_v<std::istream, Exercise_Stream>) {
+      std::string something;
+      subject >> something;
+      CPPUNIT_ASSERT(!something.empty());
+      std::cerr << __FILE__ << ':' << __LINE__ << ' ' << __FUNCTION__ << " finds <<" << something << ">>\n";
+    } else if constexpr(std::is_base_of_v<std::ostream, Exercise_Stream>) {
+      subject << "show me";
+    } else {
+      CPPUNIT_ASSERT(false);
+    }      
+  }
+}
+#endiv

@@ -1,0 +1,87 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+namespace tunitas::flagship::temerarious::directive::exception::partial {
+  //
+  // There was a problem during the execution of a directive; i.e. in a directive processor.
+  // Descendants only.
+  //
+  // Specification:
+  //
+  //   Has UX-quality grammar (reasonable explanation, complete sentences, etc.).
+  //
+  //   Has a source::Location that (is expected to have) originated from a nearby stream::Input
+  //
+  //   Constructed with a single reason, following exception::Runtime
+  //   i.e. https://en.cppreference.com/w/cpp/error/runtime_error
+  //
+  // Design:
+  //
+  //   Sure.
+  //
+  // Lifetimes;
+  //
+  //   Because the feature::Location uses string::View, the lifetime of the source must be longer than the exception.
+  //   This is trivially satisfied by recovering the Location from a nearby stream::Input by Input::input_name()
+  //
+  // Usage:
+  //
+  //   try {
+  //      ...
+  //      throw exception::Payload{there, "cause never was the reason"sv};
+  //      throw exception::Stack{there, "the stack is empty"sv};
+  //      ...
+  //   } catch (temerarious::directive::exception::Aspect const &) {
+  //      ...ours...
+  //   } catch (tunitas::exception::Aspect const &) {
+  //      ...otherwise ours...
+  //   }
+  //
+  class Directive;
+}
+#endiv
+#divert <hpp>
+#import tunitas.exception.Aspect
+#import tunitas.flagship.temerarious.exception.Aspect
+#import tunitas.flagship.temerarious.directive.exception.Aspect
+#import tunitas.flagship.temerarious.directive.exception.feature.Where
+#import tunitas.string.View
+#import nonstd.exception.Runtime
+namespace tunitas::flagship::temerarious::directive::exception {
+  class partial::Directive : public virtual directive::exception::Aspect,
+                             public virtual temerarious::exception::Aspect,
+                             public virtual tunitas::exception::Aspect,
+                             public nonstd::exception::Runtime<string::View>,
+                             public feature::Where {
+    struct Ancestors {
+      struct Aspects { /* ... who cares... */ };
+      using Exception = nonstd::exception::Runtime<string::View>;
+      using Where = feature::Where;
+    };
+  protected:
+    ~Directive() = default;
+  public:
+    // The constructor is public so descendants can inherit it as theirs.
+    inline explicit Directive(Location, string::View reason);
+    auto what() const noexcept -> char const * override;
+    auto where() const noexcept -> source::Location override;
+  };
+}
+#endiv
+#divert <ipp>
+namespace tunitas::flagship::temerarious::directive::exception::partial {
+  Directive::Directive(Location where, string::View reason)
+    : Ancestors::Exception{reason}
+    , Ancestors::Where{where}
+  { }
+}
+#endiv
+#divert <cpp>
+namespace tunitas::flagship::temerarious::directive::exception::partial {
+  auto Directive::what() const noexcept -> char const * { return Ancestors::Exception::what(); }
+  auto Directive::where() const noexcept -> Location    { return Ancestors::Where::where(); }
+}
+#endiv

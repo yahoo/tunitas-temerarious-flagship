@@ -1,0 +1,45 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+namespace tunitas::flagship::temerarious::diversion {
+  //
+  // The stack of diversions
+  //
+  // Specification:
+  //
+  //   What happens on PASSTHROUGH?   Where does it pass through {un,}to
+  //
+  // Invariants:
+  //
+  //   The pointed-at objects MUST not move across the lifespan of the stack entry.
+  //
+  //   case: Output * .... there will be one of these and it won't move
+  //   case: Storage * ... the string won't be moved while it is being appended into.
+  //
+  //   In particular this means that new global variables cannot be defined while there are open diversions.
+  //   [[FIXTHIS]] create some locks & interlocks to be able to prove that this won't occur or will be detected.
+  //
+  // Lifetimes:
+  //
+  //   the pointed-at objects MUST live longer than the diversion stack which points at them.
+  //
+  // Usage:
+  //
+  //   A stack within input::Frame within input::State.
+  //
+  struct Stack;
+}
+#endiv
+#divert <hpp>
+#import std.stack
+#import tunitas.flagship.temerarious.diversion.Frame
+class tunitas::flagship::temerarious::diversion::Stack : public std::stack<Frame> {
+  using Ancestor = std::stack<Frame>;
+public:
+  Stack() = default;
+  using Ancestor::stack;
+};
+#endiv

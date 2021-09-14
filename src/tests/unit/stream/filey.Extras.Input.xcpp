@@ -1,0 +1,81 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+#import tests.unit.stream.filey.Extras.template
+#forward tunitas.flagship.temerarious.stream.Input
+namespace tests::unit::stream::filey {
+  template<> struct Extras<library::Input>;
+}
+#endiv
+#divert <hpp>
+#forward tests.unit.stream.Filey
+#import tunitas.file.Path
+namespace tests::unit::stream::filey {
+  template<> struct Extras<library::Input> {
+    using Subject = library::Input;
+    using Fixture = Filey<library::Input>; // because we'll need the descendant for the subsuite
+    virtual ~Extras() = default;
+    auto test_getline() -> void;
+    auto test_input_name() -> void;
+    auto test_whence() -> void;
+    auto test_directory() -> void;
+  protected:
+    static auto subsuite() -> Stream;
+    using Filepath = ::tunitas::file::Path;
+    auto generate_existing_filepath() -> Filepath; // The file is suitable for reading
+  };
+}
+#endiv
+#divert <cpp>
+#import tests.unit.stream.filey.Filey.Input // see the full type so we can take member pointers off of it
+namespace tests::unit::stream::filey {
+  auto Extras<library::Input>::generate_existing_filepath() -> Filepath { return "tests/specimens/READTHIS"; }
+  auto Extras<library::Input>::test_getline() -> void {
+    // [[FIXTHIS]] in order for this test to be meanigful, this corpus MUST be read from an existing filepath.
+    // [[FIXTHIS]] to test reading from a stream, see Streamy<library::Input>::test_getline()
+    auto in = std::istringstream{"line 1: apple\n"
+                                 "line 2: banana\n"
+                                 "line 3: cherry\n"
+                                 "line 4: dog\n"
+                                 "line 5: eagle\n"s};
+    auto buf = string::Storage{};
+    auto count{0u};
+    while (getline(in, buf)) {
+      ++count;
+      std::cerr << "read <<" << buf << ">>\n";
+    }
+    CPPUNIT_ASSERT(5u == count);
+  }
+  auto Extras<library::Input>::test_input_name() -> void {
+    auto subject = Subject{"/dev/null"};
+    CPPUNIT_ASSERT(subject.good());
+    auto name = subject.input_name(); // <---------------------------------------- test this
+    CPPUNIT_ASSERT(!name.empty());
+  }
+  auto Extras<library::Input>::test_whence() -> void {
+    auto subject = Subject{"/dev/null"};
+    CPPUNIT_ASSERT(subject.good());
+    auto name = subject.whence(); // <---------------------------------------- test this
+    CPPUNIT_ASSERT(!name.filepath().empty());
+  }
+  auto Extras<library::Input>::test_directory() -> void {
+    auto subject = Subject{"/dev/null"};
+    CPPUNIT_ASSERT(subject.good());
+    auto const expected = ::tunitas::file::Path{"/dev"};
+    auto const actual = subject.directory(); // <---------------------------------------- test this
+    CPPUNIT_ASSERT(actual == expected);
+  }
+  auto Extras<library::Input>::subsuite() -> Stream {
+    auto sub = Stream{"specifics"};
+    sub << call<Fixture>("getline", &Fixture::test_getline)
+        << call<Fixture>("input_name", &Fixture::test_input_name)
+        << call<Fixture>("whence", &Fixture::test_whence)
+        << call<Fixture>("directory", &Fixture::test_directory)
+        << END;
+    return sub;
+  }
+}
+#endiv

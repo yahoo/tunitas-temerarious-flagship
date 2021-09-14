@@ -1,0 +1,101 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+namespace tunitas::flagship::temerarious::source {
+  //
+  // The Source Location
+  //
+  // Semantic:
+  //
+  //   The source name and line number.
+
+  // Specification:
+  //
+  //   Rhymes with std::source_location
+  //   https://en.cppreference.com/w/cpp/utility/source_location
+  //
+  //   But no need for the function name.
+  //
+  //   Is noexcept.
+  //   Has a noexcept copy constructor as is required for use in an exception object.
+  //
+  //   Has the distinctive printed representation without gratuitous quoting.
+  //   So if your filename has shell-token-breaking spaces, then you will be surprised.   Don't use those.
+  //
+  // Design:
+  //
+  //   See source::Name.
+  //
+  // Lifetimes:
+  //
+  //   See source::Name for the non-trivial lifetime analysis that needs to happen.
+  //
+  // Usage:
+  //
+  //   auto inbound = stream::Input{...somehow...};
+  //   auto line = stream::Line{...somehow...};
+  //
+  //   auto location = Location{line, inbound.input_name()};
+  //   cout << location << "there is a problem, right here\n";
+  //
+  struct Location;
+}
+#endiv
+#divert <hpp>
+#import tunitas.flagship.temerarious.source.Name
+#import tunitas.flagship.temerarious.source.Line
+#import std.source_location
+namespace tunitas::flagship::temerarious {
+  namespace source {
+    using std::move;
+    using std::swap;
+    inline auto swap(Location &, Location &) noexcept -> void;
+    inline auto operator<<(std::ostream &, Location const &) -> std::ostream &;
+  }
+  class source::Location : public Name {
+    using Ancestor = Name;
+  public:
+    using Line = source::Line;
+    inline Location(Line, Fileview);
+    inline Location(Line, Name);
+    inline Location(std::source_location);
+    inline auto line() const noexcept -> Line;
+  private:
+    Line stored_line;
+    friend auto source::swap(Location &, Location &) noexcept -> void;
+  };
+  namespace source {
+    // The source::Location must have a noexcept copy constructor because it will be used directly in an exception as a member field
+    static_assert(noexcept(source::Location{move(std::declval<source::Location>())}), "noexcept move constructor");
+    static_assert(noexcept(source::Location{std::declval<source::Location const>()}), "noexcept copy constructor");
+  }
+}
+#endiv
+#divert <ipp>
+namespace tunitas::flagship::temerarious {
+  auto source::swap(Location &a, Location &b) noexcept -> void {
+    Location::Ancestor &aa{a}, &bb{b};
+    swap(aa, bb);
+    swap(a.stored_line, b.stored_line);
+  }
+  auto source::operator<<(std::ostream &o, Location const &l) -> std::ostream & { return o << l.fileview() << ':' << underlying(l.line()) << ':' << ' '; }
+  namespace source {
+    Location::Location(std::source_location sl)
+      : Ancestor{sl}
+      , stored_line{sl.line()}
+    { }
+    Location::Location(Line l, Fileview f)
+      : Ancestor{f}
+      , stored_line{l}
+    { }
+    Location::Location(Line l, Name n)
+      : Ancestor{n}
+      , stored_line{l}
+    { }
+    auto Location::line() const noexcept -> Line { return stored_line; }
+  }
+}
+#endiv

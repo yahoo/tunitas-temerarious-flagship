@@ -1,0 +1,4 @@
+This file will be read by the inbound testers at src/tests/unit/stream
+It needs to have some content.  Not a lot.  Just some.
+
+Nearby will be the WRITETHIS file, which is NOT a versioned object.

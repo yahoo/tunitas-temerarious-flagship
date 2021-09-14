@@ -1,0 +1,73 @@
+This document exercises every single dot-directive
+This document is produced from the assessor in .../tunitas/flagship/temerarious/parse/assess.xcpp
+
+." comment
+
+.' uncomment
+
+." block  <-------------------------------- test this (.b ... .e)
+.b variable
+.e
+
+." the arrow becomes part of the variable value ----\ (here)
+."                                                  |
+."                                                  |
+."                                                  v
+.d variable1 value1 <-------------------------------- test this (.d)
+.d variable2 value2
+.d variable3 value3
+
+.i DEFINE
+if DEFINE is defined <------------------------------ test this (.i ... .f)
+.f
+
+.i DEFINE
+if DEFINE is defined but an elsedef is coming up
+.l ELSEDEF
+if ELSEDEF is defined in the .elsedef <------------------------------ test this (.l within .i ... .f)
+.f
+
+.i DEFINE
+if DEFINE is defined
+.s
+else DEFINE is not defined <------------------------------ test this (.s within .i ... .f)
+.f
+
+.i DEFINE
+if DEFINE is defined but an elsedef is coming up
+.l ELSEDEF
+if ELSEDEF is defined in the .elsedef
+.s
+else DEFINE and ELSEDEF is not defined at all <------------------------------ test this (.s within .i ... .f)
+.f
+
+." include these files
+.r /dev/null
+.r middle.roff
+." wheren middle.roff later reads bottom.roff
+
+About to undef a block variable (.b ... .e
+." block and undef  <-------------------------------- test this (.b ... .e followed by .u)
+.b define-undefine
+.e
+.u define-undefine
+Done
+.i define-undef
+define-undef is still defined ERROR
+.s
+define-undef is now undefined GOOD
+.f
+."
+About to define-and-undef undef a line variable (.d)
+." define undef  <-------------------------------- test this (.d followed by .u)
+.d variable99 variable99
+.u variable99
+
+And this is wrapping up with some future directives.
+These will take errors right now, but should become valid in the future.
+" dump
+._
+
+" help
+.h
+

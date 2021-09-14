@@ -1,0 +1,62 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+namespace tests::unit::parser::assess {
+  //
+  // An exception for the failure of the Accumulator
+  // Scoped by rhyming and C++ conversion magic to work with both v1-series API and v2-series API without changes.
+  //
+  // Specification:
+  //
+  //   Has an Aspect (virtual)
+  //   for the v1-series API ... is shaped like a cppunit::Exception
+  //   for the v2-series API ... is shaped like a cppunit::Exception
+  //
+  // Usage:
+  //
+  //   Should work "the same" in the v1 and v2 APIs.
+  //
+  struct [[nodiscard]] Exception;
+}
+#endiv
+#divert <hpp>
+#import tests.cppunit.Exception // .... these are compatibility shims
+#import tests.cppunit.Message // ...... ibidem
+#import tests.cppunit.SourceLine // ... ibidem
+#import rigging.exception.Aspect
+#import std.declval
+struct tests::unit::parser::assess::Exception : public virtual rigging::exception::Aspect,
+                                                public cppunit::Exception {
+  struct Ancestors {
+    struct Aspects { /* ... who cares ... */ };
+    using Exception = cppunit::Exception;
+  };
+public:
+  struct Arguments {
+    using Message = cppunit::Message;
+    using Location = cppunit::SourceLine;
+  };
+  struct Results {
+    using What = char const *;
+    // WATCHOUT - these can't be declared 'override' in the v1 API because they are not virtual in the v1-series Ancestors::Exception
+    using Message = decltype(std::declval<cppunit::Exception>().message());
+    using Location = decltype(std::declval<cppunit::Exception>().sourceLine());
+  };
+  explicit Exception(Arguments::Message, Arguments::Location); // yes, pass by value (compatiblity v1- and v2- wil treat these differently
+  auto what() const noexcept -> char const * override;
+  // WATCHOUT - these can't be declared 'override' in the v1 API because they are not virtual in the v1-series Ancestors::Exception
+  virtual auto message() const -> Results::Message;
+  virtual auto sourceLine() const -> Results::Location;
+};
+#endiv
+#divert <cpp>
+namespace tests::unit::parser::assess {
+  Exception::Exception(Arguments::Message message, Arguments::Location location) : Ancestors::Exception{std::move(message), std::move(location)} { }
+  auto Exception::what() const noexcept -> Results::What    { return Ancestors::Exception::what(); }
+  auto Exception::message() const -> Results::Message       { return Ancestors::Exception::message(); } // ...... WATCHOUT - not virtual in the Ancestors::Exception
+  auto Exception::sourceLine() const -> Results::Location   { return Ancestors::Exception::sourceLine(); } // ... ibidem.
+}
+#endiv

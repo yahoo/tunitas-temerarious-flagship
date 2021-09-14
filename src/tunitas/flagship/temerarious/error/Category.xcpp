@@ -1,0 +1,63 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+namespace tunitas::flagship::temerarious::error {
+  //
+  // The category (descriptor)
+  // For the std::error_code and std::error_condition scheme
+  //
+  // Specification:
+  //
+  //   https://en.cppreference.com/w/cpp/error/error_category
+  //
+  // Usage:
+  //
+  //   auto const &c = category();
+  //   ...use it...
+  //
+  struct Category;
+}
+#endiv
+#divert <hpp>
+#import tunitas.flagship.temerarious.error.category
+#import std.error_category
+#import std.error_condition
+#import std.string
+class tunitas::flagship::temerarious::error::Category : public std::error_category {
+  using Ancestor = std::error_category;
+  friend auto error::category() -> Category const &;
+  Category() = default;
+public:
+  auto name() const noexcept -> char const * override final;
+  auto default_error_condition(int code) const noexcept -> std::error_condition override final;
+  auto message(int code) const -> std::string override final;
+};
+#endiv
+#divert <cpp>
+#import tunitas.flagship.temerarious.error.Code
+#import autotools.autoconf.Config.tunitas.flagship.temerarious.CONFIG
+#import std.to_string
+#import std.string_literals
+namespace tunitas::flagship::temerarious::error {
+  auto Category::name() const noexcept -> char const * { return autotools::autoconf::Config<CONFIG>::package_name(); }
+  auto Category::default_error_condition(int code) const noexcept -> std::error_condition { return {0 != code, *this}; }
+  auto Category::message(int code) const -> std::string {
+    switch (code::Companion{code}) {
+      using namespace std::string_literals;
+    case code::Companion::SUCCESS:            return "success"s;
+    case code::Companion::FAILURE:            return "failure"s;
+    case code::Companion::FILE:               return "problem with a 'roff file"s; // opening, missing, writing
+    case code::Companion::DIRECTIVE:          return "problem with a 'roff directive"s; // e.g. incomprehensible directive
+    case code::Companion::PROCESSOR_INVALID:  return "the 'roff process reached an invalid date"; // a.k.a. "an internal error"
+    case code::Companion::DIVERSION_UNCLOSED: return "unclosed diversion at end-of-file"s;
+    case code::Companion::CONDITION_UNCLOSED: return "unclosed conditional at end-of-file"s;
+    case code::Companion::VARIABLE_UNFOUND:   return "no such variable"s;
+    default:
+      return "Error #"s + std::to_string(code);
+    }
+  }
+}
+#endiv

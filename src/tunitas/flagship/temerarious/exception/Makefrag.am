@@ -1,0 +1,20 @@
+# This is a GNU -*- Makefile -*- which is managed by automake.
+# Copyright Verizon Media
+# Licensed under the terms of the Apache-2.0 license.
+# For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+# For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#
+obj_src_tunitas_flagship_temerarious_exception_SUBSOURCES = \
+  obj/src/tunitas/flagship/temerarious/exception/namespace.cpp \
+  obj/src/tunitas/flagship/temerarious/exception/Aspect.cpp \
+  obj/src/tunitas/flagship/temerarious/exception/partial.Invalid.cpp \
+  obj/src/tunitas/flagship/temerarious/exception/partial.Runtime.cpp \
+  obj/src/tunitas/flagship/temerarious/exception/partial.System.cpp \
+  obj/src/tunitas/flagship/temerarious/exception/partial.Filesystem.cpp \
+  obj/src/tunitas/flagship/temerarious/exception/Empty.cpp \
+  obj/src/tunitas/flagship/temerarious/exception/Null.cpp \
+  obj/src/tunitas/flagship/temerarious/exception/Invalid.cpp \
+  obj/src/tunitas/flagship/temerarious/exception/Runtime.cpp \
+  obj/src/tunitas/flagship/temerarious/exception/System.cpp \
+  obj/src/tunitas/flagship/temerarious/exception/Filesystem.cpp \
+  $(end)

@@ -1,0 +1,56 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+namespace tunitas::flagship::temerarious::input::exception::feature {
+  //
+  // Having the feature of a Whence
+  // Descendants only.
+  //
+  // Specification:
+  //
+  //   Provides this->whence() const -> source::Name
+  //   Vaguely rhymes with feature::What() that supplies implementation of the virtual this->what()
+  //
+  // Design:
+  //
+  //   Sure, why do you ask?
+  //   The Name::name(Name const &) is noexcept
+  //
+  // Lifetimes:
+  //
+  //   The lifetime of the string::View within the Name must be longer than that of the exception (descendant).
+  //
+  // Usage:
+  //
+  //   By (non-virtual) inheritance in the completing class.
+  //   See at least exception::Missing, exception::Present
+  //
+  struct Whence;
+}
+#endiv
+#divert <hpp>
+#import tunitas.flagship.temerarious.source.Name
+#import std.declval
+struct tunitas::flagship::temerarious::input::exception::feature::Whence {
+  using Name = source::Name;
+  virtual auto whence() const noexcept -> Name;
+protected:
+  virtual ~Whence() = default;
+  inline explicit Whence(Name);
+  Name stored_name;
+  static_assert(noexcept(Name{std::declval<Name>()}));
+};
+#endiv
+#divert <ipp>
+namespace tunitas::flagship::temerarious::input::exception::feature {
+  Whence::Whence(Name there) : stored_name{move(there)} { }
+}
+#endiv
+#divert <cpp>
+namespace tunitas::flagship::temerarious::input::exception::feature {
+  auto Whence::whence() const noexcept -> Name { return stored_name; }
+}
+#endiv

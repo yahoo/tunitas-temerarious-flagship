@@ -1,0 +1,34 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+#import std.stack
+namespace tunitas::flagship::temerarious::input::condition {
+  //
+  // The stack of conditions (true or false)
+  //
+  // Specification:
+  //
+  //   Within an .ifdef.elsifdef....else.endif series
+  //   Is the condition true or false?
+  //   This controls the effect of the current diversion.
+  //
+  //   See diversion::passthrough(...)
+  //
+  //   The bool has the obvious semantic:
+  //   true .... emit the input output into the diversion
+  //   false ... do not emit
+  //
+  // Lifetimes:
+  //
+  //   None to note.
+  //
+  // Usage:
+  //
+  //   A stack within input::Frame within processor::State.
+  //
+  using Stack = std::stack<bool>;
+}
+#endiv

@@ -1,0 +1,37 @@
+." this code looks like -*- nroff -*- but is the 'roff language of Temerarious Flagship
+."
+.\This is test of "ifdef"
+.\
+.\
+.\Usage:
+.\
+.\  .i NAME
+.\  ...if NAME is defined...
+.\  .s
+.\  ...if NAME is not defined...
+.\  .f
+.\
+.\  The value of NAME is arbitrary or even empty.
+.\  see .d
+.\  see .u
+.\
+.d TRUE 1
+.d FALSE 0
+.i TRUE
+This is TRUE
+.s
+This is not TRUE
+.f
+
+Whereas...
+.i FALSE
+As expected, FALSE is also defined! (so FALSE =~= TRUE)
+.f
+
+What you want is to .u FALSE
+.u FALSE
+.i FALSE
+NEVER
+.s
+In this case FALSE is now ... uh ... false.
+.f

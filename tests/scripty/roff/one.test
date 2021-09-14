@@ -1,0 +1,8 @@
+#!/bin/sh
+__topdir=$(realpath ${0%/*}/../../..)
+export PATH="${__topdir?}/libexec/temerarious-flagship:${__topdir?}/bin:$PATH"
+exec < /dev/null
+#
+# the test
+#
+roff < ${0%/*}/one.roff

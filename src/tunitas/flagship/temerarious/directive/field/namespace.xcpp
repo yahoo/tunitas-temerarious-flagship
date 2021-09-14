@@ -1,0 +1,127 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+#import tunitas.flagship.temerarious.directive
+namespace tunitas::flagship::temerarious::directive::field {
+  inline namespace package_field {
+    namespace package_body_field::body { }
+    inline namespace interface { using namespace package_body_field::body; }
+  }
+}
+#import std
+#import tunitas.flagship.temerarious.directive.exception
+#import tunitas.flagship.temerarious.source.Location
+#import tunitas.string.View
+#import tunitas.Tuple
+namespace tunitas::flagship::temerarious::directive::field {
+  namespace package_field::package_body_field::body {
+    using namespace std;
+    namespace exception = tunitas::flagship::temerarious::directive::exception; // use the directive exceptions for the fields
+    using Location = source::Location;
+    using Payload = string::View;
+  }
+}
+#endiv
+#divert <hpp>
+#import std.isspace
+#import std.isgraph
+#import std.isalpha
+#import std.isdigit
+#import std.isalnum
+#import std.isxdigit
+namespace tunitas::flagship::temerarious::directive::field {
+  namespace interface {
+    //
+    // Used also by the command line to establish -D<NAME>=<VALUE>
+    //
+    inline auto is_identifier(string::View) -> bool;
+    [[deprecated("instead prefer the underscored one as is_identifier(...)")]] inline auto isidentifier(string::View) -> bool;
+  }
+  namespace package_field::package_body_field::body {
+    //
+    // The bundle of functions needed to recover elements of the field
+    //
+    // At least:
+    //
+    //   zero words
+    //   an identifier
+    //   an identifier and "more"
+    //   a filepath
+    //
+    // Schema ... Identifier:
+    //
+    //   Not empty
+    //   Follows a multitude of cultures and styles, being at least:
+    //     like a DNS label or a Scheme variable name (has dashes)
+    //     like a filename with slashes
+    //     like C++ (underscores)
+    //     like cascaded names (has dots)
+    //   But the first character must be "reasonable" ... being C++ styled.
+    //
+    // Schema ... Identifier:
+    //
+    //   not empty
+    //   isprint(...)
+    //
+    // Generally:
+    //
+    //   return the requested item (perhaps as a string::View)
+    //   else throw an exception descending from temerarious::exception::Aspect
+    //
+    // Usage:
+    //
+    //   #import tunitas.flagship.temerarious.fields (plural, buys them all)
+    //
+    inline constexpr auto NO = string::View::npos;
+    // See the table https://en.cppreference.com/w/c/string/byte/isprint
+    inline auto isidentifier0(char) -> bool; // shaped like a C++ identifier (but omitting the latent support for '$'
+    inline auto isidentifierN(char) -> bool; // ibidem.
+    inline auto isfilepath(string::View) -> bool; // (Unix) file paths can contain pretty much any character except \0
+    inline auto istext(string::View) -> bool; // any text at all ... this is locale-specific, so all those exotic characters(!)
+    inline auto find_first_blank(string::View) -> size_t; // returns NO on blank-not-found
+    inline auto has_blanks(string::View) -> bool; // i.e. there are multiple words where there should be but one
+    inline auto ensure_not_empty(Location, string::View candidate) -> void;
+  }
+}
+// Whereas every single "getter" function will need one or more of these ... here they are (here it is)
+#import tunitas.flagship.temerarious.directive.exception.Field
+#import tunitas.flagship.temerarious.directive.exception.Statement
+#endiv
+#divert <ipp>
+#import std.all_of
+namespace tunitas::flagship::temerarious::directive::field::package_field {
+  auto interface::isidentifier(string::View candidate) -> bool { return is_identifier(candidate); }
+  auto interface::is_identifier(string::View candidate) -> bool {
+    return (!candidate.empty() &&
+            isidentifier0(candidate.front()) &&
+            all_of(1+candidate.begin(), candidate.end(), [](char c) { return isidentifierN(c); }));
+  }
+  namespace package_body_field {
+    auto body::isidentifier0(char candidate) -> bool { return isalpha(candidate) || '_' == candidate; }
+    auto body::isidentifierN(char candidate) -> bool { return (isdigit(candidate) ||
+                                                               '-' == candidate ||
+                                                               '.' == candidate ||
+                                                               '/' == candidate ||
+                                                               isidentifier0(candidate)); }
+    auto body::isfilepath(string::View candidate) -> bool {
+      return (!candidate.empty() &&
+              all_of(candidate.begin(), candidate.end(), [](char c) { return isgraph(c); }));
+    }
+    auto body::istext(string::View candidate) -> bool {
+      // WATCHOUT - the definition of isprint varies by locale.
+      // We WANT the exotic character values for the second field (the value of the "name=value" definition)
+      return all_of(candidate.begin(), candidate.end(), [](char c){ return isblank(c) || isprint(c); });
+    }
+    auto body::find_first_blank(string::View candidate) -> size_t { return candidate.find_first_of(" \t\n\f"); }
+    auto body::has_blanks(string::View candidate) -> bool { return NO != find_first_blank(candidate); }
+    auto body::ensure_not_empty(Location where, string::View candidate) -> void {
+      if (candidate.empty()) {
+        throw exception::Field{where, "there nothing here, only emptiness"sv};
+      }
+    }
+  }
+}
+#endiv

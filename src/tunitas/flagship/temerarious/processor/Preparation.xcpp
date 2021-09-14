@@ -1,0 +1,53 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+namespace tunitas::flagship::temerarious::processor {
+  //
+  // The preparation (configuration) of the processor
+  //
+  // Specification:
+  //
+  //   Establish the definitions per --define NAME=VALUE & -D<name>=<value>
+  //   Establish the searchpath  per--include DIRECTORY, -I<directory>
+  //
+  // Design:
+  //
+  //   Align the member fields to be easy to move the elements into the State
+  //
+  // Usage:
+  //
+  //   auto in = stream::Input{...somehow...};
+  //   auto out = stream::Output{...somehow...};
+  //   auto prep = Preparation{...somehow...};
+  //
+  //   auto ran = run(move(in), out, move(prep));
+  //
+  struct Preparation;
+}
+#endiv
+#divert <hpp>
+#import tunitas.flagship.temerarious.path.Search
+#import tunitas.flagship.temerarious.variable.Frame
+namespace tunitas::flagship::temerarious {
+  namespace processor {
+    using std::move;
+    using std::swap;
+    inline auto swap(Preparation &, Preparation &) noexcept -> void;
+  }
+  struct processor::Preparation {
+    variable::Frame defines;
+    path::Search search;
+  };
+}
+#endiv
+#divert <ipp>
+namespace tunitas::flagship::temerarious {
+  auto processor::swap(Preparation &a, Preparation &b) noexcept -> void {
+    swap(a.defines, b.defines);
+    swap(a.search, b.search);
+  }
+}
+#endiv

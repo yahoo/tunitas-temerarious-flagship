@@ -1,0 +1,126 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+namespace app::tf {
+  inline namespace package_main {
+   namespace package_body_main {
+     namespace interface { }
+     namespace body { using namespace interface; }
+   }
+   inline namespace interface { using namespace package_body_main::interface; }
+  }
+}
+#import tunitas.application.exits.constants
+#import tunitas.application.options
+#import tunitas.flagship.temerarious
+#import tunitas.file.Path
+#import tunitas.string.Storage
+namespace app::tf::package_main::package_body_main {
+  namespace interface {
+    namespace options = tunitas::application::options;
+  }
+  namespace body {
+    inline namespace constants { using namespace tunitas::application::exits::constants; } 
+    using String = tunitas::string::Storage;
+    using Filepath = tunitas::file::Path;
+    namespace version = tunitas::flagship::temerarious::version;
+  }
+}
+#endiv
+#divert <hpp>
+#import tunitas.application.exits.Code
+#import tunitas.application.options.c.Argv
+namespace app::tf::package_main {
+  namespace interface {
+    inline auto main(int, char *[]) -> exits::Code;
+    auto main(options::c::Argv) -> exits::Code;
+  }
+  namespace package_body_main::body {
+    auto root(options::c::Argv) -> Filepath;
+  }
+}
+#endiv
+#divert <ipp>
+namespace app::tf::package_main {
+  namespace interface { using namespace package_body_main::body; } // the body sees the interface too
+  inline auto interface::main(int cc, char *vv[]) -> exits::Code { return main(options::c::Argv(cc, vv)); }
+}
+#endiv
+#divert <cpp>
+#import std.cerr
+#import tunitas.application.options.Program
+#import tunitas.application.options.Arguments
+#import tunitas.flagship.temerarious.version.Generator
+#import sys.posix.exec
+#import app.tf.usage.Message
+namespace app::tf::package_main {
+  auto interface::main(options::c::Argv av) -> exits::Code {
+    auto prog = options::Program{av.front()};
+    if (av.size() < 2) {
+      std::cerr << prog << ": error, a command is required\n";
+      return USAGE;
+    }
+    std::string first = av[1];
+    if (first.empty()) {
+      std::cerr << prog << ": error, the <subprogram> cannot be empty\n";
+      return USAGE;
+    } else if ("--usage"s == first || "--help"s == first || "-h"s == first) {
+      std::cout << usage::Message{prog} << '\n';
+      return OK;
+      } else if ("--version"s == first || "-V"s == first) {
+        std::cout << version::Generator{} << '\n';
+        return OK;
+    } else if ('-' == first.front()) {
+      std::cerr << prog << ": error, invalid option (use --usage to explore)\n";
+      return USAGE;
+    } else {
+      auto reargs = options::Arguments{1+av.begin(), av.end()};
+      auto reexec = [&]{
+                      auto redir = root(av) / Filepath{"libexec"} / Filepath{"temerarious-flagship"};
+                      auto reprog = Filepath{first}.filename();
+                      return redir / reprog;
+                    }();
+      auto done = sys::posix::exec(reexec, move(reargs));
+      // Even returning here at all signals an error.
+      std::cerr << prog << ": error, could not invoke " << reexec << " because " << error_code(done).message() << '\n';
+      return OS;
+    }
+  }
+  namespace package_body_main {
+    auto body::root(options::c::Argv av) -> Filepath {
+      //
+      // WATCHOUT - libtool in or out of development
+      //
+      // When installed or when linked with -no-install, the second form applies; else the 1st
+      //
+      //      /---------------------------------------- third  parent path
+      //      |       /-------------------------------  second  parent path
+      //      |       |   /---------------------------  first parent path
+      //      |       |   |
+      //      v       v   v
+      // /opt/tunitas/bin/.libs/lt-tf
+      //
+      //      /---------------------------------------- second  parent path
+      //      |       /-------------------------------  first  parent path
+      //      |       |
+      //      |       |
+      //      v       v
+      // /opt/tunitas/bin/tf
+      //
+      auto debin = Filepath{av.front()}.parent_path();
+      if (".libs"s == debin.filename()) {
+        debin = debin.parent_path();
+      }
+      auto guess = debin.parent_path();
+      if (guess.empty()) {
+        return ".";
+      } else {
+        return move(guess);
+      }
+    }
+  }
+}
+#endiv

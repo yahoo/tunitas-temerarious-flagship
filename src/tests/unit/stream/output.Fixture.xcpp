@@ -1,0 +1,109 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+#import tunitas.flagship.temerarious.stream
+namespace tests::unit::stream::output {
+  namespace [[eponymous]] fixture {
+    struct Fixture;
+    namespace library = ::tunitas::flagship::temerarious::stream;
+  }
+  using fixture::Fixture;
+}
+#endiv
+#divert <hpp>
+#import tunitas.flagship.temerarious.stream.Output
+struct tests::unit::stream::output::Fixture : public cppunit::test::Fixture {
+  using Subject = library::Output;
+  auto test_constructor_conversion_stream() -> void;
+  auto test_constructor_conversion_file() -> void;
+  auto test_constructor_copy() -> void;
+  auto test_constructor_move() -> void;
+  auto test_assignment_copy() -> void;
+  auto test_assignment_move() -> void;
+  static auto suite() -> cppunit::Test *;
+};
+#endiv
+#divert <cpp>
+#import std.cerr
+#import std.cout
+#import tunitas.flagship.temerarious.path.File
+namespace tests::unit::stream::output {
+  auto Fixture::test_constructor_conversion_stream() -> void {
+    auto subject = Subject{std::cout}; // <---------------------------------------- test this
+    CPPUNIT_ASSERT(subject.good());
+    subject << "a loud mouth bass";
+  }
+  auto Fixture::test_constructor_conversion_file() -> void {
+    auto subject = Subject{"/dev/null"}; // <---------------------------------------- test this
+    CPPUNIT_ASSERT(subject.good());
+    subject << "shush, be quiet!";
+  }
+  auto Fixture::test_constructor_copy() -> void {
+#if 0 // copy is denied
+    auto specimen = Subject{std::cout};
+    auto subject = Subject{specimen}; // <---------------------------------------- test this
+    subject << "a loud mouth bass";
+#endif
+  }
+  auto Fixture::test_constructor_move() -> void {
+    auto specimen = Subject{std::cout};
+    auto subject = Subject{move(specimen)}; // <---------------------------------------- test this
+    subject << "a loud mouth bass";
+  }
+  auto Fixture::test_assignment_copy() -> void {
+#if 0 // copy is denied
+    auto specimen = Subject{std::cout};
+    auto subject = Subject{};
+    subject = Subject{specimen}; // <---------------------------------------- test this
+    subject << "a loud mouth bass";
+#endif
+  }
+  auto Fixture::test_assignment_move() -> void {
+    auto specimen = Subject{std::cout};
+    auto subject = Subject{std::cerr};
+    subject = move(specimen); // <---------------------------------------- test this
+    subject << "a loud mouth bass";
+  }
+}
+#import tests.unit.stream.Filey
+#import tests.unit.stream.Streamy
+namespace tests::unit::stream::output {
+  auto Fixture::suite() -> cppunit::Test * {
+    using namespace rigging::suite;
+    auto series = Stream{"Output"};
+    series << []{
+                auto use = Stream{"usage"};
+                use << []{
+                         auto con = Stream{"constructor"};
+                         con << []{
+                                  auto ver = Stream{"conversion"};
+                                  ver << call("stream", &Fixture::test_constructor_conversion_stream)
+                                      << call("file", &Fixture::test_constructor_conversion_file)
+                                      << END;
+                                  return move(ver);
+                                }()
+                             << call("copy", &Fixture::test_constructor_copy)
+                             << call("move", &Fixture::test_constructor_move)
+                             << END;
+                         return move(con);
+                       }()
+                    << []{
+                         auto ass = Stream{"assignment"};
+                         ass << call("copy", &Fixture::test_assignment_copy)
+                             << call("move", &Fixture::test_assignment_move)
+                             << END;
+                         return move(ass);
+                       }()
+                    << END;
+                return move(use);
+              }()
+           << add<Filey<library::Output>>()
+           << add<Streamy<library::Output>>()
+           << END;
+    return finalize(series);
+  }
+}
+#endiv

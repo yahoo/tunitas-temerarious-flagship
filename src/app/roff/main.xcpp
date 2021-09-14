@@ -1,0 +1,247 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+namespace app::roff {
+  namespace package_body_main {
+    namespace interface { }
+    namespace body { using namespace interface; }
+  }
+  inline namespace package_main {
+    inline namespace interface { using namespace package_body_main::body; }
+  }
+}
+#import autotools.autoconf.Config.tunitas.flagship.temerarious.CONFIG
+#import langu.age
+#import tunitas.application.exits.constants
+#import tunitas.application.exits.Code
+#import tunitas.application.options // namespace options::c
+#import tunitas.application.options.Arguments
+#import tunitas.application.options.Program
+#import tunitas.flagship.temerarious // namespace version
+#import tunitas.flagship.temerarious.processor.Preparation
+#import tunitas.Optional
+#import tunitas.string
+#import tunitas.Tuple
+#import sys.posix.stat
+#import sys.posix.isdir
+namespace app::roff::package_body_main {
+  namespace interface {
+    namespace c = tunitas::application::options::c;
+    using tunitas::application::options::Program;
+    using tunitas::application::options::Arguments;
+    using Exit = tunitas::application::exits::Code;
+  }
+  namespace body {
+    namespace version = tunitas::flagship::temerarious::version;
+    namespace string = tunitas::string;
+    inline namespace constants { using namespace tunitas::application::exits::constants; } 
+    using namespace langu::age;
+    namespace posix = sys::posix;
+    //
+    struct Palette;
+    using Config = autotools::autoconf::Config<tunitas::flagship::temerarious::CONFIG>;
+    using tunitas::Optional;
+    using tunitas::Tuple;
+    using tunitas::flagship::temerarious::processor::Preparation;
+  }
+}
+#endiv
+#divert <hpp>
+#import tunitas.application.exits.Code
+#import tunitas.application.options.c.Argv
+#import tunitas.string.View
+#import tunitas.string.Storage
+#import tunitas.flagship.temerarious.directive.field // is_identifier(...)
+#import std.ostream
+namespace app::roff::package_body_main {
+  namespace interface {
+    inline auto main(int, char *[]) -> Exit;
+    inline auto main(c::Argv) -> Exit;
+    auto main(Program, Arguments) -> Exit;
+  }
+  namespace body {
+    using tunitas::flagship::temerarious::directive::field::is_identifier;
+    auto get_define(string::View syntax) -> Tuple<Optional<string::Storage>, Optional<string::Storage>>;
+    //
+    // Validate (warn) if the directory is not a directory.
+    // Silent if the directory does not exist at all.
+    //
+    auto accept_searchpath_directory([[inout]] Palette &, string::View flag_leader, string::Storage directory) -> Exit;
+    //
+    // syntax shall look like one of
+    //
+    //   NAME=VALUE ............... as -DNAME=VALUE
+    //   NAME ..................... '='
+    //
+    auto accept_variable_definition([[inout]] Palette &, string::View flag_leader, string::View syntax) -> Exit;
+  }
+}
+#import app.roff.main.Palette
+#endiv
+#divert <ipp>
+#import std.clog
+// not until v2 #import substd.exception.Exception
+#import nonstd.exception.Exception
+namespace app::roff::package_body_main {
+  inline auto interface::main(int cc, char *vv[]) -> Exit { return main(c::Argv(cc, vv)); }
+  auto interface::main(c::Argv av) -> Exit try {
+    auto program = Program{av.front()};
+    auto arguments = Arguments{1+av.begin(), av.end()};
+    return main(move(program), move(arguments));
+#if 0
+  } catch (substd::exception::Exception const &e) {
+#else
+  } catch (nonstd::exception::Exception const &e) {
+#endif
+    std::clog << Config::package() << ": error, there was an unexpected problem saying " << e.what() << '\n';
+    return SOFTWARE;
+  }
+}
+#endiv
+#divert <cpp>
+#import app.roff.exception.File
+#import app.roff.run
+#import app.roff.usage.Message
+#import langu.age.q
+#import nonstd.exception.Unimplemented
+#import nonstd.same_as
+#import std.clog
+#import tunitas.flagship.temerarious.version.Generator
+namespace app::roff::package_body_main {
+  auto interface::main(Program program, Arguments arguments) -> Exit try {
+    auto prep = Preparation{};
+    auto error = OK;
+    auto palette = Palette{std::clog, program, prep};
+    while (!arguments.empty()) {
+      static_assert(nonstd::same_as<tunitas::string::Storage, Arguments::value_type>);
+      auto const &item = arguments.front();
+      if (item.empty()) {
+        erroneity(palette) << "the <subprogram> cannot be empty\n";
+        return USAGE;
+      } else if ("--usage"s == item || "--help"s == item || "-h"s == item) {
+        std::cout << usage::Message{program} << '\n';
+        return OK;
+      } else if ("--version"s == item || "-V"s == item) {
+        std::cout << version::Generator{} << '\n';
+        return OK;
+      } else if (auto option="--include"s; option == item) {
+        arguments.pop_front();
+        if (arguments.empty()) {
+          erroneity(palette) << "the " << q(option) << " must be followed by the name of directory\n";
+          return USAGE;
+        } else {
+          error &= accept_searchpath_directory(palette, move(option), move(arguments.front()));
+          arguments.pop_front();
+        }
+      } else if (auto leader="-I"s, actual=item.substr(0, leader.size()); leader == actual) {
+        error &= accept_searchpath_directory(palette, move(leader), item.substr(leader.size()));
+        arguments.pop_front();
+      } else if (auto option="--define"s; option == item) {
+        arguments.pop_front();
+        if (arguments.empty()) {
+          erroneity(palette) << "the " << q(option) << " must be followed by a NAME or NAME=VALU\n";
+          return USAGE;
+        } else {
+          error &= accept_variable_definition(palette, move(option), move(arguments.front()));
+          arguments.pop_front();
+        }
+      } else if (auto leader="-D"s, actual=item.substr(0, leader.size()); leader == actual) {
+        error &= accept_variable_definition(palette, move(leader), item.substr(leader.size()));
+        arguments.pop_front();
+      } else if ("--"s == item) {
+        // The options formally end at an explicit "--"
+        arguments.pop_front();
+        break;
+      } else if ('-' == item.front()) {
+        erroneity(palette) << "invalid option (use --usage to explore)\n";
+        return USAGE;
+      } else {
+        // The options have ended
+        break;
+      }
+    }
+    if (fail(error)) {
+      return error;
+    } else if (auto count=arguments.size(); 0 == count) {
+      return run(std::cin, std::cout, move(prep));
+    } else if (2 == count) {
+      return run(arguments.front(), arguments.back(), move(prep));
+    } else {
+      erroneity(palette) << "there must be either zero or exactly two (2) flie paths\n";
+      auto [were, words] = [single=(1 == count)]{
+                             using T = Tuple<string::View, string::View>;
+                             return [single]() { return single ? T{"is"sv, "word"sv} : T{"are"sv, "words"sv}; }();
+                           }();
+      notice(palette) << "instead there " << were << " " << count << " " << words << " after the options\n";
+      notice(palette) << "use " << q("--usage") << " to see the available options\n";
+      return USAGE;
+    }
+  } catch (exception::File const &e) {
+    std::clog << program << ": error, " << e.what() << '\n';
+    return FAIL;
+  }
+  auto body::get_define(string::View syntax) -> Tuple<Optional<string::Storage>, Optional<string::Storage>> {
+    if (syntax.empty()) {
+      //
+      // Nope.
+      //
+      return {};
+    } else if (auto eq = syntax.find('='); string::View::npos != eq) {
+      //
+      // One among:
+      //
+      //   NAME=       .................... with empty VALUE; valid if NAME is an identifier
+      //   =VALUE      .................... invalid NAME
+      //   NAME=VALUE  .................... valid if NAME is an identifier
+      //
+      auto name = string::Storage{syntax.data(), eq};
+      auto value = string::Storage{1+eq+syntax.data(), syntax.size()-1-eq};
+      if (is_identifier(name)) {
+        return {name, value};
+      } else {
+        return {};
+      }
+    } else {
+      //
+      //   NAME .......................... valid if NAME is an identifier 
+      //
+      if (is_identifier(syntax)) {
+        return {string::Storage{syntax.data(), syntax.size()}, {}};
+      } else {
+        return {};
+      }
+    }
+  }
+  auto body::accept_variable_definition(Palette &palette, string::View leader, string::View syntax) -> Exit {
+    auto [name, value] = get_define(syntax);
+    if (!name) {
+      erroneity(palette) << "incomprehensible definition " << syntax << '\n';
+      return USAGE;
+    } else {
+      palette.preparation.defines[*name] = value.value_or("");
+      return OK;
+    }
+  }
+  auto body::accept_searchpath_directory(Palette &palette, string::View leader, string::Storage directory) -> Exit {
+    if (directory.empty()) {
+      warning(palette) << "ignoring empty directory name\n";
+      notice(palette) << "empty element cannot be inserted in the searchpath\n";
+      return USAGE;
+    } else if (auto status=sys::posix::stat(directory); good(status) && !sys::posix::isdir(value(status))) {
+      // It's okay if the directory does not exist (silence on that account
+      // It's NOT okay if the name exists as something *other* than a directory.
+      warning(palette) << "the name " << directory << " does not refer to a directory\n";
+      notice(palette) << "that name will be ignored in search path lookup\n";
+      //
+      // If this is just a warning then we can't declare a failure here
+      return OK;
+    } else {
+      palette.preparation.search.push_back(move(directory));
+      return OK;
+    }
+  }
+}
+#endiv

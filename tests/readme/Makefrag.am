@@ -1,0 +1,29 @@
+# This is a GNU -*- Makefile -*- which is managed by automake.
+# Copyright Verizon Media
+# Licensed under the terms of the Apache-2.0 license.
+# For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+# For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#
+tests_readme_XFAIL_TESTS = \
+  tests/readme/00.universe/special.test \
+  $(end)
+tests_readme_TESTS = \
+  tests/readme/01.comment/run.test \
+  tests/readme/01.fatal/fail.test \
+  tests/readme/01.notice/run.test \
+  tests/readme/01.warning/run.test \
+  tests/readme/01.rest/run.test \
+  tests/readme/02.block-endef/run.test \
+  tests/readme/02.define/run.test \
+  tests/readme/02.undef/run.test \
+  tests/readme/02.substitute/run.test \
+  tests/readme/03.ifdef/run.test \
+  tests/readme/03.else/run.test \
+  tests/readme/03.elseifdef.1/run.test \
+  tests/readme/03.elseifdef.2/run.test \
+  tests/readme/04.read.direct/run.test \
+  tests/readme/04.read.search/special.test \
+  tests/readme/04.read.recursive/fail.test \
+  \
+  $(tests_readme_XFAIL_TESTS) \
+  $(end)

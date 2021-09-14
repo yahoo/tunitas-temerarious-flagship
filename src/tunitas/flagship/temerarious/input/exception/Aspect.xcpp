@@ -1,0 +1,54 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+namespace tunitas::flagship::temerarious::input::exception {
+  //
+  // The aspect of a input exception
+  //
+  // Specification:
+  //
+  //   The input exceptions have a "whence" consisting of a name of the input (could be a file or a stream, c.f. stdin)
+  //      auto whence() const noexcept -> source::Name;
+  //
+  //   These exceptions pertain to the operation of the input as a whole;
+  //      e.g. opening, closing, device errors in transit; invariants at the end-of-file.
+  //
+  //   As such, the some of the problems pertain to the luser's input.
+  //   Others pertain to the operating system or to other accidents of the environment.
+  //
+  // Usage: (for example for the case of an Invalid-themed exception)
+  //
+  //   class my::Problem : public virtual input::exception::Aspect,
+  //                       public virtual temerarious::exception::Aspect,
+  //                       public virtual tunitas::exception::Aspect,
+  //                       public nonstd::exception::Invalid<string::View> {
+  //     struct Ancestors {
+  //       using Exception = nonstd::exception::Invalid<string::View>;
+  //     };
+  //   public:
+  //      ...constructor...
+  //      auto what() const noexcept -> char const * override { return Ancestors::Exception::what(); }
+  //      auto whence() const noexcept -> Name override;
+  //   };
+  //
+  struct Aspect;
+}
+#endiv
+#divert <hpp>
+#import tunitas.flagship.temerarious.source.Name
+struct tunitas::flagship::temerarious::input::exception::Aspect {
+protected:
+  virtual ~Aspect();
+public:
+  virtual auto what() const noexcept -> char const * = 0;
+  virtual auto whence() const noexcept -> source::Name = 0;
+};
+#endiv
+#divert <cpp>
+namespace tunitas::flagship::temerarious::input::exception {
+  Aspect::~Aspect() = default;
+}
+#endiv

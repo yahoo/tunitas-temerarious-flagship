@@ -1,0 +1,72 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Verizon Media
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+namespace tunitas::flagship::temerarious::diversion {
+  //
+  // Like a std::variant, but has its own members.
+  //
+  // Specification:
+  //
+  //   See Stack, which is nearby.
+  //
+  // Design:
+  //
+  //   Yes, doing this is arduous
+  //
+  // Usage:
+  //
+  //   In State::passthrough(...), the simpel one-liner
+  //
+  //   auto state = processor::State{...somehow...};
+  //   auto buffer = string;:View{...somehow...};
+  //
+  //   state.ensure_diversions().emplace(buffer);
+  //
+  struct Frame;
+}
+#endiv
+#divert <hpp>
+#import std.variant
+#import tunitas.string.Storage
+#import tunitas.string.View
+#import tunitas.flagship.temerarious.stream.Output
+namespace tunitas::flagship::temerarious {
+  namespace diversion {
+    using std::move;
+    using std::swap;
+    inline auto swap(Frame &, Frame &) noexcept -> void;
+  }
+  struct diversion::Frame : public std::variant<stream::Output *, string::Storage *> {
+    using Ancestor = std::variant<stream::Output *, string::Storage *>;
+  public:
+    Frame() = default;
+    using Ancestor::variant;
+    inline auto emplace(string::View buffer) -> void;
+  };
+}
+#endiv
+#divert <ipp>
+#import nonstd.Visitor
+#import nonstd.visit
+namespace tunitas::flagship::temerarious {
+  auto diversion::swap(Frame &a, Frame &b) noexcept -> void {
+    Frame::Ancestor &aa{a}, &bb{b};
+    swap(aa, bb);
+  }
+  namespace diversion {
+    auto Frame::emplace(string::View buffer) -> void {
+      auto &self = static_cast<Ancestor &>(*this);
+      using namespace nonstd;
+      auto visitor = Visitor{[buffer](stream::Output *outbound) { *outbound << buffer << '\n'; },
+                             [buffer](string::Storage *variable) {
+                               variable->append(buffer);
+                               variable->append("\n");
+                             }};
+      visit(visitor, self);
+    }
+  }
+}
+#endiv
