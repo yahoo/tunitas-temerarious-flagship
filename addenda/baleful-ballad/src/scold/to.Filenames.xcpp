@@ -1,0 +1,91 @@
+// -*- c++ -*- with SCOLD stylings
+#divert <hpp>
+// The module name <scold.to.Filenames> corresponds to
+//    the function template to<...>(...)
+//    specialized to return scold::Filenames
+#import scold.to.RESULT.Module
+#import scold.to.RESULT.string
+#import scold.Filenames
+namespace scold {
+  //
+  // Given
+  //   system/subsystem/package/Class.xcpp
+  // Return
+  //   system/subsystem/package/Class.{fpp,hpp,ipp,tpp,cpp}
+  //
+  template<> inline auto to<Filenames>(std::string const &filename_xcpp) -> Filenames;
+  template<> inline auto to<Filenames>(Module const &) -> Filenames;
+
+  //
+  // Given
+  //   srcdir = /views/build/module-specimen/src
+  //   $(srcdir)/system/subsystem/package/Class.xcpp
+  // Return
+  //   $(srcdir)/system.subsystem.package.Class                for $phase = tpp, the template definition declarations
+  //   $(srcdir)/$phase/system.subsystem.package.Class         for $phase in { fpp, hpp, ipp }
+  //   $(srcdir)/system/subsystem/package/Class.{cpp,o,lo,mk}
+  //   $(srcdir)/system/subsystem/package/Class.xcpp           SCOLD C++ original srcs in the same place
+  //
+  template<> inline auto to<Filenames>(std::string const &filename_xcpp, std::string const &srcdir) -> Filenames;
+  template<> inline auto to<Filenames>(Module const &, std::string const &srcdir) -> Filenames;
+
+  //
+  // Given
+  //   srcdir = /views/build/example/module-thisthat/src
+  //   definitiondir = /views/build/module-specimen/obj/src
+  //   declarationdir = /views/build/module-specimen/obj/modules
+  //   $(srcdir)/system/subsystem/package/Class.xcpp
+  // Return
+  //   ${declarationdir)/system.subsystem.package.Class               for $phase = tpp, the template definition declarations
+  //   ${declarationdir)/$phase/system.subsystem.package.Class        for $phase in { fpp, hpp, ipp }
+  //   ${definitiondir)/system/subsystem/package/Class.{cpp,o,lo,mk}
+  //   ${definitiondir)/system/subsystem/package/Class.
+  //   ${srcdir)/system/subsystem/package/Class.xcpp                  SCOLD C++ original srcs in the same place
+  //
+  template<> inline auto to<Filenames>(std::string const &filename_xcpp, std::string const &declarationdir, std::string const &definitiondir, std::string const &srcdir) -> Filenames;
+  template<> inline auto to<Filenames>(Module const &, std::string const &declarationdir, std::string const &definitiondir, std::string const &srcdir) -> Filenames;
+}
+#endiv
+#divert <ipp>
+#import scold.Module
+#import scold.to.Module
+#import std.move
+template<> auto scold::to<scold::Filenames>(std::string const &filename_xcpp) -> Filenames {
+  auto module = to<Module>(filename_xcpp);
+  Filenames ret;
+  ret.define(module);
+  return ret;
+}
+
+template<> auto scold::to<scold::Filenames>(Module const &module) -> Filenames {
+  Filenames ret;
+  ret.define(module);
+  return ret;
+}
+
+template<> auto scold::to<scold::Filenames>(std::string const &filename_xcpp, std::string const &srcdir) -> Filenames {
+  auto module = to<Module>(filename_xcpp, srcdir);
+  Filenames ret;
+  ret.define(module, srcdir);
+  return ret;
+}
+
+template<> auto scold::to<scold::Filenames>(Module const &module, std::string const &srcdir) -> Filenames {
+  Filenames ret;
+  ret.define(module, srcdir);
+  return ret;
+}
+
+template<> auto scold::to<scold::Filenames>(std::string const &filename_xcpp, std::string const &declarationdir, std::string const &definitiondir, std::string const &srcdir) -> Filenames {
+  auto module = to<Module>(filename_xcpp, srcdir);
+  Filenames ret;
+  ret.define(module, declarationdir, definitiondir, srcdir);
+  return ret;
+}
+
+template<> auto scold::to<scold::Filenames>(Module const &module, std::string const &declarationdir, std::string const &definitiondir, std::string const &srcdir) -> Filenames {
+  Filenames ret;
+  ret.define(module, declarationdir, definitiondir, srcdir);
+  return ret;
+}
+#endiv

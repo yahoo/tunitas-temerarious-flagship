@@ -1,0 +1,34 @@
+// -*- c++ -*- in the SCOLD styling that is so fashionable these days
+#divert <hpp>
+#import scold.filenames.Filenames
+#import scold.filenames.Filenames.Directories
+#import scold.Phase
+#import scold.Phases
+#import scold.Suffix
+namespace scold {
+  namespace filenames {
+    //
+    // Concept: The INDICES are one of { Phase, Phases, Suffix }
+    //
+    // The Filenames::Directories are filled with the indicated directories
+    // uniquely and in lexicographic order, ready for a mkdirp operation
+    //
+    // To get the C++ set, use scold::Phases()
+    //     auto set = dirnames(filenames, Phases())
+    // To get the C++ set, and GNU Makefrag area
+    //     auto set = dirnames(filenames, Phases(), Suffix::MK)
+    // etc.
+    //
+    template<typename... INDICES> inline auto dirnames(filenames::Filenames const &, INDICES...) -> Filenames::Directories;
+  }
+}
+#endiv
+#divert <ipp>
+#import scold.filenames.detail.dirnames
+#import std.move
+template<typename... INDICES> auto scold::filenames::dirnames(filenames::Filenames const &arg_filenames, INDICES...indices) -> Filenames::Directories {
+  Filenames::Directories ret;
+  detail::dirnames(ret, arg_filenames, indices...);
+  return ret;
+}
+#endiv

@@ -1,0 +1,128 @@
+// -*- c++ -*- in the SCOLD styling that is so fashionable these days
+#divert <fpp>
+namespace scold {
+  namespace processor {
+    //
+    // Fixup and warn about some other problems
+    // Go fish for that stray ';' that shows up
+    //
+    // sloppy:   #import std::is_same
+    // correct:  #import std.is_same
+    //
+    // sloppy:   #import std::numeric_limits; <------------------- ';' here is wrong, but a common error
+    // correct:  #import std.numeric_limits
+    //
+    class Ifdef;
+  }
+}
+#endiv
+#divert <hpp>
+#import scold.config.Context
+#import scold.config.Generic
+#import scold.processor.Prototype
+#import std.string
+#import want.regex.pattern
+class scold::processor::Ifdef {
+public:
+  using configuration_type = config::Generic;
+  using context_type = config::Context;
+  using line_type = Prototype::line_type;
+  Ifdef(configuration_type const &, context_type &);
+  // reminder do not make these static, they can throw in the constructor
+  want::regex::pattern const BLANKS_ONLY;
+  want::regex::pattern const CXX_STYLE_COMMENT;
+  want::regex::pattern const C_STYLE_COMMENT_START;
+  want::regex::pattern const COLON_COLON; //  a C++-style name; e.g. std::string (two colons)
+  want::regex::pattern const COLON; // a sloppy C++ style name; e.g. std:string (one colon)
+  want::regex::pattern const PHASE_NAME; // belongs on a #divert statement, not on #forward, #import, #entail
+  want::regex::pattern const INCLUDE_STYLE_FILENAME;
+  auto fixup_sloppy_module_syntax(line_type const &, std::string const &sloppy_module_syntax, std::string const &sloppy_remaining_commentariat) -> std::string;
+protected:
+  // can have ':' in lieu of '.' and extraneous '.' separators
+  auto true_up_sloppy_module_syntax(std::string const &sloppy) -> std::string;
+  configuration_type const &cfg;
+  // A non-const reference so it can accrue error- (warning-) counts
+  context_type &ctx;
+};
+#endiv
+#divert <cpp>
+scold::processor::Ifdef::Ifdef(configuration_type const &arg_cfg, context_type &arg_ctx)
+  : BLANKS_ONLY(R"regex(\s+)regex")
+  , CXX_STYLE_COMMENT(R"regex(\s*//.*)regex")
+  , C_STYLE_COMMENT_START(R"regex(\s*/\*.*)regex")
+  , COLON_COLON("::")
+  , COLON(R"regex((?:^:[^:]|[^:]:[^:]|[^:]:$))regex")
+  , PHASE_NAME(R"regex(<?[a-z]pp>)regex")
+  , INCLUDE_STYLE_FILENAME(R"regex([<"].*[>"]>)regex")
+  , cfg(arg_cfg)
+  , ctx(arg_ctx) {
+  ;
+}
+
+#import want.regex.replace
+#import std.move
+auto scold::processor::Ifdef::true_up_sloppy_module_syntax(std::string const &original) -> std::string {
+  auto reworked0 = original;
+  // :: -> .
+  auto reworked1 = want::regex::replace(std::move(reworked0), COLON_COLON, ".");
+  // : -> .
+  auto reworked2 = want::regex::replace(std::move(reworked1), COLON, ".");
+  return reworked2;
+}
+
+#import std.move
+#import want.format.braket
+#import want.regex.match
+auto scold::processor::Ifdef::fixup_sloppy_module_syntax(line_type const &line, std::string const &sloppy_module_syntax, std::string const &sloppy_remaining_commentariat) -> std::string {
+  using want::format::braket;
+  if (!sloppy_remaining_commentariat.empty()) {
+    //
+    // Go fish for that stray ';' that shows up
+    //
+    // sloppy:    #entail std::numeric_limits; <------------------- the ';' here is wrong, but a common error
+    // correct:   #entail std.numeric_limits
+    //
+    // Don't give a warning if there are only blank characters out there
+    if ( !want::regex::match(sloppy_remaining_commentariat, BLANKS_ONLY)) {
+      // Empty remaining is good.  No warning there.
+      // A C++-style comment is good.  No warning there.
+      if ( !want::regex::match(sloppy_remaining_commentariat, CXX_STYLE_COMMENT)) {
+        warning(cfg, ctx, line) << "ignoring extraneous syntax " << braket(braket(sloppy_remaining_commentariat)) << '\n';
+      }
+    }
+  }
+  if (want::regex::match(sloppy_module_syntax, COLON)) {
+    //
+    // Go fish for singleton orpaned ':'
+    //
+    // sloppy:    #entail std:numeric_limits <------------------- the ':' here is wrong, but a common error
+    // correct:   #entail std.numeric_limits
+    //
+    warning(cfg, ctx, line) << "a single ':' is invalid as a module name " << braket(braket(sloppy_module_syntax)) << '\n';
+  }
+  if (want::regex::match(sloppy_module_syntax, PHASE_NAME)) {
+    //
+    // Go fish for an XML-style phase name appearing instead of a module name
+    //
+    // sloppy:    #import <ipp>
+    // correct:   #divert <ipp>               it is a common error to use the 'import' keyword, thereby not starting a diversion.
+    //
+    // This cannot be fixed; it is always wrong.
+    error(cfg, ctx, line) << "the phase symbol " << sloppy_module_syntax << " appears where a module name is expected\n";
+  } else if (want::regex::match(sloppy_module_syntax, INCLUDE_STYLE_FILENAME)) {
+    //
+    // Go fish for a C/C++ #include file appearing in a SCOLD #forward, #import, #entail
+    //
+    // sloppy:    #import <unistd.h>
+    // correct:   #include <unistd.h>        it is a common error to use the 'forward' 'import' 'entail' instead of #include
+    //
+    // This cannot be fixed; it is always wrong.
+    error(cfg, ctx, line) << "the module symbol " << sloppy_module_syntax << " belongs in an #include\n";
+  }
+  auto fixed = true_up_sloppy_module_syntax(sloppy_module_syntax);
+  if (fixed != sloppy_module_syntax) {
+    warning(cfg, ctx, line) << "treating sloppy " << braket(braket(sloppy_module_syntax)) << " as module " << fixed << '\n';
+  }
+  return fixed;
+}
+#endiv

@@ -1,0 +1,20 @@
+// -*- c++ -*-in the SCOLD styling that is so fashionable these days
+#divert <hpp>
+#import want.format.detail.QuoteQuote
+namespace want {
+  namespace format {
+    //
+    // usage:
+    //
+    //     std::cout << qq("quote this");
+    //
+    // Of course, the reference to the VALUE must last for the lifetime of the formatter object
+    template<typename VALUE> inline auto qq(VALUE const &) -> detail::QuoteQuote<VALUE>;
+  }
+}
+#endiv
+#divert <ipp>
+template<typename VALUE> auto want::format::qq(VALUE const &value) -> detail::QuoteQuote<VALUE> {
+  return detail::QuoteQuote<VALUE>(value);
+}
+#endiv

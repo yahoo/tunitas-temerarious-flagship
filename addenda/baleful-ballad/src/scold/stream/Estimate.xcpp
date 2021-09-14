@@ -1,0 +1,110 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace scold {
+  namespace stream {
+    enum class Action { DROP, KEEP };
+    class Estimate;
+  }
+}
+#endiv
+#divert <hpp>
+#import scold.Ground
+#import scold.Phase
+namespace scold {
+  namespace stream {
+    // The state of the assessor before the current line (rarely used)
+    inline auto prev(Estimate const &) -> Phase;
+    // The "ground" indicates whether we're inside or outside a #divert/#endiv
+    inline auto ground(Estimate const &) -> Ground;
+    // if keep(...) then this is the assessment of the current line - "here"
+    // if keep(...) then this is the assessment of the state of the "next" line
+    inline auto diversion(Estimate const &) -> Phase;
+    // Drop the line (it was SCOLD meta-directives; it was speaking to the SCOLD preprocessor)
+    inline auto drop(Estimate const &) -> bool;
+    // Keep the line (it is C++)
+    inline auto keep(Estimate const &) -> bool;
+    // Was there an error? & the error messaging itself
+    inline auto ok(Estimate const &) -> bool; 
+    inline auto has_quibbles(Estimate const &e) -> bool; // quibbles are "errors" or "warnings"
+    inline auto has_error(Estimate const &) -> bool;
+    inline auto error_message(Estimate const &) -> std::string const &;
+    inline auto error_message(Estimate &&) -> std::string;
+    // The warnings and errors are independent; there can be both
+    inline auto has_warning(Estimate const &) -> bool;
+    inline auto warning_message(Estimate const &) -> std::string const &;
+    inline auto warning_message(Estimate &&) -> std::string;
+  }
+}
+
+#import std.string
+#import std.tuple
+namespace scold {
+  namespace stream {
+    namespace detail {
+      using Estimate = std::tuple</*prev*/ Phase, Ground, /*here*/ Phase, Action, /*error*/ std::string, /*warning*/ std::string>;
+    }
+  }
+}
+class scold::stream::Estimate : public detail::Estimate {
+  using ancestor = detail::Estimate;
+public:
+  using ancestor::tuple;
+  // for convenience of accessing these values via the class name contra the enum class name.
+  static constexpr Action const DROP = Action::DROP;
+  static constexpr Action const KEEP = Action::KEEP;
+};
+#endiv
+#divert <ipp>
+#import std.get
+auto scold::stream::prev(Estimate const &a) -> Phase {
+  return std::get<0>(a);
+}
+
+auto scold::stream::ground(Estimate const &a) -> Ground {
+  return std::get<1>(a);
+}
+
+auto scold::stream::diversion(Estimate const &a) -> Phase {
+  return std::get<2>(a);
+}
+
+auto scold::stream::drop(Estimate const &a) -> bool {
+  return Estimate::DROP == std::get<3>(a);
+}
+
+auto scold::stream::keep(Estimate const &a) -> bool {
+  return !drop(a);
+}
+
+auto scold::stream::ok(Estimate const &e) -> bool {
+  return !has_error(e);
+}
+
+auto scold::stream::has_quibbles(Estimate const &e) -> bool {
+  return has_error(e) || has_warning(e);
+}
+
+auto scold::stream::has_error(Estimate const &e) -> bool {
+  return !std::get<4>(e).empty();
+}
+
+auto scold::stream::error_message(Estimate const &e) -> std::string const & {
+  return std::get<4>(e);
+}
+
+auto scold::stream::error_message(Estimate &&anon) -> std::string {
+  return std::get<4>(std::forward<Estimate>(anon));
+}
+
+auto scold::stream::has_warning(Estimate const &e) -> bool {
+  return !std::get<5>(e).empty();
+}
+
+auto scold::stream::warning_message(Estimate const &e) -> std::string const & {
+  return std::get<5>(e);
+}
+
+auto scold::stream::warning_message(Estimate &&anon) -> std::string {
+  return std::get<5>(std::forward<Estimate>(anon));
+}
+#endiv

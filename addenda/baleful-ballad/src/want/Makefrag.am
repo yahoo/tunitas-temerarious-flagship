@@ -1,0 +1,104 @@
+# This is a GNU -*- Makefile -*- fragment. For terms, see the LICENSE file at the top of the repository.
+#
+lib_libwant_la = lib/libwant.la
+lib_libwant_la_LIBADD = \
+  @libstd_regex@ \
+  $(end)
+lib_libwant_la_LDFLAGS = $(PACKAGE_LDFLAGS_SET)
+lib_libwant_la_MODULES = \
+  $(call SCOLD_SOURCEStoMODULES, $(lib_libwant_la_SOURCES))
+lib_libwant_la_SOURCES = \
+  obj/src/want/namespace.cpp \
+  obj/src/want/detail/namespace.cpp \
+  obj/src/want/join.cpp \
+  \
+  obj/src/want/doppelgang.cpp \
+  obj/src/want/doppel/namespace.cpp \
+  obj/src/want/doppel/Ganger.cpp \
+  obj/src/want/doppel/Iterator.cpp \
+ \
+  obj/src/want/doppel/traits/namespace.cpp \
+  obj/src/want/doppel/traits/Combine.cpp \
+  obj/src/want/doppel/traits/Iterator.cpp \
+  obj/src/want/doppel/traits/Container.cpp \
+  \
+  obj/src/want/format/namespace.cpp \
+  obj/src/want/format/dot.cpp \
+  obj/src/want/format/braket.cpp \
+  obj/src/want/format/q.cpp \
+  obj/src/want/format/qq.cpp \
+  obj/src/want/format/detail/namespace.cpp \
+  obj/src/want/format/detail/Braket.cpp \
+  obj/src/want/format/detail/Dot.cpp \
+  obj/src/want/format/detail/Formatter.cpp \
+  obj/src/want/format/detail/Quote.cpp \
+  obj/src/want/format/detail/QuoteQuote.cpp \
+  \
+  obj/src/want/mvr/namespace.cpp \
+  obj/src/want/mvr/recv.cpp \
+  obj/src/want/mvr/SAV.std.back_insert_iterator.cpp \
+  obj/src/want/mvr/SAV.cpp \
+  obj/src/want/mvr/send.cpp \
+  obj/src/want/mvr/State.cpp \
+  obj/src/want/mvr/status.cpp \
+  obj/src/want/mvr/value.cpp \
+  obj/src/want/mvr/ok.cpp \
+  obj/src/want/mvr/andvalue.cpp \
+  \
+  obj/src/want/regex/namespace.cpp \
+  obj/src/want/regex/unbusted/namespace.cpp \
+  obj/src/want/regex/basic_pattern.cpp \
+  obj/src/want/regex/cmatch.cpp \
+  obj/src/want/regex/constants.cpp \
+  obj/src/want/regex/error.cpp \
+  obj/src/want/regex/error_type.cpp \
+  obj/src/want/regex/iterator.cpp \
+  obj/src/want/regex/match.cpp \
+  obj/src/want/regex/match_results.cpp \
+  obj/src/want/regex/pattern.cpp \
+  obj/src/want/regex/replace.cpp \
+  obj/src/want/regex/search.cpp \
+  obj/src/want/regex/smatch.cpp \
+  obj/src/want/regex/sub_match.cpp \
+  obj/src/want/regex/traits.cpp \
+  \
+  obj/src/want/series.cpp \
+  obj/src/want/detail/series/namespace.cpp \
+  obj/src/want/detail/series/Object.cpp \
+  \
+  obj/src/want/tuple_cons.cpp \
+  obj/src/want/tuple_rest.cpp \
+  obj/src/want/tuple/namespace.cpp \
+  obj/src/want/tuple/Rebuilder.cpp \
+  obj/src/want/tuple/Rest.cpp \
+  \
+  obj/src/want/tuppelgang.cpp \
+  obj/src/want/tuppel/namespace.cpp \
+  obj/src/want/tuppel/Ganger.cpp \
+  obj/src/want/tuppel/Ganger.CONTAINER1.CONTAINERS.cpp \
+  obj/src/want/tuppel/Ganger.EMPTY.cpp \
+  obj/src/want/tuppel/Iterator.cpp \
+  obj/src/want/tuppel/Iterator.ITERATOR1.ITERATORS.cpp \
+  obj/src/want/tuppel/Iterator.EMPTY.cpp \
+  \
+  obj/src/want/tuppel/traits/namespace.cpp \
+  obj/src/want/tuppel/traits/Iterator.cpp \
+  obj/src/want/tuppel/traits/Iterator.ITERATOR1.ITERATORS.cpp \
+  obj/src/want/tuppel/traits/Iterator.EMPTY.cpp \
+  obj/src/want/tuppel/traits/Iterator.iterator_traits.cpp \
+  \
+  obj/src/want/path/namespace.cpp \
+  obj/src/want/path/dot.cpp \
+  obj/src/want/path/dedot.cpp \
+  obj/src/want/path/endot.cpp \
+  $(end)
+#
+$(scold_cxxdir)/want/dependencies.mk: $(lib_libwant_la_SOURCES)
+$(lib_libwant_la_SOURCES) : obj/src/%.cpp : src/%.xcpp
+	$(HT_V_COLD) $(call HT_XCPP2CPP, $<)
+	@test -e $@
+$(scold_cxxdir)/want/dependencies.mk:
+	$(HT_V_BOTH) $(call HT_DEPENDENCIES, $^)
+	@test -e $@
+include $(scold_cxxdir)/want/dependencies.mk
+clean-dependencies:: ; rm -f $(scold_cxxdir)/want/dependencies.mk

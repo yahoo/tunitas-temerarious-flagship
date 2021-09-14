@@ -1,0 +1,60 @@
+// This is C++ 23 -*- c++ -*- -std=c++23 in the stylings of the S.C.O.L.D. design method.
+// For terms and provenance see the LICENSE file at the top of the repository.
+#divert <fpp>
+#forward scold.easy.core.Match.declaration
+namespace scold::easy::core {
+  //
+  // Examples:
+  //
+  //   #divert <fpp/> <-------------- the begin-and-end
+  //   #divert <hpp/>
+  //   #divert <ipp/>
+  //   #divert <tpp/>
+  //   #divert <cpp/>
+  //
+  // Usage:
+  //
+  //   if (TSE tse; tse << line_object) {
+  //     auto [new_mode, autoend] = tse;
+  //     ...
+  //   }
+  //
+  template<> struct Match<tag_start_and_end>;
+}
+#endiv
+#divert <hpp>
+#import scold.easy.line.Object
+#import lite.regex.matching.Results
+#import std.tuple
+namespace scold::easy::core {
+  template<> struct Match<tag_start_and_end> {
+    inline Match();
+    inline auto operator()(line::Object const &) const -> bool;
+    inline auto operator<<(line::Object const &) -> bool; // side-effects the matcher
+    inline auto result() const -> std::tuple<std::string, std::string>;
+  protected:
+    lite::regex::matching::SResults captured;
+    std::regex TAG_STARTEND;
+  };
+}
+#divert <ipp>
+#import scold.easy.core // namespace regex
+#import lite.regex.search
+namespace scold::easy::core {
+  Match<tag_start_and_end>::Match()
+    : TAG_STARTEND{R"regex(^\s*(?:#\s*divert\s*)?<((\w+)/)>)regex"}
+  {}
+  auto Match<tag_start_and_end>::operator()(line::Object const &subject) const -> bool {
+    // no side effect on the object to recover captured values
+    return regex::search(subject, TAG_STARTEND);
+  }
+  auto Match<tag_start_and_end>::operator<<(line::Object const &subject) -> bool { // side-effects the matcher
+    // recover the captured values
+    return regex::search(subject, captured, TAG_STARTEND);
+  }
+  auto Match<tag_start_and_end>::result() const -> std::tuple<std::string, std::string> {
+    // index 0 is the whole match; 1, 2 are the submatches
+    return std::tuple<std::string, std::string>{captured[1].str(), captured[2].str()};
+  }
+}
+#endiv

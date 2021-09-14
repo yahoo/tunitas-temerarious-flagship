@@ -1,0 +1,13 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace scold {
+  namespace fragment {
+    //
+    // Developing formatted fragments for inclusion in the SCOLD output
+    //
+    // "Preprocessor" fragments - #entail, #forward, #import, #include
+    // (GNU) make fragements    - dependencies, declarations, scripts
+    //
+  }
+}
+#endiv

@@ -1,0 +1,118 @@
+// This is C++ 23 -*- c++ -*- -std=c++23 in the stylings of the S.C.O.L.D. design method.
+// For terms and provenance see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace scold::easy::file::outbound {
+  //
+  // The multidimensional result.
+  //
+  // Usage:
+  //
+  //   auto r = outbound.open(...filepath...);
+  //   auto r = outbound.close();
+  //   if (ok(r)) {
+  //     ...use outbound...
+  //   } else {
+  //     auto ec = error_code(r);
+  //     auto m = error_message(r);
+  //     ...
+  //     auto ok_hpp = OK(r[Suffix::HPP]);
+  //     auto ec_hpp = error_code(r[Suffix::HPP]);
+  //     auto m_hpp = error_message(r[Suffix::HPP]);
+  //   }
+  //
+  class Result;
+}
+#endiv
+#divert <hpp>
+#import scold.easy.suffix.Limits
+#import scold.easy.suffix.Suffix
+#import std.error_code
+#import std.error_condition
+#import std.string
+namespace scold::easy::file::outbound {
+  inline auto ok(Result const &) -> bool;
+  inline auto error_code(Result const &) -> std::error_code;
+  inline auto error_condition(Result const &) -> std::error_condition;
+  inline auto error_num(Result const &) -> int;
+  inline auto error_message(Result const &) -> std::string;
+  inline auto swap(Result &, Result &) noexcept -> void;
+}
+#import std.swap
+namespace std {
+  using scold::easy::file::outbound::swap;
+}
+#import sys.call.Result
+class scold::easy::file::outbound::Result {
+public:
+  Result() = default;
+  inline auto operator[](suffix::Suffix) const -> sys::call::Result const &;
+  inline auto operator[](suffix::Suffix) -> sys::call::Result &;
+  using Limits = suffix::Limits<suffix::Suffix>;
+protected:
+  using Phases = std::array<sys::call::Result, suffix::Limits<suffix::Suffix>::size()>;
+  Phases phases;
+  friend auto outbound::swap(Result &, Result &) noexcept -> void;
+};
+#endiv
+#divert <ipp>
+#import std.all_of
+#import std.any_of
+#import want.ranges.minmax
+namespace scold::easy::file {
+  auto outbound::swap(Result &a, Result &b) noexcept -> void {
+    std::swap(a.phases, b.phases);
+  }
+  auto outbound::ok(Result const &res) -> bool {
+    for (auto fix : want::ranges::minmax(Result::Limits::min(), Result::Limits::max())) {
+      if (!ok(res[fix])) {
+        return false;
+      }
+    }
+    return true;
+  }
+  auto outbound::error_code(Result const &res) -> std::error_code {
+    for (auto fix : want::ranges::minmax(Result::Limits::min(), Result::Limits::max())) {
+      auto const &phase = res[fix];
+      if (!ok(phase)) {
+        return error_code(phase);
+      }
+    }
+    return error_code(res[Result::Limits::max()]); // the last success is returned
+  }
+  auto outbound::error_condition(Result const &res) -> std::error_condition {
+    for (auto fix : want::ranges::minmax(Result::Limits::min(), Result::Limits::max())) {
+      auto const &phase = res[fix];
+      if (!ok(phase)) {
+        return error_condition(phase);
+      }
+    }
+    return error_condition(res[Result::Limits::max()]); // the last success is returned
+  }
+  auto outbound::error_num(Result const &res) -> int {
+    for (auto fix : want::ranges::minmax(Result::Limits::min(), Result::Limits::max())) {
+      auto const &phase = res[fix];
+      if (!ok(phase)) {
+        return error_num(phase);
+      }
+    }
+    return 0; // i.e. success
+  }
+  auto outbound::error_message(Result const &res) -> std::string {
+    for (auto fix : want::ranges::minmax(Result::Limits::min(), Result::Limits::max())) {
+      auto const &phase = res[fix];
+      if (!ok(phase)) {
+        return error_message(phase);
+      }
+    }
+    return error_message(res[Result::Limits::max()]); // the last success is returned
+  }
+}
+namespace scold::easy::file::outbound {
+  auto Result::operator[](suffix::Suffix s) const -> sys::call::Result const & {
+    return phases[(int) s];
+  }
+  auto Result::operator[](suffix::Suffix s) -> sys::call::Result & {
+    return phases[(int) s];
+  }
+}
+#endiv

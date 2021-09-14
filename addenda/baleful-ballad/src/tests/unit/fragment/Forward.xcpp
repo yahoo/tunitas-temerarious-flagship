@@ -1,0 +1,37 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace tests {
+  namespace unit {
+    namespace fragment {
+      class Forward;
+    }
+  }
+}
+#endiv
+#divert <hpp>
+class tests::unit::fragment::Forward : public cppunit::test::Fixture {
+public:
+  auto test_forward_Module() -> void;
+
+  static auto suite() -> cppunit::Test *;
+};
+#endiv
+#divert <cpp>
+#import scold.Module
+#import scold.fragment.preproc.forward
+
+auto tests::unit::fragment::Forward::test_forward_Module() -> void {
+  ::scold::Module specimen{"apple", "banana", "cherry", "dog"};
+  auto actual = ::scold::fragment::preproc::forward(specimen); // <----------------- test this
+  auto expected = ::scold::line::Item(R"expected(#forward apple.banana.cherry.dog)expected");
+  CPPUNIT_ASSERT_EQUAL(value(expected), value(actual));
+}
+
+auto tests::unit::fragment::Forward::suite() -> cppunit::Test * {
+  using namespace ::unit::rigging::suite;
+  Stream s("forward");
+  s << call("Module", &Forward::test_forward_Module)
+    ;
+  return finalize(s);
+}
+#endiv

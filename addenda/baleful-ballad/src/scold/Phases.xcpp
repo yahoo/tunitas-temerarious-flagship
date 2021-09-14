@@ -1,0 +1,36 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace scold {
+  class Phases;
+}
+#endiv
+#divert <hpp>
+#import scold.Phase
+#import scold.phases.Iterator
+class scold::Phases {
+public:
+  inline Phases(Phase start = Phase::FPP, Phase finish = Phase::END);
+  using iterator = phases::Iterator;
+  using const_iterator = iterator; // same thing for this sort of series generator
+  inline auto begin() const -> const_iterator;
+  inline auto end() const -> const_iterator;
+protected:
+  Phase start;
+  Phase finish;
+};
+#endiv
+#divert <ipp>
+scold::Phases::Phases(Phase arg_start, Phase arg_finish)
+  : start(arg_start)
+  , finish(arg_finish) {
+  ;
+}
+
+auto scold::Phases::begin() const -> const_iterator {
+  return iterator(start);
+}
+
+auto scold::Phases::end() const -> const_iterator {
+  return iterator(finish);
+}
+#endiv

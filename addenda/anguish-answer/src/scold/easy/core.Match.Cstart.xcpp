@@ -1,0 +1,49 @@
+// This is C++ 23 -*- c++ -*- -std=c++23 in the stylings of the S.C.O.L.D. design method.
+// For terms and provenance see the LICENSE file at the top of the repository.
+#divert <fpp>
+#forward scold.easy.core.Match.declaration
+namespace scold::easy::core {
+  template<> struct Match<not_preprocessor_but_ending_in_C_style_comment_start>;
+}
+#endiv
+#divert <hpp>
+#import scold.easy.line.Object
+#import lite.regex.matching.Results
+#import scold.easy.core.Match.IPL
+#import scold.easy.core // namespace regex
+#import lite.regex.Pattern
+namespace scold::easy::core {
+  template<> struct Match<not_preprocessor_but_ending_in_C_style_comment_start> {
+    inline Match();
+    inline auto operator()(line::Object const &) const -> bool;
+    using Preprocessor = Match<is_preprocessor_line>;
+  protected:
+    regex::Pattern C_COMMENT_START;
+  };
+}
+#endiv
+#divert <ipp>
+#import lite.regex.search
+#import lite.regex.matching.Results
+#import scold.easy.core.Match
+#import std.string
+namespace scold::easy::core {
+  Match<not_preprocessor_but_ending_in_C_style_comment_start>::Match()
+    : C_COMMENT_START{R"regex(.*?/\*(.*))regex"}
+  { }
+  auto Match<not_preprocessor_but_ending_in_C_style_comment_start>::operator()(line::Object const &subject) const -> bool {
+    // [[FIXTHIS]] - just build a recognizer right here by walking the characters
+    if (subject != Preprocessor{}) {
+      regex::matching::SResults sm;
+      if (regex::search(subject, sm, C_COMMENT_START) && 2 == sm.size()) {
+        std::string rest{sm[1].str()};
+        if (std::string::npos == rest.find("*/")) {
+          // starts a C++ comment but doesn't end it
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+}
+#endiv

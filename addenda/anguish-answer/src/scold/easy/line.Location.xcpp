@@ -1,0 +1,70 @@
+// This is C++ 23 -*- c++ -*- -std=c++23 in the stylings of the S.C.O.L.D. design method.
+// For terms and provenance see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace scold::easy::line {
+  //
+  // The location in a file
+  // As named by the filename and the line number
+  //
+  // Usage:
+  //
+  //   auto filepath = Filepath{...somehow...};
+  //   auto number = Number{...somehow...};
+  //   Location loc{filepath, number};
+  //
+  //   std::cout << location << ": a bad thing happened here\n';
+  //
+  class Location;
+}
+#endiv
+#divert <hpp>
+#import std.basic_ostream
+#import nonstd.required.Character
+#import nonstd.required.Character_Traits
+#import scold.easy.required
+namespace scold::easy::line {
+  template<required::Character CHAR, required::Character_Traits TRAITS> inline auto operator<<(std::basic_ostream<CHAR, TRAITS> &, Location const &) -> std::basic_ostream<CHAR, TRAITS> &;
+  inline auto to_string(Location const &) -> std::string;
+}
+#import std.to_string
+namespace std {
+  using scold::easy::line::to_string;
+}
+#import scold.easy.name.Filepath
+#import scold.easy.line.Number
+#import std.pair
+namespace scold::easy {
+  class line::Location : protected std::pair<name::Filepath const &, line::Number> {
+    using ancestor = std::pair<name::Filepath const &, line::Number>;
+  public:
+    using Filepath = ancestor::first_type;
+    using Number = ancestor::second_type;
+    inline Location(Filepath const &, Number const &) noexcept;
+    inline auto file() const noexcept -> Filepath const &;
+    inline auto line() const noexcept -> Number const &;
+  };
+}
+#endiv
+#divert <ipp>
+namespace scold::easy {
+  template<required::Character CHAR, required::Character_Traits TRAITS> auto line::operator<<(std::basic_ostream<CHAR, TRAITS> &o, Location const &l) -> std::basic_ostream<CHAR, TRAITS> & {
+    return o << l.file() << o.widen(':') << l.line();
+  }
+  auto line::to_string(Location const &lin) -> std::string {
+    std::ostringstream buf;
+    buf << lin;
+    return buf.str();
+  }
+}
+namespace scold::easy::line {
+  Location::Location(Filepath const &f, Number const &n) noexcept
+    : ancestor{f, n}
+  { }
+  auto Location::file() const noexcept -> Filepath const & {
+    return first;
+  }
+  auto Location::line() const noexcept -> Number const & {
+   return second;
+  }
+}
+#endiv

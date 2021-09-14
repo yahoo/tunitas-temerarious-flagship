@@ -1,0 +1,11 @@
+// This is C++ 23 -*- c++ -*- -std=c++23 in the stylings of the S.C.O.L.D. design method.
+// For terms and provenance see the LICENSE file at the top of the repository.
+#divert <fpp>
+#import nonstd.required.Character_Traits
+namespace lite::required {
+  //
+  // What is a character trait??
+  //
+  using nonstd::required::Character_Traits;
+}
+#endiv

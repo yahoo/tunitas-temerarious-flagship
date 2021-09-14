@@ -1,0 +1,67 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace tests {
+  namespace unit {
+    namespace phase {
+      class Sequence;
+    }
+  }
+}
+#endiv
+#divert <hpp>
+class tests::unit::phase::Sequence : public cppunit::test::Fixture {
+public:
+  auto test_series1() -> void;
+  auto test_series0() -> void;
+  auto test_sequence() -> void;
+
+  static auto suite() -> cppunit::Test *;
+};
+#endiv
+#divert <cpp>
+#import scold.Phase
+#import scold.phase.sequence
+
+auto tests::unit::phase::Sequence::test_series1() -> void {
+  unsigned count = 0;
+  ::scold::Phase maximum = ::scold::Phase::BEG;
+  for (auto ph : ::scold::phase::series1<std::vector>()) {
+    maximum = max(maximum, ph);
+    count++;
+  }
+  CPPUNIT_ASSERT(::scold::Phase::CPP == maximum);
+  CPPUNIT_ASSERT(5 == count);
+}
+
+auto tests::unit::phase::Sequence::test_series0() -> void {
+  unsigned count = 0;
+  ::scold::Phase maximum = ::scold::Phase::BEG;
+  for (auto ph : ::scold::phase::series0<std::vector<::scold::Phase>>()) {
+    maximum = max(maximum, ph);
+    count++;
+  }
+  CPPUNIT_ASSERT(::scold::Phase::CPP == maximum);
+  CPPUNIT_ASSERT(5 == count);
+}
+
+auto tests::unit::phase::Sequence::test_sequence() -> void {
+  unsigned count = 0;
+  ::scold::Phase maximum = ::scold::Phase::BEG;
+  for (auto ph : ::scold::phase::sequence()) {
+    maximum = max(maximum, ph);
+    count++;
+  }
+  CPPUNIT_ASSERT(::scold::Phase::CPP == maximum);
+  CPPUNIT_ASSERT(5 == count);
+}
+
+auto tests::unit::phase::Sequence::suite() -> cppunit::Test * {
+  using namespace ::unit::rigging::suite;
+  Stream s("sequence");
+  s << call("series1", &Sequence::test_series1)
+    << call("series0", &Sequence::test_series0)
+    << call("sequence", &Sequence::test_sequence)
+    ;
+  return finalize(s);
+}
+#endiv

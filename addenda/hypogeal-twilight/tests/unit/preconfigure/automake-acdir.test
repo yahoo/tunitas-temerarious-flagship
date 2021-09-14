@@ -1,0 +1,3 @@
+#!/bin/sh
+source ${0%/*}/../library/rigging.sh || exit 255
+autotools-local-preconfigure --automake-acdir=here --dry-run

@@ -1,0 +1,79 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <hpp>
+#import scold.module.Module
+#import scold.module.detail.enclosing.Result
+#import std.string
+#import std.is_same
+namespace scold {
+  namespace module {
+    //
+    // The "enclosing module" operation is not a trivality.
+    // The "enclosing module" requires inspection of the nearby filesystem where the source file resides.
+    //
+    // Basic case:
+    //
+    //   Given:
+    //       package.subpackage.component.Class 
+    //         as $(srcdir)/package/subpackage/compent/Class.xcpp
+    //
+    //   Return:
+    //       package.subpackage.component
+    //         as $(srcdir)/package/subpackage/component/namespace.xcpp
+    //
+    // The problem comes with the non-physical (non-filename) basis of submodules containing variants.
+    // Context (of specializations in non-physical (non-file) modules)
+    //
+    //       template<typename... DEFINITIONS> class Caller;
+    //       template<> class Caller<>;
+    //       template<typename DEFINITION, typename... DEFINITIONS> class Caller<DEFINITION, DEFINITIONS...>
+    //  
+    //   Given:
+    //       package.subpackage.component.Caller
+    //         as $(srcdir)/package/subpackage/component/Caller.xcpp
+    //       package.subpackage.component.Caller.EMPTY
+    //         as $(srcdir)/package/subpackage/component/Caller.EMPTY.xcpp
+    //       package.subpackage.component.Caller.DEFINITION.DEFINITIONS
+    //         as $(srcdir)/package/subpackage/component/Caller.DEFINITION.DEFINITIONS.xcpp
+    //
+    //   Return:
+    //       package.subpackage.component
+    //         as $(srcdir)/package/subpackage/component/namespace.xcpp
+    //
+    // Usage #1:
+    //    auto r = enclosing(module, srcdir);
+    //    bool is_global = global(r);
+    //    Module above = enclosing(r);
+    //
+    // Usage #2:
+    //    bool is_global;
+    //    Module above;
+    //    recv(std::ignore, is_global, above) = enclosing(module, srcdir);
+    // 
+    inline auto enclosing(Module const &, std::string const &scold_source_directory) -> detail::enclosing::Result;
+    static_assert(std::is_same<detail::enclosing::Result, decltype(mvr::send(detail::enclosing::ADL(), true, Module()))>::value, "mvr::send-recv mismatch");
+  }
+}
+#endiv
+#divert <ipp>
+#import ish.shell.dirname
+#import path.filename.workbench
+#import scold.module.filebase
+#import scold.module.detail.enclosing.Result
+#import scold.to
+#import std.move
+auto scold::module::enclosing(Module const &module, std::string const &scold_source_directory) -> detail::enclosing::Result {
+    using adl_type = detail::enclosing::ADL;
+  if (module.empty()) {
+    return mvr::send(adl_type(), true, Module());
+  } else {
+    using ish::shell::dirname;
+    // Companion lines of code in Filenames::define(...)
+    // recall: filebase(...) throws on empty module
+    std::string base = filebase(module, scold_source_directory);
+    std::string directory = dirname(base);
+    Module ret = to<Module>(directory);
+    bool enclosing_is_global = ret.empty();
+    return mvr::send(adl_type(), enclosing_is_global, std::move(ret));
+  }
+}
+#endiv

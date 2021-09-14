@@ -1,0 +1,54 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace scold {
+  namespace validate {
+    namespace detail {
+      class Leaf;
+    }
+  }
+}
+#endiv
+#divert <hpp>
+#import std.string
+#import scold.validate.Result
+#import scold.validate.detail.is
+class scold::validate::detail::Leaf {
+public:
+  inline Leaf(std::string const &identifier_adjective, std::string const &condition_explanation, validation_predicate condition);
+  inline auto operator()(std::string const &subject) -> Result;
+  std::string identifier_adjective;
+  std::string condition_explanation;
+  validation_predicate condition;
+public:
+  struct test { struct Suite; };
+  friend struct test::Suite;
+};
+#endiv
+#divert <ipp>
+scold::validate::detail::Leaf::Leaf(std::string const &the_adjective, std::string const &the_explanation, validation_predicate the_condition)
+  : identifier_adjective(the_adjective)
+  , condition_explanation(the_explanation)
+  , condition(the_condition) {
+  ;
+}
+
+#import std.ostringstream
+auto scold::validate::detail::Leaf::operator()(std::string const &subject) -> Result {
+  if (subject.empty()) {
+    std::ostringstream err;
+    err << identifier_adjective << " name is empty";
+    return Result::is_invalid(err.str());
+  }
+  if ( !isidentifier(subject) ) {
+    std::ostringstream err;
+    err << identifier_adjective << " names must be shaped like a C++ identifier";
+    return Result::is_invalid(err.str());
+  }
+  if ( !condition(subject) ) {
+    std::ostringstream err;
+    err << identifier_adjective << " leaf names must be " << condition_explanation;
+    return Result::is_invalid(err.str());
+  }
+  return Result::is_valid();
+}
+#endiv

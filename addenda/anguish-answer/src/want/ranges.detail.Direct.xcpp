@@ -1,0 +1,52 @@
+// This is C++ 23 -*- c++ -*- -std=c++23 in the stylings of the S.C.O.L.D. design method.
+// For terms and provenance see the LICENSE file at the top of the repository.
+#divert <fpp>
+#import want.ranges.required.Directable
+namespace want::ranges::detail {
+  //
+  // A specification of a "direct" range wherein the iterator produces values over a series.
+  //
+  // <strike why="NOT-IMPLEMENTED">-
+  //   The values are produced by the succ(TYPE const &) function which can be specialized.
+  // </strike>
+  //
+  // Usage:
+  //
+  //   auto mm = minmax(1, 10);
+  //   for (auto i : mm) {
+  //     ...see range 1..10...
+  //   }
+  //
+  template<required::Directable TYPE> class Direct;
+}
+#endiv
+#divert <hpp>
+#import std.size_t
+namespace want::ranges {
+  template<required::Directable TYPE> struct detail::Direct {
+    using Value = TYPE;
+    inline Direct(Value min, Value max);
+    struct Iterator;
+    inline auto empty() const -> bool;
+    inline auto size() const -> std::size_t;
+    inline auto begin() const -> Iterator;
+    inline auto end() const -> Iterator;
+  protected:
+    Value min; // a.k.a. "first"
+    Value max; // a.k.a. "last" ... this is NOT "end" as is usual
+  };
+}
+#endiv
+#divert <ipp>
+#import want.ranges.detail.Direct.Iterator
+namespace want::ranges::detail {
+  template<required::Directable _> Direct<_>::Direct(Value min, Value max)
+    : min{min}
+    , max{max}
+  { }
+  template<required::Directable _> auto Direct<_>::empty() const -> bool       { return max < min; }
+  template<required::Directable _> auto Direct<_>::size() const -> std::size_t { return empty() ? 0lu : 1lu + max - min; }
+  template<required::Directable _> auto Direct<_>::begin() const -> Iterator   { return Iterator{min, max}; }
+  template<required::Directable _> auto Direct<_>::end() const -> Iterator     { return Iterator{max, max, true}; }
+}
+#endiv

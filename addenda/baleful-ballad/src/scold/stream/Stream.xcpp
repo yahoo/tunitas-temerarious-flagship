@@ -1,0 +1,127 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace scold {
+  namespace stream {
+    class Stream;
+  }
+}
+#endiv
+#divert <hpp>
+#import scold.line.Item
+#import scold.line.Stream
+#import std.ostream
+#import std.string
+namespace scold {
+  namespace stream {
+    // Write a "line" into the Stream
+    inline auto operator<<(Stream &, line::Item const &) -> Stream &;
+    inline auto operator<<(Stream &, line::Item &&) -> Stream &;
+
+    // write the Stream in toto to a STL stream.
+    inline auto operator<<(std::ostream &, Stream const &) -> std::ostream &;
+
+    //
+    // Usage:
+    //     Stream somestream = ... compute_somestream(...) ...
+    //     std::string filename "somefile.xcpp";
+    //     line::named(std::cout, filename) << somestream
+    //
+    // see line::named(...) nearby)
+    inline auto operator<<(line::Stream<std::ostream &, std::string const &>, Stream const &) -> line::Stream<std::ostream &, std::string const &>;
+    inline auto operator<<(line::Stream<std::ostream &, std::string>, Stream const &) -> line::Stream<std::ostream &, std::string>;
+  }
+}
+
+#import std.vector
+#forward scold.streams.Streams
+#forward scold.streams.Range
+class scold::stream::Stream : public std::vector<line::Item> {
+  using ancestor = std::vector<line::Item>;
+public:
+  using ancestor::vector;
+  // frequently we want copy semantics
+  inline auto operator+=(Stream const &) -> Stream &;
+  inline auto operator+=(streams::Range<streams::Streams> const &) -> Stream &;
+  // infrequently we want move semantics
+  inline auto operator+=(Stream &&) -> Stream &;
+  inline auto operator+=(streams::Range<streams::Streams> &&) -> Stream &;
+};
+#endiv
+#divert <ipp>
+auto scold::stream::operator<<(Stream &s, line::Item const &l) -> Stream & {
+  s.push_back(l);
+  return s;
+}
+
+#import std.forward
+auto scold::stream::operator<<(Stream &s, line::Item &&anon) -> Stream & {
+  s.push_back(std::forward<line::Item>(anon));
+  return s;
+}
+
+auto scold::stream::operator<<(std::ostream &o, Stream const &s) -> std::ostream & {
+  for (auto const &l : s) {
+    o << value(l) << '\n'; // <--- add back in the newline that we stripped off previously
+  }
+  return o;
+}
+
+auto scold::stream::operator<<(line::Stream<std::ostream &, std::string> pof, Stream const &s) -> line::Stream<std::ostream &, std::string> {
+  line::Stream<std::ostream &, std::string const &> redo(pof.first, pof.second);
+  redo << s;
+  return pof;
+}
+
+#import format.qq
+auto scold::stream::operator<<(line::Stream<std::ostream &, std::string const &> pof, Stream const &s) -> line::Stream<std::ostream &, std::string const &> {
+  using format::qq;
+  std::ostream &out = outbound(pof);
+  for (auto const &l : s) {
+    if (has_lineno(l)) {
+      out << "#line " << lineno(l) << ' ' << qq(filename(pof)) << '\n';
+    }
+    out << value(l) << '\n'; // <--- add back in the newline that we stripped off previously
+  }
+  return pof;
+}
+
+#import std.back_insert_iterator
+#import std.begin
+#import std.copy
+#import std.end
+auto scold::stream::Stream::operator+=(Stream const &rhs) -> Stream & {
+  auto &self(*this);
+  std::back_insert_iterator<Stream> bii(self);
+  std::copy(std::begin(rhs), std::end(rhs), bii);
+  return *this;
+}
+
+#import std.move
+#import std.forward
+auto scold::stream::Stream::operator+=(Stream &&anon) -> Stream & {
+  auto &self(*this);
+  std::back_insert_iterator<Stream> bii(self);
+  std::move(std::begin(std::forward<Stream>(anon)), std::end(std::forward<Stream>(anon)), bii);
+  return *this;
+}
+
+#import scold.streams.Streams
+#import scold.streams.Range
+auto scold::stream::Stream::operator+=(streams::Range<streams::Streams> const &rhs) -> Stream & {
+  auto &self(*this);
+  for (auto const &stream : rhs) {
+    self += stream;
+  }
+  return *this;
+}
+
+#import std.move
+#import std.forward
+auto scold::stream::Stream::operator+=(streams::Range<streams::Streams> &&anon) -> Stream & {
+  auto &self(*this);
+  for (auto &stream : std::forward<streams::Range<streams::Streams>>(anon)) {
+    self += std::move(stream);
+  }
+  return *this;
+}
+#endiv

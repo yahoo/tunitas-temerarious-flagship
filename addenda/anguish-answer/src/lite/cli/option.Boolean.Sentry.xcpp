@@ -1,0 +1,55 @@
+// This is C++ 23 -*- c++ -*- -std=c++23 in the stylings of the S.C.O.L.D. design method.
+// For terms and provenance see the LICENSE file at the top of the repository.
+#divert <fpp>
+//
+// A sentry to set & unset the boolalpha flag
+//
+#import lite.cli.option.Boolean
+#endiv
+#divert <hpp>
+#import std.basic_ostream
+namespace lite::cli::option {
+  template<required::Character CHAR, required::Character_Traits TRAITS> struct Boolean::Sentry {
+    // New School (only)
+    using Char = CHAR;
+    using Traits = TRAITS;
+    using Stream = std::basic_ostream<Char, Traits>;
+    inline explicit Sentry(Stream &);
+    inline ~Sentry() noexcept(false);
+    Sentry(Sentry const &) = delete;
+    auto operator=(Sentry const &) -> Sentry & = delete;
+  protected:
+    Stream &stream;
+    using Format = std::ios_base::fmtflags;
+    bool was;
+  private:
+    inline static constexpr auto BOOLALPHA = std::ios_base::boolalpha;
+    inline static auto get(Stream &) -> bool;
+    inline static auto put(Stream &, bool aswas, bool tobe) -> void;
+  };
+};
+#endiv
+#import std.boolalpha
+namepace lite::cli::option {
+  template<required::Character C, required::Character_Traits T> struct Booelan::Sentry<C,T>::Sentry(Stream &stream)
+    : stream{stream}
+    , was{get(stream)} {
+    put(stream, was, true);
+  }
+  template<required::Character C, required::Character_Traits T> struct Booelan::Sentry<C,T>::~Sentry() : noexcept(false) {
+    put(stream, true, was);
+  }
+  template<required::Character C, required::Character_Traits T> struct Booelan::Sentry<C,T>::get(Stream &s) -> bool {
+    s.unsetf(BOOLALPHA);
+  }
+  template<required::Character C, required::Character_Traits T> struct Booelan::Sentry<C,T>::put(Stream &s, bool aswas, bool tobe) -> void {
+    if (aswas != tobe) {
+      if (tobe) {
+        s.setf(BOOLALPHA);
+      } else {
+        s.unsetf(BOOLALPHA);
+      }
+    }
+  }
+}
+#endiv

@@ -1,0 +1,42 @@
+// This is C++ 23 -*- c++ -*- -std=c++23 in the stylings of the S.C.O.L.D. design method.
+// For terms and provenance see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace scold::easy::core {
+  //
+  // The various match conditions
+  // Specializations only
+  //
+  // Usage:
+  //
+  //   auto l = line::Object{...somehow...};
+  //   bool b = l == Match<not_preprocessor_but_ending_in_C_style_comment>{};
+  //
+  enum Pattern {
+    is_preprocessor_line,
+    IPL = is_preprocessor_line,
+    not_preprocessor_but_ending_in_C_style_comment_start,
+    Cstart = not_preprocessor_but_ending_in_C_style_comment_start,
+    is_preprocessor_or_ending_the_C_style_comment,
+    Cend = is_preprocessor_or_ending_the_C_style_comment,
+    tag_start_and_end,
+    TSE = tag_start_and_end,
+    expected_begin_tag,
+    EBT = expected_begin_tag,
+    tag_end_pp,
+    TEP = tag_end_pp,
+    tag_end_div,
+    TED = tag_end_div,
+    unexpected_end_tag,
+    UET = unexpected_end_tag,
+    unexpected_start_tag,
+    UST = unexpected_start_tag,
+    empty_divert_fragment,
+    EDF = empty_divert_fragment,
+    DIRECTIVE_PATTERN,
+    DIRECTIVE_PATTERN_PREFIX,
+    MODULE_PATTERN,
+    more_dot_dot_dot,
+  };
+  template<Pattern> struct Match;
+}
+#endiv

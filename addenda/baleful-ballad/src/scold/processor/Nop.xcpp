@@ -1,0 +1,32 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace scold {
+  namespace processor {
+    class Nop;
+  }
+}
+#endiv
+#divert <hpp>
+#import scold.processor.Generic
+class scold::processor::Nop : public Generic {
+  using ancestor = Generic;
+public:
+  explicit Nop(configuration_type const &, context_type &);
+  auto operator()(phase_type, line_type &, output_type &, imports_type &, entails_type &, depends_type &) -> void override final;
+  // The Director uses the EMPTY line when dispatching a spontaneous nop processor.
+  line_type EMPTY;
+};
+#endiv
+#divert <cpp>
+scold::processor::Nop::Nop(configuration_type const &arg_cfg, context_type &arg_ctx)
+  : ancestor(arg_cfg, arg_ctx) {
+  ;
+}
+
+#import want.format.braket
+auto scold::processor::Nop::operator()(phase_type phase, line_type &line, output_type &out, imports_type &imports, entails_type &entails, depends_type &depends) -> void {
+  // Do Nothing
+  using want::format::braket;
+  debug(cfg, ctx, line) << "nop on " << braket(braket(value(line))) << '\n';
+}
+#endiv

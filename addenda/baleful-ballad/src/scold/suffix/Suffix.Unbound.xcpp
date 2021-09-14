@@ -1,0 +1,28 @@
+// -*- c++ -*- in the SCOLD styling that is so fashionable these days
+#divert <hpp>
+#import scold.suffix.Suffix
+#import path.filename.mount.Unbound
+#import path.filename.mount.Value
+namespace scold {
+  namespace suffix {
+    //
+    // entailed from (at least) module <scold.fragment.workbench>
+    //
+    // Usage:
+    //     Suffix fpp = Suffix::FPP
+    //     auto some_filename_syntax = ...something...
+    //     finalize(workbench() * fpp / some_filename_syntax)
+    //
+    // declared in namespace scold near scold::Suffix so that ADL will find it.
+    inline auto operator*(path::filename::mount::Unbound &&, Suffix) -> path::filename::mount::Value;
+  }
+}
+#endiv
+#divert <ipp>
+#import scold.to.string
+#import std.forward
+auto scold::suffix::operator*(path::filename::mount::Unbound &&anon, Suffix suffix) -> path::filename::mount::Value {
+  return std::forward<path::filename::mount::Unbound>(anon) * to<std::string>(suffix);
+}
+#endiv
+

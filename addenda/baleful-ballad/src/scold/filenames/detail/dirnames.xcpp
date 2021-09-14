@@ -1,0 +1,45 @@
+// -*- c++ -*- in the SCOLD styling that is so fashionable these days
+#divert <hpp>
+#import scold.filenames.Filenames
+#import scold.filenames.Filenames.Directories
+#import scold.Phase
+#import scold.Phases
+#import scold.Suffix
+namespace scold {
+  namespace filenames {
+    namespace detail {
+      inline auto dirnames(Filenames::Directories &fill, Filenames const &) -> void;
+      template<typename... INDICES> inline auto dirnames(Filenames::Directories &fill, Filenames const &, Phase, INDICES...) -> void;
+      template<typename... INDICES> inline auto dirnames(Filenames::Directories &fill, Filenames const &, Phases, INDICES...) -> void;
+      template<typename... INDICES> inline auto dirnames(Filenames::Directories &fill, Filenames const &, Suffix, INDICES...) -> void;
+    }
+  }
+}
+#endiv
+#divert <ipp>
+auto scold::filenames::detail::dirnames(Filenames::Directories &fill, Filenames const &source) -> void {
+  // do nothing ...
+  // ... do not read from source.
+  // ... do not modify fill.
+}
+
+#import ish.shell.dirname
+template<typename... INDICES> auto scold::filenames::detail::dirnames(Filenames::Directories &fill, Filenames const &source, Phase phase, INDICES ...indices) -> void {
+  fill.insert(ish::shell::dirname(source[phase]));
+  dirnames(fill, source, indices...);
+}
+
+#import ish.shell.dirname
+template<typename... INDICES> auto scold::filenames::detail::dirnames(Filenames::Directories &fill, Filenames const &source, Phases phases, INDICES ...indices) -> void {
+  for (auto phase : phases) {
+    fill.insert(ish::shell::dirname(source[phase]));
+  }
+  dirnames(fill, source, indices...);
+}
+
+#import ish.shell.dirname
+template<typename... INDICES> auto scold::filenames::detail::dirnames(Filenames::Directories &fill, Filenames const &source, Suffix suffix, INDICES ...indices) -> void { 
+  fill.insert(ish::shell::dirname(source[suffix]));
+  dirnames(fill, source, indices...);
+}
+#endiv

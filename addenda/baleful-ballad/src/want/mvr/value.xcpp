@@ -1,0 +1,26 @@
+// -*- c++ -*- in the SCOLD stylings that are all the fashion these days
+#divert <hpp>
+#forward want.mvr.SAV
+namespace want {
+  namespace mvr {
+    template<typename TYPE> inline auto value(SAV<TYPE> const &) -> TYPE const &;
+    template<typename TYPE> inline auto value(SAV<TYPE> &) -> TYPE &;
+    template<typename TYPE> inline auto value(SAV<TYPE> &&) -> TYPE &&;
+  }
+}
+#endiv
+#divert <ipp>
+#import std.forward
+
+template<typename TYPE> auto want::mvr::value(SAV<TYPE> const &sav) -> TYPE const & {
+  return sav.captured_value;
+}
+
+template<typename TYPE> auto want::mvr::value(SAV<TYPE> &sav) -> TYPE & {
+  return sav.captured_value;
+}
+
+template<typename TYPE> auto want::mvr::value(SAV<TYPE> &&anon) -> TYPE && {
+  return std::forward<TYPE>(anon.captured_value);
+}
+#endiv

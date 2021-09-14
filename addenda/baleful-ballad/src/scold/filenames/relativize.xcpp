@@ -1,0 +1,34 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <hpp>
+#import scold.filenames.Filenames
+#import std.string
+namespace scold {
+  namespace filenames {
+    inline auto relativize(Filenames const &, std::string const &modulesdir, std::string const &objdir, std::string const  &srcdir) -> Filenames;
+  }
+}
+#endiv
+#divert <ipp>
+#import path.filename.deprefix
+#import path.filename.trim
+#import scold.Suffix
+#import std.move
+auto scold::filenames::relativize(Filenames const &source, std::string const &modulesdir, std::string const &objdir, std::string const  &srcdir) -> Filenames {
+  using path::filename::trim;
+  using path::filename::deprefix;
+  Filenames result(source);
+  auto demodule = deprefix(modulesdir);
+  auto deobj = deprefix(objdir);
+  auto desrc = deprefix(srcdir);
+  trim(result[Suffix::FPP]) << demodule;
+  trim(result[Suffix::HPP]) << demodule;
+  trim(result[Suffix::IPP]) << demodule;
+  trim(result[Suffix::TPP]) << demodule;
+  trim(result[Suffix::CPP]) << deobj;
+  trim(result[Suffix::XCPP]) << desrc;
+  trim(result[Suffix::O]) << deobj;
+  trim(result[Suffix::LO]) << deobj;
+  trim(result[Suffix::MK]) << deobj;
+  return result;
+}
+#endiv

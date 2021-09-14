@@ -1,0 +1,13 @@
+#!/bin/sh
+source ${0%/*}/../library/rigging.sh || exit 255
+opt=/opt/scold
+make_outdir
+good ${boilerplate_exe?} \
+    --mk-directory=${outdir?} \
+    --with-vernacular-doggerel=../library/installation \
+    --with-hypogeal-twilight=../library/installation \
+    --with-nonstd-gcc=${opt?} \
+    --with-nonstd-cppunit=${opt?} \
+    --with-std-scold=${opt?} \
+    --with-std-mysql=${opt?} \
+    ${end}

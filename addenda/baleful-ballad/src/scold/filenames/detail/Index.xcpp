@@ -1,0 +1,21 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace scold {
+  namespace filenames {
+    namespace detail {
+      //
+      // In support of Filenames::operator_index<...>(...)
+      //
+      template<typename INDEX, typename FILENAMES_CONSTY> struct Index;
+    }
+  }
+}
+#entail scold.filenames.detail.Index.CONSTY
+#endiv
+#divert <hpp>
+#import std.string
+template<typename INDEX, typename FILENAMES_CONSTY> struct scold::filenames::detail::Index {
+  using filenames_type = FILENAMES_CONSTY;
+  using name_type = std::string;
+};
+#endiv

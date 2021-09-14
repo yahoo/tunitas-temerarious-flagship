@@ -1,0 +1,64 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace scold {
+  namespace directories {
+    namespace mkdirp {
+      // a new class, not a type alias, so that ADL will find it here
+      class Result;
+    }
+  }
+}
+#endiv
+#divert <hpp>
+#import std.set
+#import std.string
+namespace scold {
+  namespace directories {
+    namespace mkdirp {
+      // the directory that failed to be made
+      inline auto directory(Result const &) -> std::string const &;
+      inline auto directory(Result &) -> std::string &;
+      inline auto directory(Result &&) -> std::string &&;
+
+      inline auto worklist(Result const &) -> std::set<std::string> const &;
+      inline auto worklist(Result &) -> std::set<std::string> &;
+      inline auto worklist(Result &&) -> std::set<std::string> &&;
+    }
+  }
+}
+
+#import sys.call.result.Value
+class scold::directories::mkdirp::Result : public sys::call::result::Value<std::string, std::set<std::string>> {
+  using ancestor = sys::call::result::Value<std::string, std::set<std::string>>;
+public:
+  using ancestor::Value;
+};
+#endiv
+#divert <ipp>
+#import std.get
+auto scold::directories::mkdirp::directory(Result const &result) -> std::string const & {
+  return std::get<2>(result);
+}
+
+auto scold::directories::mkdirp::directory(Result &result) -> std::string & {
+  return std::get<2>(result);
+}
+
+#import std.forward
+auto scold::directories::mkdirp::directory(Result &&result) -> std::string && {
+  return std::get<2>(std::forward<Result>(result));
+}
+
+auto scold::directories::mkdirp::worklist(Result const &result) -> std::set<std::string> const & {
+  return std::get<3>(result);
+}
+
+auto scold::directories::mkdirp::worklist(Result &result) -> std::set<std::string> & {
+  return std::get<3>(result);
+}
+
+#import std.forward
+auto scold::directories::mkdirp::worklist(Result &&result) -> std::set<std::string> && {
+  return std::get<3>(std::forward<Result>(result));
+}
+#endiv

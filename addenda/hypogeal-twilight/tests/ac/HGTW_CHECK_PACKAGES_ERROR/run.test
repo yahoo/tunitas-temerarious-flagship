@@ -1,0 +1,9 @@
+#!/bin/bash
+# Run the standard test rig.  Watch it fail
+if ${0%/*}../lib/case1/run.test ; then
+    echo "FAIL unexpected success of ./configure"
+    exit 1
+else
+    # It is expected to fail (read the configure.ac)
+    echo OK
+fi

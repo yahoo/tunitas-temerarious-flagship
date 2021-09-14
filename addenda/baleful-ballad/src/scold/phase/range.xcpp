@@ -1,0 +1,22 @@
+// -*- c++ -*- in the SCOLD styling that is so fashionable these days
+#divert <hpp>
+#import scold.Phases
+#import scold.phase.Phase
+namespace scold {
+  namespace phase {
+    //
+    // usage:
+    //     for (auto p : range(Phase::HPP, Phase::TPP)) {
+    //        ...use p...
+    //     }
+    //
+    inline auto range(Phase, Phase) -> Phases;
+  }
+}
+#endiv
+#divert <ipp>
+auto scold::phase::range(Phase s, Phase f) -> Phases {
+  // Whereas Phases already does "the range thing"
+  return Phases(s, f);
+}
+#endiv

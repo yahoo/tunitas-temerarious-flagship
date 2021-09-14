@@ -1,0 +1,4 @@
+tests_usage_TESTS = \
+  tests/usage/remonstrate.test \
+  $(end)
+

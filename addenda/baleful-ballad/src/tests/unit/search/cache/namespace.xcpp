@@ -1,0 +1,13 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+#import tests.unit.search
+namespace tests {
+  namespace unit {
+    namespace search {
+      namespace cache {
+        // Test fixtures for the cache of the searchpath manipulations
+      }
+    }
+  }
+}
+#divert </fpp>

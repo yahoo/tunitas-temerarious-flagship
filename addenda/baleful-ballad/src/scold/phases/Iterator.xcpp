@@ -1,0 +1,60 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace scold {
+  namespace phases {
+    class Iterator;
+  }
+}
+#endiv
+#divert <hpp>
+namespace scold {
+  namespace phases {
+    inline auto operator==(Iterator const &, Iterator const &) -> bool;
+    inline auto operator!=(Iterator const &, Iterator const &) -> bool;
+  }
+}
+
+#import scold.Phase
+#import std.forward_iterator_tag
+#import std.iterator
+class scold::phases::Iterator : public std::iterator<std::forward_iterator_tag, Phase, void, void, void> {
+public:
+  inline explicit Iterator(Phase);
+  inline auto operator++() -> Iterator &;
+  inline auto operator++(int) -> Iterator;
+  inline auto operator*() -> value_type;
+protected:
+  Phase value;
+  friend auto operator==(Iterator const &a, Iterator const &b) -> bool;
+};
+#endiv
+#divert <ipp>
+
+auto scold::phases::operator==(Iterator const &a, Iterator const &b) -> bool {
+  return a.value == b.value;
+}
+
+auto scold::phases::operator!=(Iterator const &a, Iterator const &b) -> bool {
+  return !operator==(a, b);
+}
+
+scold::phases::Iterator::Iterator(Phase arg_value)
+  : value(arg_value) {
+  ;
+}
+
+auto scold::phases::Iterator::operator++() -> Iterator & {
+  value = succ(value);
+  return *this;
+}
+
+auto scold::phases::Iterator::operator++(int) -> Iterator {
+  Iterator old(*this);
+  operator++();
+  return old;
+}
+
+auto scold::phases::Iterator::operator*() -> value_type {
+  return value;
+}
+#endiv

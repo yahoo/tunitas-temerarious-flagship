@@ -1,0 +1,24 @@
+// This is C++ 23 -*- c++ -*- -std=c++23 in the stylings of the S.C.O.L.D. design method.
+// For terms and provenance see the LICENSE file at the top of the repository.
+#divert <fpp>
+#import scold.easy.debugging.Formatter
+#endiv
+#divert <hpp>
+#import scold.easy.message.Stream
+#import scold.easy.Searchpath
+namespace scold::easy::debugging {
+  inline auto operator<<(message::Stream, Formatter<Searchpath> const &) -> message::Stream;  
+}
+#endiv
+#divert <ipp>
+auto scold::easy::debugging::operator<<(message::Stream eam, Formatter<Searchpath> const &frm) -> message::Stream {
+  (void) (eam << "{");
+  auto sep = "";
+  for (auto const &filepath : frm.value) {
+    (void) (eam << sep << filepath);
+    sep = ", ";
+  }
+  return eam << " }";
+}
+#endiv
+

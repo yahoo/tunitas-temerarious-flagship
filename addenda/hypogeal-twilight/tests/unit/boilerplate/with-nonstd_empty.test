@@ -1,0 +1,4 @@
+#!/bin/sh
+source ${0%/*}/../library/rigging.sh || exit 255
+EMPTY=""
+fail ${boilerplate_exe?} --with-nonstd-$EMPTY=/opt/nonstd/ --dry-run

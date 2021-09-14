@@ -1,0 +1,52 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace want {
+  namespace detail {
+    namespace series {
+      //
+      // The first VALUE defines the "type" of the remaining VALUES...
+      // The VALUES... will need to be "the same" or else instantiating the iterator will fail
+      //
+      // Usage
+      //   Object<Suffix, Suffix, Suffix>
+      //   Object<Phase, Phase, Phase...>
+      //   auto list = series(Phase::FPP, Phase::TPP, Phase::XCPP)
+      //
+      template<typename VALUE, typename... VALUES> class Object;
+    }
+  }
+}
+#endiv
+#divert <hpp>
+#import std.size_t
+#import std.array
+#import std.tuple_size
+#import std.tuple
+template<typename VALUE, typename... VALUES> class want::detail::series::Object : public std::array<VALUE, 1+std::tuple_size<std::tuple<VALUES...>>::value> {
+  // see +1 for 'VALUE' and tuple_size to count the vararg part
+  using ancestor = std::array<VALUE, 1+std::tuple_size<std::tuple<VALUES...>>::value>;
+public:
+  using value_type = VALUE;
+  inline explicit Object(VALUE, VALUES ...);
+  // empty(), size(), begin(, end() are from the ancestor
+ protected:
+  template<std::size_t N> inline auto initialize() -> void;
+  template<std::size_t N, typename INITIAL, typename... REST> inline auto initialize(INITIAL, REST ...) -> void;
+};
+#endiv
+#divert <ipp>
+template<typename VALUE, typename... VALUES> template<std::size_t N> auto want::detail::series::Object<VALUE, VALUES...>::initialize() -> void {
+  // nothing to do
+}
+
+template<typename VALUE, typename... VALUES> template<std::size_t N, typename INITIAL, typename... REST> auto want::detail::series::Object<VALUE, VALUES...>::initialize(INITIAL arg_initial, REST ...arg_rest) -> void {
+  ancestor &self(*this);
+  self[N] = arg_initial;
+  initialize<N+1>(arg_rest...);
+}
+
+template<typename VALUE, typename... VALUES> want::detail::series::Object<VALUE, VALUES...>::Object(VALUE arg_value, VALUES ...arg_values)
+  : ancestor() {
+  initialize<0>(arg_value, arg_values...);
+}
+#endiv

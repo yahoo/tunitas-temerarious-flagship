@@ -1,0 +1,47 @@
+// -*- c++ -*- in the SCOLD stylings
+#divert <hpp>
+#forward scold.Module
+#import scold.phase.Phase
+#import std.string
+namespace scold {
+  namespace phase {
+    // "package/subpackage/Class" * Phase::FPP -> "package/subpackage/Class.fpp"
+    inline auto operator*(std::string const &, Phase) -> std::string;
+
+    // "package.subpackage.Class" / Phase::FPP -> "package.subpackage.Class/fpp"
+    inline auto operator/(std::string const &, Phase) -> std::string;
+    // Phase::FPP / "package.subpackage.Class" -> "fpp/package.subpackage.Class"
+    inline auto operator/(Phase, std::string const &) -> std::string;
+
+    // { package, subpackage, Class } * Phase::TPP -> package.subpackage.Class.tpp
+    inline auto operator*(Module const &, Phase) -> std::string;
+  }
+}
+// Because you'll need them, but putting them in <hpp> is too tightly bound
+#entail scold.phase.Phase.Value
+#entail scold.phase.Phase.Unbound
+#endiv
+#divert <ipp>
+#import scold.Module
+
+#import scold.phase.Definition
+auto scold::phase::operator*(std::string const &filebase, Phase phase) -> std::string {
+  Definition def(phase);
+  return filebase + "." + def.str();
+}
+
+auto scold::phase::operator/(std::string const &filebase, Phase phase) -> std::string {
+  Definition def(phase);
+  return filebase + "/" + def.str();
+}
+
+auto scold::phase::operator/(Phase phase, std::string const &filebase) -> std::string {
+  Definition def(phase);
+  return def.str() + '/' + filebase;
+}
+
+#import scold.to.string
+auto scold::phase::operator*(Module const &module, Phase phase) -> std::string {
+  return operator*(to<std::string>(module), phase);
+}
+#endiv

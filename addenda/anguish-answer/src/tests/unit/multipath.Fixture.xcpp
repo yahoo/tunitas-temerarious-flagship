@@ -1,0 +1,116 @@
+// This is C++ 23 -*- c++ -*- -std=c++23 in the stylings of the S.C.O.L.D. design method.
+// For terms and provenance see the LICENSE file at the top of the repository.
+#divert <fpp>
+#import scold.easy // for the namespaces, all of them
+#import scold.easy.Program
+#import scold.easy.Configuration
+#import scold.easy.suffix.Suffix
+namespace tests::unit::multipath {
+  namespace [[eponymous]] fixture {
+    class Fixture;
+    namespace library = ::scold::easy::multipath;
+    namespace name = ::scold::easy::name;
+    using ::scold::easy::Program;
+    using ::scold::easy::Configuration;
+    using ::scold::easy::suffix::Suffix;
+  }
+  using fixture::Fixture;
+}
+#endiv
+#divert <hpp>
+#import cppunit.Test
+#import cppunit.test.Fixture
+struct tests::unit::multipath::fixture::Fixture : public cppunit::test::Fixture {
+  auto test_burst() -> void;
+  auto test_prune() -> void;
+  auto test_defined_path() -> void;
+  auto test_defined_optional_path() -> void;
+  auto test_reconstruct() -> void;
+  auto test_dedot() -> void;
+  static auto suite() -> cppunit::Test *;
+};
+#endiv
+#divert <cpp>
+#import std.cerr
+#import scold.easy.multipath.burst
+#import scold.easy.multipath.prune
+namespace tests::unit::multipath::fixture {
+  auto Fixture::test_burst() -> void {
+    auto cfg = Configuration{Program{"a.out"}};
+    cfg.debug_mode = true;
+    cfg.quiet_mode = false;
+    cfg.project.sources_area = "src";
+    cfg.project.local_objects_area = "obj/src";
+    cfg.project.local_modules_area = "obj/modules";
+    auto bust = library::burst(cfg, "src/tests/example/main.xcpp");
+    std::cerr << "DEBUG " << bust.module << '\n';
+    std::cerr << "DEBUG " << bust.original << '\n';
+    std::cerr << "DEBUG " << bust.at(Suffix::FPP) << '\n';
+    std::cerr << "DEBUG " << bust.at(Suffix::HPP) << '\n';
+    std::cerr << "DEBUG " << bust.at(Suffix::IPP) << '\n';
+    std::cerr << "DEBUG " << bust.at(Suffix::TPP) << '\n';
+    std::cerr << "DEBUG " << bust.at(Suffix::CPP) << '\n';
+    CPPUNIT_ASSERT(!bust.module.empty());
+    CPPUNIT_ASSERT(!bust.original.empty());
+    CPPUNIT_ASSERT("obj/src/tests/example/main.cpp"s == bust.at(Suffix::CPP));
+    CPPUNIT_ASSERT("obj/modules/fpp/tests.example.main"s == bust.at(Suffix::FPP));
+  }
+  auto Fixture::test_prune() -> void {
+    auto x1 = name::Filepath{"obj/src/here/there/file.xcpp"};
+    { auto const pattern = name::Filepath{"obj/src"};
+      std::cerr << "DEBUG 1. before pruning " << x1 << '\n';
+      library::prune(x1, pattern);
+      std::cerr << "DEBUG 1. after pruning " << x1 << '\n';
+    } { auto const pattern = name::Filepath{"src/"};
+      std::cerr << "DEBUG 2. before pruning " << x1 << '\n';
+      library::prune(x1, pattern);
+      std::cerr << "DEBUG 2. after pruning " << x1 << '\n';
+    } { auto const pattern = name::Filepath{"obj/src/"};
+      std::cerr << "DEBUG 3. before pruning " << x1 << '\n';
+      library::prune(x1, pattern);
+      std::cerr << "DEBUG 3. after pruning " << x1 << '\n';
+    }
+  }
+  auto Fixture::test_defined_path() -> void {
+    auto d0 = library::detail::defined(std::filesystem::path{""});
+    auto d1 = library::detail::defined(std::filesystem::path{"/path"});
+    CPPUNIT_ASSERT(d0 != d1);
+  }
+  auto Fixture::test_defined_optional_path() -> void {
+    auto d0 = library::detail::defined(std::optional<std::filesystem::path>{});
+    auto d1 = library::detail::defined(std::optional<std::filesystem::path>{"/path"});
+    CPPUNIT_ASSERT(d0 != d1);
+  }
+  auto Fixture::test_reconstruct() -> void {
+    auto const specimen = std::filesystem::path{"/a/b/c/d/e/f"};
+    std::cerr << "DEBUG reconstruction specimen=" << specimen << '\n';
+    auto const reconstructed = library::detail::reconstruct(specimen.begin(), specimen.end());
+    std::cerr << "DEBUG reconstruction reconstructed=" << reconstructed << '\n';
+    CPPUNIT_ASSERT(reconstructed == specimen);
+  }
+  auto Fixture::test_dedot() -> void {
+    auto const specimen = std::filesystem::path{"apple/banana/cherry"};
+    auto const dedotted = library::detail::dedot(specimen);
+    auto const expected = "apple.banana.cherry"s;
+    CPPUNIT_ASSERT_EQUAL(expected, (std::string) dedotted);
+  }
+}
+#import rigging.suite.io
+auto tests::unit::multipath::fixture::Fixture::suite() -> cppunit::Test * {
+  using namespace rigging::suite;
+  Stream series("multipath");
+  series << call("burst", &Fixture::test_burst)
+         << call("prune", &Fixture::test_prune)
+         << []{
+              auto det = Stream{"defined"};
+              det << call("path", &Fixture::test_defined_path)
+                  << call("optional<path>", &Fixture::test_defined_optional_path)
+                  << END;
+              return move(det);
+            }()
+         << call("reconstruct", &Fixture::test_reconstruct)
+         << call("dedot", &Fixture::test_dedot)
+         << END;
+  return finalize(series);
+}
+#endiv

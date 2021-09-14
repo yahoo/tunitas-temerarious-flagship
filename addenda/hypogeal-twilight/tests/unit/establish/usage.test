@@ -1,0 +1,3 @@
+#!/bin/sh
+source ${0%/*}/../library/rigging.sh || exit 255
+run establish-config-settings --usage

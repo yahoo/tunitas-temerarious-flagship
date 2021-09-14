@@ -1,0 +1,193 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace scold {
+  namespace stream {
+    //
+    // Assess a line to see if it it is a SCOLD preprocessor line
+    // For phases <fpp>, <hpp>, <ipp>, <tpp>, <cpp>
+    //
+    // Current
+    //     #divert <fpp>       ... begin the fpp-phase stanza
+    //     #divert <fpp/>      ... begin and end the fpp-phase stanza
+    //     #divert </fpp>      ... end the fpp-phase stanza
+    //     #endiv              ... ibidem.
+    //
+    // Deprecated (no need for the keywords)
+    //     # <fpp>
+    //     # <fpp/>
+    //     # </fpp>
+    //
+    // This is in namespace scold::phase because it pertains to phases.
+    // An argument could be made that it belongs in some other namespace.
+    //
+    class Assessor;
+  }
+}
+#endiv
+#divert <hpp>
+#import scold.Ground
+#import scold.Phase
+#import scold.stream.Estimate
+#import std.string
+#import want.regex.pattern
+class scold::stream::Assessor {
+public:
+  Assessor(); 
+  auto operator()(std::string const &line) -> Estimate;
+  template<typename TYPE> inline auto state() const -> TYPE;
+  // contra UNUSEABLE
+  inline auto in_foreground() -> bool;
+  inline auto in_background() -> bool;
+protected:
+  // The assessor maintains state
+  Ground ground;
+  Phase phase;
+  Phase maximum;
+  bool errors_were_seen;
+  // WATCHOUT - do not make these static because they can throw in the constructor.
+  want::regex::pattern const DIVERT_TAG;
+  want::regex::pattern const DIVERT_END;
+  want::regex::pattern const ENDIV;
+  want::regex::pattern const ALMOST_BUT_UNUSEABLE_DIVERT;
+  want::regex::pattern const ALMOST_BUT_UNUSEABLE_ENDIV;
+  want::regex::pattern const ALMOST_BUT_UNUSEABLE_DEPRECATED;
+};
+
+namespace scold {
+  namespace stream {
+    template<> inline auto Assessor::state<Ground>() const -> Ground;
+    template<> inline auto Assessor::state<Phase>() const -> Phase;
+  }
+}
+#endiv
+#divert <ipp>
+template<typename TYPE> auto scold::stream::Assessor::state() const -> TYPE {
+  static_assert(0 == sizeof (TYPE) && 0 != sizeof (TYPE), "specializations only");
+  return TYPE();
+}
+
+template<> auto scold::stream::Assessor::state<scold::Ground>() const -> Ground {
+  return ground;
+}
+
+template<> auto scold::stream::Assessor::state<scold::Phase>() const -> Phase {
+  return phase;
+}
+
+auto scold::stream::Assessor::in_foreground() -> bool {
+  return Ground::FORE == ground;
+}
+
+auto scold::stream::Assessor::in_background() -> bool {
+  return Ground::BACK == ground;
+}
+#endiv
+#divert <cpp>
+scold::stream::Assessor::Assessor()
+  : ground(Ground::BACK)
+  , phase(Phase::BEG)
+  , maximum(phase)
+  , errors_were_seen(false)
+  , DIVERT_TAG(R"regex(^\s*(?:#\s*divert\s*)?<(\w+)(/)?>\s*$)regex")
+  , DIVERT_END(R"regex(^\s*(?:#\s*divert\s*)?<(/(\w+))>\s*$)regex")
+  , ENDIV(R"regex(^\s*(?:#\s*endiv\b\s*$))regex")
+  , ALMOST_BUT_UNUSEABLE_DIVERT(R"regex(^\s*#\s*divert\b.*$)regex")
+  , ALMOST_BUT_UNUSEABLE_ENDIV(R"regex(^\s*#\s*endiv\b.*$)regex")
+  , ALMOST_BUT_UNUSEABLE_DEPRECATED(R"regex(^\s*#\s*<.*$)regex") {
+  ;
+}
+
+#import scold.Phase
+#import scold.stream.Estimate
+#import scold.phase.Definition
+#import want.regex.match
+#import want.regex.smatch
+#include <cassert>
+auto scold::stream::Assessor::operator()(std::string const &line) -> Estimate {
+  using scold::phase::Definition;
+  Phase old_phase(phase);
+  Action action = Action::KEEP;
+  std::string error_message, warning_message;
+  want::regex::smatch sm;
+  if (want::regex::match(line, sm, DIVERT_TAG)) {
+    assert(3 == sm.size());
+    // sm[0] = the whole match (the whole line)
+    // sm[1] = $1 is fpp    of <fpp>
+    // sm[2] = $2 is /      of <fpp/>   the optional slash of the "begin and end"
+    ground = Ground::FORE;
+    auto r = Definition::to(sm[1]);
+    if (ok(r)) {
+      phase = value(r);
+      if (le(phase, maximum)) {
+        std::ostringstream buf;
+        buf << "the tag on #divert " << sm[1] << " has already been used";
+        error_message = buf.str();
+        errors_were_seen = true;
+      } else {
+        maximum = max(maximum, phase);
+        action = Action::DROP;
+      }
+    } else {
+      std::ostringstream buf;
+      buf << "inappropriate tag on #divert " << sm[1];
+      error_message = buf.str();
+      ground = Ground::UNUSEABLE;
+      errors_were_seen = true;
+    }
+  } else if (want::regex::match(line, sm, DIVERT_END)) {
+    assert(3 == sm.size());
+    // sm[0] = the whole match (the whole line)
+    // sm[1] = $1 is /fpp   of </fpp>
+    // sm[2] = $2 is fpp    of </fpp>
+    ground = Ground::BACK;
+    auto r = Definition::to(sm[2]);
+    if (ok(r)) {
+      Phase end = value(r);
+      if (end == phase) {
+        // After the #divert ends, we're back out at the top level, which is imputed to "all" files
+        // but that concept is handled with the FORE/BACK notion.  phase remains the same
+        phase = phase;
+        action = Action::DROP;
+      } else {
+        std::ostringstream buf;
+        buf << "mismatched end tag on #divert " << sm[1] << " does not match " << phase;
+        error_message = buf.str();
+        errors_were_seen = true;
+      }
+    } else {
+      std::ostringstream buf;
+      buf << "unknown end tag on #divert " << sm[0];
+      error_message = buf.str();
+      errors_were_seen = true;
+    }
+  } else if (want::regex::match(line, sm, ENDIV)) {
+    // it's hard to make a mistake by using #endiv in the wrong place (but it can be done)
+    ground = Ground::BACK;
+    Definition d(phase);
+    if (d.can_endiv()) {
+      phase = phase;
+      action = Action::DROP;
+    } else {
+      std::ostringstream buf;
+      buf << "inappropriate use of #endiv while at the top level (there is no #divert in play)\n";
+      error_message = buf.str();
+      errors_were_seen = true;
+    }
+  } else if (want::regex::match(line, sm, ALMOST_BUT_UNUSEABLE_DIVERT)) {
+    // FIXME ... move this up in to the Imputer, which needs to have access to cfg & ctx.
+    error_message = "invalid syntax in #divert (close but still incomprehensible)\n";
+    errors_were_seen = true;
+  } else if (want::regex::match(line, sm, ALMOST_BUT_UNUSEABLE_ENDIV)) {
+    // FIXME ... move this up in to the Imputer, which needs to have access to cfg & ctx.
+    error_message = "invalid syntax in #endiv (close but still incomprehensible)\n";
+    errors_were_seen = true;
+  } else if (want::regex::match(line, sm, ALMOST_BUT_UNUSEABLE_DEPRECATED)) {
+    // FIXME ... move this up in to the Imputer, which needs to have access to cfg & ctx.
+    error_message = "invalid deprecated syntax after # (close but still incomprehensible)\n";
+    errors_were_seen = true;
+  } else {
+    // No change in state: neither ground nor phase changes
+  }
+  return Estimate(old_phase, ground, phase, action, std::move(error_message), std::move(warning_message));
+}
+#endiv

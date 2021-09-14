@@ -1,0 +1,117 @@
+// This is C++ 23 -*- c++ -*- -std=c++23 in the stylings of the S.C.O.L.D. design method.
+// For terms and provenance see the LICENSE file at the top of the repository.
+#divert <hpp>
+#import std.optional
+#import std.string
+#import std.filesystem.path
+#import scold.easy.Configuration
+namespace scold::easy::multipath::detail {
+  //
+  // return a "define" or "undefined" keyword
+  inline auto defined(std::optional<std::filesystem::path> const &) -> std::string;
+  inline auto defined(std::filesystem::path const &) -> std::string;
+  // reassemble
+  inline auto reconstruct(std::filesystem::path::iterator, std::filesystem::path::iterator) -> std::filesystem::path;
+  // s|/|.|g;
+  inline auto dedot(std::filesystem::path const &filepath) -> std::filesystem::path;
+  // s|\.|/|g;
+  inline auto reslash(std::filesystem::path const &filepath) -> std::filesystem::path;
+  //
+  // Explain and throw Failing if it is invalid
+  // Different rules apply to the head and the tail
+  //
+  //   apple/banana/cherry/dog.goat.eagle     but only the last component an use the "dots" notation
+  //   apple/banana/cherry/dog/goat/eagle
+  //
+  // All but the last component must be identifiers.
+  // The final component may have dots "as if" they were slashes; and the intervening words must be slashes.
+  auto validate_module_name(Configuration const &, std::filesystem::path const &file_xcpp, std::filesystem::path const &source) -> void;
+}
+#endiv
+#divert <ipp>
+#import std.move
+#import std.all_of
+#import std.isalnum
+#import scold.easy.exception.Failing
+namespace scold::easy::multipath {
+  auto detail::defined(std::optional<std::filesystem::path> const &opt) -> std::string {
+    return !opt ? "undefined" : defined(*opt);
+  }
+  auto detail::defined(std::filesystem::path const &p) -> std::string {
+    return p.empty() ? "undefined" : "defined";
+  }
+  auto detail::reconstruct(std::filesystem::path::iterator current, std::filesystem::path::iterator finish) -> std::filesystem::path {
+    auto ret = std::filesystem::path{};
+    for ( ; current != finish; ++current) {
+      ret /= *current;
+    }
+    return ret;
+  }
+  auto detail::dedot(std::filesystem::path const &filepath) -> std::filesystem::path {
+    // Hack on it using the string reprsentation, then return the converted-to-dots as a path
+    std::string ret{filepath};
+    for (char &c : ret) {
+      if ('/' == c) { c = '.'; }
+    }
+    return ret;
+  }
+  auto detail::reslash(std::filesystem::path const &filepath) -> std::filesystem::path {
+    // Hack on it using the string reprsentation, then return the converted-to-dots as a path
+    std::string ret{filepath};
+    for (char &c : ret) {
+      if ('.' == c) { c = '/'; }
+    }
+    return ret;
+  }
+}
+#endiv
+#divert <cpp>
+#import std.rbegin
+#import std.rend
+#import std.vector
+#import std.filesystem.path
+namespace scold::easy::multipath {
+  auto detail::validate_module_name(Configuration const &cfg, std::filesystem::path const &file_xcpp, std::filesystem::path const &source) -> void {
+    // Success is signalled by returning at all.
+    // Ensure each entry (component of the compound module name) is not empty and is an identifier.
+    if (source.empty()) {
+      (notice(cfg) << "the original " << file_xcpp << end(cfg));
+      (error(cfg) << "but was been reduced to nothing (cannot proceed)" << end(cfg));
+      throw exception::Failing{cfg.NAME};
+    } else {
+      auto check = [&cfg, file_xcpp, source](std::filesystem::path const &entry) {
+                     auto valid_entry = [](std::string const &item) -> bool {
+                                          auto is_identifier = [](char c) { return std::isalnum(c) || '_' == c; };
+                                          return ! item.empty() && std::all_of(item.begin(), item.end(), is_identifier);
+                                        };
+                     if (!valid_entry(entry)) {
+                       (notice(cfg) << "the original " << file_xcpp << end(cfg));
+                       (notice(cfg) << "became " << source << end(cfg));
+                       (notice(cfg) << "examining " << entry << end(cfg));
+                       (error(cfg) << "has an invalid module name component (cannot proceed)" << end(cfg));
+                       throw exception::Failing{cfg.NAME};
+                     }
+                   };
+      auto resource = [](auto const &path) {
+        std::vector<std::filesystem::path::iterator> ret;
+        auto b = path.begin();
+        auto const e = path.end();
+        while (e != b) {
+          ret.push_back(b++);
+        }
+        return ret;
+      }(source);
+      auto b = std::rbegin(resource);
+      auto e = std::rend(resource);
+      [&check](auto const &p2012r0) {
+        for (auto const &entry : p2012r0) {
+          check(entry);
+        }
+      }(reslash(**b));
+      for (++b; e != b; ++b) {
+        check(**b);
+      }
+    }
+  }
+}
+#endiv

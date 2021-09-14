@@ -1,0 +1,84 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace scold {
+  namespace suffix {
+    //
+    // The Suffix is like a Phase, but not as much algebra overlaid on it.
+    // And with support for the source suffix ".xcpp"
+    //
+    enum class Suffix { FPP = 0, HPP, IPP, TPP, CPP, XCPP, NS, MK, O, LO };
+  }
+}
+#endiv
+#divert <hpp>
+#import std.ostream
+#import std.istream
+namespace scold {
+  namespace suffix {
+    inline auto operator<<(std::ostream &, Suffix) -> std::ostream &;
+    auto operator>>(std::istream &, Suffix &) -> std::istream &;
+    // see the (separate) helpers for operator<< printing
+    //   want::braket(Suffix)
+    //   want::dot(Suffix)
+  }
+}
+#entail scold.suffix.operators
+#endiv
+#divert <ipp>
+#import scold.suffix.Definition
+auto scold::suffix::operator<<(std::ostream &o, Suffix value) -> std::ostream & {
+  Definition def(value);
+  return o << def.str();
+}
+#endiv
+#divert <cpp>
+#import scold.suffix.Definition
+auto scold::suffix::operator>>(std::istream &in, Suffix &fill) -> std::istream & {
+  std::string token;
+  char c1, c2, c3;
+  bool found = false;
+  // expect: "o"
+  // expect: "lo", "mk
+  // expect: "fpp" "hpp" "ipp" "tpp" "cpp"
+  // expect: "xcpp"
+  if (in >> c1) {
+    if ('o' == c1) {
+      token = std::string{c1};
+      found = true;
+    } else if (in >> c2) {
+      if (('m' == c1 && 'k' == c2) ||
+          ('l' == c1 && 'o' == c2)) {
+            token = std::string{c1, c2};
+            found = true;
+      } else if (in >> c3) {
+        if ('p' == c2 && 'p' == c3 && ('f' == c1 || 'h' == c1 || 'i' == c1 || 't' == c1 || 'c' == c1)) {
+          token = std::string{c1, c2, c3};
+          found = true;
+        } else if ('x' == c1) {
+          char c4;
+          if (in >> c4) {
+            if ('x' == c1 && 'c' == c2 && 'p' == c3 && 'p' == c4) {
+              token = std::string{c1, c2, c3, c4};
+              found = true;
+            }
+          }
+        }
+      }
+    }
+  }
+  if (!found) {
+    in.setstate(std::ios::failbit); // might throw
+    return in;
+  }
+  // This reparses the token that we guessed at above.
+  // It should validate the suffix structure that we chose.
+  // But it may fail independently of the above structure
+  auto r = Definition::to(token);
+  if (ok(r)) {
+    fill = value(r);
+  } else {
+    in.setstate(std::ios::failbit); // might throw
+  }
+  return in;
+}
+#endiv

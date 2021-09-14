@@ -1,0 +1,32 @@
+// -*- c++ -*- in the SCOLD stylings
+#divert <hpp>
+#forward scold.Module
+#import scold.suffix.Suffix
+#import std.string
+namespace scold {
+  namespace suffix {
+    // "package/subpackage/Class" * Suffix::FPP -> "package/subpackage/Class.fpp"
+    inline auto operator*(std::string const &, Suffix) -> std::string;
+
+    // { package, subpackage, Class } * Suffix::TPP -> package.subpackage.Class.tpp
+    inline auto operator*(Module const &, Suffix) -> std::string;
+  }
+}
+#endiv
+#divert <ipp>
+#import scold.Module
+// Because you'll need them, but putting them in <hpp> is too tightly bound
+#entail scold.suffix.Suffix.Value
+#entail scold.suffix.Suffix.Unbound
+
+#import scold.suffix.Definition
+auto scold::suffix::operator*(std::string const &filebase, Suffix suffix) -> std::string {
+  scold::suffix::Definition def(suffix);
+  return filebase + "." + def.str();
+}
+
+#import scold.to.string
+auto scold::suffix::operator*(Module const &module, Suffix suffix) -> std::string {
+  return operator*(to<std::string>(module), suffix);
+}
+#endiv

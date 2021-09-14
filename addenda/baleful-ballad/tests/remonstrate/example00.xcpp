@@ -1,0 +1,27 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+     3	#divert <fpp>
+     4	namespace com {
+     5	  namespace example {
+     6	    class Thing;
+     7	  }
+     8	}
+     9	#endif
+    10	#divert <hpp>
+    11	class com::example::Thing {
+    12	  inline Thing();
+    13	  template<typename VALUE> auto f(VALUE) -> void;
+    14	  auto g(int) -> void;
+    15	};
+    16	#endiv
+    17	#divert <ipp>
+    18	com::example::Thing::Thing() {
+    19	}
+    20	#endiv
+    21	#divert <tpp>
+    22	template<typename VALUE> auto com::example::Thing::f(VALUE) -> void {
+    23	}
+    24	#endiv
+    25	#divert <cpp>
+    26	auto com::example::Thing::g(int) -> void {
+    27	}
+    28	#endiv

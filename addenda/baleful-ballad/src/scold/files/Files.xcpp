@@ -1,0 +1,302 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace scold {
+  namespace files {
+    class Files;
+  }
+}
+#endiv
+#divert <hpp>
+#forward scold.Streams
+#forward scold.line.Stream
+#import std.string
+namespace scold {
+  namespace files {
+    inline auto operator<<(Files &, Streams const &) -> Files &;
+    template<typename VALUE> inline auto operator<<(Files &, VALUE const &) -> Files &;
+
+    inline auto operator<<(line::Stream<Files &, std::string>, Streams const &) -> line::Stream<Files &, std::string>;
+    inline auto operator<<(line::Stream<Files &, std::string const &>, Streams const &) -> line::Stream<Files &, std::string const &>;
+
+    template<typename VALUE> inline auto operator<<(line::Stream<Files &, std::string>, VALUE const &) -> line::Stream<Files &, std::string>;
+    template<typename VALUE> inline auto operator<<(line::Stream<Files &, std::string const &>, VALUE const &) -> line::Stream<Files &, std::string const &>;
+  }
+}
+
+#import std.ios
+#import std.ofstream
+#import scold.Filenames
+#import scold.files // default_open_flags
+#forward scold.files.Iterator
+class scold::files::Files {
+public:
+  // Constructed & operated in a manner similar to std::ofstream
+  Files() = default;
+  inline explicit Files(Filenames const &, openmode = default_open_flags);
+  // no copy semantic (and no move semantic either)
+  Files(Files const &) = default;
+  auto operator=(Files const &) -> Files & = delete;
+  inline explicit operator bool() const;
+  inline auto operator!() const -> bool;
+  // all are good
+  inline auto good() const -> bool;
+  // any have eof, fail, bad
+  inline auto eof() const -> bool;
+  inline auto fail() const -> bool;
+  inline auto bad() const -> bool;
+
+  using iostate = std::ios::iostate;
+  // rdstate() the unions the streams; setting assigns to each stream individually
+  inline auto rdstate() const -> iostate;
+  inline auto setstate(iostate) -> void;
+  inline auto clear(iostate = std::ios::goodbit) -> void;
+
+  // exception() the unions the streams; setting assigns to each stream individually
+  inline auto exceptions() const -> iostate;
+  inline auto exceptions(iostate) -> void;
+
+  inline auto open(Filenames const &, openmode = default_open_flags) -> void;
+  inline auto is_open() const -> bool;
+  inline auto close() -> void;
+
+  using iterator = Iterator<Files, std::ostream>;
+  inline auto begin() -> iterator;
+  inline auto end() -> iterator;
+  // where STREAM can be std::ofstream or std::ostream
+  template<typename STREAM> inline auto begin() -> Iterator<Files, STREAM>;
+  template<typename STREAM> inline auto end() -> Iterator<Files, STREAM>;
+
+  using const_iterator = Iterator<Files const, std::ostream const>;
+  inline auto begin() const -> const_iterator;
+  inline auto end() const -> const_iterator;
+  // where STREAM can be std::ofstream or std::ostream
+  template<typename STREAM> inline auto begin() const -> Iterator<Files const, STREAM const>;
+  template<typename STREAM> inline auto end() const -> Iterator<Files const, STREAM const>;
+protected:
+  static_assert(1 <= Filenames::SIZE, "bad size");
+  static_assert(2 <= Filenames::SIZE, "bad size");
+  static_assert(3 <= Filenames::SIZE, "bad size");
+  static_assert(4 <= Filenames::SIZE, "bad size");
+  static_assert(5 == Filenames::SIZE, "bad size");
+  std::ofstream streams[Filenames::SIZE];
+  template<typename F, typename S> friend class files::Iterator;
+  friend auto files::operator<<(Files &, Streams const &) -> Files &;
+  template<typename VALUE> friend auto files::operator<<(Files &, VALUE const &) -> Files &;
+};
+
+namespace scold {
+  namespace files {
+    template<> inline auto Files::begin<std::ofstream>() -> Iterator<Files, std::ofstream>;
+    template<> inline auto Files::end<std::ofstream>() -> Iterator<Files, std::ofstream>;
+    template<> inline auto Files::begin<std::ofstream>() const -> Iterator<Files const, std::ofstream const>;
+    template<> inline auto Files::end<std::ofstream>() const -> Iterator<Files const, std::ofstream const>;
+
+    template<> inline auto Files::begin<std::ostream>() -> Iterator<Files, std::ostream>;
+    template<> inline auto Files::end<std::ostream>() -> Iterator<Files, std::ostream>;
+    template<> inline auto Files::begin<std::ostream>() const -> Iterator<Files const, std::ostream const>;
+    template<> inline auto Files::end<std::ostream>() const -> Iterator<Files const, std::ostream const>;
+  }
+}
+#endiv
+#divert <ipp>
+#import scold.Streams
+#import scold.line.Stream
+#import std.boolalpha
+#import scold.files.Iterator
+
+#import want.doppelgang
+auto scold::files::operator<<(Files &f, Streams const &s) -> Files & {
+  for (auto os : want::doppelgang(f, s)) {
+    auto &out = os.first;
+    out << s.background
+        << os.second;
+  }
+  return f;
+}
+
+auto scold::files::operator<<(line::Stream<Files &, std::string> lsfs, Streams const &s) -> line::Stream<Files &, std::string> {
+  line::Stream<Files &, std::string const &> redo(outbound(lsfs), filename(lsfs));
+  redo << s;
+  return lsfs;
+}
+
+#import scold.named
+auto scold::files::operator<<(line::Stream<Files &, std::string const &> lsfs, Streams const &s) -> line::Stream<Files &, std::string const &> {
+  for (auto os : want::doppelgang(outbound(lsfs), s)) {
+    auto no = named(os.first, filename(lsfs));
+    no << s.background
+       << os.second;
+  }
+  return lsfs;
+}
+
+template<typename VALUE> auto scold::files::operator<<(Files &f, VALUE const &v) -> Files & {
+  // Foreach substream, put VALUE out on the substream.
+  for (auto &o : f) {
+    o << v;
+  }
+  return f;
+}
+
+template<typename VALUE> auto scold::files::operator<<(line::Stream<Files &, std::string> lsfs, VALUE const &v) -> line::Stream<Files &, std::string> {
+  line::Stream<Files &, std::string const &> redo(outbound(lsfs), filename(lsfs));
+  redo << v;
+  return lsfs;
+}
+
+template<typename VALUE> auto scold::files::operator<<(line::Stream<Files &, std::string const &> lsfs, VALUE const &v) -> line::Stream<Files &, std::string const &> {
+  // Foreach substream, put VALUE out on the substream.
+  for (auto &o : outbound(lsfs)) {
+    named(o, filename(lsfs)) << v;
+  }
+  return lsfs;
+}
+
+#import want.doppelgang
+scold::files::Files::Files(Filenames const &names, openmode mode)
+  : streams() {
+  for (auto no : want::doppelgang(names, streams)) {
+    no.second.open(no.first, mode);
+  }
+}
+
+scold::files::Files::operator bool() const {
+  return good();
+}
+
+auto scold::files::Files::operator!() const -> bool {
+  return !good();
+}
+
+#import std.all_of
+auto scold::files::Files::good() const -> bool {
+  return std::all_of(begin(), end(), [](std::ostream const &o) -> bool { return o.good(); });
+}
+
+#import std.any_of
+auto scold::files::Files::eof() const -> bool {
+  return std::any_of(begin(), end(), [](std::ostream const &o) -> bool { return o.eof(); });
+}
+
+auto scold::files::Files::fail() const -> bool {
+  return std::any_of(begin(), end(), [](std::ostream const &o) -> bool { return o.fail(); });
+}
+
+auto scold::files::Files::bad() const -> bool {
+  return std::any_of(begin(), end(), [](std::ostream const &o) -> bool { return o.bad(); });
+}
+
+#import std.for_each
+auto scold::files::Files::rdstate() const -> iostate {
+  iostate ret = iostate();
+  std::for_each(begin(), end(), [&ret](std::ostream const &o) -> void { ret |= o.rdstate(); });
+  return ret;
+}
+
+auto scold::files::Files::setstate(iostate s) -> void {
+  std::for_each(begin(), end(), [s](std::ostream &o) -> void { o.setstate(s); });
+}
+
+auto scold::files::Files::clear(iostate s) -> void {
+  std::for_each(begin(), end(), [s](std::ostream &o) -> void { o.clear(s); });
+}
+
+auto scold::files::Files::exceptions() const -> iostate {
+  iostate ret = iostate();
+  std::for_each(begin(), end(), [&ret](std::ostream const &o) -> void { ret |= o.exceptions(); });
+  return ret;
+}
+
+auto scold::files::Files::exceptions(std::ios::iostate s) -> void {
+  std::for_each(begin(), end(), [s](std::ostream &o) -> void { o.exceptions(s); });
+}
+
+auto scold::files::Files::open(Filenames const &filenames, openmode mode) -> void {
+  for (auto no : want::doppelgang(filenames, streams)) {
+    no.second.open(no.first, mode);
+  }
+}
+
+#include <cassert>
+auto scold::files::Files::is_open() const -> bool {
+  bool ret = true;
+  unsigned count = 0;
+  using ofs = std::ofstream;
+  std::for_each(begin<ofs>(), end<ofs>(), [&ret, &count](ofs const &o) -> void { count++; ret &= o.is_open(); });
+  assert(count == sizeof (streams)/sizeof (streams[0]));
+  return ret;
+}
+
+auto scold::files::Files::close() -> void {
+  using ofs = std::ofstream;
+  std::for_each(begin<ofs>(), end<ofs>(), [](std::ofstream &o) -> void { o.close(); });
+}
+
+auto scold::files::Files::begin() -> iterator {
+  return iterator(this, Phase::FPP);
+}
+
+auto scold::files::Files::end() -> iterator {
+  return iterator(this, Phase::END);
+}
+
+auto scold::files::Files::begin() const -> const_iterator {
+  return const_iterator(this, Phase::FPP);
+}
+
+auto scold::files::Files::end() const -> const_iterator {
+  return const_iterator(this, Phase::END);
+}
+
+template<typename STREAM> auto scold::files::Files::begin() -> Iterator<Files, STREAM> {
+  static_assert(0 == sizeof (STREAM) || 0 != sizeof (STREAM), "speciaizations only");
+  return Iterator<Files, STREAM>();
+}
+
+template<typename STREAM> auto scold::files::Files::end() -> Iterator<Files, STREAM> {
+  static_assert(0 == sizeof (STREAM) || 0 != sizeof (STREAM), "speciaizations only");
+  return Iterator<Files, STREAM>();
+}
+
+template<typename STREAM> auto scold::files::Files::begin() const -> Iterator<Files const, STREAM const> {
+  static_assert(0 == sizeof (STREAM) || 0 != sizeof (STREAM), "speciaizations only");
+  return Iterator<Files, STREAM const>();
+}
+
+template<typename STREAM> auto scold::files::Files::end() const -> Iterator<Files const, STREAM const> {
+  static_assert(0 == sizeof (STREAM) || 0 != sizeof (STREAM), "speciaizations only");
+  return Iterator<Files, STREAM const>();
+}
+
+template<> auto scold::files::Files::begin<std::ostream>() -> Iterator<Files, std::ostream> {
+  return Iterator<Files, std::ostream>(this, Phase::FPP);
+}
+
+template<> auto scold::files::Files::end<std::ostream>() -> Iterator<Files, std::ostream> {
+  return Iterator<Files, std::ostream>(this, Phase::END);
+}
+
+template<> auto scold::files::Files::begin<std::ostream>() const -> Iterator<Files const, std::ostream const> {
+  return Iterator<Files const, std::ostream const>(this, Phase::FPP);
+}
+
+template<> auto scold::files::Files::end<std::ostream>() const -> Iterator<Files const, std::ostream const> {
+  return Iterator<Files const, std::ostream const>(this, Phase::END);
+}
+
+template<> auto scold::files::Files::begin<std::ofstream>() -> Iterator<Files, std::ofstream> {
+  return Iterator<Files, std::ofstream>(this, Phase::FPP);
+}
+
+template<> auto scold::files::Files::end<std::ofstream>() -> Iterator<Files, std::ofstream> {
+  return Iterator<Files, std::ofstream>(this, Phase::END);
+}
+
+template<> auto scold::files::Files::begin<std::ofstream>() const -> Iterator<Files const, std::ofstream const> {
+  return Iterator<Files const, std::ofstream const>(this, Phase::FPP);
+}
+
+template<> auto scold::files::Files::end<std::ofstream>() const -> Iterator<Files const, std::ofstream const> {
+  return Iterator<Files const, std::ofstream const>(this, Phase::END);
+}
+#endiv

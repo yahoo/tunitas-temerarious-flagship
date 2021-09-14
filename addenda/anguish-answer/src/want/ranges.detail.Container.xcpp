@@ -1,0 +1,53 @@
+// This is C++ 23 -*- c++ -*- -std=c++23 in the stylings of the S.C.O.L.D. design method.
+// For terms and provenance see the LICENSE file at the top of the repository.
+#divert <fpp>
+#import nonstd.required.iterator.Bidirectional
+namespace want::ranges::detail {
+  //
+  // A specification of the simplistic "container" range possible.
+  //
+  // The expectation is that this is->will_be subsumed by something in Ranges TS.
+  //
+  // Usage:
+  //
+  //   auto const &thing = ...somehow...;
+  //   for (auto const &item : forward(thing)) {
+  //     ...visit the items...
+  //   }
+  //
+  //   for (auto const &item : reverse(thing)) {
+  //     ...visit the items...
+  //   }
+  //
+  template<required::iterator::Bidirectional ITERATOR> class Container;
+}
+#endiv
+#divert <hpp>
+#import std.size_t
+namespace want::ranges {
+  template<required::iterator::Bidirectional ITERATOR> struct detail::Container {
+    using Iterator = ITERATOR;
+    inline Container(Iterator start, Iterator finish);
+    inline auto empty() const -> bool;
+    inline auto size() const -> std::size_t; // is O(n) unless a required::iterator::Random_Access is used
+    inline auto begin() const -> Iterator;
+    inline auto end() const -> Iterator;
+  protected:
+    Iterator start;
+    Iterator finish;
+  };
+}
+#endiv
+#divert <ipp>
+#import std.distance
+namespace want::ranges::detail {
+  template<required::iterator::Bidirectional _> Container<_>::Container(Iterator start, Iterator finish)
+    : start{start}
+    , finish{finish}
+  { }
+  template<required::iterator::Bidirectional _> auto Container<_>::empty() const -> bool       { return finish == start; }
+  template<required::iterator::Bidirectional _> auto Container<_>::size() const -> std::size_t { return std::distance(start, finish); }
+  template<required::iterator::Bidirectional _> auto Container<_>::begin() const -> Iterator   { return start; }
+  template<required::iterator::Bidirectional _> auto Container<_>::end() const -> Iterator     { return finish; }
+}
+#endiv

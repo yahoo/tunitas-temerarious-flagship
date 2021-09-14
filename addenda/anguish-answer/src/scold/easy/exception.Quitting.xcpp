@@ -1,0 +1,61 @@
+// This is C++ 23 -*- c++ -*- -std=c++23 in the stylings of the S.C.O.L.D. design method.
+// For terms and provenance see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace scold::easy::exception {
+  //
+  // Quitting the application
+  // Quitting, possibly with OK, but usually FAIL or other exit code
+  //
+  // Usage:
+  //
+  //   try {
+  //     ...computing...
+  //     throw Quitting{NAME, OK};
+  //     throw Quitting{NAME, FAIL};
+  //     ...
+  //   } catch (exception::aspect::Exiting const &e) {
+  //     e.stream() << format(e) << '\n';
+  //   }
+  //
+  class Quitting;
+}
+#endiv
+#divert <hpp>
+#import nonstd.exception.Quitting
+#import nonstd.sysexits.Code
+#import scold.easy.Program
+#import scold.easy.exception.aspect.Exiting
+#import std.string
+class scold::easy::exception::Quitting : public nonstd::exception::Quitting, public aspect::Exiting {
+  struct ancestors {
+    using Exception = nonstd::exception::Quitting;
+    using Aspect = aspect::Exiting;
+  };
+public:
+  inline Quitting(Program const &, nonstd::sysexits::Code, std::string reason);
+  auto stream() const noexcept -> std::ostream & override;
+  auto code() const noexcept -> nonstd::sysexits::Code override;
+  auto what() const noexcept -> char const * override;
+};
+#endiv
+#divert <ipp>
+namespace scold::easy::exception {
+  Quitting::Quitting(Program const &name, nonstd::sysexits::Code code, std::string reason)
+    : ancestors::Exception{name + ": " + reason, code}
+    , ancestors::Aspect{}
+  { }
+}
+#endiv
+#divert <cpp>
+namespace scold::easy::exception {
+  auto Quitting::stream() const noexcept -> std::ostream & {
+    return ancestors::Exception::stream();
+  }
+  auto Quitting::code() const noexcept -> nonstd::sysexits::Code {
+    return ancestors::Exception::code();
+  }
+  auto Quitting::what() const noexcept -> char const * {
+    return ancestors::Exception::what();
+  }
+}
+#endiv

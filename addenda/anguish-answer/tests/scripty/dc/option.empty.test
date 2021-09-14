@@ -1,0 +1,20 @@
+#!/bin/sh
+source ${0%/*}/rigging.sh || exit 70
+# with no other options is (not yet) an error
+expected_ecode=1
+# (for now) unwind the trap ... we expect this test to fail
+trap '' ERR
+(
+    # this will fail because there are not enough options
+    # missing --srcdir, --objdir, --modulesdir
+    ${exe?} # no options, no commands, no nothing
+) >& ${output?}
+actual_ecode=$?
+trap failing ERR
+if ((expected_ecode != actual_ecode)); then
+    echo "exit expected=${expected_ecode?} actual=${actual_ecode?}"
+    failing
+else
+    difference $golden $output
+    successful
+fi

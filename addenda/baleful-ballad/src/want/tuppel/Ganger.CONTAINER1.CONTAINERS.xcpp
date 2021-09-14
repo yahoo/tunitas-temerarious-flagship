@@ -1,0 +1,115 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+#import want.tuppel.Ganger
+namespace want {
+  namespace tuppel {
+    template<typename CONTAINER1, typename... CONTAINERS> class Ganger<CONTAINER1, CONTAINERS...>;
+  }
+}
+#endiv
+#divert <hpp>
+#import want.doppel.traits.Container
+#import want.tuppel.Iterator
+#import std.add_const
+#import std.remove_reference
+#import std.tuple
+template<typename CONTAINER1, typename... CONTAINERS> class want::tuppel::Ganger<CONTAINER1, CONTAINERS...> : public Ganger<CONTAINERS...> {
+  using ancestor = Ganger<CONTAINERS...>;
+public:
+  using container1_type = CONTAINER1;
+  using containers_type = std::tuple<CONTAINER1, CONTAINERS...>;
+  inline Ganger(container1_type &, CONTAINERS &...);
+  using subiterator1 = typename doppel::traits::Container<typename std::remove_reference<CONTAINER1>::type>::iterator;
+  using subiteratorN = Iterator<typename doppel::traits::Container<typename std::remove_reference<CONTAINERS>::type>::iterator...>;
+  using iterator = Iterator<subiterator1, typename doppel::traits::Container<typename std::remove_reference<CONTAINERS>::type>::iterator...>;
+  inline auto begin() -> iterator;
+  inline auto end() -> iterator;
+protected:
+  inline auto subbegin1() -> subiterator1;
+  inline auto subend1() -> subiterator1;
+  inline auto subbeginN() -> subiteratorN;
+  inline auto subendN() -> subiteratorN;
+public:
+  using const_subiterator1 = typename doppel::traits::Container<typename std::add_const<typename std::remove_reference<CONTAINER1>::type>::type>::iterator;
+  using const_subiteratorN = Iterator<typename doppel::traits::Container<typename std::add_const<typename std::remove_reference<CONTAINERS>::type>::type>::iterator...>;
+  using const_iterator = Iterator<const_subiterator1, typename doppel::traits::Container<typename std::add_const<typename std::remove_reference<CONTAINERS>::type>::type>::iterator...>;
+  inline auto begin() const -> const_iterator;
+  inline auto end() const -> const_iterator;
+protected:
+  inline auto subbegin1() const -> const_subiterator1;
+  inline auto subend1() const -> const_subiterator1;
+  inline auto subbeginN() const -> const_subiteratorN;
+  inline auto subendN() const -> const_subiteratorN;
+protected:
+  container1_type &container1;
+};
+#endiv
+#divert <ipp>
+#import std.forward
+template<typename CONTAINER1, typename... CONTAINERS> want::tuppel::Ganger<CONTAINER1, CONTAINERS...>::Ganger(container1_type &arg1, CONTAINERS &...rest)
+  : ancestor(rest...)
+  , container1(arg1) {
+  ;
+}
+
+#include <cassert>
+#import std.distance
+template<typename CONTAINER1, typename... CONTAINERS> auto want::tuppel::Ganger<CONTAINER1, CONTAINERS...>::begin() -> iterator {
+  // DO NOT assert(std::distance(subbegin1(), subend1()) == std::distance(subbeginN(), subendN()))
+  // because if the iterators are input iterators then you've exhausted the input
+  return iterator(subbegin1(), subbeginN());
+}
+
+
+template<typename CONTAINER1, typename... CONTAINERS> auto want::tuppel::Ganger<CONTAINER1, CONTAINERS...>::end() -> iterator {
+  return iterator(subend1(), subendN());
+}
+
+#import std.begin
+template<typename CONTAINER1, typename... CONTAINERS> auto want::tuppel::Ganger<CONTAINER1, CONTAINERS...>::subbegin1() -> subiterator1 {
+  return std::begin(container1);
+}
+
+#import std.end
+template<typename CONTAINER1, typename... CONTAINERS> auto want::tuppel::Ganger<CONTAINER1, CONTAINERS...>::subend1() -> subiterator1 {
+  return std::end(container1);
+}
+
+template<typename CONTAINER1, typename... CONTAINERS> auto want::tuppel::Ganger<CONTAINER1, CONTAINERS...>::subbeginN() -> subiteratorN {
+  return ancestor::begin();
+}
+
+template<typename CONTAINER1, typename... CONTAINERS> auto want::tuppel::Ganger<CONTAINER1, CONTAINERS...>::subendN() -> subiteratorN {
+  return ancestor::end();
+}
+
+#include <cassert>
+#import std.distance
+template<typename CONTAINER1, typename... CONTAINERS> auto want::tuppel::Ganger<CONTAINER1, CONTAINERS...>::begin() const -> const_iterator {
+  // DO NOT assert(std::distance(subbegin1(), subend1()) == std::distance(subbeginN(), subendN()))
+  // because if the iterators are input iterators then you've exhausted the input
+  return const_iterator(subbegin1(), subbeginN());
+}
+
+template<typename CONTAINER1, typename... CONTAINERS> auto want::tuppel::Ganger<CONTAINER1, CONTAINERS...>::end() const -> const_iterator {
+  return const_iterator(subend1(), subendN());
+}
+
+#import std.begin
+template<typename CONTAINER1, typename... CONTAINERS> auto want::tuppel::Ganger<CONTAINER1, CONTAINERS...>::subbegin1() const -> const_subiterator1 {
+  return std::begin(container1);
+}
+
+#import std.end
+template<typename CONTAINER1, typename... CONTAINERS> auto want::tuppel::Ganger<CONTAINER1, CONTAINERS...>::subend1() const -> const_subiterator1 {
+  return std::end(container1);
+}
+
+template<typename CONTAINER1, typename... CONTAINERS> auto want::tuppel::Ganger<CONTAINER1, CONTAINERS...>::subbeginN() const -> const_subiteratorN {
+  return ancestor::begin();
+}
+
+template<typename CONTAINER1, typename... CONTAINERS> auto want::tuppel::Ganger<CONTAINER1, CONTAINERS...>::subendN() const -> const_subiteratorN {
+  return ancestor::end();
+}
+#endiv

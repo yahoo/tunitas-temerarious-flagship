@@ -1,0 +1,218 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace tests {
+  namespace unit {
+    namespace phase {
+      class Definition;
+    }
+  }
+}
+#divert </fpp>
+#divert <hpp>
+class tests::unit::phase::Definition : public cppunit::test::Fixture {
+public:
+  auto test_has_diversion() -> void;
+  auto test_diversion_size() -> void;
+  auto test_has_index() -> void;
+  auto test_index() -> void;
+  auto test_has_succ() -> void;
+  auto test_has_pred() -> void;
+  auto test_has_suffix() -> void;
+  auto test_c_str() -> void;
+  auto test_str() -> void;
+  auto test_to() -> void;
+
+  static auto suite() -> cppunit::Test *;
+};
+#endiv
+#divert <cpp>
+#import scold.Phase
+#import scold.phase.Definition
+auto tests::unit::phase::Definition::test_has_diversion() -> void {
+  using ::scold::phase::Definition;
+  using ::scold::Phase;
+  { Definition d(Phase::BEG);
+    CPPUNIT_ASSERT(!d.has_diversion()); }
+  { Definition d(Phase::FPP);
+    CPPUNIT_ASSERT(d.has_diversion()); }
+  { Definition d(Phase::HPP);
+    CPPUNIT_ASSERT(d.has_diversion()); }
+  { Definition d(Phase::IPP);
+    CPPUNIT_ASSERT(d.has_diversion()); }
+  { Definition d(Phase::TPP);
+    CPPUNIT_ASSERT(d.has_diversion()); }
+  { Definition d(Phase::CPP);
+    CPPUNIT_ASSERT(d.has_diversion()); }
+  { Definition d(Phase::END);
+    CPPUNIT_ASSERT(!d.has_diversion()); }
+}
+
+auto tests::unit::phase::Definition::test_diversion_size() -> void {
+  CPPUNIT_ASSERT(5 == ::scold::phase::Definition::diversion_size());
+}
+
+auto tests::unit::phase::Definition::test_has_index() -> void {
+  using ::scold::phase::Definition;
+  using ::scold::Phase;
+  { Definition d(Phase::BEG);
+    CPPUNIT_ASSERT(d.has_diversion() == d.has_index());
+    CPPUNIT_ASSERT(!d.has_index()); }
+  { Definition d(Phase::FPP);
+    CPPUNIT_ASSERT(d.has_diversion() == d.has_index());
+    CPPUNIT_ASSERT(d.has_index()); }
+  { Definition d(Phase::HPP);
+    CPPUNIT_ASSERT(d.has_diversion() == d.has_index());
+    CPPUNIT_ASSERT(d.has_index()); }
+  { Definition d(Phase::IPP);
+    CPPUNIT_ASSERT(d.has_diversion() == d.has_index());
+    CPPUNIT_ASSERT(d.has_index()); }
+  { Definition d(Phase::TPP);
+    CPPUNIT_ASSERT(d.has_diversion() == d.has_index());
+    CPPUNIT_ASSERT(d.has_index()); }
+  { Definition d(Phase::CPP);
+    CPPUNIT_ASSERT(d.has_diversion() == d.has_index());
+    CPPUNIT_ASSERT(d.has_index()); }
+  { Definition d(Phase::END);
+    CPPUNIT_ASSERT(d.has_diversion() == d.has_index());
+    CPPUNIT_ASSERT(!d.has_index()); }
+}
+
+auto tests::unit::phase::Definition::test_index() -> void {
+  using ::scold::phase::Definition;
+  using ::scold::Phase;
+  { Definition d(Phase::FPP);
+    CPPUNIT_ASSERT(0 == d.index()); }
+  { Definition d(Phase::HPP);
+    CPPUNIT_ASSERT(1 == d.index()); }
+  { Definition d(Phase::IPP);
+    CPPUNIT_ASSERT(2 == d.index()); }
+  { Definition d(Phase::TPP);
+    CPPUNIT_ASSERT(3 == d.index()); }
+  { Definition d(Phase::CPP);
+    CPPUNIT_ASSERT(4 == d.index()); }
+}
+
+auto tests::unit::phase::Definition::test_has_succ() -> void {
+  using ::scold::phase::Definition;
+  using ::scold::Phase;
+  { Definition d(Phase::BEG);
+    CPPUNIT_ASSERT(d.has_succ()); }
+  { Definition d(Phase::FPP);
+    CPPUNIT_ASSERT(d.has_succ()); }
+  { Definition d(Phase::HPP);
+    CPPUNIT_ASSERT(d.has_succ()); }
+  { Definition d(Phase::IPP);
+    CPPUNIT_ASSERT(d.has_succ()); }
+  { Definition d(Phase::TPP);
+    CPPUNIT_ASSERT(d.has_succ()); }
+  { Definition d(Phase::CPP);
+    CPPUNIT_ASSERT(d.has_succ()); }
+  { Definition d(Phase::END);
+    CPPUNIT_ASSERT(!d.has_succ()); }
+}
+
+auto tests::unit::phase::Definition::test_has_pred() -> void {
+  using ::scold::phase::Definition;
+  using ::scold::Phase;
+  { Definition d(Phase::BEG);
+    CPPUNIT_ASSERT(!d.has_pred()); }
+  { Definition d(Phase::FPP);
+    CPPUNIT_ASSERT(d.has_pred()); }
+  { Definition d(Phase::HPP);
+    CPPUNIT_ASSERT(d.has_pred()); }
+  { Definition d(Phase::IPP);
+    CPPUNIT_ASSERT(d.has_pred()); }
+  { Definition d(Phase::TPP);
+    CPPUNIT_ASSERT(d.has_pred()); }
+  { Definition d(Phase::CPP);
+    CPPUNIT_ASSERT(d.has_pred()); }
+  { Definition d(Phase::END);
+    CPPUNIT_ASSERT(d.has_pred()); }
+}
+
+auto tests::unit::phase::Definition::test_has_suffix() -> void {
+  using ::scold::phase::Definition;
+  using ::scold::Phase;
+  { Definition d(Phase::BEG);
+    CPPUNIT_ASSERT(!d.has_suffix()); }
+  { Definition d(Phase::FPP);
+    CPPUNIT_ASSERT(d.has_suffix()); }
+  { Definition d(Phase::HPP);
+    CPPUNIT_ASSERT(d.has_suffix()); }
+  { Definition d(Phase::IPP);
+    CPPUNIT_ASSERT(d.has_suffix()); }
+  { Definition d(Phase::TPP);
+    CPPUNIT_ASSERT(d.has_suffix()); }
+  { Definition d(Phase::CPP);
+    CPPUNIT_ASSERT(d.has_suffix()); }
+  { Definition d(Phase::END);
+    CPPUNIT_ASSERT(!d.has_suffix()); }
+}
+
+auto tests::unit::phase::Definition::test_c_str() -> void {
+  // show that !has_suffix => (nullptr == c_str())
+  using ::scold::phase::Definition;
+  using ::scold::Phase;
+  { Definition d(Phase::BEG);
+    CPPUNIT_ASSERT(nullptr == d.c_str()); }
+  { Definition d(Phase::FPP);
+    CPPUNIT_ASSERT(nullptr != d.c_str()); }
+  { Definition d(Phase::HPP);
+    CPPUNIT_ASSERT(nullptr != d.c_str()); }
+  { Definition d(Phase::IPP);
+    CPPUNIT_ASSERT(nullptr != d.c_str()); }
+  { Definition d(Phase::TPP);
+    CPPUNIT_ASSERT(nullptr != d.c_str()); }
+  { Definition d(Phase::CPP);
+    CPPUNIT_ASSERT(nullptr != d.c_str()); }
+  { Definition d(Phase::END);
+    CPPUNIT_ASSERT(nullptr == d.c_str()); }
+}
+
+auto tests::unit::phase::Definition::test_str() -> void {
+  // show that !has_suffix => str().empty()
+  using ::scold::phase::Definition;
+  using ::scold::Phase;
+  { Definition d(Phase::BEG);
+    CPPUNIT_ASSERT(d.str().empty()); }
+  { Definition d(Phase::FPP);
+    CPPUNIT_ASSERT(!d.str().empty()); }
+  { Definition d(Phase::HPP);
+    CPPUNIT_ASSERT(!d.str().empty()); }
+  { Definition d(Phase::IPP);
+    CPPUNIT_ASSERT(!d.str().empty()); }
+  { Definition d(Phase::TPP);
+    CPPUNIT_ASSERT(!d.str().empty()); }
+  { Definition d(Phase::CPP);
+    CPPUNIT_ASSERT(!d.str().empty()); }
+  { Definition d(Phase::END);
+    CPPUNIT_ASSERT(d.str().empty()); }
+}
+
+auto tests::unit::phase::Definition::test_to() -> void {
+  using d = ::scold::phase::Definition;
+  using p = ::scold::Phase;
+  CPPUNIT_ASSERT(p::FPP == value(d::to("fpp")));
+  CPPUNIT_ASSERT(p::HPP == value(d::to("hpp")));
+  CPPUNIT_ASSERT(p::IPP == value(d::to("ipp")));
+  CPPUNIT_ASSERT(p::TPP == value(d::to("tpp")));
+  CPPUNIT_ASSERT(p::CPP == value(d::to("cpp")));
+}
+
+auto tests::unit::phase::Definition::suite() -> cppunit::Test * {
+  using namespace ::unit::rigging::suite;
+  Stream s("Definition");
+  s << call("has_diversion", &Definition::test_has_diversion)
+    << call("diversion_size", &Definition::test_diversion_size)
+    << call("has_index", &Definition::test_has_index)
+    << call("index", &Definition::test_index)
+    << call("has_succ", &Definition::test_has_succ)
+    << call("has_pred", &Definition::test_has_pred)
+    << call("has_suffix", &Definition::test_has_suffix)
+    << call("c_str", &Definition::test_c_str)
+    << call("str", &Definition::test_str)
+    << call("to", &Definition::test_to)
+    ;
+  return finalize(s);
+}
+#endiv

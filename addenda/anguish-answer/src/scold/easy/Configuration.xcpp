@@ -1,0 +1,50 @@
+// This is C++ 23 -*- c++ -*- -std=c++23 in the stylings of the S.C.O.L.D. design method.
+// For terms and provenance see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace scold::easy {
+  //
+  // The configuration of the workload.
+  // These are the global variables of the job.
+  //
+  // Usage:
+  //
+  //   Program program{av.front()};
+  //   Configuration cfg{program};
+  //
+  //   (error(cfg) << "Do not connect power rail to the ground plane" << end(cfg));
+  //   (warning(cfg) << "Don't swim after eating" << end(cfg));
+  //   (notice(cfg) << "Here Ye, Here Ye, let it be proclaimed" << end(cfg));
+  //   (verbose(cfg) << "And on the seventh day the camel died" << end(cfg));
+  //   (debug(cfg) << "buggy" << end(cfg));
+  //
+  class Configuration;
+}
+#endiv
+#divert <hpp>
+#import nonstd.sysexits.Code
+#import scold.easy.cascade.Matryoshka
+#import scold.easy.Program
+#import scold.easy.Project
+#import scold.easy.Searchpath
+#import lite.cli.option.Boolean
+#import std.optional
+struct scold::easy::Configuration {
+  inline explicit Configuration(Program);
+  nonstd::sysexits::Code exit_code;
+  Program NAME;
+  std::optional<cascade::Matryoshka> insert_namespace_mode;
+  lite::cli::option::Boolean warnings_mode, quiet_mode, verbose_mode, debug_mode, dry_run_mode;
+  Project project;
+  Searchpath searchpath;
+};
+#import scold.easy.logging
+#endiv
+#divert <ipp>
+#import std.move
+#import nonstd.sysexits.constants
+scold::easy::Configuration::Configuration(Program program)
+  : exit_code{nonstd::sysexits::OK}
+  , NAME{std::move(program)}
+  , searchpath{project}
+{ }
+#endiv

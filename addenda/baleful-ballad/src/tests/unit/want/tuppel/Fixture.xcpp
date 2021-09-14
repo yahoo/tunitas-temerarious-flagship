@@ -1,0 +1,96 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace tests {
+  namespace unit {
+    namespace want {
+      namespace tuppel {
+        class Fixture;
+      }
+    }
+  }
+}
+#endiv
+#divert <hpp>
+#import std.deque
+#import std.list
+#import std.set
+#import std.vector
+class tests::unit::want::tuppel::Fixture : public cppunit::test::Fixture {
+public:
+  auto setUp() -> void override final;
+  auto tearDown() -> void override final;
+
+  std::set<std::string> container1;
+  std::vector<int> container2;
+  std::deque<double> container3;
+  std::list<std::string> container4;
+
+  auto test_tuppelgang_muting() -> void;
+  auto test_tuppelgang_consty() -> void;
+
+  static auto suite() -> cppunit::Test *;
+protected:
+  template<typename CONTAINER1, typename CONTAINER2, typename CONTAINER3, typename CONTAINER4> static auto same_test_consty_and_muting(CONTAINER1 &, CONTAINER2 &, CONTAINER3 &, CONTAINER4 &) -> void;
+};
+#endiv
+#divert <tpp>
+#import want.tuppelgang
+#import std.ostringstream
+template<typename CONTAINER1, typename CONTAINER2, typename CONTAINER3, typename CONTAINER4> auto tests::unit::want::tuppel::Fixture::same_test_consty_and_muting(CONTAINER1 &container1, CONTAINER2 &container2, CONTAINER3 &container3, CONTAINER4 &container4) -> void {
+  std::ostringstream buf;
+  for (auto si : ::want::tuppelgang(container1, container2, container3, container4)) {
+    buf << std::get<0>(si) << '=' << std::get<1>(si) << '/' << std::get<2>(si) << '=' << std::get<3>(si) << '\n';
+  }
+  std::string const actual = buf.str();
+  std::string const expected = ("apple=1/4.5=dog\n"
+                                "banana=2/6.7=eagle\n"
+                                "cherry=3/8.9=frog\n");
+  std::cerr << "expected=qq!" << expected << "!\n"
+            << "actual  =qq!" << actual << "!\n";
+  CPPUNIT_ASSERT(actual == expected);
+}
+#endiv
+#divert <cpp>
+
+auto tests::unit::want::tuppel::Fixture::setUp() -> void {
+  container1 = decltype(container1){"apple", "banana", "cherry"};
+  container2 = decltype(container2){1, 2, 3};
+  container3 = decltype(container3){4.5, 6.7, 8.9};
+  container4 = decltype(container4){"dog", "eagle", "frog"};
+}
+
+auto tests::unit::want::tuppel::Fixture::tearDown() -> void {
+  container1.clear();
+  container2.clear();
+  container3.clear();
+  container4.clear();
+}
+
+auto tests::unit::want::tuppel::Fixture::test_tuppelgang_muting() -> void {
+  same_test_consty_and_muting(container1, container2, container3, container4);
+}
+
+auto tests::unit::want::tuppel::Fixture::test_tuppelgang_consty() -> void {
+  // same test but 'const' 'const'
+  auto const &c1 = const_cast<decltype(container1) const &>(container1);
+  auto const &c2 = const_cast<decltype(container2) const &>(container2);
+  auto const &c3 = const_cast<decltype(container3) const &>(container3);
+  auto const &c4 = const_cast<decltype(container4) const &>(container4);
+  same_test_consty_and_muting(c1, c2, c3, c4);
+}
+
+#import tests.unit.want.tuppel.Ganger
+#import tests.unit.want.tuppel.Iterator
+#import tests.unit.want.tuppel.Traits
+auto tests::unit::want::tuppel::Fixture::suite() -> cppunit::Test * {
+  using namespace ::unit::rigging::suite;
+  Stream s("tuppel");
+  s << call("tuppelgang-muting", &Fixture::test_tuppelgang_muting)
+    << call("tuppelgang-consty", &Fixture::test_tuppelgang_consty)
+    << add<Ganger>()
+    << add<Iterator>()
+    << add<Traits>()
+    ;
+  return finalize(s);
+}
+#endiv

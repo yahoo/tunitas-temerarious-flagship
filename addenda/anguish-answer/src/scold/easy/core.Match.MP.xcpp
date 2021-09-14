@@ -1,0 +1,47 @@
+// This is C++ 23 -*- c++ -*- -std=c++23 in the stylings of the S.C.O.L.D. design method.
+// For terms and provenance see the LICENSE file at the top of the repository.
+#divert <fpp>
+#forward scold.easy.core.Match.declaration
+namespace scold::easy::core {
+  template<> struct Match<MODULE_PATTERN>;
+}
+#endiv
+#divert <hpp>
+#import scold.easy.line.Object
+#import scold.easy.core // namespace regex
+#import lite.regex.Pattern
+#import lite.regex.matching.Results
+#import std.string
+#import std.tuple
+namespace scold::easy::core {
+  template<> struct Match<MODULE_PATTERN> {
+    inline Match();
+    // match against std::string as produced by Match<DIRECTIVE_PATTERN>::result()
+    inline auto operator()(std::string const &) const -> bool;
+    inline auto operator<<(std::string const &subject) -> bool;
+    using Result = std::tuple<std::string>;
+    inline auto result() const -> Result;
+  protected:
+    regex::Pattern const PATTERN;
+    lite::regex::matching::SResults captured;
+  };
+}
+#divert <ipp>
+#import lite.regex.search
+namespace scold::easy::core {
+  Match<MODULE_PATTERN>::Match()
+    : PATTERN{R"regex(^([a-zA-Z_][a-zA-Z_0-9]*)(\.[a-zA-Z_][a-zA-Z_0-9]*)*$)regex"}
+  { }
+  auto Match<MODULE_PATTERN>::operator()(std::string const &subject) const -> bool {
+    return regex::search(subject, PATTERN);
+  }
+  auto Match<MODULE_PATTERN>::operator<<(std::string const &subject) -> bool {
+    // recover the captured values
+    return regex::search(subject, captured, PATTERN);
+  }
+  auto Match<MODULE_PATTERN>::result() const -> Result {
+    // index 0 is the whole match; 1, 2 are the submatches
+    return Result{captured[1].str()};
+  }
+}
+#endiv

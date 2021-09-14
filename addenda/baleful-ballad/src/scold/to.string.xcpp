@@ -1,0 +1,38 @@
+// -*- c++ -*- with SCOLD stylings
+#divert <hpp>
+// The module name <scold.to.string> corresponds to
+//    the function template to<...>(...)
+//    specialized to return std::string
+#import scold.to.RESULT.Module
+#import scold.to.RESULT.Phase
+#import scold.to.RESULT.Suffix
+#import std.string
+namespace scold {
+  // { system, subsystem, package, Class } -> "system.subsystem.package.Class"
+  // { system, subsystem, package, as.RESULT.string } -> "system.subsystem.package.as.RESULT.string"
+  template<> inline auto to<std::string>(Module const &) -> std::string;
+  // Phase::FPP -> "fpp"
+  template<> inline auto to<std::string>(Phase) -> std::string;
+  // Suffix::FPP -> "fpp"
+  template<> inline auto to<std::string>(Suffix) -> std::string;
+}
+#endiv
+#divert <ipp>
+#import std.ostringstream
+#import want.join
+template<> auto scold::to<std::string>(Module const &module) -> std::string {
+  return want::join('.', module);
+}
+
+#import scold.phase.Definition
+template<> auto scold::to<std::string>(Phase phase) -> std::string {
+  scold::phase::Definition def(phase);
+  return def.str();
+}
+
+#import scold.suffix.Definition
+template<> auto scold::to<std::string>(Suffix suffix) -> std::string {
+  scold::suffix::Definition def(suffix);
+  return def.str();
+}
+#endiv

@@ -1,0 +1,25 @@
+// This is C++ 23 -*- c++ -*- -std=c++23 in the stylings of the S.C.O.L.D. design method.
+// For terms and provenance see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace scold::easy {
+  // These are mentioned here in lieu of the individual .../namespace.xcpp files in the subdirectory method
+  namespace cascade { }
+  namespace core { }
+  namespace debugging { }
+  namespace exception { }
+  namespace file { }
+  namespace filesystem { }
+  namespace formatting { }
+  namespace line { }
+  namespace message { }
+  namespace multipath { }
+  namespace name { }
+  namespace option { }
+  namespace outcome { }
+  namespace required { }
+  namespace suffix { }
+  namespace tagged { }
+  namespace time { }
+  namespace uuid { }
+}
+#endiv

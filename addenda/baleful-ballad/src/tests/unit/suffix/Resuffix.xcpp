@@ -1,0 +1,78 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace tests {
+  namespace unit {
+    namespace suffix {
+      class Resuffix;
+    }
+  }
+}
+#endiv
+#divert <hpp>
+#import scold.Suffix
+class tests::unit::suffix::Resuffix : public cppunit::test::Fixture {
+public:
+  using Sf = ::scold::Suffix;
+
+  auto test_miscellaneous() -> void;
+  auto test_simple_nodot() -> void;
+  auto test_simple_dot() -> void;
+  auto test_path_nodot() -> void;
+  auto test_path_dot_before_slash() -> void;
+  auto test_path_dot_after_slash() -> void;
+
+  static auto suite() -> cppunit::Test *;
+};
+#endiv
+#divert <cpp>
+#import std.string
+#import scold.suffix.resuffix
+
+auto tests::unit::suffix::Resuffix::test_miscellaneous() -> void {
+  // surely something goes in here
+  CPPUNIT_ASSERT(true);
+}
+
+auto tests::unit::suffix::Resuffix::test_simple_nodot() -> void {
+  CPPUNIT_ASSERT("apple.o" == resuffix("apple", Sf::O));
+  CPPUNIT_ASSERT("banana.mk" == resuffix("banana", Sf::MK));
+  CPPUNIT_ASSERT("cherry.xcpp" == resuffix("cherry", Sf::XCPP));
+}
+
+auto tests::unit::suffix::Resuffix::test_simple_dot() -> void {
+  CPPUNIT_ASSERT("apple.o" == resuffix("apple.yy", Sf::O));
+  CPPUNIT_ASSERT("banana.mk" == resuffix("banana.hh", Sf::MK));
+  CPPUNIT_ASSERT("cherry.xcpp" == resuffix("cherry.c++", Sf::XCPP));
+}
+
+auto tests::unit::suffix::Resuffix::test_path_nodot() -> void {
+  CPPUNIT_ASSERT("external/apple.o" == resuffix("external/apple", Sf::O));
+  CPPUNIT_ASSERT("external/banana.mk" == resuffix("external/banana", Sf::MK));
+  CPPUNIT_ASSERT("external/cherry.xcpp" == resuffix("external/cherry", Sf::XCPP));
+}
+
+auto tests::unit::suffix::Resuffix::test_path_dot_before_slash() -> void {
+  CPPUNIT_ASSERT("./apple.o" == resuffix("./apple", Sf::O));
+  CPPUNIT_ASSERT("./banana.mk" == resuffix("./banana", Sf::MK));
+  CPPUNIT_ASSERT("./cherry.xcpp" == resuffix("./cherry", Sf::XCPP));
+}
+
+auto tests::unit::suffix::Resuffix::test_path_dot_after_slash() -> void {
+  CPPUNIT_ASSERT("./here.apple.o" == resuffix("./here.apple.c", Sf::O));
+  CPPUNIT_ASSERT("./there.banana.mk" == resuffix("./there.banana.p", Sf::MK));
+  CPPUNIT_ASSERT("./everywhere.cherry.xcpp" == resuffix("./everywhere.cherry.basic", Sf::XCPP));
+}
+
+auto tests::unit::suffix::Resuffix::suite() -> cppunit::Test * {
+  using namespace ::unit::rigging::suite;
+  Stream s("resuffix");
+  s << call("miscellaneous", &Resuffix::test_miscellaneous)
+    << call("simple-nodot", &Resuffix::test_simple_nodot)
+    << call("simple-dot", &Resuffix::test_simple_dot)
+    << call("path-nodot", &Resuffix::test_path_nodot)
+    << call("path-dot-before-slash", &Resuffix::test_path_dot_before_slash)
+    << call("path-dot-after-slash", &Resuffix::test_path_dot_after_slash)
+    ;
+  return finalize(s);
+}
+#endiv

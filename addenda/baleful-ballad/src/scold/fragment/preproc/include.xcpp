@@ -1,0 +1,45 @@
+// -*- c++ -*- in the SCOLD styling that is so fashionable these days
+#divert <hpp>
+#import scold.module.Module
+#import path.filename.mount.Value
+#import scold.line.Item
+namespace scold {
+  namespace fragment {
+    namespace preproc {
+      // #include "module"              recall that <module> and "module" are "mostly" the same thing
+      //
+      inline auto include(module::Module const &) -> line::Item;
+
+      // #include "filename"
+      //
+      inline auto include(std::string const &filename) -> line::Item;
+
+      //
+      // #include "filename"
+      //
+      // The complicated way to get the module, where the sub-include structure is exposed
+      // like path::filename::finalize(...) but surrounds with #include "$filename"
+      inline auto include(path::filename::mount::Value &&) -> line::Item;
+    }
+  }
+}
+#endiv
+#divert <ipp>
+#import scold.fragment.detail.ifdef
+
+auto scold::fragment::preproc::include(module::Module const &module) -> line::Item {
+  using namespace detail;
+  return ifdef("include", Quote::ANGLE, module);
+}
+
+auto scold::fragment::preproc::include(std::string const &filename) -> line::Item {
+  using namespace detail;
+  return ifdef("include", Quote::ANGLE, filename);
+}
+
+#import std.forward
+auto scold::fragment::preproc::include(path::filename::mount::Value &&anon) -> line::Item {
+  using namespace detail;
+  return ifdef("include", Quote::ANGLE, std::forward<path::filename::mount::Value>(anon));
+}
+#endiv

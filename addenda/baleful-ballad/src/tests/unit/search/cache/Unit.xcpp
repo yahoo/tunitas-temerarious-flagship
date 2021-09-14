@@ -1,0 +1,36 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace tests {
+  namespace unit {
+    namespace search {
+      namespace cache {
+        class Unit;
+      }
+    }
+  }
+}
+#endiv
+#divert <hpp>
+class tests::unit::search::cache::Unit : public cppunit::test::Fixture {
+public:
+  auto test_constructor() -> void;
+
+  static auto suite() -> cppunit::Test *;
+};
+#endiv
+#divert <cpp>
+#import scold.search.cache.Unit
+#import tests.unit.search.cache.Unit_Finalized
+auto tests::unit::search::cache::Unit::test_constructor() -> void {
+  Unit_Finalized uf;
+  CPPUNIT_ASSERT(true);
+}
+
+auto tests::unit::search::cache::Unit::suite() -> cppunit::Test * {
+  using namespace ::unit::rigging::suite;
+  Stream s("Unit");
+  s << call("constructor", &Unit::test_constructor)
+    ;
+  return finalize(s);
+}
+#endiv

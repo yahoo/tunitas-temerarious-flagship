@@ -1,0 +1,135 @@
+# This is a -*- Makefile -*- fragment.
+# For terms and provenance see the LICENSE file at the top of this repository.
+#
+lib_libscold_easy_la = lib/libscold-easy.la
+lib_libscold_easy_la_LIBADD = \
+  $(lib_liblite_la) \
+  $(lib_libwant_la) \
+  -loptions-module \
+  -lnonstd-module \
+  $(end)
+lib_libscold_easy_la_LDFLAGS = 
+lib_libscold_easy_la_MODULES = $(call SCOLD_SOURCEStoMODULES, $(lib_libscold_easy_la_SOURCES))
+# shut up
+# src/scold/easy/cascade.Context.xcpp:51:65: warning: ‘inout’ attribute directive ignored [-Wattributes]
+$(lib_libscold_easy_la_OBJECTS): AM_CXXFLAGS+=-Wno-attributes
+lib_libscold_easy_la_SOURCES = \
+  obj/src/scold/easy/back_inserter.cpp \
+  obj/src/scold/easy/cascade.Context.cpp \
+  obj/src/scold/easy/cascade.Matryoshka.cpp \
+  obj/src/scold/easy/cascade.cpp \
+  obj/src/scold/easy/Configuration.cpp \
+  obj/src/scold/easy/core.cpp \
+  obj/src/scold/easy/core.Match.declaration.cpp \
+  obj/src/scold/easy/core.Match.template.cpp \
+  obj/src/scold/easy/core.Match.cpp \
+  obj/src/scold/easy/core.Match.Cstart.cpp \
+  obj/src/scold/easy/core.Match.Cend.cpp \
+  obj/src/scold/easy/core.Match.EBT.cpp \
+  obj/src/scold/easy/core.Match.EDF.cpp \
+  obj/src/scold/easy/core.Match.IPL.cpp \
+  obj/src/scold/easy/core.Match.TED.cpp \
+  obj/src/scold/easy/core.Match.TSE.cpp \
+  obj/src/scold/easy/core.Match.TEP.cpp \
+  obj/src/scold/easy/core.Match.UET.cpp \
+  obj/src/scold/easy/core.Match.UST.cpp \
+  obj/src/scold/easy/core.Match.DP.cpp \
+  obj/src/scold/easy/core.Match.MP.cpp \
+  obj/src/scold/easy/core.process.cpp \
+  obj/src/scold/easy/core.State.cpp \
+  obj/src/scold/easy/debuggable.cpp \
+  obj/src/scold/easy/debugging.Formatter.cpp \
+  obj/src/scold/easy/debugging.Formatter.Searchpath.cpp \
+  obj/src/scold/easy/defaults.cpp \
+  obj/src/scold/easy/diagnostic.cpp \
+  obj/src/scold/easy/exception.aspect.Exiting.cpp \
+  obj/src/scold/easy/exception.aspect.Exiting.Formatter.cpp \
+  obj/src/scold/easy/exception.provides.Exiting.cpp \
+  obj/src/scold/easy/exception.Failing.cpp \
+  obj/src/scold/easy/exception.Quitting.cpp \
+  obj/src/scold/easy/exception.Usage.cpp \
+  obj/src/scold/easy/exception.Version.cpp \
+  obj/src/scold/easy/file.Inbound.cpp \
+  obj/src/scold/easy/file.inbound.Result.cpp \
+  obj/src/scold/easy/file.Outbound.cpp \
+  obj/src/scold/easy/file.outbound.Result.cpp \
+  obj/src/scold/easy/filesystem.cpp \
+  obj/src/scold/easy/filesystem.operations.cpp \
+  obj/src/scold/easy/filesystem.Path.cpp \
+  obj/src/scold/easy/filesystem.Suffix.cpp \
+  obj/src/scold/easy/filesystem.Module.cpp \
+  obj/src/scold/easy/format.cpp \
+  obj/src/scold/easy/format.put.cpp \
+  obj/src/scold/easy/formatting.Formatter.template.cpp \
+  obj/src/scold/easy/formatting.Formatter.time.cpp \
+  obj/src/scold/easy/formatting.Formatter.uuid.cpp \
+  obj/src/scold/easy/formatting.Formatter.file.cpp \
+  obj/src/scold/easy/formatting.Formatter.cpp \
+  obj/src/scold/easy/generate.cpp \
+  obj/src/scold/easy/line.Buffer.cpp \
+  obj/src/scold/easy/line.get.cpp \
+  obj/src/scold/easy/line.Location.cpp \
+  obj/src/scold/easy/line.Number.cpp \
+  obj/src/scold/easy/line.Object.cpp \
+  obj/src/scold/easy/line.Range.cpp \
+  obj/src/scold/easy/line.Stream.cpp \
+  obj/src/scold/easy/List.cpp \
+  obj/src/scold/easy/logging.cpp \
+  obj/src/scold/easy/Map.cpp \
+  obj/src/scold/easy/message.cpp \
+  obj/src/scold/easy/message.Stream.cpp \
+  obj/src/scold/easy/multipath.burst.cpp \
+  obj/src/scold/easy/multipath.detail.cpp \
+  obj/src/scold/easy/multipath.Filepath.cpp \
+  obj/src/scold/easy/multipath.prune.cpp \
+  obj/src/scold/easy/multipath.pruning.Walker.cpp \
+  obj/src/scold/easy/name.Filepath.cpp \
+  obj/src/scold/easy/name.Module.cpp \
+  obj/src/scold/easy/name.Multipath.cpp \
+  obj/src/scold/easy/namespace.cpp \
+  obj/src/scold/easy/option.Argv.cpp \
+  obj/src/scold/easy/option.cpp \
+  obj/src/scold/easy/option.Parser.cpp \
+  obj/src/scold/easy/option.parser.Result.cpp \
+  obj/src/scold/easy/outcome.Code.cpp \
+  obj/src/scold/easy/outcome.Condition.cpp \
+  obj/src/scold/easy/outcome.Category.cpp \
+  obj/src/scold/easy/outcome.category.cpp \
+  obj/src/scold/easy/Program.cpp \
+  obj/src/scold/easy/Project.cpp \
+  obj/src/scold/easy/remain.cpp \
+  obj/src/scold/easy/required.cpp \
+  obj/src/scold/easy/required.function.Result.cpp \
+  obj/src/scold/easy/required.iterator.cpp \
+  obj/src/scold/easy/required.iterator.Forward.cpp \
+  obj/src/scold/easy/required.iterator.Producing.cpp \
+  obj/src/scold/easy/required.map.Key.cpp \
+  obj/src/scold/easy/required.map.Mapped.cpp \
+  obj/src/scold/easy/Searchpath.Constructor.cpp \
+  obj/src/scold/easy/Searchpath.cpp \
+  obj/src/scold/easy/searchpath.Iterator.cpp \
+  obj/src/scold/easy/suffix.cpp \
+  obj/src/scold/easy/suffix.Limits.cpp \
+  obj/src/scold/easy/suffix.Step.cpp \
+  obj/src/scold/easy/suffix.Step.less.cpp \
+  obj/src/scold/easy/suffix.Suffix.cpp \
+  obj/src/scold/easy/suffix.Suffix.less.cpp \
+  obj/src/scold/easy/suffix.Neighbors.cpp \
+  obj/src/scold/easy/suffix.tables.cpp \
+  obj/src/scold/easy/tagged.String.cpp \
+  obj/src/scold/easy/tagged.String.traits.cpp \
+  obj/src/scold/easy/time.Point.cpp \
+  obj/src/scold/easy/timepoint.cpp \
+  obj/src/scold/easy/uuid.Point.cpp \
+  obj/src/scold/easy/uniqueness.cpp \
+  $(end)
+$(scold_cxxdir)/scold/easy/dependencies.mk: $(lib_libscold_easy_la_SOURCES)
+$(lib_libscold_easy_la_SOURCES) : obj/src/%.cpp : src/%.xcpp
+	$(HT_V_COLD) $(call HT_XCPP2CPP, $<)
+	@test -e $@
+$(scold_cxxdir)/scold/easy/dependencies.mk:
+	$(HT_V_BOTH) $(call HT_DEPENDENCIES, $^)
+	@test -e $@
+include $(scold_cxxdir)/scold/easy/dependencies.mk
+clean-dependencies::
+	rm -f $(scold_cxxdir)/scold/easy/dependencies.mk

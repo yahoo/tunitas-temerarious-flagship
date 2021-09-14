@@ -1,0 +1,57 @@
+// -*- c++ -*- in the SCOLD styling that is so popular these days
+#divert <fpp>
+#import std.string
+#import std.vector
+namespace scold {
+  namespace module {
+    using Position = std::vector<std::string>::const_iterator; // a.k.a. Module::const_iterator
+  }
+}
+#endiv
+#divert <hpp>
+#import scold.module.detail.filebase.Result
+namespace scold {
+  namespace module {
+    inline auto probe(std::string const &srcdir_context, Position begin, Position middle, Position end) -> detail::filebase::Result;
+  }
+}
+#endiv
+#divert <ipp>
+#import path.filename.join
+#import path.filename.workbench
+#import scold.Suffix
+#import std.move
+#import sys.posix.isdir
+#import sys.posix.isreg
+#import sys.posix.exists
+auto scold::module::probe(std::string const &srcdir_context, Position begin, Position middle, Position end) -> detail::filebase::Result {
+  using path::filename::workbench;
+  using path::filename::join;
+  using adl_type = detail::filebase::ADL;
+  auto mixture = [&srcdir_context, begin, middle, end]() -> std::string {
+    if (begin == middle) {
+      return finalize(workbench() * join('.', middle, end));
+    } else if (middle == end) {
+      // At the end, the module names a directory, so there ought to be a /namespace.xcpp below that
+      auto naive_basis = finalize(workbench() * join('/', begin, middle));
+      auto namespace_basis = finalize(workbench() * naive_basis / "namespace");
+      auto filename_candidate = finalize(workbench() * srcdir_context / namespace_basis * Suffix::XCPP);
+      if (sys::posix::isreg(filename_candidate)) {
+        return namespace_basis;
+      } else {
+        return naive_basis;
+      }
+    } else {
+      return finalize(workbench() * join('/', begin, middle) / join('.', middle, end));
+    }
+  }();
+  auto candidate = finalize(workbench() * srcdir_context / mixture * Suffix::XCPP);
+  if (sys::posix::exists(candidate)) {
+    // good, found it
+    return detail::filebase::Result(adl_type(), true, std::move(mixture));
+  } else {
+    // error, no such
+    return detail::filebase::Result(adl_type(), false, std::string());
+  }
+}
+#endiv

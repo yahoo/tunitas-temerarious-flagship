@@ -1,0 +1,146 @@
+// This is C++ 23 -*- c++ -*- -std=c++23 in the stylings of the S.C.O.L.D. design method.
+// For terms and provenance see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace scold::easy::file {
+  //
+  // The outbound file (streams) are indexed by the suffix name.
+  // Streams of the multiple file(s) at the multiple paths.
+  //
+  // Usage:
+  //
+  //    auto names = burst("src/package/component/file.xcpp");
+  //    auto outbound = Outbound{names);
+  //
+  //    Outbound outbound;
+  //    auto opened = outbound.open(names);
+  //    auto closed = outbound.close();
+  //
+  //    outbound[Suffix:FPP] << "this that\n";
+  //    outbound[Suffix:HPP] << "this that\n";
+  //    outbound[Suffix:IPP] << "this that\n";
+  //    outbound[Suffix:TPP] << "this that\n";
+  //    outbound[Suffix:CPP] << "this that\n";
+  //
+  class Outbound;
+}
+#endiv
+#divert <hpp>
+namespace scold::easy::file {
+  inline auto swap(Outbound &, Outbound &) noexcept -> void;
+}
+#import std.swap
+namespace std {
+  using scold::easy::file::swap;
+}
+#import scold.easy.file.outbound.Result
+#import scold.easy.name.Multipath
+#import scold.easy.suffix.Limits
+#import scold.easy.suffix.Suffix
+#import std.array
+#import std.ios_base
+#import std.ofstream
+class scold::easy::file::Outbound {
+public:
+  Outbound() = default;
+  Outbound(Outbound const &) = default;
+  auto operator=(Outbound const &) -> Outbound & = default;
+  inline Outbound(Outbound &&);
+  inline auto operator=(Outbound &&) -> Outbound &;
+  // shaped like std::ios_base
+  inline auto operator!() const -> bool;
+  inline operator bool() const;
+  inline auto good() const -> bool;
+  inline auto bad() const -> bool;
+  inline auto fail() const -> bool;
+  inline auto eof() const -> bool;
+private:
+  // You can only open in outbound mode only, so there is no need for or utility in these.
+  using Openmode = std::ios_base::openmode;
+  inline static constexpr auto IN = std::ios_base::in;
+  inline static constexpr auto OUT = std::ios_base::out;
+public:
+  inline auto open(name::Multipath const &) -> outbound::Result;
+  inline auto is_open() const -> bool;
+  inline auto close() -> outbound::Result;
+  // the individual streams
+  inline auto operator[](suffix::Suffix) -> std::ostream &;
+  inline auto at(suffix::Suffix) -> std::ostream &;
+  using Limits = suffix::Limits<suffix::Suffix>;
+protected:
+  static_assert(5 == suffix::Limits<suffix::Suffix>::size());
+  using Phases = std::array<std::ofstream, suffix::Limits<suffix::Suffix>::size()>;
+  Phases phases;
+  friend auto file::swap(Outbound &, Outbound &) noexcept -> void;
+};
+#endiv
+#divert <ipp>
+auto scold::easy::file::swap(Outbound &a, Outbound &b) noexcept -> void {
+  swap(a.phases, b.phases);
+}
+namespace scold::easy::file {
+  Outbound::Outbound(Outbound &&other)
+    : phases{std::forward<Phases>(other.phases)}
+  { }
+  auto Outbound::operator=(Outbound &&other) -> Outbound & {
+    Outbound tmp{std::forward<Outbound>(other)};
+    swap(*this, tmp);
+    return *this;
+  }
+  auto Outbound::operator!() const -> bool { return !good(); }
+  Outbound::operator bool() const { return good(); }
+}
+#import std.any_of
+#import std.all_of
+namespace scold::easy::file {
+  auto Outbound::good() const -> bool { return std::all_of(phases.begin(), phases.end(), [](std::ostream const &o) { return o.good(); }); }
+  auto Outbound::bad() const -> bool { return std::any_of(phases.begin(), phases.end(), [](std::ostream const &o) { return o.bad(); }); }
+  auto Outbound::fail() const -> bool { return std::any_of(phases.begin(), phases.end(), [](std::ostream const &o) { return o.fail(); }); }
+  auto Outbound::eof() const -> bool { return std::any_of(phases.begin(), phases.end(), [](std::ostream const &o) { return o.eof(); }); }
+  auto Outbound::operator[](suffix::Suffix s) -> std::ostream & { return phases[(int) s]; }
+  auto Outbound::at(suffix::Suffix s) -> std::ostream & { return phases.at((int) s); }
+}
+#include <cerrno>
+#import std.is_same
+#import std.move
+#import sys.call.Result
+#import want.ranges.minmax
+#import std.cerr
+namespace scold::easy::file {
+  auto Outbound::open(name::Multipath const &multi) -> outbound::Result {
+    using Phase_Result = sys::call::Result;
+    outbound::Result ret;
+    for (auto fix : want::ranges::minmax(Limits::min(), Limits::max())) {
+      auto &phase = phases[(int) fix];
+      static_assert(std::is_same<void, decltype(phase.open(multi[fix], OUT))>::value);
+      std::cerr << "DEBUG opening " << multi[fix] << '\n';
+      phase.open(multi[fix], OUT);
+      int errnum = errno; // capture this as soon as possible
+      auto ok = phase.is_open();
+      auto value = ok ? 0 : -1;
+      ret[fix] = Phase_Result{ok, errnum, value};
+    }
+    return ret;
+  }
+  auto Outbound::is_open() const -> bool {
+    auto is = true;
+    for (auto fix : want::ranges::minmax(Limits::min(), Limits::max())) {
+      is &= phases[(int)fix].is_open();
+    }
+    return is;
+  }
+  auto Outbound::close() -> outbound::Result {
+    using Phase_Result = sys::call::Result;
+    outbound::Result ret;
+    for (auto fix : want::ranges::minmax(Limits::min(), Limits::max())) {
+      auto &phase = phases[(int)fix];
+      static_assert(std::is_same<void, decltype(phase.close())>::value);
+      phase.close();
+      int errnum = errno; // capture this as soon as possible
+      auto ok = !phase.is_open(); // can this ever fail?
+      auto value = ok ? 0 : -1;
+      ret[fix] = Phase_Result{ok, errnum, value};
+    }
+    return ret;
+  }
+}
+#endiv

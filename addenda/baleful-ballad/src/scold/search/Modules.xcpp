@@ -1,0 +1,42 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace scold {
+  namespace search {
+    //
+    // A filename or a module via the C Preprocessor
+    //
+    // Usage:
+    //     Modules search(...directories...);
+    //     auto searched = search("iostream");
+    //     if (ok(searched)) {
+    //         std::string fullpath = value(searched);
+    //     }
+    //
+    class Modules;
+  }
+}
+#endiv
+#divert <hpp>
+#import scold.Module 
+#import std.string 
+#import scold.search.aspect.Modules
+#import scold.search.cache.Unit
+class scold::search::Modules : public aspect::Modules, protected cache::Unit {
+  using ancestor = aspect::Modules;
+public:
+  using ancestor::Modules;
+  using ancestor::operator=;
+  inline auto operator()(std::string const &basename) -> result_type;
+  inline auto operator()(scold::Module const &) -> result_type;
+};
+#endiv
+#divert <ipp>
+#import scold.to
+auto scold::search::Modules::operator()(scold::Module const &module) -> result_type {
+  return ancestor::operator_call(*this, to<std::string>(module));
+}
+
+auto scold::search::Modules::operator()(std::string const &basename) -> result_type {
+  return ancestor::operator_call(*this, basename);
+}
+#endiv

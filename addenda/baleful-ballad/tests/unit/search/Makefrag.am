@@ -1,0 +1,4 @@
+tests_unit_search_TESTS = \
+  tests/unit/search/cases.test \
+  $(end)
+

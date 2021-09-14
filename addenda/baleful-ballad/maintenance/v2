@@ -1,0 +1,23 @@
+#!/bin/bash
+: ${with_worktrees:=/build/worktrees}
+: ${with_nearby:=/build/scold}
+
+with_nearby=${with_nearby?} \
+with_hypogeal_twilight=${with_hypogeal_twilight:-${with_worktrees?}/hypogeal-twilight/v0.LATEST} \
+with_module_langu=${with_module_langu:-${with_worktrees?}/langu/v0.LATEST} \
+with_module_nonstd=${with_module_nonstd:-${with_worktrees?}/nonstd/v2.LATEST} \
+with_module_options=${with_module_options:-${with_worktrees?}/options/v2.LATEST} \
+with_module_sys=${with_module_sys:-${with_worktrees?}/sys/v2.LATEST} \
+with_module_rigging=${with_module_rigging:-${with_worktrees?}/rigging/v2.LATEST} \
+with_module_cppunit=${with_module_cppunit:-no} \
+with_nonstd_cppunit=${with_nonstd_cppunit:-no} \
+\
+with_module_c=${with_module_c:-no} \
+with_module_find=${with_module_find:-no} \
+with_module_glob=${with_module_glob:-no} \
+with_module_posix=${with_module_posix:-no} \
+with_module_shell=${with_module_shell:-no} \
+with_module_slurp=${with_module_slurp:-no} \
+with_module_std=${with_module_std:-no} \
+\
+exec ${0%/*}/nearby

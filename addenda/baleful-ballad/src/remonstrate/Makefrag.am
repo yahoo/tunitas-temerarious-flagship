@@ -1,0 +1,42 @@
+# This is a GNU -*- Makefile -*- fragment. For terms, see the LICENSE file at the top of the repository.
+
+bin_remonstrate = bin/remonstrate
+$(bin_remonstrate): $(lib_libscold_la)
+bin_remonstrate_LDADD = \
+  $(lib_libscold_la_lNAME) \
+  -loptions-module \
+  $(end)
+#
+# Ick.  Remember, we're talking to libtool here, not to gcc (g++).
+# https://wiki.scold-lang.org/page/Libtool
+#
+# You want -static-libtool-libs.  That is the safest for "static builds" and the most robust installations.
+#
+#   -all-static
+#      If output-file is a library, then only create a static library. This flag cannot be used together with disable-static (see LT_INIT).
+#      If output-file is a program, then do not link it against any shared libraries at all. 
+#  -static
+#      If output-file is a library, then only create a static library.
+#      If output-file is a program, then do not link it against any uninstalled shared libtool libraries. 
+#  -static-libtool-libs
+#      If output-file is a library, then only create a static library.
+#      If output-file is a program, then do not link it against any shared libtool libraries. 
+#
+bin_remonstrate_LDFLAGS = @static_libtool_libs_EXECUTABLES_LDFLAGS@ $(PACKAGE_LDFLAGS_SET)
+bin_remonstrate_MODULES = $(call HGTW_SOURCEStoMODULES, $(bin_remonstrate_SOURCES))
+bin_remonstrate_SOURCES = \
+  obj/src/remonstrate/c.main.cpp \
+  obj/src/remonstrate/main.cpp \
+  obj/src/remonstrate/namespace.cpp \
+  obj/src/remonstrate/Usage.cpp \
+  $(end)
+#
+$(scold_cxxdir)/remonstrate/dependencies.mk: $(bin_remonstrate_SOURCES)
+$(bin_remonstrate_SOURCES) : obj/src/%.cpp : src/%.xcpp
+	$(HT_V_COLD) $(call HT_XCPP2CPP, $<)
+	@test -e $@
+$(scold_cxxdir)/remonstrate/dependencies.mk:
+	$(HT_V_BOTH) $(call HT_DEPENDENCIES, $^)
+	@test -e $@
+include $(scold_cxxdir)/remonstrate/dependencies.mk
+clean-dependencies:: ; rm -f $(scold_cxxdir)/remonstrate/dependencies.mk

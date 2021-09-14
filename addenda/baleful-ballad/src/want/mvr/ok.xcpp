@@ -1,0 +1,16 @@
+// -*- c++ -*- in the SCOLD stylings that are all the fashion these days
+#divert <hpp>
+#forward want.mvr.SAV
+namespace want {
+  namespace mvr {
+    template<typename TYPE> inline auto ok(SAV<TYPE> const &) -> bool;
+  }
+}
+#endiv
+#divert <ipp>
+#import want.mvr.SAV
+
+template<typename TYPE> auto want::mvr::ok(SAV<TYPE> const &sav) -> bool {
+  return sav.ok();
+}
+#endiv

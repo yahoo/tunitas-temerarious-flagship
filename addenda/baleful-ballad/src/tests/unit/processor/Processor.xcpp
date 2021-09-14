@@ -1,0 +1,61 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace tests {
+  namespace unit {
+    namespace processor {
+      class Processor;
+    }
+  }
+}
+#endiv
+#divert <hpp>
+#import tests.unit.processor.Dumper
+#import tests.unit.processor.Contextualization
+class tests::unit::processor::Processor : public cppunit::test::Fixture, Dumper, Contextualization {
+public:
+  auto test_constructor() -> void;
+  auto test_operator_call() -> void;
+
+  static auto suite() -> cppunit::Test *;
+};
+#endiv
+#divert <cpp>
+#import scold.Processor
+#import scold.line.Item
+#import scold.processor.Source
+#import tests.unit.processor.Subprocessor
+auto tests::unit::processor::Processor::test_constructor() -> void {
+  ::scold::line::Item li(99, "int i;");
+  ::scold::processor::Source so(cfg, ctx);
+  Subprocessor pr(li, so);
+  CPPUNIT_ASSERT(true);
+}
+
+#import scold.Phase
+#import scold.line.Item
+#import scold.Stream
+#import scold.Accruals
+#import scold.processor.Source
+auto tests::unit::processor::Processor::test_operator_call() -> void {
+  ::scold::processor::Source source(cfg, ctx);
+  ::scold::Phase ph(::scold::Phase::FPP);
+  ::scold::line::Item li(1, "int i;");
+  Subprocessor process(li, source);
+  ::scold::Stream ou;
+  ::scold::Accruals<::scold::IMPORT> im;
+  ::scold::Accruals<::scold::ENTAIL> en;
+  ::scold::Accruals<::scold::DEPEND> ds("file.lo", "$(modulesdir)", "$(objdir)", "$(srcdir)", "$(DC-COMPILE)", ::scold::Regeneration::TWO_STEP);
+  process(ph, ou, im, en, ds);
+  dump(ph, li, ou, im, en, __FUNCTION__, __FILE__, __LINE__);
+  CPPUNIT_ASSERT(true);
+}
+
+auto tests::unit::processor::Processor::suite() -> cppunit::Test * {
+  using namespace ::unit::rigging::suite;
+  Stream s("Processor");
+  s << call("constructor", &Processor::test_constructor)
+    << call("operator()", &Processor::test_operator_call)
+    ;
+  return finalize(s);
+}
+#endiv

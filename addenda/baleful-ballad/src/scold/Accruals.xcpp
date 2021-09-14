@@ -1,0 +1,56 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace scold {
+  enum class DEPEND { };
+  enum class ENTAIL { };
+  enum class IMPORT { };
+  template<typename ORIENTATION> class Accruals;
+}
+#endiv
+#divert <hpp>
+#import scold.Phase
+#import scold.phase.Incrementer
+#import scold.Streams
+#import scold.streams.Range
+#import std.is_same
+template<typename ORIENTATION> class scold::Accruals : public Streams {
+  using ancestor = Streams;
+  static_assert((std::is_same<ORIENTATION, ENTAIL>::value ||
+                 std::is_same<ORIENTATION, IMPORT>::value), "only ENTAIL or IMPORT");
+  static_assert(!std::is_same<ORIENTATION, DEPEND>::value, "not DEPEND, Accruals<DEPEND> has its own specialization");
+public:
+  Accruals() = default;
+  // reminder ancestor::operator[] exists
+  inline auto operator()(Phase) const -> streams::Range<Streams const>;
+  inline auto operator()(Phase) -> streams::Range<Streams>;
+protected:
+  // ... so we don't have to write operator() twice or cut & paste
+  template<typename STREAMS_CONSTY> inline static auto operator_call(STREAMS_CONSTY *, Phase start, Phase finish, phase::Incrementer) -> streams::Range<STREAMS_CONSTY>;
+};
+#entail scold.Accruals.DEPEND
+#entail scold.Accruals.ENTAIL
+#entail scold.Accruals.IMPORT
+#endiv
+#divert <ipp>
+#import scold.phase.Definition
+#import std.invalid_argument
+template<typename ORIENTATION> template<typename STREAMS_CONSTY> auto scold::Accruals<ORIENTATION>::operator_call(STREAMS_CONSTY *streams_consty, Phase start, Phase finish, phase::Incrementer incrementer) -> streams::Range<STREAMS_CONSTY> {
+  phase::Definition def(start);
+  if (!def.has_index()) {
+    throw std::invalid_argument("no index for phase");
+  }
+  return streams::Range<STREAMS_CONSTY>(streams_consty, start, finish, incrementer);
+}
+
+// see the specializations on Accruals<DEPEND, Accruals <ENTAIL>, or Accruals<IMPORT>
+template<typename ORIENTATION> auto scold::Accruals<ORIENTATION>::operator()(Phase) const -> streams::Range<Streams const> {
+  static_assert(0 == sizeof (ORIENTATION) && 0 != sizeof (ORIENTATION), "specializations only");
+  return streams::Range<Streams const>();
+}
+
+// ibidem.
+template<typename ORIENTATION> auto scold::Accruals<ORIENTATION>::operator()(Phase) -> streams::Range<Streams> {
+  static_assert(0 == sizeof (ORIENTATION) && 0 != sizeof (ORIENTATION), "specializations only");
+  return streams::Range<Streams>();
+}
+#endiv

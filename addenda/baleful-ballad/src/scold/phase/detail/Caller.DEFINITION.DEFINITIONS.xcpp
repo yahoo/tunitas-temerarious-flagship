@@ -1,0 +1,70 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+#import scold.phase.detail.Caller
+namespace scold {
+  namespace phase {
+    namespace detail {
+      template<typename DEFINITION, typename... DEFINITIONS> struct Caller<DEFINITION, DEFINITIONS...>;
+    }
+  }
+}
+#endiv
+#divert <hpp>
+#import scold.Phase
+#import mvr.State
+#import mvr.status
+#import mvr.SAV
+#import scold.phase.detail.Definition
+#forward scold.stream // steam::index_t
+template<typename DEFINITION, typename... DEFINITIONS> struct scold::phase::detail::Caller<DEFINITION, DEFINITIONS...> {
+  using definition = DEFINITION;
+  using subcaller = Caller<DEFINITIONS...>;
+  inline static auto has_diversion(Phase phase) -> bool { return recurrence(phase, &definition::has_diversion, &subcaller::has_diversion); }
+  inline static constexpr auto diversion_counter(unsigned base) -> stream::index_t {
+    return subcaller::diversion_counter(definition::diversion_counter(base));
+  }
+  inline static auto has_index(Phase phase) -> bool { return recurrence(phase, &definition::has_index, &subcaller::has_index); }
+  inline static auto index(Phase phase) -> stream::index_t {
+    if (definition::value() == phase) {
+      return definition::index();
+    } else {
+      return subcaller::index(phase);
+    }
+  }
+  inline static auto has_succ(Phase phase) -> bool { return recurrence(phase, &definition::has_succ, &subcaller::has_succ); }
+  inline static auto has_pred(Phase phase) -> bool { return recurrence(phase, &definition::has_pred, &subcaller::has_pred); }
+  inline static auto can_endiv(Phase phase) -> bool { return recurrence(phase, &definition::can_endiv, &subcaller::can_endiv); }
+  inline static auto has_suffix(Phase phase) -> bool { return recurrence(phase, &definition::has_suffix, &subcaller::has_suffix); }
+  inline static auto c_str(Phase phase) -> char const * {
+    if (definition::value() == phase) {
+      return definition::c_str();
+    } else {
+      return subcaller::c_str(phase);
+    }
+  }
+  inline static auto str(Phase phase) -> std::string { return recurrence<std::string>(phase, &definition::str, &subcaller::str); }
+  inline static auto to(std::string const &specimen) -> mvr::SAV<Phase> {
+    if (definition::str() == specimen) {
+      using namespace mvr;
+      return status<Phase>(State::VALUE, definition::value()); // yup, a value was found
+    } else {
+      return subcaller::to(specimen);
+    }
+  }
+private:
+  inline static auto recurrence(Phase phase, bool (*base)(), bool (*recur)(Phase)) -> bool {
+    if (definition::value() == phase) {
+      return (*base)();
+    } else {
+      return (*recur)(phase);
+    }
+  }
+  template<typename RESULT> inline static auto recurrence(Phase phase, RESULT (*base)(), RESULT (*recur)(Phase)) -> RESULT {
+    if (definition::value() == phase) {
+      return (*base)();
+    } else {
+      return (*recur)(phase);
+    }
+  }
+};
+#endiv

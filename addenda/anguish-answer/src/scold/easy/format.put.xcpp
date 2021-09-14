@@ -1,0 +1,25 @@
+// This is C++ 23 -*- c++ -*- -std=c++23 in the stylings of the S.C.O.L.D. design method.
+// For terms and provenance see the LICENSE file at the top of the repository.
+#divert <fpp>
+#import scold.easy.formatting.Formatter
+namespace scold::easy::format {
+  //
+  // Produce a formatter object for a specific data type
+  //
+  // The return type is a "formatter" which captures a reference to its argument.
+  // The lifetime of the formatter must be longer than the lifetime of its referent.
+  //
+  // Usage:
+  //
+  //   auto const &thing = ...somehow...
+  //   std::cout << put(thing);
+  //
+  template<typename TYPE> inline auto put(TYPE const &) -> formatting::Formatter<TYPE>;
+}
+#endiv
+#divert <hpp>
+template<typename TYPE> auto scold::easy::format::put(TYPE const &value) -> formatting::Formatter<TYPE> {
+  using Result = formatting::Formatter<TYPE>;
+  return Result{value};
+}
+#endiv

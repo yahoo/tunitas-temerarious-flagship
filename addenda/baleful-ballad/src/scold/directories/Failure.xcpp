@@ -1,0 +1,46 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace scold {
+  namespace directories {
+    class Failure;
+  }
+}
+#endiv
+#divert <hpp>
+#import scold.directories.mkdirp.Result
+#import std.error_code
+#import std.set
+#import std.string
+class scold::directories::Failure : public std::runtime_error, public mkdirp::Result {
+  using ancestor = std::runtime_error;
+  using mkdirp_result = mkdirp::Result;
+public:
+  inline Failure(bool ok, int errnum, std::string const &directory, std::set<std::string> const &worklist);
+  inline Failure(bool ok, std::error_code, std::string const &directory, std::set<std::string> const &worklist);
+  inline auto code() -> std::error_code;
+protected:
+  static auto format(bool, std::error_code, std::string const &, std::set<std::string> const &) -> std::string;
+};
+#endiv
+#divert <ipp>
+#import std.system_category
+scold::directories::Failure::Failure(bool arg_ok, int arg_errnum, std::string const &arg_directory, std::set<std::string> const &arg_worklist)
+  : Failure(arg_ok, std::error_code(arg_errnum, std::system_category()), arg_directory, arg_worklist) {
+  ;
+}
+
+scold::directories::Failure::Failure(bool arg_ok, std::error_code arg_ec, std::string const &arg_directory, std::set<std::string> const &arg_worklist)
+  : ancestor(format(arg_ok, arg_ec, arg_directory, arg_worklist))
+  , mkdirp_result(arg_ok, arg_ec.value(), arg_directory, arg_worklist) {
+  ;
+}
+#endiv
+#divert <cpp>
+#import std.ostringstream
+auto scold::directories::Failure::format(bool ok, std::error_code ec, std::string const &directory, std::set<std::string> const &worklist) -> std::string {
+  std::ostringstream buf;
+  buf << "failed to make the directory " << directory << " because " << ec.message();
+  // worklist is unused, it would (should) be very long & verbose to place in an error message.
+  return buf.str();
+}
+#endiv

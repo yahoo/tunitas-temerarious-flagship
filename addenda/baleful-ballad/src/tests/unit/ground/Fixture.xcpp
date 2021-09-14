@@ -1,0 +1,95 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace tests {
+  namespace unit {
+    namespace ground {
+      class Fixture;
+    }
+  }
+}
+#endiv
+#divert <hpp>
+class tests::unit::ground::Fixture : public cppunit::test::Fixture {
+public:
+  // detailed testing is in tests::unit::ground::Functions
+  auto test_invert() -> void;
+  auto test_operator_not() -> void;
+  auto test_operator_insert() -> void;
+  auto test_operator_extract() -> void;
+
+  static auto suite() -> cppunit::Test *;
+};
+#endiv
+#divert <cpp>
+#import scold.Ground
+auto tests::unit::ground::Fixture::test_invert() -> void {
+  CPPUNIT_ASSERT(::scold::Ground::FORE == invert(::scold::Ground::BACK));
+  CPPUNIT_ASSERT(::scold::Ground::BACK == invert(::scold::Ground::FORE));
+  CPPUNIT_ASSERT(::scold::Ground::UNUSEABLE == invert(::scold::Ground::UNUSEABLE));
+}
+
+auto tests::unit::ground::Fixture::test_operator_not() -> void {
+  CPPUNIT_ASSERT(::scold::Ground::FORE == !::scold::Ground::BACK);
+  CPPUNIT_ASSERT(::scold::Ground::BACK == !::scold::Ground::FORE);
+  CPPUNIT_ASSERT(::scold::Ground::UNUSEABLE == !::scold::Ground::UNUSEABLE);
+}
+
+#import std.string
+#import std.ostringstream
+auto tests::unit::ground::Fixture::test_operator_insert() -> void {
+  {
+    std::ostringstream buf;
+    buf << ::scold::Ground::FORE;
+    std::string const actual = buf.str();
+    std::string const expected = "foreground";
+    CPPUNIT_ASSERT(expected == actual);
+  } {
+    std::ostringstream buf;
+    buf << ::scold::Ground::BACK;
+    std::string const actual = buf.str();
+    std::string const expected = "background";
+    CPPUNIT_ASSERT(expected == actual);
+  } {
+    std::ostringstream buf;
+    buf << ::scold::Ground::UNUSEABLE;
+    std::string const actual = buf.str();
+    std::string const expected = "unuseable";
+    CPPUNIT_ASSERT(expected == actual);
+  }
+}
+
+#import std.string
+#import std.ostringstream
+auto tests::unit::ground::Fixture::test_operator_extract() -> void {
+  {
+    std::istringstream buf(" foreground ");
+    ::scold::Ground ground;
+    bool ok = (bool)(buf >> ground);
+    CPPUNIT_ASSERT(ok);
+    CPPUNIT_ASSERT(::scold::Ground::FORE == ground);
+  } {
+    std::istringstream buf(" background ");
+    ::scold::Ground ground;
+    bool ok = (bool)(buf >> ground);
+    CPPUNIT_ASSERT(ok);
+    CPPUNIT_ASSERT(::scold::Ground::BACK == ground);
+  } {
+    std::istringstream buf(" unuseable ");
+    ::scold::Ground ground;
+    bool ok = (bool)(buf >> ground);
+    CPPUNIT_ASSERT(ok);
+    CPPUNIT_ASSERT(::scold::Ground::UNUSEABLE == ground);
+  }
+}
+
+auto tests::unit::ground::Fixture::suite() -> cppunit::Test * {
+  using namespace ::unit::rigging::suite;
+  Stream s("ground");
+  s << call("invert", &Fixture::test_invert)
+    << call("operator!", &Fixture::test_operator_not)
+    << call("operator<<", &Fixture::test_operator_insert)
+    << call("operator>>", &Fixture::test_operator_extract)
+    ;
+  return finalize(s);
+}
+#endiv

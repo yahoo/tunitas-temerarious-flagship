@@ -1,0 +1,98 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace scold {
+  namespace search {
+    namespace aspect {
+      //
+      // The module & filename lookup via the searchpath of the C PreProcessor (CPP)
+      //
+      // Usage (via the descendant)
+      //
+      //     Modules search(...directories...);
+      //     auto searched = search("iostream");
+      //     if (ok(searched)) {
+      //         std::string fullpath = value(searched);
+      //     }
+      //
+      class Modules;
+    }
+  }
+}
+#endiv
+#divert <hpp>
+#import scold.Module
+#import scold.search.aspect.Prototype
+#import std.initializer_list
+#import std.string
+#import std.vector
+class scold::search::aspect::Modules : public Prototype {
+  using ancestor = Prototype;
+public:
+  using directory_path_type = std::vector<std::string>;
+  inline explicit Modules(std::initializer_list<std::string>);
+  inline explicit Modules(directory_path_type const &);
+  inline explicit Modules(directory_path_type &&);
+  // no copy semantic
+  Modules(Modules const &) = delete;
+  auto operator=(Modules const &) -> Modules & = delete;
+  // a move semantic
+  Modules(Modules &&) = default;
+  auto operator=(Modules &&) -> Modules & = default;
+protected:
+  //
+  // The basename is the basename of the #include or the module of a #import, #entail,#forward
+  //
+  //     #include <sys/types.h> <------------------ basename
+  //     #include "apple/banana/Cherry.hpp" <------ basename
+  //     #import apple.banana.Cherry
+  //     #entail apple.banana.Cherry
+  //     #forward apple.banana.Cherry
+  //
+  // The descendant must implement a public operator()(...)
+  //
+  inline auto operator_call(cache_aspect &, std::string const &basename) -> result_type;
+  inline auto operator_call(cache_aspect &, scold::Module const &) -> result_type;
+  directory_path_type directory_path;
+};
+#endiv
+#divert <ipp>
+scold::search::aspect::Modules::Modules(std::initializer_list<std::string> il)
+  : directory_path(il) {
+  ;
+}
+
+scold::search::aspect::Modules::Modules(directory_path_type const &arg_path)
+  : directory_path(arg_path) {
+  ;
+}
+
+#import std.forward
+scold::search::aspect::Modules::Modules(directory_path_type &&anon)
+  : directory_path(std::forward<directory_path_type>(anon)) {
+  ;
+}
+
+#import scold.to
+#import std.string
+auto scold::search::aspect::Modules::operator_call(cache_aspect &aspect, scold::Module const &module) -> result_type {
+  auto basename = to<std::string>(module);
+  return operator_call(aspect, basename);
+}
+
+#import mvr.andvalue
+auto scold::search::aspect::Modules::operator_call(cache_aspect &aspect, std::string const &basename) -> result_type {
+  auto i = aspect.cache.find(basename);
+  auto e = aspect.cache.end();
+  if (e != i) {
+    return mvr::andvalue<result_type::value_type>(i->second);
+  } else {
+    for (auto const &directory : directory_path) {
+      auto probed = probe_and_cache(aspect, cache::Type::INCLUDE, directory, basename);
+      if (ok(probed)) {
+        return probed;
+      }
+    }
+    return mvr::andvalue<result_type::value_type>(); // do not cache the negative result
+  }
+}
+#endiv

@@ -1,0 +1,61 @@
+// This is C++ 23 -*- c++ -*- -std=c++23 in the stylings of the S.C.O.L.D. design method.
+// For terms and provenance see the LICENSE file at the top of the repository.
+#divert <hpp>
+#import scold.easy.List
+#import scold.easy.Map
+#import scold.easy.suffix.Step
+#import scold.easy.suffix.Suffix
+#import scold.easy.suffix.Neighbors
+namespace scold::easy::suffix::tables {
+  //
+  // These are (mostly) implementation details but are referenced elsewhere
+  //
+  // REMOVE --- extern Map<Step, List<Step>> const GREATER;
+  [[deprecated("use SUFFIX or UNSUFFIX)")]] extern Map<Step, bool> const MODE;
+  extern Map<Suffix, std::string> const SUFFIX;
+  extern Map<std::string, Suffix> const UNSUFFIX;
+  extern Map<Step, Neighbors> const NEIGHBORS;
+  extern List<Suffix> const IMPORTS;
+  extern List<Suffix> const ENTAILS;
+}
+#endiv
+#divert <cpp>
+using scold::easy::List;
+using scold::easy::Map;
+using namespace scold::easy::suffix;
+List<Suffix> const tables::IMPORTS{Suffix::FPP, Suffix::HPP, Suffix::IPP, Suffix::TPP}; // yes, missing Suffix::CPP
+List<Suffix> const tables::ENTAILS{Suffix::FPP, Suffix::HPP, Suffix::IPP, Suffix::TPP, Suffix::CPP};
+
+#if 0 // REMOVE
+Map<Step, List<Step>> const tables::GREATER{{Suffix::FPP, List<Step>{}},
+                                            {Suffix::HPP, List<Step>{Suffix::FPP}},
+                                            {Suffix::IPP, List<Step>{Suffix::HPP,Suffix::FPP}},
+                                            {Suffix::TPP, List<Step>{Suffix::IPP,Suffix::HPP,Suffix::FPP}},
+                                            {Suffix::CPP, List<Step>{Suffix::TPP,Suffix::IPP,Suffix::HPP,Suffix::FPP}},
+                                            {Step::END, List<Step>{Suffix::CPP,Suffix::TPP,Suffix::IPP,Suffix::HPP,Suffix::FPP}}};
+#endif
+// wait ... this means they are *all* legal ... what's the point?
+Map<Step, bool> const tables::MODE{// REMOVE {Step::ALL, true},
+                                   {Suffix::FPP, true},
+                                   {Suffix::HPP, true},
+                                   {Suffix::IPP, true},
+                                   {Suffix::TPP, true},
+                                   {Suffix::CPP, true},
+                                   {Step::END, true}};
+Map<Suffix, std::string> const tables::SUFFIX{{Suffix::FPP, "fpp"},
+                                              {Suffix::HPP, "hpp"},
+                                              {Suffix::IPP, "ipp"},
+                                              {Suffix::TPP, "tpp"},
+                                              {Suffix::CPP, "cpp"}};
+Map<std::string, Suffix> const tables::UNSUFFIX{{"fpp", Suffix::FPP},
+                                                {"hpp", Suffix::HPP},
+                                                {"ipp", Suffix::IPP},
+                                                {"tpp", Suffix::TPP},
+                                                {"cpp", Suffix::CPP}};
+Map<Step, Neighbors> const tables::NEIGHBORS{// REMOVE Step::ALL, Neighbors{Neighbors::NONE, Suffix::FPP}},
+                                             {Suffix::FPP, Neighbors{Neighbors::NONE, Suffix::HPP}},
+                                             {Suffix::HPP, Neighbors{Suffix::FPP, Suffix::IPP}},
+                                             {Suffix::IPP, Neighbors{Suffix::HPP, Suffix::TPP}},
+                                             {Suffix::TPP, Neighbors{Suffix::IPP, Suffix::CPP}},
+                                             {Suffix::CPP, Neighbors{Suffix::TPP, Neighbors::NONE}}};
+#endiv

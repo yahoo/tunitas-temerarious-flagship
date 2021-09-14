@@ -1,0 +1,25 @@
+// This is C++ 23 -*- c++ -*- -std=c++23 in the stylings of the S.C.O.L.D. design method.
+// For terms and provenance see the LICENSE file at the top of the repository.
+#divert <hpp>
+#forward scold.easy.outcome.Category
+namespace scold::easy::outcome {
+  //
+  // Recover the singleton of the outcome category
+  //
+  // Usage:
+  //
+  //   auto const &cat = category();
+  //   ...etc...
+  //
+  auto category() -> Category const &;
+}
+#endiv
+#divert <ipp>
+#import scold.easy.outcome.Category
+#endiv
+#divert <cpp>
+auto scold::easy::outcome::category() -> Category const & {
+  static Category const singleton;
+  return singleton;
+}
+#endiv

@@ -1,0 +1,60 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace tests {
+  namespace unit {
+    namespace processor {
+      class Injector_ENCLOSING;
+    }
+  }
+}
+#endiv
+#divert <hpp>
+#import tests.unit.processor.Dumper
+#import tests.unit.processor.Contextualization
+class tests::unit::processor::Injector_ENCLOSING : public cppunit::test::Fixture, Dumper, Contextualization {
+public:
+  auto test_constructor() -> void;
+  auto test_operator_call() -> void;
+
+  static auto suite() -> cppunit::Test *;
+};
+#endiv
+#divert <cpp>
+#import scold.Director
+#import scold.Phase
+#import scold.line.Item
+#import scold.Stream
+#import scold.Accruals
+#import scold.processor.Injector
+#import tests.unit.processor.Injector_ENCLOSING
+
+auto tests::unit::processor::Injector_ENCLOSING::test_constructor() -> void {
+  ::scold::Director director(cfg, ctx, build_search);
+  ::scold::processor::Injector<::scold::processor::ENCLOSING> injector(cfg, ctx, director);
+  // Whee! it constructs
+  CPPUNIT_ASSERT(true);
+}
+
+auto tests::unit::processor::Injector_ENCLOSING::test_operator_call() -> void {
+  ::scold::Director director(cfg, ctx, build_search);
+  ::scold::processor::Injector<::scold::processor::ENCLOSING> injector(cfg, ctx, director);
+  ::scold::Phase ph(::scold::Phase::FPP);
+  ::scold::line::Item li(1, "$bogon");
+  ::scold::Stream ou;
+  ::scold::Accruals<::scold::IMPORT> im;
+  ::scold::Accruals<::scold::ENTAIL> en;
+  ::scold::Accruals<::scold::DEPEND> ds("file.o", "$(modulesdir)", "$(objdir)", "$(srcdir)", "$(DC-COMPILE)", ::scold::Regeneration::TWO_STEP);
+  injector("./package/subpackage/component/namespace.xcpp"); // <------- test this
+  dump(ph, li, ou, im, en, __FUNCTION__, __FILE__, __LINE__);
+  CPPUNIT_ASSERT(true);
+}
+
+auto tests::unit::processor::Injector_ENCLOSING::suite() -> cppunit::Test * {
+  using namespace ::unit::rigging::suite;
+  Stream s("Injector<ENCLOSING>");
+  s << call("constructor", &Injector_ENCLOSING::test_constructor)
+    << call("operator()", &Injector_ENCLOSING::test_operator_call)
+    ;
+  return finalize(s);
+}
+#endiv

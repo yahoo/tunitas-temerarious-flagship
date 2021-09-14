@@ -1,0 +1,18 @@
+// This is C++ 23 -*- c++ -*- -std=c++23 in the stylings of the S.C.O.L.D. design method.
+// For terms and provenance see the LICENSE file at the top of the repository.
+#divert <fpp>
+#import scold.easy.core.Match.declaration
+#import scold.easy.core.Match.Cstart
+#import scold.easy.core.Match.Cend
+#import scold.easy.core.Match.DP
+#import scold.easy.core.Match.EBT
+#import scold.easy.core.Match.EDF
+#import scold.easy.core.Match.IPL
+#import scold.easy.core.Match.MP
+#import scold.easy.core.Match.TED
+#import scold.easy.core.Match.TEP
+#import scold.easy.core.Match.TSE
+#import scold.easy.core.Match.UET
+#import scold.easy.core.Match.UST
+#import scold.easy.core.Match.template
+#endiv

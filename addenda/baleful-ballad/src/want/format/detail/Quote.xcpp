@@ -1,0 +1,32 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace want {
+  namespace format {
+    namespace detail {
+      template<typename VALUE> class Quote;
+    }
+  }
+}
+#endiv
+#divert <hpp>
+#import std.ostream
+namespace want {
+  namespace format {
+    namespace detail {
+      template<typename VALUE> inline auto operator<<(std::ostream &, Quote<VALUE> const &) -> std::ostream &;
+    }
+  }
+}
+
+#import want.format.detail.Formatter
+template<typename VALUE> class want::format::detail::Quote : public Formatter<VALUE> {
+  using ancestor = Formatter<VALUE>;
+public:
+  using ancestor::Formatter;
+};
+#endiv
+#divert <ipp>
+template<typename VALUE> auto want::format::detail::operator<<(std::ostream &o, Quote<VALUE> const &d) -> std::ostream & {
+  return o << '\'' << d.value << '\'';
+}
+#endiv

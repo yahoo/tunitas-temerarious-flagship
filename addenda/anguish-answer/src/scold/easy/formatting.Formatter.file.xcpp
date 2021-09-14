@@ -1,0 +1,22 @@
+// This is C++ 23 -*- c++ -*- -std=c++23 in the stylings of the S.C.O.L.D. design method.
+// For terms and provenance see the LICENSE file at the top of the repository.
+#divert <hpp>
+#import scold.easy.formatting.Formatter.template
+#import std.basic_ostream
+#import nonstd.required.Character
+#import nonstd.required.Character_Traits
+#import std.filesystem.path
+namespace scold::easy::formatting {
+  template<nonstd::required::Character CHAR, nonstd::required::Character_Traits TRAITS> inline auto operator<<(std::basic_ostream<CHAR, TRAITS> &, Formatter<std::filesystem::path> const &) -> std::basic_ostream<CHAR, TRAITS> &;
+}
+#endiv
+#divert <ipp>
+#import scold.easy.formatting.Formatter
+namespace scold::easy {
+  template<nonstd::required::Character CHAR, nonstd::required::Character_Traits TRAITS> auto formatting::operator<<(std::basic_ostream<CHAR, TRAITS> &o, Formatter<std::filesystem::path> const &f) -> std::basic_ostream<CHAR, TRAITS> & {
+    // Whereas we desire to not see the quotes.
+    // And there is yet no standardized formatting system which will produce quoteless filepath representations
+    return o << (std::string) f.value;
+  }
+}
+#endiv

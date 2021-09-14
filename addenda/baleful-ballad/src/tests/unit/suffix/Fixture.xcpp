@@ -1,0 +1,77 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace tests {
+  namespace unit {
+    namespace suffix {
+      class Fixture;
+    }
+  }
+}
+#endiv
+#divert <hpp>
+class tests::unit::suffix::Fixture : public cppunit::test::Fixture {
+public:
+  // detailed testing is in tests::unit::suffix::Functions
+  auto test_operator_insert() -> void;
+  auto test_operator_extract() -> void;
+
+  static auto suite() -> cppunit::Test *;
+};
+#endiv
+#divert <cpp>
+#import scold.Suffix
+#import std.ostringstream
+auto tests::unit::suffix::Fixture::test_operator_insert() -> void {
+  std::ostringstream buf;
+  buf << ::scold::Suffix::FPP
+      << '.' << ::scold::Suffix::HPP
+      << '.' << ::scold::Suffix::IPP
+      << '.' << ::scold::Suffix::TPP
+      << '.' << ::scold::Suffix::CPP
+      << '.' << ::scold::Suffix::XCPP
+      << '.' << ::scold::Suffix::MK
+      << '.' << ::scold::Suffix::O
+      << '.' << ::scold::Suffix::LO;
+  std::string const actual = buf.str();
+  std::string const expected = "fpp.hpp.ipp.tpp.cpp.xcpp.mk.o.lo";
+  CPPUNIT_ASSERT_EQUAL(expected, actual);
+}
+
+#import std.istringstream
+auto tests::unit::suffix::Fixture::test_operator_extract() -> void {
+  std::istringstream buf("fpp.hpp.ipp.tpp.cpp.xcpp.mk.o.lo");
+  ::scold::Suffix fpp, hpp, ipp, tpp, cpp, xcpp, mk, o, lo;
+  char dot;
+  buf >> fpp
+      >> dot >> hpp
+      >> dot >> ipp
+      >> dot >> tpp
+      >> dot >> cpp
+      >> dot >> xcpp
+      >> dot >> mk
+      >> dot >> o
+      >> dot >> lo;
+  CPPUNIT_ASSERT_EQUAL(::scold::Suffix::FPP, fpp);
+  CPPUNIT_ASSERT_EQUAL(::scold::Suffix::HPP, hpp);
+  CPPUNIT_ASSERT_EQUAL(::scold::Suffix::IPP, ipp);
+  CPPUNIT_ASSERT_EQUAL(::scold::Suffix::TPP, tpp);
+  CPPUNIT_ASSERT_EQUAL(::scold::Suffix::CPP, cpp);
+  CPPUNIT_ASSERT_EQUAL(::scold::Suffix::XCPP, xcpp);
+  CPPUNIT_ASSERT_EQUAL(::scold::Suffix::MK, mk);
+  CPPUNIT_ASSERT_EQUAL(::scold::Suffix::O, o);
+  CPPUNIT_ASSERT_EQUAL(::scold::Suffix::LO, lo);
+}
+
+#import tests.unit.suffix.Definition
+#import tests.unit.suffix.Functions
+auto tests::unit::suffix::Fixture::suite() -> cppunit::Test * {
+  using namespace ::unit::rigging::suite;
+  Stream s("suffix");
+  s << call("operator<<", &Fixture::test_operator_insert)
+    << call("operator>>", &Fixture::test_operator_extract)
+    << add<Definition>()
+    << add<Functions>()
+    ;
+  return finalize(s);
+}
+#endiv

@@ -1,0 +1,63 @@
+#!/bin/bash
+
+declare NAME=${0##*/}
+declare SPECFILE=hypogeal-twilight.spec
+
+function usage_final() {
+    local -i e=$1; shift
+    cat <<EOF
+usage: check-package-version %{name} %{version} %{buildroot}%{pkglibexec}/*
+expect: from within ${specfile?}
+
+... designed for use in the %check stanza of ${SPECFILE?}
+... WATCHOUT - the %-substitutions are only meaningful from within ${SPECFILE?}
+EOF
+    exit ${e:-2}
+}
+
+if (($# < 2)) ; then
+    usage_final 1
+fi 1>&2
+if (($# == 2)) ; then
+    echo "${NAME}: warning, there is nothing to check"
+fi 1>&2
+if [[ $1 == "--usage" ]] ; then
+    usage final 0
+fi
+
+declare package_name=$1; shift
+declare package_version=$1; shift
+declare -a executables=( "$@" )
+
+declare expected_basis="version v*${package_version} of ${package_name}"
+echo "${NAME}: verbose, expecting to find a pattern approximating m/${expected_basis?}/"
+
+function check_version() {
+    local exe=$1; shift
+    # do the work a bunch of times to get fidelity on the error
+    if ! $exe --version >& /dev/null ; then
+        # not found?
+        # not executable?
+        # does not exit zero
+        $exe --version
+        echo "FAIL: the command '$exe --version' fails upon invocation"
+        return 1
+    fi 1>&2
+    local actual=$($exe --version)
+    local expected_pattern="${exe##*}.*: ${expected_basis}"
+    if ! expr  "${actual?}" : "${expected_pattern?}" > /dev/null ; then
+        echo "FAIL: $exe fails the version testification"
+        echo "pattern:"
+        echo "$expected_pattern"
+        echo "found:"
+        echo "$actual"
+        return 1
+    fi
+    return 0
+}
+
+declare -i e=0
+for exe in ${executables[@]}; do
+    check_version "${exe?}" || e=1
+done
+exit $e

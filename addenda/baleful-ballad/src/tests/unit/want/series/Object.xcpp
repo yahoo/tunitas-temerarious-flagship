@@ -1,0 +1,83 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace tests {
+  namespace unit {
+    namespace want {
+      namespace series {
+        class Object;
+      }
+    }
+  }
+}
+#endiv
+#divert <hpp>
+class tests::unit::want::series::Object : public cppunit::test::Fixture {
+public:
+  auto test_constructor_int() -> void;
+  auto test_constructor_char() -> void;
+  auto test_constructor_string() -> void;
+  auto test_begin_end() -> void;
+  auto test_size() -> void;
+
+  static auto suite() -> cppunit::Test *;
+};
+#endiv
+#divert <cpp>
+#import want.detail.series.Object
+#import std.string
+
+auto tests::unit::want::series::Object::test_constructor_int() -> void {
+  using object_type = ::want::detail::series::Object<int, int, int, int>;
+  object_type obj(1, 2, 3, 4);
+  CPPUNIT_ASSERT_EQUAL(4lu, obj.size());
+}
+
+auto tests::unit::want::series::Object::test_constructor_char() -> void {
+  using object_type = ::want::detail::series::Object<char, char, char, char>;
+  object_type obj('a', 'b', 'c', 'd');
+  CPPUNIT_ASSERT_EQUAL(4lu, obj.size());
+}
+
+auto tests::unit::want::series::Object::test_constructor_string() -> void {
+  using s = std::string;
+  using object_type = ::want::detail::series::Object<s, s, s, s>;
+  object_type obj(s("apple"), s("banana"), s("cherry"), s("dog"));
+  CPPUNIT_ASSERT_EQUAL(4lu, obj.size());
+}
+
+auto tests::unit::want::series::Object::test_begin_end() -> void {
+  using object_type = ::want::detail::series::Object<int, int, int, int>;
+  {
+    object_type obj{1, 2, 3, 4};
+    int count = 0;
+    for (object_type::iterator i(obj.begin()), e(obj.end()); e != i; ++i) {
+      count++;
+    }
+    CPPUNIT_ASSERT_EQUAL(4, count);
+  } {
+    object_type const obj{10, 11, 12, 13};
+    int count = 0;
+    for (object_type::const_iterator i(obj.begin()), e(obj.end()); e != i; ++i) {
+      count++;
+    }
+    CPPUNIT_ASSERT_EQUAL(4, count);
+  }
+}
+
+auto tests::unit::want::series::Object::test_size() -> void {
+  ::want::detail::series::Object<int, int, int, int> obj{1, 2, 3, 4};
+  CPPUNIT_ASSERT_EQUAL(4lu, obj.size());
+}
+
+auto tests::unit::want::series::Object::suite() -> cppunit::Test * {
+  using namespace ::unit::rigging::suite;
+  Stream s("Object");
+  s << call("constructor_int", &Object::test_constructor_int)
+    << call("constructor_char", &Object::test_constructor_char)
+    << call("constructor_string", &Object::test_constructor_string)
+    << call("begin-end", &Object::test_begin_end)
+    << call("size", &Object::test_size)
+    ;
+  return finalize(s);
+}
+#endiv

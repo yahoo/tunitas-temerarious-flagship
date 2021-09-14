@@ -1,0 +1,88 @@
+// -*- c++ -*- in the SCOLD styling that is so fashionable these days
+#divert <hpp>
+#import path.filename.mount.Value
+#import scold.line.Item
+#import std.string
+namespace scold {
+  namespace fragment {
+    namespace make {
+      //
+      // Synthesize make dependency lines
+      //
+
+      //
+      // $(lhs) : $(rhs)
+      inline auto depend(std::string const &lhs, std::string const &rhs) -> line::Item;
+      inline auto depend(std::string const &lhs, path::filename::mount::Value &&) -> line::Item;
+
+      //
+      // $(lhs) : $(objdir)/$(rhs)
+      //
+      // like path::filename::finalize(...) but constitute up a (GNU)make dependency statement  
+      inline auto depend(std::string const &lhs, std::string const &rhs_prefix, std::string const &rhs) -> line::Item;
+      inline auto depend(std::string const &lhs, std::string const &rhs_prefix, path::filename::mount::Value &&) -> line::Item;
+
+      //
+      // $(lhs_objdir)/$(lhs) : $(rhs_objdir)/$(rhs)
+      //
+      // like path::filename::finalize(...) but constitute up a (GNU)make dependency statement  
+      inline auto depend(std::string const &lhs_objdir, std::string const &lhs, std::string const &rhs_prefix, std::string const &rhs) -> line::Item;
+      inline auto depend(std::string const &lhs_objdir, std::string const &lhs, std::string const &rhs_prefix, path::filename::mount::Value &&) -> line::Item;
+      inline auto depend(std::string const &lhs_objdir, path::filename::mount::Value &&lhs, std::string const &rhs_prefix, path::filename::mount::Value &&rhs) -> line::Item;
+    }
+  }
+}
+#endiv
+#divert <ipp>
+#import path.filename.workbench
+#import std.ostringstream
+#import std.move
+
+auto scold::fragment::make::depend(std::string const &lhs, std::string const &rhs) -> line::Item {
+  std::ostringstream buf;
+  buf << lhs << " : " << rhs;
+  line::Item nonum(buf.str()); // no need for a line number
+  return nonum;
+}
+
+auto scold::fragment::make::depend(std::string const &lhs, path::filename::mount::Value &&rhs_anon) -> line::Item {
+  using path::filename::mount::Value;
+  auto rhs = finalize(std::forward<path::filename::mount::Value>(rhs_anon));
+  return depend(lhs, std::move(rhs));
+}
+
+auto scold::fragment::make::depend(std::string const &lhs, std::string const &rhs_objdir, std::string const &rhs_subpath) -> line::Item {
+  using path::filename::workbench;
+  auto rhs = finalize(workbench() * rhs_objdir / rhs_subpath);
+  return depend(lhs, std::move(rhs));
+}
+
+auto scold::fragment::make::depend(std::string const &lhs, std::string const &rhs_objdir, path::filename::mount::Value &&rhs_subpath) -> line::Item {
+  using path::filename::mount::Value; 
+  auto rhs = finalize(rhs_objdir / std::forward<path::filename::mount::Value>(rhs_subpath));
+  return depend(lhs, std::move(rhs));
+}
+
+auto scold::fragment::make::depend(std::string const &lhs_objdir, std::string const &lhs_subpath, std::string const &rhs_objdir, std::string const &rhs_subpath) -> line::Item {
+  using path::filename::workbench;
+  auto lhs = finalize(workbench() * lhs_objdir / lhs_subpath);
+  auto rhs = finalize(workbench() * rhs_objdir / rhs_subpath);
+  return depend(std::move(lhs), std::move(rhs));
+}
+
+#import std.forward
+auto scold::fragment::make::depend(std::string const &lhs_objdir, std::string const &lhs_subpath, std::string const &rhs_objdir, path::filename::mount::Value &&rhs_subpath) -> line::Item {
+  using path::filename::workbench;
+  auto lhs = finalize(workbench() * lhs_objdir / lhs_subpath);
+  auto rhs = finalize(rhs_objdir / std::forward<path::filename::mount::Value>(rhs_subpath));
+  return depend(std::move(lhs), std::move(rhs));
+}
+
+#import std.forward
+auto scold::fragment::make::depend(std::string const &lhs_objdir, path::filename::mount::Value &&lhs_subpath, std::string const &rhs_objdir, path::filename::mount::Value &&rhs_subpath) -> line::Item {
+  using path::filename::mount::Value;
+  auto lhs = finalize(lhs_objdir / std::forward<path::filename::mount::Value>(lhs_subpath));
+  auto rhs = finalize(rhs_objdir / std::forward<path::filename::mount::Value>(rhs_subpath));
+  return depend(std::move(lhs), std::move(rhs));
+}
+#endiv

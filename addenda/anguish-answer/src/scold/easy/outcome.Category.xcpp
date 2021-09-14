@@ -1,0 +1,63 @@
+// This is C++ 23 -*- c++ -*- -std=c++23 in the stylings of the S.C.O.L.D. design method.
+// For terms and provenance see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace scold::easy::outcome {
+  //
+  // Recover the singleton of the outcome category
+  //
+  // Usage:
+  //
+  //   auto const &cat = category();
+  //   ...etc...
+  //
+  class Category;
+}
+#endiv
+#divert <hpp>
+#import scold.easy.outcome.category
+#import std.error_category
+#import std.error_condition
+#import std.string
+class scold::easy::outcome::Category : public std::error_category {
+  using ancestor = std::error_category;
+  friend auto outcome::category() -> Category const &;
+  Category() = default;
+public:
+  auto name() const noexcept -> char const * final;
+  auto default_error_condition(int) const noexcept -> std::error_condition final;
+  auto message(int) const -> std::string final;
+};
+#endiv
+#divert <cpp>
+namespace scold::easy::outcome {
+  auto Category::name() const noexcept -> char const * {
+    return "scold::easy";
+  }
+  auto Category::default_error_condition(int code) const noexcept -> std::error_condition {
+    // Reduce the codes down to merely Condition::SUCCESS, Condition::FAILURE
+    return std::error_condition{0 != code, *this};
+  }
+}
+#import scold.easy.outcome.Code
+#import std.to_string
+namespace scold::easy::outcome {
+  auto Category::message(int code) const -> std::string {
+    switch (Code{code}) {
+    case Code::SUCCESS:
+      return "success";
+    case Code::FAILURE:
+      return "there was some failure";
+    case Code::OPTION_IS_UNKNOWN:
+      return "the option unknown";
+    case Code::OPTION_VALUE_IS_MISSING:
+      return "the option value is missing";
+    case Code::OPTION_SET_IS_INCOMPLETE:
+      return "the option set is incomplete";
+    case Code::OPTION_SET_IS_INCONSISTENT:
+      return "the option set is inconsistent";
+    default:
+      return "error code " + std::to_string(code);
+    }
+  }
+}
+#endiv

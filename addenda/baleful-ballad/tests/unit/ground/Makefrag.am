@@ -1,0 +1,4 @@
+tests_unit_ground_TESTS = \
+  tests/unit/ground/cases.test \
+  $(end)
+

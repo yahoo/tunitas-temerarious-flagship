@@ -1,0 +1,65 @@
+// -*- c++ -*- in the SCOLD styling that is so popular these days
+#divert <hpp>
+#import std.string
+namespace scold {
+  namespace validate {
+    namespace detail {
+      // Bug generally, shaped like C++ identifiers
+      inline auto isidentifier(std::string const &) -> bool;
+      inline auto is_snake_case(std::string const &) -> bool;
+      inline auto isCamelCase(std::string const &) -> bool;
+    }
+  }
+}
+#endiv
+#divert <ipp>
+#import std.all_of
+#import std.isdigit
+#import std.islower
+#import std.isupper
+#import std.isalnum
+auto scold::validate::detail::isidentifier(std::string const &subject) -> bool {
+  bool first(true);
+  auto test = [&first](std::string::value_type c) {
+    bool first_bad = std::isdigit(c);
+    bool generally_ok = std::isalnum(c) || '_' == c;
+    if (first) {
+      first = false;
+      return !first_bad && generally_ok;
+    } else {
+      return generally_ok;
+    }
+  };
+  return !subject.empty() && std::all_of(subject.begin(), subject.end(), test);
+}
+
+auto scold::validate::detail::is_snake_case(std::string const &subject) -> bool {
+  bool first(true);
+  auto test = [&first](std::string::value_type c) {
+    bool first_ok = std::islower(c) || '_' == c;
+    if (first) {
+      first = false;
+      return first_ok;
+    } else {
+      bool rest_ok = std::isdigit(c); // but never uppercase
+      return first_ok || rest_ok;
+    }
+  };
+  return !subject.empty() && std::all_of(subject.begin(), subject.end(), test);
+}
+
+auto scold::validate::detail::isCamelCase(std::string const &subject) -> bool {
+  bool first(true);
+  auto test = [&first](std::string::value_type c) {
+    bool first_ok = std::isupper(c); // no '_', first char must be upcased
+    if (first) {
+      first = false;
+      return first_ok;
+    } else {
+      bool rest_ok = std::isalnum(c); // but never '_' (underscore)
+      return first_ok || rest_ok;
+    }
+  };
+  return !subject.empty() && std::all_of(subject.begin(), subject.end(), test);
+}
+#endiv

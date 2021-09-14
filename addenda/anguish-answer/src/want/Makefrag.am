@@ -1,0 +1,34 @@
+# This is a -*- Makefile -*- fragment.
+# For terms and provenance see the LICENSE file at the top of this repository.
+#
+lib_libwant_la = lib/libwant.la
+lib_libwant_la_LIBADD = $(none)
+lib_libwant_la_LDFLAGS = 
+lib_libwant_la_MODULES = $(call SCOLD_SOURCEStoMODULES, $(lib_libwant_la_SOURCES))
+lib_libwant_la_SOURCES = \
+  obj/src/want/namespace.cpp \
+  obj/src/want/ranges.detail.Direct.Iterator.cpp \
+  obj/src/want/ranges.detail.Direct.cpp \
+  obj/src/want/ranges.detail.Container.cpp \
+  obj/src/want/ranges.minmax.cpp \
+  obj/src/want/ranges.forward.cpp \
+  obj/src/want/ranges.reverse.cpp \
+  obj/src/want/ranges.required.Directable.cpp \
+  obj/src/want/aliases.any.cpp \
+  obj/src/want/aliases.starts_with.cpp \
+  obj/src/want/aliases.detail.Set.cpp \
+  obj/src/want/aliases.detail.Any.cpp \
+  obj/src/want/aliases.detail.Starts_With.cpp \
+  obj/src/want/aliases.detail.Remainder.cpp \
+  obj/src/want/aliases.required.Stringable.cpp \
+  $(end)
+$(scold_cxxdir)/want/dependencies.mk: $(lib_libwant_la_SOURCES)
+$(lib_libwant_la_SOURCES) : obj/src/%.cpp : src/%.xcpp
+	$(HT_V_COLD) $(call HT_XCPP2CPP, $<)
+	@test -e $@
+$(scold_cxxdir)/want/dependencies.mk:
+	$(HT_V_BOTH) $(call HT_DEPENDENCIES, $^)
+	@test -e $@
+include $(scold_cxxdir)/want/dependencies.mk
+clean-dependencies::
+	rm -f $(scold_cxxdir)/want/dependencies.mk

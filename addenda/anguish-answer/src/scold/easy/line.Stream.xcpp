@@ -1,0 +1,67 @@
+// This is C++ 23 -*- c++ -*- -std=c++23 in the stylings of the S.C.O.L.D. design method.
+// For terms and provenance see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace scold::easy::line {
+  //
+  // A line-counting input stream
+  // Descendants only to allow various sorts of stream implementations to be used.
+  //
+  // Yes, thin characters only because that the code set of the the C++ languages.
+  // The wide characters are indicative of UX affordances in your language.
+  //
+  // Usage:
+  //
+  //   class my::Stream : public line::Stream, public std::ifstream {
+  //     ...
+  //     protected:
+  //       auto base() noexcept -> std::istream & { return *static_cast<std::istream *>(this); }
+  //   };
+  //   class my::Stream : public line::Stream, public std::istringstream {
+  //     ...etc...
+  //     protected:
+  //       auto base() noexcept -> std::istream & { return *static_cast<std::istream *>(this); }
+  //   };
+  class Stream;
+}
+#endiv
+#divert <hpp>
+#import scold.easy.line.Number
+#import scold.easy.line.get
+#import std.ios
+#import std.istream
+class scold::easy::line::Stream {
+protected:
+  virtual ~Stream() = default;
+  inline Stream();
+public:
+  inline auto operator!() const -> bool;
+  inline operator bool() const;
+  inline auto good() const -> bool;
+  inline auto bad() const -> bool;
+  inline auto fail() const -> bool;
+  inline auto eof() const -> bool;
+  using IOState = std::ios::iostate; // New School
+  virtual auto rdstate() const noexcept -> IOState = 0;
+protected:
+  virtual auto base() noexcept -> std::istream & = 0;
+  friend auto line::get(Stream &, Object &) -> Stream &;
+  Number line_number;
+  inline auto rdstate_has(IOState) const -> bool;
+  inline static constexpr auto GOOD = std::ios::goodbit;
+  inline static constexpr auto BAD = std::ios::badbit;
+  inline static constexpr auto FAIL = std::ios::failbit;
+  inline static constexpr auto EEOF = std::ios::eofbit;
+};
+#endiv
+#divert <ipp>
+namespace scold::easy::line {
+  Stream::Stream() : line_number{Number{}} { }
+  auto Stream::operator!() const -> bool { return !good(); }
+  Stream::operator bool() const { return good(); }
+  auto Stream::good() const -> bool { return std::ios::goodbit == rdstate(); }
+  auto Stream::rdstate_has(IOState pattern) const -> bool { return (pattern & rdstate()) == pattern; }
+  auto Stream::bad() const -> bool { return rdstate_has(BAD); }
+  auto Stream::fail() const -> bool { return rdstate_has(FAIL); }
+  auto Stream::eof() const -> bool { return rdstate_has(EEOF); }
+}
+#endiv

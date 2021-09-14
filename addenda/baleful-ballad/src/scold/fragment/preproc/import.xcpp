@@ -1,0 +1,21 @@
+// -*- c++ -*- in the SCOLD styling that is so fashionable these days
+#divert <hpp>
+#import scold.module.Module
+#import scold.line.Item
+namespace scold {
+  namespace fragment {
+    namespace preproc {
+      // #import package.subpackage.Component    (a module)
+      //
+      inline auto import(module::Module const &) -> line::Item;
+    }
+  }
+}
+#endiv
+#divert <ipp>
+#import scold.fragment.detail.ifdef
+auto scold::fragment::preproc::import(module::Module const &module) -> line::Item {
+  using namespace detail;
+  return ifdef("import", Quote::NOT, module);
+}
+#endiv

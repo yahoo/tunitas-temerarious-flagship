@@ -1,0 +1,125 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+#import std.string
+#import std.tuple
+namespace scold {
+  namespace line {
+    class Item;
+  }
+}
+#endiv
+#divert <hpp>
+namespace scold {
+  namespace line {
+    inline auto noline() -> number_t; // generate the line number indicating "there is no line number here"
+    inline auto is_lineno(number_t) -> bool;   // is a valid line number
+    inline auto is_nolineno(number_t) -> bool; // is the line number of "there is no line  number here"
+
+    // extract the line number from the tuple
+    inline auto lineno(Item const &) -> number_t;
+
+    // (Is there? | There is) "no line number" for this Item?
+    inline auto has_lineno(Item const &) -> bool;
+    inline auto has_nolineno(Item const &) -> bool;
+
+    // extract the line itself from the tuple
+    inline auto value(Item const &) -> std::string const &;
+    inline auto value(Item &) -> std::string &;
+    inline auto value(Item &&) -> std::string &&;
+  }
+}
+
+class scold::line::Item: public std::tuple<number_t, std::string> {
+  // Create a "new type" so that ADL will find the accessor functions (above)
+  using ancestor = std::tuple<number_t, std::string>;
+public:
+  Item() = default;
+  using ancestor::tuple;
+  // establish synthetic, unattributable "no line number" lines
+  inline explicit Item(std::string const &);
+  inline explicit Item(std::string &&);
+  // extract the line number from the tuple
+  inline auto has_lineno() -> bool;
+  inline auto is_noline() -> bool;
+  inline auto lineno() const -> number_t;
+  inline auto lineno() -> number_t &;
+  // extract the line itself from the tuple
+  inline auto value() const -> std::string const &;
+  inline auto value() -> std::string &;
+};
+#endiv
+#divert <ipp>
+#import std.get
+#import std.numeric_limits
+
+auto scold::line::noline() -> number_t {
+  return std::numeric_limits<number_t>::max();
+}
+
+auto scold::line::is_lineno(number_t val) -> bool {
+  return val != noline();
+}
+
+auto scold::line::is_nolineno(number_t val) -> bool {
+  return !is_lineno(val);
+}
+
+auto scold::line::has_lineno(Item const &line) -> bool {
+  return is_lineno(lineno(line));
+}
+
+auto scold::line::has_nolineno(Item const &line) -> bool {
+  return is_nolineno(lineno(line));
+}
+
+// extract the line number from the tuple
+auto scold::line::lineno(Item const &line) -> number_t {
+  return std::get<0>(line);
+}
+
+auto scold::line::value(Item const &line) -> std::string const & {
+  return std::get<1>(line);
+}
+
+auto scold::line::value(Item &line) -> std::string & {
+  return std::get<1>(line);
+}
+
+auto scold::line::value(Item &&anon) -> std::string && {
+  return std::get<1>(std::forward<Item>(anon));
+}
+
+scold::line::Item::Item(std::string const &value)
+  : ancestor(noline(), value) {
+  ;
+}
+
+scold::line::Item::Item(std::string &&anon)
+  : ancestor(noline(), std::forward<std::string>(anon)) {
+  ;
+}
+
+auto scold::line::Item::has_lineno() -> bool {
+  return ! is_noline();
+}
+
+auto scold::line::Item::is_noline() -> bool {
+  return lineno() == std::numeric_limits<number_t>::max();
+}
+
+auto scold::line::Item::lineno() const -> number_t {
+  return std::get<0>(*this);
+}
+
+auto scold::line::Item::lineno() -> number_t & {
+  return std::get<0>(*this);
+}
+
+auto scold::line::Item::value() const -> std::string const & {
+  return std::get<1>(*this);
+}
+
+auto scold::line::Item::value() -> std::string & {
+  return std::get<1>(*this);
+}
+#endiv

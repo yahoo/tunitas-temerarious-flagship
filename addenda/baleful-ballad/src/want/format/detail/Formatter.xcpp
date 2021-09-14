@@ -1,0 +1,24 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace want {
+  namespace format {
+    namespace detail {
+      template<typename VALUE> class Formatter;
+    }
+  }
+}
+#endiv
+#divert <hpp>
+template<typename VALUE> class want::format::detail::Formatter {
+public:
+  using value_type = VALUE;
+  inline explicit Formatter(value_type const &);
+  value_type const &value;
+};
+#endiv
+#divert <ipp>
+template<typename VALUE> want::format::detail::Formatter<VALUE>::Formatter(value_type const &arg_value)
+  : value(arg_value) {
+  ;
+}
+#endiv

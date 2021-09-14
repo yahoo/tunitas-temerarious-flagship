@@ -1,0 +1,124 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace tests {
+  namespace unit {
+    namespace scold {
+      class Director;
+    }
+  }
+}
+#endiv
+#divert <hpp>
+#import tests.unit.processor.Dumper
+#import tests.unit.processor.Contextualization
+class tests::unit::scold::Director : public cppunit::test::Fixture, processor::Dumper, processor::Contextualization {
+public:
+  auto test_usage1() -> void;
+  auto test_use_Forward() -> void;
+  auto test_use_Import() -> void;
+  auto test_use_Entail() -> void;
+  auto test_use_Source() -> void;
+  auto test_use_Error() -> void;
+
+  static auto suite() -> cppunit::Test *;
+};
+#endiv
+#divert <cpp>
+#import scold.Accruals.ENTAIL
+#import scold.Accruals.IMPORT
+#import scold.Director
+#import scold.Phase
+#import scold.Stream
+#import scold.line.Item
+
+auto tests::unit::scold::Director::test_usage1() -> void {
+  ::scold::Director d(cfg, ctx, build_search);
+  // it constructed (good)
+  ::scold::line::Item l(45, "int i;");
+  auto p = d(l);
+  ::scold::Stream out;
+  ::scold::Accruals<::scold::IMPORT> im;
+  ::scold::Accruals<::scold::ENTAIL> en;
+  ::scold::Accruals<::scold::DEPEND> ds("file.lo", "$(modulesdir)", "$(objdir)", "$(srcdir)", "$(DC-COMPILE)", ::scold::Regeneration::TWO_STEP);
+  p(::scold::Phase::TPP, out, im, en, ds);
+}
+
+auto tests::unit::scold::Director::test_use_Forward() -> void {
+  ::scold::Director director(cfg, ctx, build_search);
+  ::scold::Phase ph(::scold::Phase::FPP);
+  ::scold::line::Item li(1, "#forward this.good.package");
+  ::scold::Stream ou;
+  ::scold::Accruals<::scold::IMPORT> im;
+  ::scold::Accruals<::scold::ENTAIL> en;
+  ::scold::Accruals<::scold::DEPEND> ds("file.lo", "$(modulesdir)", "$(objdir)", "$(srcdir)", "$(DC-COMPILE)", ::scold::Regeneration::TWO_STEP);
+  director(li)(ph, ou, im, en, ds); // <----- test this
+  dump(ph, li, ou, im, en, __FUNCTION__, __FILE__, __LINE__);
+}
+
+auto tests::unit::scold::Director::test_use_Import() -> void {
+  ::scold::Director director(cfg, ctx, build_search);
+  ::scold::Phase ph(::scold::Phase::FPP);
+  ::scold::line::Item li(1, "#import this.good.package");
+  ::scold::Stream ou;
+  ::scold::Accruals<::scold::IMPORT> im;
+  ::scold::Accruals<::scold::ENTAIL> en;
+  ::scold::Accruals<::scold::DEPEND> ds("file.lo", "$(modulesdir)", "$(objdir)", "$(srcdir)", "$(DC-COMPILE)", ::scold::Regeneration::TWO_STEP);
+  director(li)(ph, ou, im, en, ds); // <----- test this
+  dump(ph, li, ou, im, en, __FUNCTION__, __FILE__, __LINE__);
+  CPPUNIT_ASSERT(true);
+}
+
+auto tests::unit::scold::Director::test_use_Entail() -> void {
+  ::scold::Director director(cfg, ctx, build_search);
+  ::scold::Phase ph(::scold::Phase::FPP);
+  ::scold::line::Item li(1, "#entail this.good.package");
+  ::scold::Stream ou;
+  ::scold::Accruals<::scold::IMPORT> im;
+  ::scold::Accruals<::scold::ENTAIL> en;
+  ::scold::Accruals<::scold::DEPEND> ds("file.lo", "$(modulesdir)", "$(objdir)", "$(srcdir)", "$(DC-COMPILE)", ::scold::Regeneration::TWO_STEP);
+  director(li)(ph, ou, im, en, ds); // <----- test this
+  dump(ph, li, ou, im, en, __FUNCTION__, __FILE__, __LINE__);
+  CPPUNIT_ASSERT(true);
+}
+
+auto tests::unit::scold::Director::test_use_Source() -> void {
+  ::scold::Director director(cfg, ctx, build_search);
+  ::scold::Phase ph(::scold::Phase::FPP);
+  ::scold::line::Item li(1, "int integer;");
+  ::scold::Stream ou;
+  ::scold::Accruals<::scold::IMPORT> im;
+  ::scold::Accruals<::scold::ENTAIL> en;
+  ::scold::Accruals<::scold::DEPEND> ds("file.lo", "$(modulesdir)", "$(objdir)", "$(srcdir)", "$(DC-COMPILE)", ::scold::Regeneration::TWO_STEP);
+  director(li)(ph, ou, im, en, ds); // <----- test this
+  dump(ph, li, ou, im, en, __FUNCTION__, __FILE__, __LINE__);
+  CPPUNIT_ASSERT(true);
+}
+
+auto tests::unit::scold::Director::test_use_Error() -> void {
+  ::scold::Director director(cfg, ctx, build_search);
+  ::scold::Phase ph(::scold::Phase::FPP);
+  ::scold::line::Item li(1, "#import // bad syntax");
+  ::scold::Stream ou;
+  ::scold::Accruals<::scold::IMPORT> im;
+  ::scold::Accruals<::scold::ENTAIL> en;
+  ::scold::Accruals<::scold::DEPEND> ds("file.lo", "$(modulesdir)", "$(objdir)", "$(srcdir)", "$(DC-COMPILE)", ::scold::Regeneration::TWO_STEP);
+  director(li)(ph, ou, im, en, ds); // <----- test this
+  dump(ph, li, ou, im, en, __FUNCTION__, __FILE__, __LINE__);
+  CPPUNIT_ASSERT(true);
+}
+
+auto tests::unit::scold::Director::suite() -> cppunit::Test * {
+  using namespace ::unit::rigging::suite;
+  Stream s("Director");
+  s << call("usage1", &Director::test_usage1)
+    << call("use_Forward", &Director::test_use_Forward)
+    << call("use_Import", &Director::test_use_Import)
+    << call("use_Entail", &Director::test_use_Entail)
+    << call("use_Source", &Director::test_use_Source)
+    << call("use_Error", &Director::test_use_Error)
+    ;
+  return finalize(s);
+}
+#endiv
+
+

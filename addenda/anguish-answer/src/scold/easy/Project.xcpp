@@ -1,0 +1,24 @@
+// This is C++ 23 -*- c++ -*- -std=c++23 in the stylings of the S.C.O.L.D. design method.
+// For terms and provenance see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace scold::easy {
+  //
+  // Characterize the project
+  // A sources area upon which the searchpath is built.
+  //
+  // Usage:
+  //
+  //   Project project;
+  //   Searchpath searchpath{project};
+  //
+  class Project;
+}
+#endiv
+#divert <hpp>
+#import std.filesystem.path
+struct scold::easy::Project {
+  std::filesystem::path sources_area; // AVOID a trailing slash; e.g. src or .
+  std::filesystem::path local_objects_area; //           ibidem; e.g. obj/src or ./src
+  std::filesystem::path local_modules_area; //           ibidem; e.g. obj/modules or ./modules
+};
+#endiv

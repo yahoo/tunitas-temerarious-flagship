@@ -1,0 +1,24 @@
+// This is C++ 23 -*- c++ -*- -std=c++23 in the stylings of the S.C.O.L.D. design method.
+// For terms and provenance see the LICENSE file at the top of the repository.
+#divert <hpp>
+#import std.string
+#import lite.cli.option.Any
+namespace lite::cli::option {
+  //
+  // The "any" constructor
+  //
+  // Usage:
+  //
+  //   auto a = any("-v", "--verbose"s);
+  //
+  template<typename... STRINGS> inline auto any(std::string first, STRINGS ...rest) -> Any<std::string, STRINGS...>;
+}
+#endiv
+#divert <ipp>
+#import std.move
+namespace lite::cli {
+  template<typename... STRINGS> inline auto option::any(std::string first, STRINGS ...rest) -> Any<std::string, STRINGS...> {
+    return Any<STRINGS...>{std::move(first), std::move(rest)...};
+  }
+}
+#endiv

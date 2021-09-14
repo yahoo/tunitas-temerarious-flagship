@@ -1,0 +1,39 @@
+# This is a -*- Makefile -*- fragment that is included by automake to make lib/libautotools-autoconf.la
+# There are @-variables herein, so the requirement is that automake see and expand them.
+
+#
+# The TAG is a qualified C++ name to an enum constant
+# e.g.
+#     namespace mod::resting { enum class MODULE_TAG { } };
+#     namespace anthropocene::inveigle::enforcer { enum class CONFIG { } };
+#
+# Example #1 (the TAG is specified explicitly
+#
+#   lib_libautotools_autoconf_la_IMPORT = mod.resting
+#   lib_libautotools_autoconf_la_TAG    = mod::resting::CONFIG
+#
+# Example #2 (the TAG is computed)
+#
+#   lib_libautotools_autoconf_la_IMPORT = anthropocene.inveigle.enforcer
+#
+
+# the tool that does this work
+htGC = $(__def_htGC)
+
+# -- implementation ----------------------------------------------------------------------------------------------------
+
+__automake_autoconf_libexecdir_CANDIDATE = $(strip \
+  $(word 1, \
+    $(filter-out @-%, \
+       @hypogeal_twilight_libexecdir@ \
+       @hypogeal_twilight_libexec_ac@ \
+       @hypogeal_twilight_libexecdir_ac@ \
+       @hypogeal_twilight_libexec_ac@)))
+__automake_autoconf_libexecdir = \
+$(if $(__automake_autoconf_libexecdir_CANDIDATE),\
+$(__automake_autoconf_libexecdir_CANDIDATE),\
+$(error there is no possible candidate for hypogeal_twilight_libexecdir))
+
+__def_htGC = $(__automake_autoconf_libexecdir)/generate-autotools-Config-module-from-config-header
+
+import @hypogeal_twilight_datadir@/mk/autotools/autoconf/Makefrag.mk

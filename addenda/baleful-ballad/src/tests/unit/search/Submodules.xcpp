@@ -1,0 +1,113 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace tests {
+  namespace unit {
+    namespace search {
+      class Submodules;
+    }
+  }
+}
+#endiv
+#divert <hpp>
+class tests::unit::search::Submodules : public cppunit::test::Fixture {
+public:
+  auto test_constructor_default() -> void;
+  auto test_constructor_initializer_list() -> void;
+  auto test_constructor_pathvector_copy() -> void;
+  auto test_constructor_pathvector_move() -> void;
+  auto test_constructor_move() -> void;
+  auto test_assignment_move() -> void;
+  auto test_operator_call_Module() -> void;
+
+  static auto suite() -> cppunit::Test *;
+};
+#endiv
+#divert <cpp>
+#import scold.search.Submodules
+#import scold.Module
+
+auto tests::unit::search::Submodules::test_constructor_initializer_list() -> void {
+  using sm = ::scold::Submodule;
+  // WATCHOUT - the external submodules may not be populated; but /opt/scold *should* be populated
+  ::scold::search::Submodules search{sm("external/module-c-string"), sm("external/module-sqlite"), sm("external/module-sys"), sm(".")}; // <--------------- test this
+  ::scold::Module some_module{"scold", "search", "Submodules"};
+  auto searched = search(some_module);
+  CPPUNIT_ASSERT(ok(searched));
+}
+
+auto tests::unit::search::Submodules::test_constructor_pathvector_copy() -> void {
+  using sm = ::scold::Submodule;
+  std::vector<scold::Submodule> pv{sm("external/module-c-string"), sm("external/module-sqlite"), sm("external/module-sys"), sm(".")};
+  ::scold::search::Submodules search(pv); // <--------------- test this
+  ::scold::Module some_module{"scold", "search", "Submodules"};
+  auto searched = search(some_module);
+  CPPUNIT_ASSERT(ok(searched));
+}
+
+auto tests::unit::search::Submodules::test_constructor_pathvector_move() -> void {
+  using sm = ::scold::Submodule;
+  std::vector<::scold::Submodule> pv{sm("external/module-c-string"), sm("external/module-sqlite"), sm("external/module-sys"), sm(".")};
+  ::scold::search::Submodules search(std::move(pv)); // <--------------- test this
+  ::scold::Module some_module{"scold", "search", "Submodules"};
+  auto searched = search(some_module);
+  CPPUNIT_ASSERT(ok(searched));
+}
+
+#import std.move
+auto tests::unit::search::Submodules::test_constructor_move() -> void {
+  using sm = ::scold::Submodule;
+  ::scold::search::Submodules search{sm("external/module-c-string"), sm("external/module-sqlite"), sm("external/module-sys"), sm(".")};
+  ::scold::Module some_module{"scold", "search", "Submodules"};
+  auto searched = search(some_module);
+  CPPUNIT_ASSERT(ok(searched));
+  {
+    ::scold::search::Submodules research(std::move(search)); // <----------- test this, the move constructor
+    ::scold::Module some_module{"scold", "search", "Submodules"};
+    auto researched = research(some_module);
+    auto searched = search(some_module); // <--------------- this should fail because of the move
+    CPPUNIT_ASSERT(ok(researched));
+    CPPUNIT_ASSERT(!ok(searched));
+  }
+}
+
+#import std.move
+auto tests::unit::search::Submodules::test_assignment_move() -> void {
+  using sm = ::scold::Submodule;
+  ::scold::search::Submodules search{sm("external/module-c-string"), sm("external/module-sqlite"), sm("external/module-sys"), sm(".")};
+  ::scold::Module some_module{"scold", "search", "Submodules"};
+  auto searched = search(some_module);
+  CPPUNIT_ASSERT_MESSAGE("first", ok(searched));
+  {
+    ::scold::search::Submodules research{"/tmp"};
+    research = std::move(search); // <----------- test this, the move-assignment opreator
+    auto researched = research(some_module);
+    auto searched = search(some_module); // <--------------- this should fail because of the move
+    CPPUNIT_ASSERT(ok(researched));
+    CPPUNIT_ASSERT_MESSAGE("second", !ok(searched));
+  }
+}
+
+auto tests::unit::search::Submodules::test_operator_call_Module() -> void {
+  using sm = ::scold::Submodule;
+  ::scold::search::Submodules search{sm("external/module-c-string"), sm("external/module-sqlite"), sm("external/module-sys"), sm(".")};
+  ::scold::Module some_module{"scold", "search", "Submodules"};
+  auto found = search(some_module); // <----------- test this (it should fail)
+  CPPUNIT_ASSERT(ok(found));
+  ::scold::Module other_module{"apple", "banana", "cherry"};
+  auto fail = search(other_module); // <----------- test this (it should fail)
+  CPPUNIT_ASSERT(!ok(fail));
+}
+
+auto tests::unit::search::Submodules::suite() -> cppunit::Test * {
+  using namespace ::unit::rigging::suite;
+  Stream s("Submodules");
+  s << call("constructor-initializer_list", &Submodules::test_constructor_initializer_list)
+    << call("constructor-pathvector-move", &Submodules::test_constructor_pathvector_move)
+    << call("constructor-pathvector-copy", &Submodules::test_constructor_pathvector_copy)
+    << call("constructor-move", &Submodules::test_constructor_move)
+    << call("assignment-move", &Submodules::test_assignment_move)
+    << call("operator_call_Module", &Submodules::test_operator_call_Module)
+    ;
+  return finalize(s);
+}
+#endiv

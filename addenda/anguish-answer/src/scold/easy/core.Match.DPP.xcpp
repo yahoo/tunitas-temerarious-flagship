@@ -1,0 +1,45 @@
+// This is C++ 23 -*- c++ -*- -std=c++23 in the stylings of the S.C.O.L.D. design method.
+// For terms and provenance see the LICENSE file at the top of the repository.
+#divert <fpp>
+#forward scold.easy.core.Match.declaration
+namespace scold::easy::core {
+  template<> struct Match<DIRECTIVE_PATTERN_PREFIX>;
+}
+#endiv
+#divert <hpp>
+#import scold.easy.line.Object
+#import scold.easy.core // namespace regex
+#import lite.regex.Pattern
+#import lite.regex.matching.SResults
+#import std.string
+#import std.tuple
+namespace scold::easy::core {
+  template<> struct Match<DIRECTIVE_PATTERN_PREFIX> {
+    inline Match();
+    inline auto operator()(line::Object const &) const -> bool;
+    using Result = std::tuple<std::string, std::string>;
+    inline auto result() const -> Result;
+  protected:
+    regex::Pattern const PATTERN_PREFIX;
+    lite::regex::matching::SResults captured;
+  };
+}
+#divert <ipp>
+#import lite.regex.search
+namespace scold::easy::core {
+  Match<DIRECTIVE_PATTERN_PREFIX>::Match()
+    : PATTERN_PREFIX{R"regex(^\s*#\s*(import|forward|entail)(\s+.*)?)regex"}
+  { }
+  auto Match<DIRECTIVE_PATTERN_PREFIX>::operator()(line::Object const &subject) const -> bool {
+    return regex::search(subject, PREPROCESSOR);
+  }
+  auto Match<DIRECTIVE_PATTERN_PREFIX>::operator<<(line::Object const &subject) -> bool {
+    // recover the captured values
+    return regex::search(subject, captured, PATTERN);
+  }
+  auto Match<DIRECTIVE_PATTERN_PREFIX>::result() const -> Result {
+    // index 0 is the whole match; 1, 2 are the submatches
+    return Result{captured[1].str(), captured[2].str()};
+  }
+}
+#endiv

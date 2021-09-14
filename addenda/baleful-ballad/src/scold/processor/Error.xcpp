@@ -1,0 +1,29 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace scold {
+  namespace processor {
+    class Error;
+  }
+}
+#endiv
+#divert <hpp>
+#import scold.processor.Generic
+class scold::processor::Error : public Generic {
+  using ancestor = Generic;
+public:
+  explicit Error(configuration_type const &, context_type &);
+  auto operator()(phase_type, line_type &, output_type &, imports_type &, entails_type &, depends_type &) -> void override final;
+};
+#endiv
+#divert <cpp>
+scold::processor::Error::Error(configuration_type const &arg_cfg, context_type &arg_ctx)
+  : ancestor(arg_cfg, arg_ctx) {
+  ;
+}
+
+#import want.format.braket
+auto scold::processor::Error::operator()(phase_type phase, line_type &line, output_type &out, imports_type &imports, entails_type &entails, depends_type &depends) -> void {
+  using want::format::braket;
+  error(cfg, ctx, line) << "invalid SCOLD meta-direction " << braket(braket(value(line))) << '\n';
+}
+#endiv

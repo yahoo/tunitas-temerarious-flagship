@@ -1,0 +1,28 @@
+// -*- c++ -*- with SCOLD stylings
+#divert <hpp>
+// The module named <scold.to.RESULT.Suffix> corresponds to
+//     the functions to<...>(...)
+//     returning RESULT
+//     given a 1st argument of a scold::Suffix
+// Specializations occur against RESULT
+#import scold.Suffix
+#import std.string
+namespace scold {
+  template<typename RESULT> inline auto to(Suffix) -> RESULT;
+  template<typename RESULT> inline auto to(Suffix, std::string const &) -> RESULT;
+  template<typename RESULT> inline auto to(Suffix, std::string const &, std::string const &) -> RESULT;
+}
+#endiv
+#divert <ipp>
+template<typename RESULT> auto scold::to(Suffix) -> RESULT {
+  static_assert(0 == sizeof (RESULT) && 0 != sizeof (RESULT), "specializations only");
+}
+
+template<typename RESULT> auto scold::to(Suffix, std::string const &) -> RESULT {
+  static_assert(0 == sizeof (RESULT) && 0 != sizeof (RESULT), "specializations only");
+}
+
+template<typename RESULT> auto scold::to(Suffix, std::string const &, std::string const &) -> RESULT {
+  static_assert(0 == sizeof (RESULT) && 0 != sizeof (RESULT), "specializations only");
+}
+#endiv

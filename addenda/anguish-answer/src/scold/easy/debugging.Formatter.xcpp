@@ -1,0 +1,38 @@
+// This is C++ 23 -*- c++ -*- -std=c++23 in the stylings of the S.C.O.L.D. design method.
+// For terms and provenance see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace scold::easy::debugging {
+  //
+  // Formatting for debugging
+  //
+  // Of course the lifetime of the value must be longer than that of the Formatter
+  // All the magic happens in the operator<< which can be overloaded or specialized
+  //
+  // Usage:
+  //
+  //   auto value = ...somehow....;
+  //   stream << debuggable(value);
+  //
+  template<typename TYPE> struct Formatter;
+}
+#endiv
+#divert <hpp>
+#import scold.easy.message.Stream
+namespace scold::easy::debugging {
+  template<typename TYPE> inline auto operator<<(message::Stream, Formatter<TYPE> const  &) -> message::Stream;
+}
+namespace scold::easy {
+  template<typename TYPE> struct debugging::Formatter {
+    using Value = TYPE;
+    inline explicit Formatter(Value const &value) : value{value} { }
+    Value const &value;
+  };
+}
+#import scold.easy.debugging.Formatter.Searchpath
+#endiv
+#divert <ipp>
+template<typename TYPE> auto scold::easy::debugging::operator<<(message::Stream s, Formatter<TYPE> const &f) -> message::Stream {
+  // Whatever happens on the regular operator<< is just fine.
+  return s << f.value;
+}
+#endiv

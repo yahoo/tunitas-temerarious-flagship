@@ -1,0 +1,16 @@
+// This is C++ 23 -*- c++ -*- -std=c++23 in the stylings of the S.C.O.L.D. design method.
+// For terms and provenance see the LICENSE file at the top of the repository.
+#divert <fpp>
+#import std.is_enum
+#import std.is_integral
+namespace want::ranges::required {
+  //
+  // Is this type suitable for use in ranges::detail::Directable<TYPE>
+  //
+  // Usage:
+  //
+  //   template<required::Directable> struct Something;
+  //
+  template<typename TYPE> concept bool Directable = std::is_enum_v<TYPE> || std::is_integral_v<TYPE>;
+}
+#endiv

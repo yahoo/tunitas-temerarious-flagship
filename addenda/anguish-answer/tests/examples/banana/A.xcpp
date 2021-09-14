@@ -1,0 +1,17 @@
+#divert <fpp>
+namespace tests::examples::banana {
+  class One;
+  class Two;
+  class Three;
+}
+#endiv
+#divert <hpp>
+namespace tests::examples {
+  class banana::One {
+  };
+  class banana::Two {
+  };
+  class banana::Three {
+  };
+}
+#endiv

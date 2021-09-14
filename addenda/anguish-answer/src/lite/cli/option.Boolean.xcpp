@@ -1,0 +1,65 @@
+// This is C++ 23 -*- c++ -*- -std=c++23 in the stylings of the S.C.O.L.D. design method.
+// For terms and provenance see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace lite::cli::option {
+  //
+  // A self-initializing Boolean
+  //
+  // Usage:
+  //
+  //   Boolean b;
+  //   b = true;
+  //   b = false;
+  //   cout << b;
+  //
+  class Boolean;
+}
+#endiv
+#divert <hpp>
+#import std.basic_ostream
+#import lite.required.Character
+#import lite.required.Character_Traits
+namespace lite::cli::option {
+  template<required::Character CHAR, required::Character_Traits TRAITS> inline auto operator<<(std::basic_ostream<CHAR, TRAITS> &, Boolean const &) -> std::basic_ostream<CHAR, TRAITS> &;
+}
+class lite::cli::option::Boolean {
+public:
+  inline Boolean();
+  using Value = bool;
+  inline Boolean(Value);
+  inline auto operator=(Boolean const &) -> Boolean  & = default;
+  inline auto operator=(Value that) -> Boolean  &;
+  inline operator bool() const;
+  inline auto operator!() const -> bool;
+protected:
+  Value value;
+  template<required::Character, required::Character_Traits> struct Sentry;
+};
+#endiv
+#divert <ipp>
+#import lite.cli.option.Boolean.Sentry
+namespace lite::cli {
+  template<required::Character CHAR, required::Character_Traits TRAITS> auto option::operator<<(std::basic_ostream<CHAR, TRAITS> &o, Boolean const &b) -> std::basic_ostream<CHAR, TRAITS> & {
+    Boolean::Sentry<CHAR, TRAITS> sentry(o);
+    return o << (bool) b;
+  }
+}
+namespace lite::cli::option {
+  Boolean::Boolean()
+    : Boolean{false}
+  { }
+  Boolean::Boolean(Value value)
+    : value{value}
+  { }
+  auto Boolean::operator=(Value that) -> Boolean  & {
+    value = that;
+    return *this;
+  }
+  Boolean::operator bool() const {
+    return value;
+  }
+  auto Boolean::operator!() const -> bool {
+    return !value;
+  }
+}
+#endiv

@@ -1,0 +1,181 @@
+// This is C++ 23 -*- c++ -*- -std=c++23 in the stylings of the S.C.O.L.D. design method.
+// For terms and provenance see the LICENSE file at the top of the repository.
+#divert <fpp>
+#import scold.easy.cascade
+namespace scold::easy::cascade {
+  //
+  // The global variables of a job of cascading
+  // A workspace.
+  //
+  // Usage:
+  //
+  //   Context ctx;
+  //   ctx.announce(...)
+  //   ctx.emit...(...)
+  //
+  class Context;
+}
+#endiv
+#divert <hpp>
+#import std.ostream
+#import std.string
+#import scold.easy.cascade.Matryoshka
+#import scold.easy.List
+#import scold.easy.Map
+#import scold.easy.line.Buffer
+#import scold.easy.name.Module
+class scold::easy::cascade::Context {
+public:
+  inline Context();
+  Context(Context const &) = delete;
+  auto operator=(Context const &) -> Context & = delete;
+  using Text_List = List<std::string>;
+  Text_List general_text;
+  using Include_Map = Map<Suffix, List<line::Buffer>>;
+  Include_Map accrued_imports, accrued_entails;
+  auto announce(name::Module const &, Matryoshka) -> void;
+  auto emit_accrued_imports(Suffix, std::ostream &) const -> void;
+  auto emit_accrued_entails(Suffix, std::ostream &) const -> void;
+  inline auto is_import_already_handled(Suffix, line::Buffer const &) const -> bool;
+  inline auto is_entail_already_handled(Suffix, line::Buffer const &) const -> bool;
+  inline auto accrete_consequent_import(Suffix, name::Module const &) -> void;
+  inline auto accrete_consequent_entail(Suffix, name::Module const &) -> void;
+protected:
+  inline auto initialize([[out]] Include_Map &) -> void;
+  inline constexpr static auto nl = "\n";
+  inline auto starting(std::ostream &, Suffix, char const *tagging) const -> void;
+  inline auto finishing(std::ostream &, Suffix, char const *tagging) const -> void;
+  inline auto messaging(std::ostream &, char const *how, Suffix, char const *tagging) const -> void;
+  static auto is_include_already_handled(Include_Map const &, Suffix suf, line::Buffer const &) -> bool;
+  static auto accrete_consequent_includes([[inout]] Include_Map &, Suffix, name::Module const &, List<Suffix> const &) -> void;
+};
+#endiv
+#divert <ipp>
+namespace scold::easy::cascade {
+  Context::Context() {
+    general_text.clear();
+    initialize(accrued_imports);
+    initialize(accrued_entails);
+  }
+  auto Context::initialize(Include_Map &accrued) -> void {
+    accrued.clear();
+    for (auto suffix : /*[[FIXTHIS]] using a range*/ {Suffix::FPP, Suffix::HPP, Suffix::IPP, Suffix::TPP, Suffix::CPP}) {
+      accrued[suffix] = Include_Map::Mapped{};
+    }
+  }
+  auto Context::starting(std::ostream &o, Suffix s, char const *t) const -> void {
+    messaging(o, "starting", s, t);
+  }
+  auto Context::finishing(std::ostream &o, Suffix s, char const *t) const -> void {
+    messaging(o, "ending", s, t);
+  }
+  auto Context::messaging(std::ostream &outbound, char const *how, Suffix suf, char const *tagging) const -> void {
+    outbound << "// " << how << ' ' << tagging << " for " << suf << nl;
+  }
+  auto Context::is_import_already_handled(Suffix suf, line::Buffer const &line) const -> bool {
+    return is_include_already_handled(accrued_imports, suf, line);
+  }
+  auto Context::is_entail_already_handled(Suffix suf, line::Buffer const &line) const -> bool {
+    return is_include_already_handled(accrued_entails, suf, line);
+  }
+}
+#import scold.easy.suffix.tables
+namespace scold::easy::cascade {
+  auto Context::accrete_consequent_import(Suffix fix, name::Module const &module) -> void {
+    accrete_consequent_includes(accrued_imports, fix, module, suffix::tables::IMPORTS);
+  }
+  auto Context::accrete_consequent_entail(Suffix fix, name::Module const &module) -> void {
+    accrete_consequent_includes(accrued_entails, fix, module, suffix::tables::ENTAILS);
+  }
+}
+#endiv
+#divert <cpp>
+#import scold.easy.filesystem.Suffix // operator*
+#import scold.easy.uniqueness
+#import scold.easy.timepoint
+#import scold.easy.generate
+#import std.filesystem.path
+namespace scold::easy::cascade {
+  auto Context::announce(name::Module const &module, Matryoshka insert_namespaces) -> void {
+    for (auto suffix : {Suffix::FPP, Suffix::HPP, Suffix::IPP, Suffix::TPP, Suffix::CPP}) {
+      auto uu = uniqueness();
+      auto tt = timepoint();
+      auto directive = generate::pragma_once(uu, tt);
+      accrued_imports.at(suffix).push_back(directive);
+    }
+    auto filepath = std::filesystem::path{static_cast<std::string const &>(module)};
+    auto const dirpath = filepath.parent_path();
+    auto const filename = filepath.filename();
+    if (yes(insert_namespaces)) {
+      auto namespace_fpp = dirpath / "namespace" * Suffix::FPP;
+      auto directive = generate::include(namespace_fpp);
+      accrued_imports.at(Suffix::FPP).push_back(directive);
+    }
+    for (auto suffix : {Suffix::HPP, Suffix::IPP, Suffix::TPP}) {
+      auto &accrued = accrued_imports.at(suffix);
+      if (yes(insert_namespaces)) {
+        auto suf_namespace = dirpath / suffix / "namespace";
+        auto directive = generate::include(suf_namespace);
+        accrued.push_back(directive);
+      }
+      auto pred_module = dirpath / pred(suffix) / filename;
+      auto directive = generate::include(pred_module);
+      accrued.push_back(directive);
+    }
+    auto tpp_module = dirpath / filename; // reminder - the file naming scheme does not use /tpp/, that is elided
+    auto include = generate::include(tpp_module);
+    accrued_imports.at(Suffix::CPP).push_back(include);
+  }
+}
+#import std.copy
+#import std.ostream_iterator
+#import std.string
+namespace scold::easy::cascade {
+  auto Context::emit_accrued_imports(Suffix suf, std::ostream &outbound) const -> void {
+    auto sink = std::ostream_iterator<std::string>{outbound};
+    auto const gt = "general text";
+    starting(outbound, suf, gt);
+    std::copy(general_text.begin(), general_text.end(), sink);
+    finishing(outbound, suf, gt);
+    auto const ai = "accrued imports";
+    starting(outbound, suf, ai);
+    auto const &list = accrued_imports.at(suf);
+    std::copy(list.begin(), list.end(), sink);
+    finishing(outbound, suf, ai);
+  }
+  auto Context::emit_accrued_entails(Suffix suf, std::ostream &outbound) const -> void {
+    auto sink = std::ostream_iterator<std::string>{outbound};
+    auto const ae = "accrued entails";
+    starting(outbound, suf, ae);
+    auto const &list = accrued_entails.at(suf);
+    std::copy(list.begin(), list.end(), sink);
+    finishing(outbound, suf, ae);
+  }
+}
+#import std.invalid_argument
+#import std.find_if
+namespace scold::easy::cascade {
+  auto Context::is_include_already_handled(Include_Map const &includes, Suffix suf, line::Buffer const &pattern) -> bool {
+    auto const &phase = includes.at(suf);
+    auto const end = phase.end();
+    if ('\n' != pattern.back()) { throw std::invalid_argument{"candidate"}; }
+    auto const match = [&pattern](line::Buffer const &candidate) {
+                         if ('\n' != candidate.back()) { throw std::invalid_argument{"candidate"}; }
+                         return pattern == candidate;
+                      };
+    return end != std::find_if(phase.begin(), end, match);
+  }
+  auto Context::accrete_consequent_includes(Include_Map &includes, Suffix mark, name::Module const &module, List<Suffix> const &table) -> void {
+    for (auto fix : table) {
+      if (greater(fix, mark)) {
+        auto &phase = includes[mark];
+        auto suf = includable(fix);
+        auto line = line::Buffer{generate::include(suf / static_cast<std::string const  &>(module))};
+        if (!is_include_already_handled(includes, suf, line)) {
+          phase.push_back(line);
+        }
+      }
+    }
+  }
+}
+#endiv

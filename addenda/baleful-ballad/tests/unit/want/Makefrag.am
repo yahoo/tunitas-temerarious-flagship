@@ -1,0 +1,15 @@
+tests_unit_want_TESTS = \
+  tests/unit/want/cases.test \
+  tests/unit/want/doppel.test \
+  tests/unit/want/format.test \
+  tests/unit/want/mvr.test \
+  tests/unit/want/mvr/cases.test \
+  tests/unit/want/regex.test \
+  tests/unit/want/path/cases.test \
+  tests/unit/want/path/dot.test \
+  tests/unit/want/path/dedot.test \
+  tests/unit/want/path/endot.test \
+  tests/unit/want/tuple.test \
+  tests/unit/want/tuppel.test \
+  $(end)
+

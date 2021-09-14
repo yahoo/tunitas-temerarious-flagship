@@ -1,0 +1,58 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace tests {
+  namespace unit {
+    namespace fragment {
+      class Include;
+    }
+  }
+}
+#endiv
+#divert <hpp>
+class tests::unit::fragment::Include : public cppunit::test::Fixture {
+public:
+  auto test_include_Module() -> void;
+  auto test_include_string() -> void;
+  auto test_include_Value() -> void;
+
+  static auto suite() -> cppunit::Test *;
+};
+#endiv
+#divert <cpp>
+#import scold.Module
+#import scold.fragment.preproc.include
+#import scold.fragment.workbench
+#import std.string
+
+auto tests::unit::fragment::Include::test_include_Module() -> void {
+  ::scold::Module specimen{"apple", "banana", "cherry", "dog"};
+  auto actual = ::scold::fragment::preproc::include(specimen); // <----------------- test this
+  auto expected = ::scold::line::Item(R"expected(#include <apple.banana.cherry.dog>)expected");
+  CPPUNIT_ASSERT_EQUAL(value(expected), value(actual));
+}
+
+auto tests::unit::fragment::Include::test_include_string() -> void {
+  std::string specimen("apple.banana.cherry.dog");
+  auto actual = ::scold::fragment::preproc::include(specimen); // <----------------- test this
+  auto expected = ::scold::line::Item(R"expected(#include <apple.banana.cherry.dog>)expected");
+  CPPUNIT_ASSERT_EQUAL(value(expected), value(actual));
+}
+
+auto tests::unit::fragment::Include::test_include_Value() -> void {
+  using ::scold::fragment::workbench;
+  std::string specimen("apple.banana.cherry.dog");
+  auto actual = ::scold::fragment::preproc::include(workbench() * specimen); // <----------------- test this
+  auto expected = ::scold::line::Item(R"expected(#include <apple.banana.cherry.dog>)expected");
+  CPPUNIT_ASSERT_EQUAL(value(expected), value(actual));
+}
+
+auto tests::unit::fragment::Include::suite() -> cppunit::Test * {
+  using namespace ::unit::rigging::suite;
+  Stream s("include");
+  s << call("Module", &Include::test_include_Module)
+    << call("string", &Include::test_include_string)
+    << call("Value", &Include::test_include_Value)
+    ;
+  return finalize(s);
+}
+#endiv

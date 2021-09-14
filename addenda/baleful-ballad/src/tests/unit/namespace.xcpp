@@ -1,0 +1,29 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+#import std.string
+#import std.string_view
+namespace tests::unit {
+  using std::string;
+  using std::string_view;
+}
+#endiv
+#divert <hpp>
+#import std.string_literals
+#import std.string_view_literals
+#import std.chrono_literals
+namespace tests::unit {
+  using namespace std::literals;
+}
+#import tests.cppunit.Test
+#import tests.cppunit.test.Fixture
+#import tests.cppunit.ASSERT
+// Always available
+#import std.cerr
+#import std.clog
+#import std.cout
+#endiv
+#divert <ipp>
+#import rigging.suite.io
+#import unit.rigging // [[REMOVETHIS]]
+#import rigging.unit.suite // [[REMOVETHIS]]
+#endiv

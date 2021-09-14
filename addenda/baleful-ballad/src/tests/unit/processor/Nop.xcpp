@@ -1,0 +1,55 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace tests {
+  namespace unit {
+    namespace processor {
+      class Nop;
+    }
+  }
+}
+#endiv
+#divert <hpp>
+#import tests.unit.processor.Dumper
+#import tests.unit.processor.Contextualization
+class tests::unit::processor::Nop : public cppunit::test::Fixture, Dumper, Contextualization {
+public:
+  auto test_constructor() -> void;
+  auto test_operator_call() -> void;
+
+  static auto suite() -> cppunit::Test *;
+};
+#endiv
+#divert <cpp>
+#import scold.Phase
+#import scold.line.Item
+#import scold.Stream
+#import scold.Accruals
+#import scold.processor.Nop
+
+auto tests::unit::processor::Nop::test_constructor() -> void {
+  ::scold::processor::Nop er(cfg, ctx);
+  CPPUNIT_ASSERT(true);
+}
+
+auto tests::unit::processor::Nop::test_operator_call() -> void {
+  ::scold::processor::Nop nop(cfg, ctx);
+  ::scold::Phase ph(::scold::Phase::FPP);
+  ::scold::line::Item li(1, "$bogon");
+  ::scold::Stream ou;
+  ::scold::Accruals<::scold::IMPORT> im;
+  ::scold::Accruals<::scold::ENTAIL> en;
+  ::scold::Accruals<::scold::DEPEND> ds("file.o", "$(modulesdir)", "$(objdir)", "$(srcdir)", "$(DC-COMPILE)", ::scold::Regeneration::TWO_STEP);
+  nop(ph, li, ou, im, en, ds); // <----- test this which does nothing
+  dump(ph, li, ou, im, en, __FUNCTION__, __FILE__, __LINE__);
+  CPPUNIT_ASSERT(true);
+}
+
+auto tests::unit::processor::Nop::suite() -> cppunit::Test * {
+  using namespace ::unit::rigging::suite;
+  Stream s("Nop");
+  s << call("constructor", &Nop::test_constructor)
+    << call("operator()", &Nop::test_operator_call)
+    ;
+  return finalize(s);
+}
+#endiv

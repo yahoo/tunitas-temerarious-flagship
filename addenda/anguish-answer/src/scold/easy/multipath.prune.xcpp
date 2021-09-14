@@ -1,0 +1,39 @@
+// This is C++ 23 -*- c++ -*- -std=c++23 in the stylings of the S.C.O.L.D. design method.
+// For terms and provenance see the LICENSE file at the top of the repository.
+#divert <fpp>
+#import scold.easy.name.Filepath
+namespace scold::easy::multipath {
+  //
+  // Prune the leading path components away (or not).
+  // ADL is not expected to find this function.
+  //
+  // prune away the leading prefix; or not.
+  //
+  // Usage:
+  //
+  //   auto subject = std::filesystem::path{"/build/project/src/package/subpackage/component.subcomponent.Class.xcpp"};
+  //
+  //   prune(subject, "/build/project/src");
+  //   prune(subject, "/build/project/obj");
+  //
+  inline auto prune(name::Filepath &subject, name::Filepath const &prefix) -> void;
+}
+#endiv
+#divert <hpp>
+#import scold.easy.multipath.pruning.Walker
+#import scold.easy.multipath.detail
+auto scold::easy::multipath::prune(name::Filepath &subject, name::Filepath const &prefix) -> void {
+  using namespace pruning;
+  auto i = Walker{subject.begin(), prefix.begin()};
+  auto const e = Walker{subject.end(), prefix.end()};
+  for ( ; !done(i, e); ++i) {
+    if (*i.first != *i.second) {
+      break;
+    }
+  }
+  if (e.second == i.second) {
+    // If we have reached the end of the prefix the modify the subject with the reconstructed values.
+    subject = detail::reconstruct(i.first, e.first);
+  }
+}
+#endiv

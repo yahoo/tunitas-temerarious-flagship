@@ -1,0 +1,13 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <cpp>
+#import remonstrate.main
+#import options.Program
+#import scold.Configuration
+#import c.argv
+auto main(int cc, char *vv[]) -> int {
+  auto program = options::Program{cc, vv};
+  auto cfg = scold::Configuration{program};
+  auto argv = c::argv(cc, vv);
+  return remonstrate::main(cfg, argv);
+}
+#endiv

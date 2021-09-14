@@ -1,0 +1,24 @@
+# This is a -*- Makefile -*- fragment.
+# For terms and provenance see the LICENSE file at the top of this repository.
+
+bin_dc = bin/dc
+bin_dc_LDADD = \
+  $(lib_libscold_anguish_answer_module_la) \
+  $(end)
+bin_dc_LDFLAGS = $(PACKAGE_LDFLAGS_SET)
+bin_dc_MODULES = $(call SCOLD_SOURCEStoMODULES, $(bin_dc_SOURCES))
+bin_dc_SOURCES = obj/src/app/dc/c.main.cpp
+#
+$(scold_cxxdir)/app/dc/dependencies.mk $(bin_dc_SOURCES): DC_FLAGS+=--no-insert-namespace
+$(scold_cxxdir)/app/dc/dependencies.mk $(bin_dc_SOURCES): bbDC_FLAGS+=--no-insert-namespace
+#
+$(scold_cxxdir)/app/dc/dependencies.mk: $(bin_dc_SOURCES)
+$(bin_dc_SOURCES) : obj/src/%.cpp : src/%.xcpp
+	$(HT_V_COLD) $(call HT_XCPP2CPP, $<)
+	@test -e $@
+$(scold_cxxdir)/app/dc/dependencies.mk:
+	$(HT_V_BOTH) $(call HT_DEPENDENCIES, $^)
+	@test -e $@
+include $(scold_cxxdir)/app/dc/dependencies.mk
+clean-dependencies::
+	rm -f $(scold_cxxdir)/app/dc/dependencies.mk

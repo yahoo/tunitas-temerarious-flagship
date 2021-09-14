@@ -1,0 +1,106 @@
+// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace scold {
+  namespace search {
+    namespace cache {
+      class Entry;
+    }
+  }
+}
+#endiv
+#divert <hpp>
+#import scold.search.cache.Type
+#import mvr.SAV
+namespace scold {
+  namespace search {
+    namespace cache {
+      // nearby type(Type)
+      inline auto type(Entry const &) -> Type;
+      inline auto type(mvr::SAV<Entry> const &) -> Type;
+
+      inline auto directory(Entry const &) -> std::string const &;
+      inline auto directory(Entry &&) -> std::string;
+      inline auto directory(mvr::SAV<Entry> const &) -> std::string const &;
+      inline auto directory(mvr::SAV<Entry> &&) -> std::string;
+
+      // nearby buildable_from_sources(Type)
+      // The module of the entry is buildable from sources
+      // a) it is built in the current tree
+      // b) it is built in a submodule tree
+      inline auto buildable_from_sources(Entry const &) -> bool;
+      inline auto buildable_from_sources(mvr::SAV<Entry> const &) -> bool;
+
+      // nearby include_interfaces_only(Type)
+      // The module has interface-only import semantics
+      // a) it must be in the searchpath now
+      // b) it will be in the searchpath as the build progresses
+      inline auto include_interfaces_only(Entry const &) -> bool;
+      inline auto include_interfaces_only(mvr::SAV<Entry> const &) -> bool;
+    }
+  }
+}
+
+class scold::search::cache::Entry {
+public:
+  inline Entry();
+  inline Entry(Type, std::string const &directory);
+  Type type;
+  std::string directory;
+};
+#endiv
+#divert <ipp>
+// manifest to get initialize the POD
+scold::search::cache::Entry::Entry()
+  : type(Type())
+  , directory() {
+  ;
+}
+
+scold::search::cache::Entry::Entry(Type arg_type, std::string const &arg_directory)
+  : type(arg_type)
+  , directory(arg_directory) {
+  ;
+}
+
+auto scold::search::cache::type(Entry const &e) -> Type {
+  return e.type;
+}
+
+auto scold::search::cache::type(mvr::SAV<Entry> const &v) -> Type {
+  return value(v).type;
+}
+
+auto scold::search::cache::directory(Entry const &e) -> std::string const & {
+  return e.directory;
+}
+
+#import std.forward
+auto scold::search::cache::directory(Entry &&anon) -> std::string {
+  return anon.directory;
+}
+
+auto scold::search::cache::directory(mvr::SAV<Entry> const &v) -> std::string const & {
+  return value(v).directory;
+}
+
+#import std.forward
+auto scold::search::cache::directory(mvr::SAV<Entry> &&anon) -> std::string {
+  return move(value(std::forward<mvr::SAV<Entry>>(anon)).directory);
+}
+
+auto scold::search::cache::buildable_from_sources(Entry const &e) -> bool {
+  return buildable_from_sources(type(e));
+}
+
+auto scold::search::cache::buildable_from_sources(mvr::SAV<Entry> const &v) -> bool {
+  return ok(v) && buildable_from_sources(type(v));
+}
+
+auto scold::search::cache::include_interfaces_only(Entry const &e) -> bool {
+  return include_interfaces_only(type(e));
+}
+
+auto scold::search::cache::include_interfaces_only(mvr::SAV<Entry> const &v) -> bool {
+  return !ok(v) || include_interfaces_only(type(v));
+}
+#endiv

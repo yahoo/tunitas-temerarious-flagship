@@ -1,0 +1,30 @@
+// This is C++ 23 -*- c++ -*- -std=c++23 in the stylings of the S.C.O.L.D. design method.
+// For terms and provenance see the LICENSE file at the top of the repository.
+#divert <hpp>
+#import want.aliases.detail.Starts_With
+#import want.aliases.required.Stringable
+namespace want::aliases {
+  //
+  // Test if a string "starts with" one of a number of choices
+  // Return the boolean sense of this.
+  // If it does start with a prefix, then capture the suffix.
+  //
+  // Usage:
+  //
+  //    ./a.out -E/usr/include --external=/usr/include
+  //
+  //   if (auto started = starts_with("-E", "--external=") == word; started) {
+  //      .. begins with -E or --external=
+  //      auto suffix = started.value();
+  //      ...use the suffix...
+  //   }
+  //
+  template<typename... STRINGS> inline auto starts_with(STRINGS...) -> detail::Starts_With requires (true && ... && required::Stringable<STRINGS>);
+}
+#endiv
+#divert <ipp>
+#import std.move
+template<typename... STRINGS> auto want::aliases::starts_with(STRINGS ...values) -> detail::Starts_With requires (true && ... && required::Stringable<STRINGS>) {
+  return detail::Starts_With{std::move(values)...};
+}
+#endiv
