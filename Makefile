@@ -15,13 +15,13 @@
 
 
 # This is a GNU -*- Makefile -*- which is managed by automake.
-# Copyright Verizon Media
+# Copyright Yahoo Inc, 2021.
 # Licensed under the terms of the Apache-2.0 license.
 # For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
 # For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
 
 # This is a GNU -*- Makefile -*- fragment, included by automake from the top-level Makefile.am
-# Copyright Verizon Media.
+# Copyright Yahoo Inc, 2021.
 # Licensed under the terms of the Apache-2.0 license.
 # See the LICENSE file in https://github.com/yahoo/temerarious-flagship/blob/master/LICENSE for terms.
 # See the LICENSE file at the top of this repository.
@@ -1251,7 +1251,7 @@ INSTALLATION_AREAS = \
 
 
 # This is a GNU -*- Makefile -*- which is managed by automake.
-# Copyright Verizon Media
+# Copyright Yahoo Inc, 2021.
 # Licensed under the terms of the Apache-2.0 license.
 # For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
 # For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
@@ -1266,7 +1266,7 @@ lib_libaddenda_nonstd_la_SOURCES = \
 
 
 # This is a GNU -*- Makefile -*- which is managed by automake.
-# Copyright Verizon Media
+# Copyright Yahoo Inc, 2021.
 # Licensed under the terms of the Apache-2.0 license.
 # For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
 # For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
@@ -1282,7 +1282,7 @@ lib_libapp_la_SOURCES = \
 
 
 # This is a GNU -*- Makefile -*- which is managed by automake.
-# Copyright Verizon Media
+# Copyright Yahoo Inc, 2021.
 # Licensed under the terms of the Apache-2.0 license.
 # For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
 # For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
@@ -1294,7 +1294,7 @@ obj_src_app_exception_SUBSOURCES = \
 
 
 # This is a GNU -*- Makefile -*- which is managed by automake.
-# Copyright Verizon Media
+# Copyright Yahoo Inc, 2021.
 # Licensed under the terms of the Apache-2.0 license.
 # For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
 # For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
@@ -1317,7 +1317,7 @@ lib_libapp_tf_la_SOURCES = \
 
 
 # This is a GNU -*- Makefile -*- which is managed by automake.
-# Copyright Verizon Media
+# Copyright Yahoo Inc, 2021.
 # Licensed under the terms of the Apache-2.0 license.
 # For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
 # For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
@@ -1346,7 +1346,7 @@ lib_libapp_roff_la_SOURCES = \
 
 
 # This is a GNU -*- Makefile -*- which is managed by automake.
-# Copyright Verizon Media
+# Copyright Yahoo Inc, 2021.
 # Licensed under the terms of the Apache-2.0 license.
 # For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
 # For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
@@ -1354,7 +1354,7 @@ lib_libapp_roff_la_SOURCES = \
 lib_libautotools_autoconf_la_IMPORT = tunitas.flagship.temerarious
 
 # This is a GNU -*- Makefile -*- which is managed by automake.
-# Copyright Verizon Media
+# Copyright Yahoo Inc, 2021.
 # Licensed under the terms of the Apache-2.0 license.
 # For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
 # For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
@@ -1370,7 +1370,7 @@ lib_libstd_temerarious_flagship_la_SOURCES = \
 
 
 # This is a GNU -*- Makefile -*- which is managed by automake.
-# Copyright Verizon Media
+# Copyright Yahoo Inc, 2021.
 # Licensed under the terms of the Apache-2.0 license.
 # For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
 # For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
@@ -1411,7 +1411,7 @@ lib_libtunitas_flagship_temerarious_la_SOURCES = \
 
 
 # This is a GNU -*- Makefile -*- which is managed by automake.
-# Copyright Verizon Media
+# Copyright Yahoo Inc, 2021.
 # Licensed under the terms of the Apache-2.0 license.
 # For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
 # For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
@@ -1424,7 +1424,7 @@ obj_src_tunitas_flagship_temerarious_diversion_SUBSOURCES = \
 
 
 # This is a GNU -*- Makefile -*- which is managed by automake.
-# Copyright Verizon Media
+# Copyright Yahoo Inc, 2021.
 # Licensed under the terms of the Apache-2.0 license.
 # For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
 # For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
@@ -1441,7 +1441,7 @@ obj_src_tunitas_flagship_temerarious_directive_SUBSOURCES = \
 
 
 # This is a GNU -*- Makefile -*- which is managed by automake.
-# Copyright Verizon Media
+# Copyright Yahoo Inc, 2021.
 # Licensed under the terms of the Apache-2.0 license.
 # For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
 # For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
@@ -1459,7 +1459,7 @@ obj_src_tunitas_flagship_temerarious_directive_exception_SUBSOURCES = \
 
 
 # This is a GNU -*- Makefile -*- which is managed by automake.
-# Copyright Verizon Media
+# Copyright Yahoo Inc, 2021.
 # Licensed under the terms of the Apache-2.0 license.
 # For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
 # For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
@@ -1475,7 +1475,7 @@ obj_src_tunitas_flagship_temerarious_directive_field_SUBSOURCES = \
 
 
 # This is a GNU -*- Makefile -*- which is managed by automake.
-# Copyright Verizon Media
+# Copyright Yahoo Inc, 2021.
 # Licensed under the terms of the Apache-2.0 license.
 # For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
 # For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
@@ -1494,7 +1494,7 @@ obj_src_tunitas_flagship_temerarious_error_SUBSOURCES = \
 
 
 # This is a GNU -*- Makefile -*- which is managed by automake.
-# Copyright Verizon Media
+# Copyright Yahoo Inc, 2021.
 # Licensed under the terms of the Apache-2.0 license.
 # For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
 # For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
@@ -1516,7 +1516,7 @@ obj_src_tunitas_flagship_temerarious_exception_SUBSOURCES = \
 
 
 # This is a GNU -*- Makefile -*- which is managed by automake.
-# Copyright Verizon Media
+# Copyright Yahoo Inc, 2021.
 # Licensed under the terms of the Apache-2.0 license.
 # For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
 # For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
@@ -1531,7 +1531,7 @@ obj_src_tunitas_flagship_temerarious_input_SUBSOURCES = \
 
 
 # This is a GNU -*- Makefile -*- which is managed by automake.
-# Copyright Verizon Media
+# Copyright Yahoo Inc, 2021.
 # Licensed under the terms of the Apache-2.0 license.
 # For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
 # For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
@@ -1546,7 +1546,7 @@ obj_src_tunitas_flagship_temerarious_input_exception_SUBSOURCES = \
 
 
 # This is a GNU -*- Makefile -*- which is managed by automake.
-# Copyright Verizon Media
+# Copyright Yahoo Inc, 2021.
 # Licensed under the terms of the Apache-2.0 license.
 # For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
 # For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
@@ -1559,7 +1559,7 @@ obj_src_tunitas_flagship_temerarious_path_SUBSOURCES = \
 
 
 # This is a GNU -*- Makefile -*- which is managed by automake.
-# Copyright Verizon Media
+# Copyright Yahoo Inc, 2021.
 # Licensed under the terms of the Apache-2.0 license.
 # For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
 # For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
@@ -1572,7 +1572,7 @@ obj_src_tunitas_flagship_temerarious_parser_SUBSOURCES = \
 
 
 # This is a GNU -*- Makefile -*- which is managed by automake.
-# Copyright Verizon Media
+# Copyright Yahoo Inc, 2021.
 # Licensed under the terms of the Apache-2.0 license.
 # For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
 # For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
@@ -1588,7 +1588,7 @@ obj_src_tunitas_flagship_temerarious_processor_SUBSOURCES = \
 
 
 # This is a GNU -*- Makefile -*- which is managed by automake.
-# Copyright Verizon Media
+# Copyright Yahoo Inc, 2021.
 # Licensed under the terms of the Apache-2.0 license.
 # For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
 # For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
@@ -1605,7 +1605,7 @@ obj_src_tunitas_flagship_temerarious_processor_exception_SUBSOURCES = \
 
 
 # This is a GNU -*- Makefile -*- which is managed by automake.
-# Copyright Verizon Media
+# Copyright Yahoo Inc, 2021.
 # Licensed under the terms of the Apache-2.0 license.
 # For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
 # For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
@@ -1616,7 +1616,7 @@ obj_src_tunitas_flagship_temerarious_required_SUBSOURCES = \
 
 
 # This is a GNU -*- Makefile -*- which is managed by automake.
-# Copyright Verizon Media
+# Copyright Yahoo Inc, 2021.
 # Licensed under the terms of the Apache-2.0 license.
 # For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
 # For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
@@ -1630,7 +1630,7 @@ obj_src_tunitas_flagship_temerarious_source_SUBSOURCES = \
 
 
 # This is a GNU -*- Makefile -*- which is managed by automake.
-# Copyright Verizon Media
+# Copyright Yahoo Inc, 2021.
 # Licensed under the terms of the Apache-2.0 license.
 # For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
 # For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
@@ -1646,7 +1646,7 @@ obj_src_tunitas_flagship_temerarious_stream_SUBSOURCES = \
 
 
 # This is a GNU -*- Makefile -*- which is managed by automake.
-# Copyright Verizon Media
+# Copyright Yahoo Inc, 2021.
 # Licensed under the terms of the Apache-2.0 license.
 # For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
 # For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
@@ -1661,7 +1661,7 @@ obj_src_tunitas_flagship_temerarious_variable_SUBSOURCES = \
 
 
 # This is a GNU -*- Makefile -*- which is managed by automake.
-# Copyright Verizon Media
+# Copyright Yahoo Inc, 2021.
 # Licensed under the terms of the Apache-2.0 license.
 # For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
 # For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
@@ -1680,7 +1680,7 @@ check_bin_catty_SOURCES = \
 
 
 # This is a GNU -*- Makefile -*- which is managed by automake.
-# Copyright Verizon Media
+# Copyright Yahoo Inc, 2021.
 # Licensed under the terms of the Apache-2.0 license.
 # For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
 # For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
@@ -1701,7 +1701,7 @@ check_bin_roff_SOURCES = \
 
 
 # This is a GNU -*- Makefile -*- which is managed by automake.
-# Copyright Verizon Media
+# Copyright Yahoo Inc, 2021.
 # Licensed under the terms of the Apache-2.0 license.
 # For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
 # For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
@@ -1722,7 +1722,7 @@ check_bin_tf_SOURCES = \
 
 
 # This is a GNU -*- Makefile -*- which is managed by automake.
-# Copyright Verizon Media
+# Copyright Yahoo Inc, 2021.
 # Licensed under the terms of the Apache-2.0 license.
 # For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
 # For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
@@ -1762,7 +1762,7 @@ check_bin_unit_SOURCES = \
 
 
 # This is a GNU -*- Makefile -*- which is managed by automake.
-# Copyright Verizon Media
+# Copyright Yahoo Inc, 2021.
 # Licensed under the terms of the Apache-2.0 license.
 # For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
 # For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
@@ -1776,7 +1776,7 @@ obj_src_tests_unit_error_SUBSOURCES = \
 
 
 # This is a GNU -*- Makefile -*- which is managed by automake.
-# Copyright Verizon Media
+# Copyright Yahoo Inc, 2021.
 # Licensed under the terms of the Apache-2.0 license.
 # For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
 # For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
@@ -1793,7 +1793,7 @@ obj_src_tests_unit_exception_SUBSOURCES = \
 
 
 # This is a GNU -*- Makefile -*- which is managed by automake.
-# Copyright Verizon Media
+# Copyright Yahoo Inc, 2021.
 # Licensed under the terms of the Apache-2.0 license.
 # For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
 # For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
@@ -1807,7 +1807,7 @@ obj_src_tests_unit_exception_input_SUBSOURCES = \
 
 
 # This is a GNU -*- Makefile -*- which is managed by automake.
-# Copyright Verizon Media
+# Copyright Yahoo Inc, 2021.
 # Licensed under the terms of the Apache-2.0 license.
 # For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
 # For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
@@ -1825,7 +1825,7 @@ obj_src_tests_unit_field_SUBSOURCES = \
 
 
 # This is a GNU -*- Makefile -*- which is managed by automake.
-# Copyright Verizon Media
+# Copyright Yahoo Inc, 2021.
 # Licensed under the terms of the Apache-2.0 license.
 # For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
 # For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
@@ -1837,7 +1837,7 @@ obj_src_tests_unit_input_SUBSOURCES = \
 
 
 # This is a GNU -*- Makefile -*- which is managed by automake.
-# Copyright Verizon Media
+# Copyright Yahoo Inc, 2021.
 # Licensed under the terms of the Apache-2.0 license.
 # For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
 # For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
@@ -1850,7 +1850,7 @@ obj_src_tests_unit_parser_SUBSOURCES = \
 
 
 # This is a GNU -*- Makefile -*- which is managed by automake.
-# Copyright Verizon Media
+# Copyright Yahoo Inc, 2021.
 # Licensed under the terms of the Apache-2.0 license.
 # For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
 # For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
@@ -1864,7 +1864,7 @@ obj_src_tests_unit_parser_assess_SUBSOURCES = \
 
 
 # This is a GNU -*- Makefile -*- which is managed by automake.
-# Copyright Verizon Media
+# Copyright Yahoo Inc, 2021.
 # Licensed under the terms of the Apache-2.0 license.
 # For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
 # For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
@@ -1877,7 +1877,7 @@ obj_src_tests_unit_processor_SUBSOURCES = \
 
 
 # This is a GNU -*- Makefile -*- which is managed by automake.
-# Copyright Verizon Media
+# Copyright Yahoo Inc, 2021.
 # Licensed under the terms of the Apache-2.0 license.
 # For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
 # For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
@@ -1892,7 +1892,7 @@ obj_src_tests_unit_source_SUBSOURCES = \
 
 
 # This is a GNU -*- Makefile -*- which is managed by automake.
-# Copyright Verizon Media
+# Copyright Yahoo Inc, 2021.
 # Licensed under the terms of the Apache-2.0 license.
 # For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
 # For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
@@ -1947,7 +1947,7 @@ noinst_LTLIBRARIES = \
 check_LTLIBRARIES = $(none)
 
 # This is a GNU -*- Makefile -*- which is managed by automake.
-# Copyright Verizon Media
+# Copyright Yahoo Inc, 2021.
 # Licensed under the terms of the Apache-2.0 license.
 # For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
 # For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
@@ -1958,7 +1958,7 @@ tests_unit_TESTS = \
 
 
 # This is a GNU -*- Makefile -*- which is managed by automake.
-# Copyright Verizon Media
+# Copyright Yahoo Inc, 2021.
 # Licensed under the terms of the Apache-2.0 license.
 # For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
 # For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
@@ -1971,7 +1971,7 @@ tests_catty_TESTS = \
 
 
 # This is a GNU -*- Makefile -*- which is managed by automake.
-# Copyright Verizon Media
+# Copyright Yahoo Inc, 2021.
 # Licensed under the terms of the Apache-2.0 license.
 # For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
 # For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
@@ -1982,7 +1982,7 @@ tests_tf_TESTS = \
 
 
 # This is a GNU -*- Makefile -*- which is managed by automake.
-# Copyright Verizon Media
+# Copyright Yahoo Inc, 2021.
 # Licensed under the terms of the Apache-2.0 license.
 # For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
 # For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
@@ -1993,7 +1993,7 @@ tests_roff_TESTS = \
 
 
 # This is a GNU -*- Makefile -*- which is managed by automake.
-# Copyright Verizon Media
+# Copyright Yahoo Inc, 2021.
 # Licensed under the terms of the Apache-2.0 license.
 # For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
 # For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
@@ -2007,7 +2007,7 @@ tests_scripty_roff_TESTS = \
 
 
 # This is a GNU -*- Makefile -*- which is managed by automake.
-# Copyright Verizon Media
+# Copyright Yahoo Inc, 2021.
 # Licensed under the terms of the Apache-2.0 license.
 # For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
 # For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
@@ -2027,7 +2027,7 @@ tests_scripty_tf_TESTS = \
 
 
 # This is a GNU -*- Makefile -*- which is managed by automake.
-# Copyright Verizon Media
+# Copyright Yahoo Inc, 2021.
 # Licensed under the terms of the Apache-2.0 license.
 # For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
 # For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE

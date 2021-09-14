@@ -1,5 +1,5 @@
 # This is a GNU -*- Makefile -*- fragment, included by automake from the top-level Makefile.am
-# Copyright Verizon Media.
+# Copyright Yahoo Inc, 2021.
 # Licensed under the terms of the Apache-2.0 license.
 # See the LICENSE file in https://github.com/yahoo/temerarious-flagship/blob/master/LICENSE for terms.
 # See the LICENSE file at the top of this repository.

@@ -1,5 +1,5 @@
 dnl This is a GNU -*- autoconf -*- specification that is processed by Autoconf.
-dnl Copyright Verizon Media
+dnl Copyright Yahoo Inc, 2021.
 dnl Licensed under the terms of the Apache-2.0 license.
 dnl For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
 dnl For terms, see the LICENSE file at https://git.tunitas.technology/all/build/basics/temerarious-flagship/LICENSE
