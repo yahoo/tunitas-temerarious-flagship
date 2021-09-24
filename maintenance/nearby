@@ -136,6 +136,12 @@ fi
 : ${with_hypogeal_twilight:=${with_scold_nearby?}/hypogeal-twilight}
 : ${with_temerarious_flagship:=${PWD}} # RIGHT HERE
 : ${with_tunitas_basics:=${with_tunitas_nearby?}/basics}
+: ${CPPFLAGS:=-Wno-cpp}
+: ${CXXFLAGS:=-Wno-attributes -Wno-deprecated-declarations}
+: ${LDFLAGS:=-O0 -ggdb -no-install}
+if type -p nproc 2>/dev/null ; then
+    : ${MAKEFLAGS:=-j$(nproc)}
+fi
 eval \
     ${prefix:+prefix=$prefix} \
     ${with_hypogeal_twilight:+with_hypogeal_twilight=$with_hypogeal_twilight} \
@@ -164,6 +170,6 @@ eval \
     ${with_std_tunitas:+--with-std-tunitas=$with_std_tunitas} \
     ${with_std_scold:+--with-std-scold=$with_std_scold} \
     ${end} &&
-make ${CPPFLAGS:+CPPFLAGS="$CPPFLAGS"} ${CXXFLAGS:+CXXFLAGS="$CXXFLAGS"} &&
-make check ${CPPFLAGS:+CPPFLAGS="$CPPFLAGS"} ${CXXFLAGS:+CXXFLAGS="$CXXFLAGS"} &&
+make ${MAKEFLAGS:+MAKEFLAGS="$MAKEFLAGS"} ${CPPFLAGS:+CPPFLAGS="$CPPFLAGS"} ${CXXFLAGS:+CXXFLAGS="$CXXFLAGS"} ${LDFLAGS:+LDFLAGS="$LDFLAGS"} &&
+make check ${MAKEFLAGS:+MAKEFLAGS="$MAKEFLAGS"} ${CPPFLAGS:+CPPFLAGS="$CPPFLAGS"} ${CXXFLAGS:+CXXFLAGS="$CXXFLAGS"} ${LDFLAGS:+LDFLAGS="$LDFLAGS"} &&
 echo OK DONE

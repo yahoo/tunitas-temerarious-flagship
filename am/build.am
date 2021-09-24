@@ -106,7 +106,15 @@ define TF_COMPILE =
 	{ $(call TF_DISAGGREGATE_COMPILE, $1) ; } && { $(call TF_DEPENDENCIES_COMPILE, $1) ; }
 endef
 TF_DISAGGREGATE = $(call TF_COMPILE, $1)$(warning TF_DISAGGREGATE is deprecated, instead prefer TF_COMPILE)
-TF_SOURCEStoMODULES = $(call HGTW_SOURCEStoMODULES, $1)
+#
+#                      ^
+#                      |
+# The others (above---/+\---above) are deprecated in one way or another
+# These      (below---\+/---below) are the go-forward ones
+#                      |
+#                      v
+#
+TF_SOURCEStoMODULES = $(call HT_SOURCEStoMODULES, $1)
 TF_XCPP2CPP = $(call HT_XCPP2CPP,$1)
 TF_DEPENDENCIES = $(call HT_DEPENDENCIES,$1)
 

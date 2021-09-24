@@ -5,7 +5,7 @@
 # For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
 #
 lib_libtunitas_flagship_temerarious_la_CURRENT = 2
-lib_libtunitas_flagship_temerarious_la_REVISION = 1
+lib_libtunitas_flagship_temerarious_la_REVISION = 2
 lib_libtunitas_flagship_temerarious_la_AGE = 1
 lib_libtunitas_flagship_temerarious_la_CRA = $(lib_libtunitas_flagship_temerarious_la_CURRENT):$(lib_libtunitas_flagship_temerarious_la_REVISION):$(lib_libtunitas_flagship_temerarious_la_AGE)
 #
