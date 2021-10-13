@@ -1,0 +1,68 @@
+// This is C++ 23 -*- c++ -*- -std=c++23 in the stylings of the S.C.O.L.D. design method.
+// Copyright Yahoo Inc, 2021.
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-basics/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/components/basics/tree/LICENSE
+// For terms and provenance see the LICENSE file at the top of the repository.
+#divert <cpp>
+#import cli.exits.constants
+#import cli.options.Arguments
+#import nonstd.range.forward
+#import tunitas.file.Path
+#import tunitas.string.literals
+#import std.clog
+#import std.exception
+#import std.next
+#import sys.posix.exec
+auto main(int cc, char *vv[]) -> int {
+  using namespace tunitas::string::literals;
+  using namespace cli::exits::constants;
+  try {
+    namespace file = tunitas::file;
+    using nonstd::range::forward;
+    using std::next;
+    auto arguments = cli::options::Arguments{&vv[0], &vv[cc]};
+    auto parent_directory_of = [](file::Path candidate) -> file::Path {
+                                 auto root = candidate.parent_path();
+                                 if (root.empty()) { root = "."s; }
+                                 return root;
+                               };
+    auto has_an_option = [](auto const &container) {
+                           // http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2020/p2012r0.pdf
+                           return [p2012=forward(next(container.begin()), container.end())]{
+                                    for (auto const &word : p2012) {
+                                      if (word.size() && '-' == word.front()) {
+                                        return true;
+                                      }
+                                    }
+                                    return false;
+                                  }();
+                         };
+    auto has_a_location = [](auto const &container) {
+                            return [p2012=forward(next(container.begin()), container.end())]{
+                                     for (auto const &word : p2012) {
+                                       if (word.empty() || '-' != word.front()) {
+                                         return true;
+                                       }
+                                     }
+                                     return false;
+                                   }();
+                          };
+    if (!has_an_option(arguments)) {
+      auto early = next(arguments.begin());
+      arguments.insert(early, "--ignore-backups");
+      arguments.insert(early, "-1"); 
+    }
+    if (!has_a_location(arguments)) {
+      arguments.push_back(parent_directory_of(arguments.front()));
+    }
+    arguments.at(0) = "/bin/ls"s;
+    auto execed = sys::posix::exec(arguments.front(), arguments);
+    std::clog << "error: could not exec because " << error_code(execed).message() << '\n';
+    return cli::exits::FAIL;
+  } catch (std::exception const &e) {
+    std::clog << "error: unexpected exception " << e.what() << '\n';
+    return SOFTWARE;
+  }
+}
+#endiv

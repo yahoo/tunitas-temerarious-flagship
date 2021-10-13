@@ -1,2 +1,8 @@
 .libs
 roff
+echo
+help
+list
+ls
+usage
+version

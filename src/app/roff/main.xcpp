@@ -122,7 +122,7 @@ namespace app::roff::package_body_main {
         erroneity(palette) << "the <subprogram> cannot be empty\n";
         return USAGE;
       } else if ("--usage"s == item || "--help"s == item || "-h"s == item) {
-        std::cout << usage::Message{program} << '\n';
+        std::cout << usage::Message{}(program) << '\n';
         return OK;
       } else if ("--version"s == item || "-V"s == item) {
         std::cout << version::Generator{} << '\n';

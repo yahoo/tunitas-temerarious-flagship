@@ -17,7 +17,9 @@ namespace app::tf {
 #import tunitas.application.options
 #import tunitas.flagship.temerarious
 #import tunitas.file.Path
+#import tunitas.Optional
 #import tunitas.string.Storage
+#import autotools.autoconf.Config.tunitas.flagship.temerarious.CONFIG
 namespace app::tf::package_main::package_body_main {
   namespace interface {
     namespace options = tunitas::application::options;
@@ -26,7 +28,9 @@ namespace app::tf::package_main::package_body_main {
     inline namespace constants { using namespace tunitas::application::exits::constants; } 
     using String = tunitas::string::Storage;
     using Filepath = tunitas::file::Path;
+    using tunitas::Optional;
     namespace version = tunitas::flagship::temerarious::version;
+    using Config = autotools::autoconf::Config<tunitas::flagship::temerarious::CONFIG>;
   }
 }
 #endiv
@@ -39,7 +43,7 @@ namespace app::tf::package_main {
     auto main(options::c::Argv) -> exits::Code;
   }
   namespace package_body_main::body {
-    auto root(options::c::Argv) -> Filepath;
+    auto guess_actual_installed_prefix(options::c::Argv) -> Optional<Filepath>;
   }
 }
 #endiv
@@ -58,39 +62,47 @@ namespace app::tf::package_main {
 #import app.tf.usage.Message
 namespace app::tf::package_main {
   auto interface::main(options::c::Argv av) -> exits::Code {
-    auto prog = options::Program{av.front()};
+    auto program = options::Program{av.front()};
     if (av.size() < 2) {
-      std::cerr << prog << ": error, a command is required\n";
+      std::cerr << program << ": error, a command is required\n";
       return USAGE;
     }
     std::string first = av[1];
     if (first.empty()) {
-      std::cerr << prog << ": error, the <subprogram> cannot be empty\n";
+      std::cerr << program << ": error, the <subprogram> cannot be empty\n";
       return USAGE;
     } else if ("--usage"s == first || "--help"s == first || "-h"s == first) {
-      std::cout << usage::Message{prog} << '\n';
+      std::cout << usage::Message{}(program) << '\n';
       return OK;
       } else if ("--version"s == first || "-V"s == first) {
         std::cout << version::Generator{} << '\n';
         return OK;
     } else if ('-' == first.front()) {
-      std::cerr << prog << ": error, invalid option (use --usage to explore)\n";
+      std::cerr << program << ": error, invalid option (use --usage to explore)\n";
       return USAGE;
     } else {
       auto reargs = options::Arguments{1+av.begin(), av.end()};
       auto reexec = [&]{
-                      auto redir = root(av) / Filepath{"libexec"} / Filepath{"temerarious-flagship"};
+                      auto redir = [av]() -> Filepath {
+                                     // If we can find it then take what is *actually( at hand
+                                     // Else fall back onto the configure-time path as-built.
+                                     if (auto guessed=guess_actual_installed_prefix(av); guessed) {
+                                       return *guessed / Filepath{"libexec"} / Filepath{"temerarious-flagship"};
+                                     } else {
+                                       return Config::package_applibexecdir();
+                                     }
+                                   }();
                       auto reprog = Filepath{first}.filename();
                       return redir / reprog;
                     }();
       auto done = sys::posix::exec(reexec, move(reargs));
       // Even returning here at all signals an error.
-      std::cerr << prog << ": error, could not invoke " << reexec << " because " << error_code(done).message() << '\n';
+      std::cerr << program << ": error, could not invoke " << reexec << " because " << error_code(done).message() << '\n';
       return OS;
     }
   }
   namespace package_body_main {
-    auto body::root(options::c::Argv av) -> Filepath {
+    auto body::guess_actual_installed_prefix(options::c::Argv av) -> Optional<Filepath> {
       //
       // WATCHOUT - libtool in or out of development
       //
@@ -116,7 +128,7 @@ namespace app::tf::package_main {
       }
       auto guess = debin.parent_path();
       if (guess.empty()) {
-        return ".";
+        return {};
       } else {
         return guess;
       }

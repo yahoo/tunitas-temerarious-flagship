@@ -93,6 +93,8 @@ dnl only available in module-rigging >= 2.0
 TF_CHECK_PACKAGES_WARNING([rigging.io],       [module-rigging-devel], [Test Rigging of S.C.O.L.D., module-rigging >= 2.0])
 TF_CHECK_PACKAGES_WARNING([rigging.suite.io], [module-rigging-devel], [Test Rigging of S.C.O.L.D., module-rigging >= 1.0])
 
+TF_PACKAGE_VARIABLES
+
 dnl WATCHOUT if AC_OUTPUT is not called (transitively from TF_FINALIZE) then
 dnl you will see the fantastically cryptic error
 dnl

@@ -6,9 +6,10 @@
 #divert <fpp>
 #import app
 #import app.exception
+#import app.usage
 namespace app::roff {
   namespace [[implementation]] packaging { }
-  namespace [[nodirectory]] usage { }
   namespace [[nodirectory]] exception { using namespace app::exception; }
+  namespace [[nodirectory]] usage { using namespace app::usage; }
 }
 #endiv

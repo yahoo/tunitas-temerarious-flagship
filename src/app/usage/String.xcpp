@@ -1,0 +1,28 @@
+// This is C++ 23 -*- c++ -*- -std=c++23 in the stylings of the S.C.O.L.D. design method.
+// Copyright Yahoo Inc, 2021.
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-basics/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/components/basics/tree/LICENSE
+// For terms and provenance see the LICENSE file at the top of the repository.
+#divert <fpp>
+#import nonstd.string.Storage
+namespace app::usage {
+  //
+  // MUST be a type alias
+  //
+  using String = nonstd::string::Storage;
+}
+#endiv
+#divert <cpp>
+#import cli.exception.formatting.Usage
+#import nonstd.same_as
+#import std.declval
+namespace {
+  namespace testate {
+    using namespace app::usage;
+    using namespace std;
+    using Result = decltype(declval<cli::exception::feature::Usage>().unformatted());
+    static_assert(same_as<String, Result>);
+  }
+}
+#endiv

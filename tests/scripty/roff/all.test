@@ -1,12 +1,17 @@
 #!/bin/sh
 __topdir=$(realpath ${0%/*}/../../..)
-export PATH="${__topdir?}/libexec/temerarious-flagship:${__topdir?}/bin:$PATH"
+#
+# DO NOT put libexec in the PATH because it contains 'ls' and will recur infinitely
+# DO NOT ------> export PATH="${__topdir?}/libexec/temerarious-flagship:${__topdir?}/bin:$PATH" <----- DO NOT  (it will recur on 'ls')
+#
+export PATH="${__topdir?}/bin:$PATH"
+libexec=${__topdir?}/libexec/temerarious-flagship
 exec < /dev/null
-roff --help
-roff --usage
-roff -h
-roff -b || test 0 != $?
-roff --bogon || test 0 != $?
-date | roff
+$libexec/roff --help
+$libexec/roff --usage
+$libexec/roff -h
+$libexec/roff -b || test 0 != $?
+$libexec/roff --bogon || test 0 != $?
+date | $libexec/roff
 
 

@@ -1,0 +1,64 @@
+// This is C++ 23 -*- c++ -*- -std=c++23 in the stylings of the S.C.O.L.D. design method.
+// Copyright Yahoo Inc, 2021.
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-basics/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/components/basics/tree/LICENSE
+// For terms and provenance see the LICENSE file at the top of the repository.
+#divert <cpp>
+#import cli.exits.constants
+#import nonstd.directory.Range // [[FIXTHIS?]] use the version in tunitas-basics >= X.Y when such does materialize therein
+#import nonstd.directory.Iterator
+#import nonstd.directory.Entry
+#import tunitas.file.Path
+#import tunitas.string.literals
+#import tunitas.string.Storage
+#import langu.age.q
+#import std.cout
+#import std.clog
+#import std.exception
+#import std.sort
+#import std.vector
+auto main(int cc, char *vv[]) -> int {
+  using namespace tunitas::string::literals;
+  using namespace cli::exits::constants;
+  using namespace langu::age;
+  namespace directory = nonstd::directory;
+  try {
+    namespace file = tunitas::file;
+    namespace string = tunitas::string;
+    // http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2020/p2012r0.pdf
+    auto &outbound{std::cout};
+    auto parent_directory_of = [](file::Path candidate) -> file::Path {
+                                 auto root = candidate.parent_path();
+                                 if (root.empty()) { root = "."s; }
+                                 return root;
+                               };
+    [&outbound, p2012=directory::Range{parent_directory_of(vv[0])}]{
+      auto ordered = [&]{
+                       auto slurped = std::vector<directory::Entry>{p2012.begin(), p2012.end()};
+                       auto compare =  [](auto const &a, auto const &b) { return a.path().filename() < b.path().filename(); };
+                       std::sort(slurped.begin(), slurped.end(), compare);
+                       return slurped;
+                     }();
+      for (auto const &entry : ordered) {
+        string::Storage name = entry.path().filename(); // [[FIXTHIS]] is there any other way to do this without creating the path()? 
+        if (!name.empty()) {
+          if ('.' == name.front() || '~' == name.back()) {
+            // ignore
+          } else {
+            outbound << name << '\n';
+          }
+        }
+      }
+    }();
+    return OK;
+  } catch (directory::exception::Open const &o) {
+    std::clog << "error: could not open " << q(o.path()) << '\n'
+              << "error: because " << o.code().message() << '\n';
+    return FAIL;
+  } catch (std::exception const &a) {
+    std::clog << "error: unexpected exception " << a.what() << '\n';
+    return SOFTWARE;
+  }
+}
+#endiv

@@ -5,10 +5,12 @@
 // For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
 #divert <fpp>
 #import tunitas.application
+#import tunitas.application.required
 #import tunitas.string.literals
 namespace app {
   using namespace tunitas::application;
   using namespace tunitas::string::literals;
+  namespace [[nodirectory]] required { using namespace tunitas::application::required; }
 }
 #endiv
 #divert <hpp>

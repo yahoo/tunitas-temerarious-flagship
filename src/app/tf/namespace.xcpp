@@ -5,7 +5,8 @@
 // For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
 #divert <fpp>
 #import app
+#import app.usage
 namespace app::tf {
-  namespace [[nodirectory]] usage { }
+  namespace [[nodirectory]] usage { using namespace app::usage; }
 }
 #endiv

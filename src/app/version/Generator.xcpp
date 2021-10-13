@@ -1,0 +1,39 @@
+// This is C++ 23 -*- c++ -*- -std=c++23 in the stylings of the S.C.O.L.D. design method.
+// Copyright Yahoo Inc, 2021.
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-basics/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/components/basics/tree/LICENSE
+// For terms and provenance see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace app::version {
+  //
+  // Generate the package version string
+  //
+  // Specification:
+  //
+  //   Generate it afresh each time.
+  //
+  // Usage:
+  //
+  //   auto generator = Generator{};
+  //   auto generated = generator();
+  //   cout << generated;
+  //
+  struct Generator;
+}
+#endiv
+#divert <hpp>
+#import autotools.autoconf.Config.tunitas.flagship.temerarious.CONFIG
+#import app.version.String
+struct app::version::Generator {
+  using Result = String;
+  inline auto operator()() const -> Result;
+private:
+  using Config = autotools::autoconf::Config<tunitas::flagship::temerarious::CONFIG>;
+};
+#endiv
+#divert <ipp>
+namespace app::version {
+  auto Generator::operator()() const -> Result { return {Config::package_major(), Config::package_minor(), Config::package_patch()}; }
+}
+#endiv

@@ -36,6 +36,7 @@ INSTALLATION_AREAS = \
 include addenda/nonstd/Makefrag.am
 include src/app/Makefrag.am
 include src/app/tf/Makefrag.am
+include src/app/tf/thunks/Makefrag.am
 include src/app/roff/Makefrag.am
 include src/autotools/autoconf/Makefrag.am
 include src/std/Makefrag.am
@@ -57,10 +58,18 @@ include am/Makefrag.am
 include mk/Makefrag.am
 include bc/Makefrag.am
 
-bin_PROGRAMS = $(bin_tf)
+bin_PROGRAMS = bin/tf
 libexec_temerarious_flagshipdir = $(libexecdir)/temerarious-flagship
-libexec_temerarious_flagship_PROGRAMS = $(libexec_temerarious_flagship_roff)
-lib_LTLIBRARIES = $(lib_libtunitas_flagship_temerarious_la)
+libexec_temerarious_flagship_PROGRAMS = \
+  libexec/temerarious-flagship/echo \
+  libexec/temerarious-flagship/help \
+  libexec/temerarious-flagship/list \
+  libexec/temerarious-flagship/ls \
+  libexec/temerarious-flagship/roff \
+  libexec/temerarious-flagship/usage \
+  libexec/temerarious-flagship/version \
+  $(end)
+lib_LTLIBRARIES = lib/libtunitas-flagship-temerarious.la
 noinst_LTLIBRARIES = \
   $(lib_libaddenda_nonstd_la) \
   $(lib_libautotools_autoconf_la) \
@@ -70,10 +79,10 @@ noinst_LTLIBRARIES = \
   $(lib_libapp_tf_la) \
   $(end)
 check_PROGRAMS = \
-  $(check_bin_unit) \
-  $(check_bin_catty) \
-  $(check_bin_tf) \
-  $(check_bin_roff) \
+  check/bin/unit \
+  check/bin/catty \
+  check/bin/tf \
+  check/bin/roff \
   $(end)
 check_LTLIBRARIES = $(none)
 

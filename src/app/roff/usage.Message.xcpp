@@ -10,12 +10,12 @@ namespace app::roff::usage {
   //
   // Usage:
   //
-  //   auto generator = usage::Message{program};
-  //   std::cout << generator() << '\n';
+  //   auto program = Program{...somehow...};
   //
-  //   auto generator = usage::Message{program};
-  //   std::cout << usage::Message{program} << '\n';
-
+  //   auto generator = usage::Message{};
+  //   std::cout << generator(program) << '\n';
+  //
+  //   std::cout << usage::Message{}(program} << '\n';
   //
   struct Message;
 }
@@ -24,47 +24,37 @@ namespace app::roff::usage {
 #import tunitas.application.options.Program
 #import tunitas.string.Storage
 #import std.ostream
-namespace app::roff {
-  namespace usage {
-    inline auto operator<<(std::ostream &, Message const &) -> std::ostream &;
-  }
-  class usage::Message {
-    using Program = tunitas::application::options::Program;
-    using String = tunitas::string::Storage;
-  public:
-    inline explicit Message(Program const &);
-    inline auto operator()() const -> String;
-    inline auto emit_onto(std::ostream &) const -> std::ostream &;
-  private:
-    Program program;
-  };
-}
+class app::roff::usage::Message {
+  using Program = tunitas::application::options::Program;
+  using String = tunitas::string::Storage;
+public:
+  Message() = default;
+  inline auto operator()() const -> String;
+  auto operator()(Program const &) const -> String;
+};
 #endiv
 #divert <ipp>
+namespace app::roff::usage {
+  auto Message::operator()() const -> String { return operator()(Program{"roff"}); }
+}
+#endiv
+#divert <cpp>
 #import std.ostringstream
-namespace app::roff {
-  auto usage::operator<<(std::ostream &o, Message const &m) -> std::ostream & { return m.emit_onto(o); }
-  namespace usage {
-    Message::Message(Program const &program) : program{program} { }
-    auto Message::operator()() const -> String {
-      std::ostringstream buf;
-      emit_onto(buf);
-      return buf.str();
-    }
-    auto Message::emit_onto(std::ostream &outbound) const -> std::ostream & {
-      outbound << "usage: " << program << " [...options... [...files.roff]"
-               << "\n"
-               << "\nWhere the [...options...] comprise"
-               << "\n--define <NAME>=<VALUE> ........ define NAME as VALUE in the global dictionary"
-               << "\n--define <NAME> ................ define NAME as (empty) in the global dictionary"
-               << "\n-D<NAME>=<VALUE> ............... same, using the well-known idiom of the C preprocessor"
-               << "\n-D<NAME>=<VALUE> ............... same"
-               << "\n--include <DIRECTORY> .......... add <DIRECTORY> to the searchpath"
-               << "\n-I<DIRECTORY> .................. same, using the well-known idiom of the C preprocessor"
-               << "\n--version ...................... emit the version of the this package"
-               << "\n--help, --usage ................ this message."; // no final \n
-      return outbound;
-    }
+namespace app::roff::usage {
+  auto Message::operator()(Program const &program) const -> String {
+    std::ostringstream buf;
+    buf << "usage: " << program << " [...options...] [...files.roff]"
+        << "\n"
+        << "\nWhere the [...options...] comprise"
+        << "\n--define <NAME>=<VALUE> ........ define NAME as VALUE in the global dictionary"
+        << "\n--define <NAME> ................ define NAME as (empty) in the global dictionary"
+        << "\n-D<NAME>=<VALUE> ............... same, using the well-known idiom of the C preprocessor"
+        << "\n-D<NAME>=<VALUE> ............... same"
+        << "\n--include <DIRECTORY> .......... add <DIRECTORY> to the searchpath"
+        << "\n-I<DIRECTORY> .................. same, using the well-known idiom of the C preprocessor"
+        << "\n--version ...................... emit the version of the this package"
+        << "\n--help, --usage ................ this message."; // no final \n
+    return buf.str();
   }
 }
 #endiv
