@@ -1,0 +1,24 @@
+# This is a -*- Makefile -* which is managed by automake and evaluated by GNU make
+# Copyright Yahoo Inc, 2021.
+# Licensed under the terms of the Apache-2.0 license.
+# For terms, see the LICENSE file at https://github.com/yahoo/tunitas-basics/blob/master/LICENSE
+# For terms, see the LICENSE file at https://git.tunitas.technology/all/components/basics/tree/LICENSE
+#
+bc_INSTALLABLE_FILES = \
+  bc/template.autotools-buildconf
+  $(end)
+#
+bc_INSTALLED_FILES = $(addprefix $(pkgdatadir)/,$(bc_INSTALLABLE_FILES))
+install-data-local : __install-bc
+__install-bc : $(bc_INSTALLED_FILES)
+$(bc_INSTALLED_FILES) : $(pkgdatadir)/bc/% : bc/%
+	install -D -c -m 444 $< $@
+#
+# selfcheck ... got 'em all? [[Got Milk?]]
+__selfcheck_bc_IGNORABLE_FILES = bc/Makefrag.am
+# boilerplate
+__selfcheck_bc_OBSERVED_FILES = $(wildcard bc/*[^~])
+__selfcheck_bc_DECLARED_FILES = $(bc_INSTALLABLE_FILES)
+__selfcheck_bc_ESTOPPED_FILES = $(__selfcheck_bc_DECLARED_FILES) $(__selfcheck_bc_IGNORABLE_FILES)
+__selfcheck_bc_ORPHANED_FILES = $(filter-out $(__selfcheck_bc_ESTOPPED_FILES),$(__selfcheck_bc_OBSERVED_FILES))
+$(if $(__selfcheck_bc_ORPHANED_FILES),$(warning unlisted installable files [ $(__selfcheck_bc_ORPHANED_FILES) ] ))

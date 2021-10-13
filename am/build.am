@@ -78,7 +78,7 @@ $(if $(DC),$(__OK),$(error DC is not set, you should call TF_PROG_DC in configur
 ifeq "FAIL" "$(shell type -p $(DC) 2>/dev/null || echo FAIL)"
 $(warning DC=$(DC) and $(DC) is not in your PATH)
 ifneq "0" "$(words $(wildcard $(std_scold_prefix)/bin/$(DC)))"
-$(warning yet $(std_scold_prefix)$(DC) exists so as a temporary hack, the build system will use that.)
+$(warning yet $(std_scold_prefix)/$(DC) exists so as a temporary hack, the build system will use that.)
 $(warning SUGGEST adding 'export PATH=$(std_scold_prefix)/bin:$${PATH}' to your build environment or ~/.bash_profile)
 DC := $(std_scold_prefix)/bin/$(DC)
 $(warning have reset DC=$(DC))

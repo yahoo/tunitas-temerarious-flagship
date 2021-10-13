@@ -118,7 +118,7 @@ namespace app::tf::package_main {
       if (guess.empty()) {
         return ".";
       } else {
-        return move(guess);
+        return guess;
       }
     }
   }

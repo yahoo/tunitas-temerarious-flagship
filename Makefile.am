@@ -52,8 +52,13 @@ INSTALL_MODULES = \
   $(end)
 $(if $(DEBUGGING_CONDITION),$(info DEBUG INSTALL_MODULES=$(INSTALL_MODULES)))
 
+include ac/Makefrag.am
+include am/Makefrag.am
+include mk/Makefrag.am
+include bc/Makefrag.am
+
 bin_PROGRAMS = $(bin_tf)
-libexec_temerarious_flagshipdir = libexec/temerarious-flagship
+libexec_temerarious_flagshipdir = $(libexecdir)/temerarious-flagship
 libexec_temerarious_flagship_PROGRAMS = $(libexec_temerarious_flagship_roff)
 lib_LTLIBRARIES = $(lib_libtunitas_flagship_temerarious_la)
 noinst_LTLIBRARIES = \

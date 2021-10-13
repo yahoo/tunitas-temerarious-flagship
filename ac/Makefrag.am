@@ -1,0 +1,34 @@
+# This is a -*- Makefile -* which is managed by automake and evaluated by GNU make
+# Copyright Yahoo Inc, 2021.
+# Licensed under the terms of the Apache-2.0 license.
+# For terms, see the LICENSE file at https://github.com/yahoo/tunitas-basics/blob/master/LICENSE
+# For terms, see the LICENSE file at https://git.tunitas.technology/all/components/basics/tree/LICENSE
+#
+ac_INSTALLABLE_FILES = \
+  ac/tf_init.m4 \
+  ac/tf_submodules.m4 \
+  ac/tf_finalize.m4 \
+  ac/tf_msg.m4 \
+  ac/tf_prog.m4 \
+  ac/tf_check_leveldb.m4 \
+  ac/tf_package.m4 \
+  ac/tf_enable.m4 \
+  ac/tf_check.m4 \
+  ac/tf_tiers.m4 \
+  ac/tf_with.m4 \
+  $(end)
+#
+ac_INSTALLED_FILES = $(addprefix $(pkgdatadir)/,$(ac_INSTALLABLE_FILES))
+install-data-local : __install-ac
+__install-ac : $(ac_INSTALLED_FILES)
+$(ac_INSTALLED_FILES) : $(pkgdatadir)/ac/% : ac/%
+	install -D -c -m 444 $< $@
+#
+# selfcheck ... got 'em all? [[Got Milk?]]
+__selfcheck_ac_IGNORABLE_FILES = ac/Makefrag.am
+# boilerplate
+__selfcheck_ac_OBSERVED_FILES = $(wildcard ac/*[^~])
+__selfcheck_ac_DECLARED_FILES = $(ac_INSTALLABLE_FILES)
+__selfcheck_ac_ESTOPPED_FILES = $(__selfcheck_ac_DECLARED_FILES) $(__selfcheck_ac_IGNORABLE_FILES)
+__selfcheck_ac_ORPHANED_FILES = $(filter-out $(__selfcheck_ac_ESTOPPED_FILES),$(__selfcheck_ac_OBSERVED_FILES))
+$(if $(__selfcheck_ac_ORPHANED_FILES),$(warning unlisted installable files [ $(__selfcheck_ac_ORPHANED_FILES) ] ))

@@ -1,0 +1,29 @@
+# This is a -*- Makefile -* which is managed by automake and evaluated by GNU make
+# Copyright Yahoo Inc, 2021.
+# Licensed under the terms of the Apache-2.0 license.
+# For terms, see the LICENSE file at https://github.com/yahoo/tunitas-basics/blob/master/LICENSE
+# For terms, see the LICENSE file at https://git.tunitas.technology/all/components/basics/tree/LICENSE
+#
+mk_INSTALLABLE_FILES = \
+  mk/build.mk \
+  $(end)
+#
+mk_INSTALLED_FILES = $(addprefix $(pkgdatadir)/,$(mk_INSTALLABLE_FILES))
+install-data-local : __install-mk
+__install-mk : $(mk_INSTALLED_FILES)
+$(mk_INSTALLED_FILES) : $(pkgdatadir)/mk/% : mk/%
+	install -D -c -m 444 $< $@
+#
+# selfcheck ... got em all? [[Got Milk?]]
+__selfcheck_mk_IGNORABLE_FILES = \
+  mk/Makefrag.am \
+  mk/configured.mk \
+  mk/buildconfed.mk \
+  mk/check-ac.mk \
+  $(end)
+# boilerplate
+__selfcheck_mk_OBSERVED_FILES = $(wildcard mk/*[^~])
+__selfcheck_mk_DECLARED_FILES = $(mk_INSTALLABLE_FILES)
+__selfcheck_mk_ESTOPPED_FILES = $(__selfcheck_mk_DECLARED_FILES) $(__selfcheck_mk_IGNORABLE_FILES)
+__selfcheck_mk_ORPHANED_FILES = $(filter-out $(__selfcheck_mk_ESTOPPED_FILES),$(__selfcheck_mk_OBSERVED_FILES))
+$(if $(__selfcheck_mk_ORPHANED_FILES),$(warning unlisted installable files [ $(__selfcheck_mk_ORPHANED_FILES) ] ))

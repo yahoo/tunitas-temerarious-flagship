@@ -1,0 +1,19 @@
+#!/bin/bash
+#
+# experimental intallation
+#
+# suitable for installation in /exp/tunitas one-shot with most packages already installed in /opt/tunitas
+#
+# usage:
+#
+#   prefix=/exp/tunitas maintenance/exp
+#
+cd ${0%/*}/.. || exit 70
+# https://wiki.note-to-self.tunitas-lang.org/page/Libtool -static-libtool-libs
+# magic: Libtool -static-libtool-libs
+prefix=/exp/tunitas maintenance/v2 &&
+make clean -s &&
+make check LDFLAGS=-static-libtool-libs &&
+ldd bin/* &&
+echo "OK rebuilt static" &&
+echo "NEXT: sudo -u nobody -g tunitas make install"

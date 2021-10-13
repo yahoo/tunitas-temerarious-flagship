@@ -11,7 +11,7 @@ namespace tunitas::flagship::temerarious::variable::required::string {
   //
   // Just these two
   //
-  template<typename VIEWABLE> concept bool Viewable = (nonstd::same_as<VIEWABLE, tunitas::string::Storage> ||
-                                                       nonstd::same_as<VIEWABLE, tunitas::string::View>);
+  template<typename VIEWABLE> concept Viewable = (nonstd::same_as<VIEWABLE, tunitas::string::Storage> ||
+                                                  nonstd::same_as<VIEWABLE, tunitas::string::View>);
 }
 #endiv

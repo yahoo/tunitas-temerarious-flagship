@@ -170,6 +170,7 @@ eval \
     ${with_std_tunitas:+--with-std-tunitas=$with_std_tunitas} \
     ${with_std_scold:+--with-std-scold=$with_std_scold} \
     ${end} &&
+echo make ${MAKEFLAGS:+MAKEFLAGS="$MAKEFLAGS"} ${CPPFLAGS:+CPPFLAGS="$CPPFLAGS"} ${CXXFLAGS:+CXXFLAGS="$CXXFLAGS"} ${LDFLAGS:+LDFLAGS="$LDFLAGS"} &&
 make ${MAKEFLAGS:+MAKEFLAGS="$MAKEFLAGS"} ${CPPFLAGS:+CPPFLAGS="$CPPFLAGS"} ${CXXFLAGS:+CXXFLAGS="$CXXFLAGS"} ${LDFLAGS:+LDFLAGS="$LDFLAGS"} &&
 make check ${MAKEFLAGS:+MAKEFLAGS="$MAKEFLAGS"} ${CPPFLAGS:+CPPFLAGS="$CPPFLAGS"} ${CXXFLAGS:+CXXFLAGS="$CXXFLAGS"} ${LDFLAGS:+LDFLAGS="$LDFLAGS"} &&
 echo OK DONE
