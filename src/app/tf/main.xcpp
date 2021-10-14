@@ -5,104 +5,151 @@
 // For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
 #divert <fpp>
 namespace app::tf {
-  inline namespace package_main {
-   namespace package_body_main {
-     namespace interface { }
-     namespace body { using namespace interface; }
-   }
-   inline namespace interface { using namespace package_body_main::interface; }
+  namespace package_main {
+    namespace interface { }
+    namespace body { using namespace interface; }
   }
+  inline namespace interface_main { using namespace package_main::interface; }
 }
+#import tunitas.application.exits.Code
+#import tunitas.application.options.Program
 #import tunitas.application.exits.constants
-#import tunitas.application.options
+#import tunitas.application.options.c.Argv
+#import tunitas.application.options.Arguments
+#import c.const_vector // [[FIXTHIS]] move this into tunitas as' options::c::Vector
 #import tunitas.flagship.temerarious
 #import tunitas.file.Path
 #import tunitas.Optional
+#import tunitas.Tuple
 #import tunitas.string.Storage
 #import autotools.autoconf.Config.tunitas.flagship.temerarious.CONFIG
-namespace app::tf::package_main::package_body_main {
+namespace app::tf::package_main {
   namespace interface {
-    namespace options = tunitas::application::options;
+    using Argv = tunitas::application::options::c::Argv;
+    using Exit = tunitas::application::exits::Code;
   }
   namespace body {
     inline namespace constants { using namespace tunitas::application::exits::constants; } 
+    namespace version = tunitas::flagship::temerarious::version;
+    using Program = tunitas::application::options::Program;
+    using Vector = ::c::const_vector;
+    using Arguments = tunitas::application::options::Arguments;
     using String = tunitas::string::Storage;
     using Filepath = tunitas::file::Path;
     using tunitas::Optional;
-    namespace version = tunitas::flagship::temerarious::version;
+    using tunitas::Tuple;
     using Config = autotools::autoconf::Config<tunitas::flagship::temerarious::CONFIG>;
+    enum class Dispensation { FAIL, USAGE, VERSION, EXEC };
   }
 }
 #endiv
 #divert <hpp>
-#import tunitas.application.exits.Code
-#import tunitas.application.options.c.Argv
-namespace app::tf::package_main {
-  namespace interface {
-    inline auto main(int, char *[]) -> exits::Code;
-    auto main(options::c::Argv) -> exits::Code;
+namespace app::tf {
+  namespace interface_main {
+    inline auto main(int, char *[]) -> Exit;
+    auto main(Argv) -> Exit;
   }
-  namespace package_body_main::body {
-    auto guess_actual_installed_prefix(options::c::Argv) -> Optional<Filepath>;
+  namespace package_main::body {
+    auto reexec_arguments(Program const &, Argv) -> Tuple<Dispensation, Exit, Vector, Optional<Filepath>>;
+    auto reexec_path(Program const &, Optional<Filepath> libexec, Argv, Filepath first) -> Filepath;
+    auto guess_actual_installed_prefix(Argv) -> Optional<Filepath>;
   }
 }
 #endiv
 #divert <ipp>
-namespace app::tf::package_main {
-  namespace interface { using namespace package_body_main::body; } // the body sees the interface too
-  inline auto interface::main(int cc, char *vv[]) -> exits::Code { return main(options::c::Argv(cc, vv)); }
+namespace app::tf {
+  namespace interface_main { using namespace package_main::body; } // the body sees the interface too
+  inline auto interface_main::main(int cc, char *vv[]) -> Exit { return main(Argv(cc, vv)); }
 }
 #endiv
 #divert <cpp>
-#import std.cerr
-#import tunitas.application.options.Program
-#import tunitas.application.options.Arguments
-#import tunitas.flagship.temerarious.version.Generator
-#import sys.posix.exec
 #import app.tf.usage.Message
-namespace app::tf::package_main {
-  auto interface::main(options::c::Argv av) -> exits::Code {
-    auto program = options::Program{av.front()};
-    if (av.size() < 2) {
-      std::cerr << program << ": error, a command is required\n";
-      return USAGE;
-    }
-    std::string first = av[1];
-    if (first.empty()) {
-      std::cerr << program << ": error, the <subprogram> cannot be empty\n";
-      return USAGE;
-    } else if ("--usage"s == first || "--help"s == first || "-h"s == first) {
+#import c.rest
+#import std.clog
+#import tunitas.flagship.temerarious.version.Generator
+#import std.exception
+#import sys.posix.exec
+namespace app::tf {
+  auto interface_main::main(Argv av) -> Exit try {
+    auto program = Program{av.front()};
+    auto [dispensation, exit, vv, libexec] = reexec_arguments(program, av);
+    switch (dispensation) {
+    case Dispensation::EXEC:
+      { auto reexec = reexec_path(program, move(libexec), av, vv.front());
+        auto reargs = Arguments{vv.begin(), vv.end()};
+        reargs[0] = reexec; // so the other side sees the "as full path as possible" on the reexec (several of them relyo on that)
+        auto done = sys::posix::exec(reexec, move(reargs));
+        // Even returning here at all signals an error.
+        std::clog << program << ": error, could not invoke " << reexec << " because " << error_code(done).message() << '\n';
+        return OS; }
+    case Dispensation::USAGE:
       std::cout << usage::Message{}(program) << '\n';
-      return OK;
-      } else if ("--version"s == first || "-V"s == first) {
-        std::cout << version::Generator{} << '\n';
-        return OK;
-    } else if ('-' == first.front()) {
-      std::cerr << program << ": error, invalid option (use --usage to explore)\n";
-      return USAGE;
-    } else {
-      auto reargs = options::Arguments{1+av.begin(), av.end()};
-      auto reexec = [&]{
-                      auto redir = [av]() -> Filepath {
-                                     // If we can find it then take what is *actually( at hand
-                                     // Else fall back onto the configure-time path as-built.
-                                     if (auto guessed=guess_actual_installed_prefix(av); guessed) {
-                                       return *guessed / Filepath{"libexec"} / Filepath{"temerarious-flagship"};
-                                     } else {
-                                       return Config::package_applibexecdir();
-                                     }
-                                   }();
-                      auto reprog = Filepath{first}.filename();
-                      return redir / reprog;
-                    }();
-      auto done = sys::posix::exec(reexec, move(reargs));
-      // Even returning here at all signals an error.
-      std::cerr << program << ": error, could not invoke " << reexec << " because " << error_code(done).message() << '\n';
-      return OS;
+      break;
+    case Dispensation::VERSION:
+      std::cout << version::Generator{} << '\n';
+      break;
+    case Dispensation::FAIL: // the error message was already emitted
+    default:
+      break;
     }
+    return exit;
+  } catch (std::exception const &e) {
+    std::clog << "error: unexpected exception " << e.what() << '\n';
+    return SOFTWARE;
   }
-  namespace package_body_main {
-    auto body::guess_actual_installed_prefix(options::c::Argv av) -> Optional<Filepath> {
+  namespace package_main {
+    auto body::reexec_arguments(Program const &program, Argv av) -> Tuple<Dispensation, Exit, Vector, Optional<Filepath>> {
+      if (av.size() < 2) {
+        std::clog << program << ": error, a command is required\n";
+        return {Dispensation::FAIL, USAGE, {}, {}};
+      }
+      auto vv = c::rest(av);
+      auto libexec = Optional<Filepath>{};
+      while (vv.size()) {
+        std::string first = vv.front();
+        if (first.empty()) {
+          std::clog << program << ": error, the <subprogram> cannot be empty\n";
+          return {Dispensation::FAIL, USAGE, {}, {}};
+        } else if ("--usage"s == first || "--help"s == first || "-h"s == first) {
+          return {Dispensation::USAGE, OK, {}, {}};
+        } else if ("--version"s == first || "-V"s == first) {
+          return {Dispensation::VERSION, OK, {}, { }};
+        } else if (auto lead="--prefix="s; lead == first.substr(0, lead.size())) {
+          // not bothering to check for empty ... it will get "checked" later by execve(2) failing
+          auto candidate = first.substr(lead.size());
+          if (candidate.empty()) { candidate = "."; }
+          libexec = Filepath{move(candidate)} / Filepath{Config::package_name()};
+          vv = c::rest(vv);
+        } else if (auto lead="--libexec="s; lead == first.substr(0, lead.size())) {
+          auto candidate = first.substr(lead.size());
+          if (candidate.empty()) { candidate = "."; }
+          libexec = move(candidate);
+          vv = c::rest(vv);
+        } else if ('-' == first.front()) {
+          std::clog << program << ": error, invalid option (use --usage to explore)\n";
+          return {Dispensation::FAIL, USAGE, {}, {}};
+        } else {
+          // a word ... we are done.
+          break;
+        }
+      }
+      return {Dispensation::EXEC, {}, vv, move(libexec)};;
+    }
+    auto body::reexec_path(Program const &program, Optional<Filepath> libexec, Argv av, Filepath first) -> Filepath {
+      auto redir = [&]() -> Filepath {
+                     // If we can find it then take what is *actually( at hand
+                     // Else fall back onto the configure-time path as-built.
+                     if (libexec) {
+                       return *libexec;
+                     } else if (auto guessed=guess_actual_installed_prefix(av); guessed) {
+                       return *guessed / Filepath{"libexec"} / Filepath{Config::package_name()};
+                     } else {
+                       return Config::package_applibexecdir();
+                     }
+                   }();
+      return redir / first.filename();
+    }
+    auto body::guess_actual_installed_prefix(Argv av) -> Optional<Filepath> {
       //
       // WATCHOUT - libtool in or out of development
       //

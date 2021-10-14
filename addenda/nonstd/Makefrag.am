@@ -4,7 +4,6 @@
 # For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
 # For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
 #
-lib_libaddenda_nonstd_la = lib/libaddenda-nonstd.la
 lib_libaddenda_nonstd_la_LIBADD = $(none)
 lib_libaddenda_nonstd_la_LDFLAGS = $(PACKAGE_LDFLAGS_SET)
 lib_libaddenda_nonstd_la_MODULES = $(call TF_SOURCEStoMODULES, $(lib_libaddenda_nonstd_la_SOURCES))

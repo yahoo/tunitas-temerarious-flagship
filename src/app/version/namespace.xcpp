@@ -5,6 +5,6 @@
 // For terms, see the LICENSE file at https://git.tunitas.technology/all/components/basics/tree/LICENSE
 // For terms and provenance see the LICENSE file at the top of the repository.
 #divert <fpp>
-#import cli // [[nodirectory]] version
-namespace app::version { using namespace cli::version; }
+#import tunitas.flagship.temerarious // [[nodirectory]] version
+namespace app::version { using namespace tunitas::flagship::temerarious::version; }
 #endiv

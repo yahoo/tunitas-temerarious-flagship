@@ -31,6 +31,7 @@ namespace tunitas::flagship::temerarious {
   class version::Generator final {
     using Result = String;
   public:
+    Generator() = default;
     inline auto operator()() const -> Result;
   private:
     using AC = autotools::autoconf::Config<CONFIG>;

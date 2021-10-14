@@ -14,15 +14,7 @@ dnl
 dnl autoreconf --force --verbose --install
 dnl autoreconf -vfi
 dnl
-dnl Reminder: this package is the only one of the tunitas series where the configure.ac has a "tunitas-" prefix.
-dnl For example, the other packages are direct place names: butano, grabtown, lobitos, montara, pescadero, rockaway, tarwater.
-dnl That not withstanding, the rpm packages all have a "tunitas-" prefix so they can be seen together.
-dnl      ^
-dnl      |
-dnl      \prefix\
-dnl      ||||||||
-dnl      vvvvvvvv
-AC_INIT([tunitas-temerarious-flagship], [2.0.0], [tunitas@tunitas.technology])
+AC_INIT([temerarious-flagship], [2.0.1], [tunitas@tunitas.technology])
 dnl and yes there are other flagships and other toolings (packages-named "flagship" and packages named "tooling")
 TF_INIT(AC_PACKAGE_NAME, AC_PACKAGE_VERSION, AC_PACKAGE_BUGREPORT)
 

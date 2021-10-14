@@ -5,4 +5,5 @@
 # For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
 #
 lib_libautotools_autoconf_la_IMPORT = tunitas.flagship.temerarious
+lib_libautotools_autoconf_la_SOURCES = obj/src/autotools/autoconf/Config/tunitas/flagship/temerarious/CONFIG.cpp
 include $(hypogeal_twilight_datadir)/mk/autotools/autoconf/Makefrag.mk

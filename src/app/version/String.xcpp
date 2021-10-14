@@ -5,7 +5,7 @@
 // For terms, see the LICENSE file at https://git.tunitas.technology/all/components/basics/tree/LICENSE
 // For terms and provenance see the LICENSE file at the top of the repository.
 #divert <fpp>
-#import cli.version.String
+#import tunitas.flagship.temerarious.version.String
 namespace app::version {
   static_assert(sizeof (String), "already visible");
 }

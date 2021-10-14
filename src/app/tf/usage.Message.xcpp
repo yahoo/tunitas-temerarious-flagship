@@ -50,6 +50,8 @@ namespace app::tf::usage {
         << "\nusage, help ... this message"
         << "\n"
         << "\nWhere the [...options...] comprise"
+        << "\n--prefix=DIRECTORY ............. declare the installation prefix"
+        << "\n--libexec=DIRECTORY ............ declare the libexec directory"
         << "\n--version ...................... emit the version of the this package"
         << "\n--help, --usage ................ this message."; // no final \n
     return buf.str();

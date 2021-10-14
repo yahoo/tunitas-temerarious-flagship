@@ -71,12 +71,12 @@ libexec_temerarious_flagship_PROGRAMS = \
   $(end)
 lib_LTLIBRARIES = lib/libtunitas-flagship-temerarious.la
 noinst_LTLIBRARIES = \
-  $(lib_libaddenda_nonstd_la) \
-  $(lib_libautotools_autoconf_la) \
-  $(lib_libstd_temerarious_flagship_la) \
-  $(lib_libapp_la) \
-  $(lib_libapp_roff_la) \
-  $(lib_libapp_tf_la) \
+  lib/libaddenda,nonstd.la \
+  lib/libautotools-autoconf.la \
+  lib/libstd,temerarious-flagship.la \
+  lib/libapp.la \
+  lib/libapp-roff.la \
+  lib/libapp-tf.la \
   $(end)
 check_PROGRAMS = \
   check/bin/unit \
