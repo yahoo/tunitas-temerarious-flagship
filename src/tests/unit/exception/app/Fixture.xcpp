@@ -1,0 +1,75 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Yahoo Inc, 2021.
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+namespace tests::unit::exception::app {
+  namespace [[eponymous]] fixture {
+    struct Fixture;
+    // accretion of other convenience declarations will happen here
+  }
+  using fixture::Fixture;
+}
+#endiv
+#divert <hpp>
+#import tunitas.application.options.Program
+struct tests::unit::exception::app::fixture::Fixture : public cppunit::test::Fixture {
+  static auto suite() -> cppunit::Test *;
+  //
+  using Program = tunitas::application::options::Program;
+  //
+  template<typename EXCEPTION> auto test_constructor() -> void;
+  template<typename EXCEPTION> auto test_Aspect() -> void;
+protected:
+  template<typename EXCEPTION> static auto generate() -> EXCEPTION;
+};
+#endiv
+#divert <ipp>
+#import tests.unit.exception.app.Fixture.Testing
+#import tests.unit.exception.app.Fixture.roff.File
+#endiv
+#divert <tpp>
+#import app.exception.Aspect
+// v2 only #import substd.exception.Exception
+#import nonstd.exception.Exception
+#import nonstd.same_as
+namespace tests::unit::exception::app::fixture {
+  template<typename EXCEPTION> auto Fixture::test_constructor() -> void {
+    using Subject = EXCEPTION;
+    auto subject = generate<Subject>(); // <------------------------------ test the constructor (at least)
+    CPPUNIT_ASSERT(nullptr != subject.what());
+  }
+  template<typename EXCEPTION> auto Fixture::test_Aspect() -> void try {
+    // Prove that these exceptions are throwable and that they are catchable with a library::Aspect
+    auto copied = generate<EXCEPTION>();
+    throw copied; // <---------------------------------------- prove the copy constructor
+  } catch (library::Aspect const &) {
+    CPPUNIT_ASSERT(true);
+#if 0
+  } catch (substd::exception::Exception const &) {
+#else
+  } catch (nonstd::exception::Exception const &) {
+    static_assert(nonstd::same_as<nonstd::exception::Exception, std::exception>);
+#endif
+    CPPUNIT_ASSERT(false);
+  }
+}
+#endiv
+#divert <cpp>
+auto tests::unit::exception::app::fixture::Fixture::suite() -> cppunit::Test * {
+  using namespace rigging::suite;
+  auto series = Stream{"app"};
+  series << call("File", &Fixture::test_constructor<rofflib::File>)
+         << call("Testing", &Fixture::test_constructor<library::Testing>)
+         << []{
+              auto asp = Stream{"Aspect"};
+              asp << call("File", &Fixture::test_Aspect<rofflib::File>)
+                  << call("File", &Fixture::test_Aspect<library::Testing>)
+                  << END;
+              return move(asp);
+            }()
+         << END;
+  return finalize(series);
+}
+#endiv

@@ -30,11 +30,21 @@ namespace app::exception {
 }
 #endiv
 #divert <hpp>
+#import cli.exits.Code
+#import std.ostream
 class app::exception::Aspect {
 protected:
   virtual ~Aspect() = default;
   Aspect() = default;
 public:
-  virtual auto what() const noexcept -> char const * = 0;
+  struct Results {
+    using What = char const *;
+    using Stream = std::ostream &;
+    using Exit = cli::exits::Code;
+  };
+  virtual auto what() const noexcept -> Results::What = 0;
+  virtual auto stream() const noexcept -> Results::Stream = 0;
+  virtual auto exit() const noexcept -> Results::Exit = 0;
+  [[deprecated("instead prefer Aspect::exit()")]] virtual auto code() const noexcept -> Results::Exit = 0;
 };
 #endiv

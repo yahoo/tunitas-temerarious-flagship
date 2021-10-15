@@ -1,0 +1,80 @@
+// This is C++ 23 -*- c++ -*- -std=c++23 in the stylings of the S.C.O.L.D. design method.
+// Copyright Yahoo Inc, 2021.
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-basics/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/components/basics/tree/LICENSE
+// For terms and provenance see the LICENSE file at the top of the repository.
+#divert <fpp>
+#import app.exception.Aspect
+namespace app::exception::facet {
+  //
+  // The Quitting facet.
+  //
+  // Specification:
+  //
+  //   The facet of quittability.
+  //   Compatibility between (a) Tunitas (basics)       exception feature::Quitting(an implementation detail)
+  //                         (b) S.C.O.L.D. (baseline ) exception feature::Quitting(an abstract interface)
+  //
+  // Design:
+  //
+  //   Reuse the nearby Aspect.
+  //
+  // Background:
+  //
+  //   [[FIXTHIS]] this should be simpler; the design is driven by the compatibility concerns.
+  //
+  //   The term "feature" in the Tunitas nomenclature means "implementation"
+  //   reminder, so here we use non-virtual inheritance because this is an augmentation of the implementation
+  //
+  //   WATCHOUT = "feature"  in the S.C.O.L.D. baseline nomenclature means "interface" or "is abstract"
+  //   WATCHOUT - "usufruct" in the S.C.O.L.D. baseline nomenclature means "implementation"
+  //
+  // Usage: at the declaration site
+  //
+  //    struct my::Problem final : public virtual Abstract, ....................................... see Abstract::Results
+  //                               public virtual exception::facet::Quitting, ..................... see what we did here?
+  //                               public tunitas::application::exception::feature::Quitting, ..... a.k.a. "the usufruct"
+  //                               public something::something::Exception {
+  //      Problem(...declarations...)
+  //      auto what() const noexcept -> Results::Stream override;
+  //      auto stream() const noexcept -> Results::Stream override;
+  //      auto exit() const noexcept -> Results::Exit override;
+  //      [[deprecated]] auto code() const noexcept -> Results::Exit override;
+  //    };
+  //
+  // USage (at the catching site)
+  //
+  //   try {
+  //     ...
+  //     ...do something...
+  //     ...see something...
+  //     ...throw something...
+  //     ...
+  //   } catch (exception::facet::Quitting const &q) {
+  //     q.stream() << q.what() << '\n';
+  //     return q.exit();
+  //   }
+  //
+  struct Quitting;
+}
+#endiv
+#divert <hpp>
+#import cli.exits.Code
+#import std.ostream
+class app::exception::facet::Quitting {
+protected:
+  virtual ~Quitting() = default;
+  Quitting() = default;
+public:
+  struct Results {
+    using What = char const *;
+    using Stream = std::ostream &;
+    using Exit = cli::exits::Code;
+  };
+  virtual auto what() const noexcept -> Results::What = 0;
+  virtual auto stream() const noexcept -> Results::Stream = 0;
+  virtual auto exit() const noexcept -> Results::Exit = 0;
+  [[deprecated("instead prefer Quitting::exit()")]] virtual auto code() const noexcept -> Results::Exit = 0;
+};
+#endiv

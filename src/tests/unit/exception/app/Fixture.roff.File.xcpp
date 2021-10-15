@@ -1,0 +1,42 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Yahoo Inc, 2021.
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+#import tests.unit.exception.app.Fixture
+#import app.roff // namespace exception
+#import tunitas.flagship.temerarious.source
+#import tunitas.file
+namespace tests::unit::exception::app::fixture {
+  namespace rofflib = ::app::roff::exception;
+  namespace file = ::tunitas::file;
+}
+#endiv
+#divert <hpp>
+#import app.roff.exception.File
+namespace tests::unit::exception::app::fixture {
+  template<> auto Fixture::generate<rofflib::File>() -> rofflib::File;
+  template<> auto Fixture::test_constructor<rofflib::File>() -> void;
+}
+#endiv
+#divert <cpp>
+#import nonstd.errcode
+namespace tests::unit::exception::app::fixture {
+  template<> auto Fixture::generate<rofflib::File>() -> rofflib::File {
+    auto const verbie = "open for reading"sv;
+    auto ec = std::error_code{(int)std::errc::no_such_file_or_directory, std::system_category()};
+    return rofflib::File{verbie, "/dev/null", ec};
+  }
+  template<> auto Fixture::test_constructor<rofflib::File>() -> void {
+    using Subject = rofflib::File;
+    auto filepath = file::Path{"/dev/badplace"};
+    { auto subject = Subject{"close", filepath}; // <---------------------------------------- test this, with the defaulted nonstd::errcode()
+      CPPUNIT_ASSERT(nullptr != subject.what());
+      std::cerr << "SHOW exception::File what=" << subject.what() << '\n';
+      { auto subject = Subject{"open", filepath, nonstd::errcode()}; }
+      CPPUNIT_ASSERT(nullptr != subject.what()); // <---------------------------------------- test this, with the explicit nonstd::errcode()
+      std::cerr << "SHOW exception::File what=" << subject.what() << '\n'; }
+  }
+}
+#endiv

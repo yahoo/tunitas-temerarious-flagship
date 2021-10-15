@@ -1,0 +1,43 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Yahoo Inc, 2021.
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+#import tests.unit.exception.app.Fixture
+namespace tests::unit::exception::app::fixture {
+  // ... no more declarations needed...
+}
+#endiv
+#divert <hpp>
+#import app.exception.Testing
+namespace tests::unit::exception::app::fixture {
+  template<> auto Fixture::generate<library::Testing>() -> library::Testing;
+  template<> auto Fixture::test_constructor<library::Testing>() -> void;
+}
+#endiv
+#divert <cpp>
+namespace tests::unit::exception::app::fixture {
+  template<> auto Fixture::generate<library::Testing>() -> library::Testing {
+    auto program = Program{"a.out"};
+    return library::Testing{program, "subsystem"s, SOFTWARE};
+  }
+  template<> auto Fixture::test_constructor<library::Testing>() -> void {
+    using Subject = library::Testing;
+    auto program = Program{"a.out"};
+    { auto subject = Subject{program};
+      CPPUNIT_ASSERT(TESTING == subject.exit());
+      CPPUNIT_ASSERT(nullptr != subject.what()); }
+    { auto subject = Subject{program, SOFTWARE};
+      CPPUNIT_ASSERT(SOFTWARE == subject.exit());
+      CPPUNIT_ASSERT(nullptr != subject.what()); }
+    //
+    { auto subject = Subject{program, "subsystem"};
+      CPPUNIT_ASSERT(TESTING == subject.exit());
+      CPPUNIT_ASSERT(nullptr != subject.what()); }
+    { auto subject = Subject{program, "subsystem"s, SOFTWARE};
+      CPPUNIT_ASSERT(SOFTWARE == subject.exit());
+      CPPUNIT_ASSERT(nullptr != subject.what()); }
+  }
+}
+#endiv

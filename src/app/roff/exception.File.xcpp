@@ -39,24 +39,39 @@ namespace app::roff::exception {
 #endiv
 #divert <hpp>
 #import app.exception.Aspect
+#import app.exception.facet.Quitting
+#import tunitas.application.exception.Aspect
+#import tunitas.application.exception.feature.Quitting
 #import nonstd.exception.Filesystem
 #import tunitas.file.Path
 #import tunitas.string.View
 #import tunitas.string.Storage
 #import nonstd.errcode // rhymes with errno
-struct app::roff::exception::file::eponymity::File : public virtual Aspect,
-                                                     public nonstd::exception::Filesystem<string::View> {
+struct app::roff::exception::file::eponymity::File final : public virtual Aspect,
+                                                           public virtual app::exception::facet::Quitting,
+                                                           public virtual tunitas::application::exception::Aspect,
+           // WATCHOUT = "feature" in the Tunitas nomenclature means "implementation"
+           // reminder, so here we use non-virtual inheritance because this is an augmentation of the implementation
+                                                           public tunitas::application::exception::feature::Quitting,
+                                                           public nonstd::exception::Filesystem<string::View> {
   struct Ancestors {
     struct Aspects { /* who cares? */ };
+    struct Features {
+      using Quitting = tunitas::application::exception::feature::Quitting;
+    };
     using Exception = nonstd::exception::Filesystem<string::View>;
   };
 public:
+  using Results = tunitas::application::exception::Aspect::Results; // either that or Aspect::Results
   // verbie = "open for reading"
   // verbie = "open for writing"
   // verbie = "open"
   // verbie = "close"
   inline explicit File(string::View verbie, file::Path const &, std::error_code = nonstd::errcode());
-  auto what() const noexcept -> char const * override;
+  auto what() const noexcept -> Results::What override;
+  auto stream() const noexcept -> Results::Stream override;
+  auto exit() const noexcept -> Results::Exit override;
+  auto code() const noexcept -> Results::Exit override;
 private:
   static auto format(string::View verbie, file::Path const &, std::error_code) -> string::Storage;
 };
@@ -71,11 +86,14 @@ namespace app::roff::exception::file::eponymity {
 #divert <cpp>
 #import std.ostringstream
 namespace app::roff::exception::file::eponymity {
-  auto File::what() const noexcept -> char const * { return Ancestors::Exception::what(); }
   auto File::format(string::View verbie, file::Path const &filepath, std::error_code ec) -> string::Storage {
     auto buf = std::ostringstream{};
     buf << "cannot " << verbie << " the file " << filepath << " because " << ec.message();
     return buf.str();
   }
+  auto File::what() const noexcept -> Results::What     { return Ancestors::Exception::what(); }
+  auto File::stream() const noexcept -> Results::Stream { return Ancestors::Features::Quitting::stream(); }
+  auto File::exit() const noexcept -> Results::Exit     { return Ancestors::Features::Quitting::exit(); }
+  auto File::code() const noexcept -> Results::Exit     { return Ancestors::Features::Quitting::code(); }
 }
 #endiv

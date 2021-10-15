@@ -11,8 +11,10 @@ bin_tf_MODULES = $(none)
 bin_tf_SOURCES = obj/src/app/tf/c.main.cpp
 #
 lib_libapp_tf_la = lib/libapp-tf.la
-lib_libapp_tf_la_LIBADD = -ltunitas
+lib_libapp_tf_la_CPPFLAGS = $(PACKAGE_CPPFLAGS_SET)
+lib_libapp_tf_la_CXXFLAGS = $(PACKAGE_CXXFLAGS_SET)
 lib_libapp_tf_la_LDFLAGS = $(PACKAGE_LDFLAGS_SET)
+lib_libapp_tf_la_LIBADD = lib/libapp.la -ltunitas-application
 lib_libapp_tf_la_MODULES = $(call TF_SOURCEStoMODULES, $(lib_libapp_tf_la_SOURCES))
 lib_libapp_tf_la_SOURCES = \
   obj/src/app/tf/namespace.cpp \

@@ -101,7 +101,7 @@ namespace tests::unit::field::get {
   auto Identifier_And_More::test_case_1() -> void {
     // The precondition is that there is no leading or trailing blanks ... don't violate that.
     [p2012=generate_some_goodness()]{
-      for (auto const item : p2012) {
+      for (auto const &item : p2012) {
         try {
           std::cerr << "DEBUG: testing for goodness --->" << item << "<---";
           library::get_identifier_and_more(hereinat(), item);
@@ -121,7 +121,7 @@ namespace tests::unit::field::get {
   }
   auto Identifier_And_More::test_case_2() -> void {
     [p2012=generate_some_badness()]{
-      for (auto const item : p2012) {
+      for (auto const &item : p2012) {
         try {
           auto [id, rest] = library::get_identifier_and_more(hereinat(), item);
           std::cerr << "DEBUG should fail but did not " << braket(braket(item)) << '\n';

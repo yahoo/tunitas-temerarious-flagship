@@ -72,15 +72,18 @@ namespace tests::unit::field::get {
     library::get_filepath(hereinat(), "..."sv);
   }
   auto Filepath::test_case_2() -> void {
-    for (auto const item : generate_some_badness()) {
-      try {
-        library::get_filepath(hereinat(), item);
-        std::cerr << "DEBUG (should have been bad and was good): --->" << item << "<---\n";
-        CPPUNIT_ASSERT(false);
-      } catch (exception::Aspect const &) {
-        CPPUNIT_ASSERT(true);
+    // http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2020/p2012r0.pdf
+    [p2012=generate_some_badness()]{
+      for (auto const &item : p2012) {
+        try {
+          library::get_filepath(hereinat(), item);
+          std::cerr << "DEBUG (should have been bad and was good): --->" << item << "<---\n";
+          CPPUNIT_ASSERT(false);
+        } catch (exception::Aspect const &) {
+          CPPUNIT_ASSERT(true);
+        }
       }
-    }
+    }();
   }
   auto Filepath::suite() -> cppunit::Test * {
     using namespace rigging::suite;

@@ -4,11 +4,11 @@
 // For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
 // For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
 #divert <fpp>
-#import app
-#import tunitas.application.exception
+#import app.exception
 #import tunitas.application.exits.constants
-namespace app::exception {
-  using namespace tunitas::application::exception;
+#import tests.unit.exception
+namespace tests::unit::exception::app {
+  namespace library = ::app::exception;
   using namespace tunitas::application::exits::constants;
 }
 #endiv

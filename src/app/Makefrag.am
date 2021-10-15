@@ -5,8 +5,15 @@
 # For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
 #
 lib_libapp_la = lib/libapp.la
-lib_libapp_la_LIBADD = -ltunitas-application -loptions-module -lnonstd-module # [[TODO]] remove the -module suffix when module-options, module-nonstd >= 2.0 is ready
+lib_libapp_la_CPPFLAGS = $(PACKAGE_CPPFLAGS_SET)
+lib_libapp_la_CXXFLAGS = $(PACKAGE_CXXFLAGS_SET)
 lib_libapp_la_LDFLAGS = $(PACKAGE_LDFLAGS_SET)
+lib_libapp_la_LIBADD = \
+  -ltunitas-application \
+  -ltunitas \
+  -loptions-module \
+  -lnonstd-module
+  $(end) # [[TODO]] remove the -module suffix when module-options, module-nonstd >= 2.0 is ready with the ++ suffix -lnonstd++
 lib_libapp_la_MODULES = $(call TF_SOURCEStoMODULES, $(lib_libapp_la_SOURCES))
 lib_libapp_la_SOURCES = \
   obj/src/app/namespace.cpp \

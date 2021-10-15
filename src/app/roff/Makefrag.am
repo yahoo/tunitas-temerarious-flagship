@@ -11,8 +11,10 @@ libexec_temerarious_flagship_roff_MODULES = $(none)
 libexec_temerarious_flagship_roff_SOURCES = obj/src/app/roff/c.main.cpp
 #
 lib_libapp_roff_la = lib/libapp-roff.la
-lib_libapp_roff_la_LIBADD = -ltunitas $(lib_libtunitas_flagship_temerarious_la)
+lib_libapp_roff_la_CPPFLAGS = $(PACKAGE_CPPFLAGS_SET)
+lib_libapp_roff_la_CXXFLAGS = $(PACKAGE_CXXFLAGS_SET)
 lib_libapp_roff_la_LDFLAGS = $(PACKAGE_LDFLAGS_SET)
+lib_libapp_roff_la_LIBADD = lib/libapp.la -ltunitas-application -ltunitas lib/libtunitas-flagship-temerarious.la
 lib_libapp_roff_la_MODULES = $(call TF_SOURCEStoMODULES, $(lib_libapp_roff_la_SOURCES))
 lib_libapp_roff_la_SOURCES = \
   obj/src/app/roff/namespace.cpp \

@@ -1,0 +1,89 @@
+// This is C++ 23 -*- c++ -*- -std=c++23 in the stylings of the S.C.O.L.D. design method.
+// Copyright Yahoo Inc, 2021.
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-basics/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/components/basics/tree/LICENSE
+// For terms and provenance see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace app::exception {
+  //
+  // Signal that in a test mode, we're done
+  //
+  // Specification:
+  //
+  // Design:
+  //
+  //   Use the constructor signature of an application-quitting exception
+  //
+  // Usage:
+  //
+  //   auto cfg = Configuration{...somehow...};
+  //   auto program = Program{...somehow...};
+  //
+  //   if (testing(cfg) <= Through::OPTIONS) {
+  //     throw exception::Testing{program};
+  //   }
+  //
+  struct [[nodiscard]] Testing;
+}
+#endiv
+#divert <hpp>
+#import app.exception.Aspect
+#import app.exception.facet.Quitting
+#import tunitas.application.exception.Aspect
+#import tunitas.application.exception.feature.Quitting
+#import tunitas.application.options.Program
+#import tunitas.string.Storage
+#import tunitas.string.View
+#import cli.exception.feature.Testing
+#import nonstd.exception.Runtime
+class app::exception::Testing final : public virtual Aspect,
+                                      public virtual app::exception::facet::Quitting,
+                                      public virtual tunitas::application::exception::Aspect,
+          // WATCHOUT = "feature" in the Tunitas nomenclature means "implementation"
+          // reminder, so here we use non-virtual inheritance because this is an augmentation of the implementation
+                                      public tunitas::application::exception::feature::Quitting,
+          // WATCHOUT = "feature"  in the S.C.O.L.D. baseline nomenclature means "abstract"
+          // WATCHOUT - "usufruct" in the S.C.O.L.D. baseline nomenclature means "implementation"
+                                      public virtual cli::exception::feature::Testing, // [[FIXTHIS]] use tunitas::application::exception::feature::Testing
+                                      public nonstd::exception::Runtime<tunitas::string::View> {
+  struct Ancestors {
+    struct Aspects { /* ... who cares ... */ };
+    struct Features {
+      using Quitting = tunitas::application::exception::feature::Quitting;
+    };
+    struct Interfaces {
+      using Testing = cli::exception::feature::Testing;
+    };
+    using Exception = nonstd::exception::Runtime<tunitas::string::View>;
+  };
+  struct Arguments {
+    using Program = tunitas::application::options::Program const &;
+    using Subsystem = tunitas::string::Storage const &;
+    using Exit = tunitas::application::exits::Code;
+  };
+  using Results = tunitas::application::exception::Aspect::Results; // either that one or Aspect::Results
+public:
+  inline explicit Testing(Arguments::Program, Arguments::Exit = tunitas::application::exits::TESTING);
+  inline explicit Testing(Arguments::Program, Arguments::Subsystem, Arguments::Exit = tunitas::application::exits::TESTING);
+  auto what() const noexcept -> Results::What override     { return Ancestors::Exception::what(); }
+  auto stream() const noexcept -> Results::Stream override { return Ancestors::Features::Quitting::stream(); }
+  auto exit() const noexcept -> Results::Exit override     { return Ancestors::Features::Quitting::exit(); }
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+  [[deprecated("instead prefer Testing::exit()")]] auto code() const noexcept -> Results::Exit override { return Ancestors::Features::Quitting::code(); }
+#pragma GCC diagnostic pop
+};
+#endiv
+#divert <ipp>
+namespace app::exception {
+  Testing::Testing(Arguments::Program program, Arguments::Exit exit)
+    : Ancestors::Features::Quitting{exit}
+    , Ancestors::Exception{program + ": in test mode (quitting)"s}
+  { }
+  Testing::Testing(Arguments::Program program, Arguments::Subsystem subsystem, Arguments::Exit exit)
+    : Ancestors::Features::Quitting{exit}
+    , Ancestors::Exception{program + ": in test mode at "s + subsystem + " (quitting)"s}
+  { }
+}
+#endiv

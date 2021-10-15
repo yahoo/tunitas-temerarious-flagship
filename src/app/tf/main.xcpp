@@ -11,7 +11,9 @@ namespace app::tf {
   }
   inline namespace interface_main { using namespace package_main::interface; }
 }
+#import app.controllability.Through
 #import app.controllability.Controllability
+#import app.exception.facet.Quitting
 #import tunitas.application.exits.Code
 #import tunitas.application.options.Program
 #import tunitas.application.exits.constants
@@ -42,6 +44,7 @@ namespace app::tf::package_main {
     using tunitas::Tuple;
     using Config = autotools::autoconf::Config<tunitas::flagship::temerarious::CONFIG>;
     using app::options::Dispensation;
+    using app::controllability::Through;
   }
 }
 #endiv
@@ -75,13 +78,15 @@ namespace app::tf {
 #endiv
 #divert <cpp>
 #import app.tf.usage.Message
+#import app.exception.Testing
 #import c.rest
 #import tunitas.flagship.temerarious.version.Generator
 #import sys.posix.exec
 namespace app::tf {
-  auto interface_main::main(Controllability const &, Argv av) -> Exit {
+  auto interface_main::main(Controllability const &ctl, Argv av) -> Exit try {
     auto program = Program{av.front()};
     auto [dispensation, exit, vv, libexec] = reexec_arguments(program, av);
+    if (testing(ctl) <= Through::OPTIONS) { throw exception::Testing{program}; }
     switch (dispensation) {
     case Dispensation::PROCESS:
       { auto reexec = reexec_path(program, move(libexec), av, vv.front());
@@ -102,6 +107,9 @@ namespace app::tf {
       break;
     }
     return exit;
+  } catch (exception::facet::Quitting const &e) {
+    e.stream() << e.what() << '\n';
+    return e.exit();
   }
   namespace package_main {
     auto body::reexec_arguments(Program const &program, Argv av) -> Tuple<Dispensation, Exit, Vector, Optional<Filepath>> {
