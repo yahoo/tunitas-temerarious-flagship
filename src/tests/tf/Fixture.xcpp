@@ -12,11 +12,15 @@ struct tests::tf::Fixture : public cppunit::test::Fixture {
 };
 #endiv
 #divert <cpp>
+#import tests.tf.Options
+#import tests.tf.Invocations
 namespace tests::tf {
   auto Fixture::suite() -> cppunit::Test * {
     using namespace rigging::suite;
     auto series = Stream{"tf"};
-    series << END;
+    series << add<Options>()
+           << add<Invocations>()
+           << END;
     return finalize(series);
   }
 }

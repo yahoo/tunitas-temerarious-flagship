@@ -1,0 +1,47 @@
+// This is C++ 23 -*- c++ -*- -std=c++23 in the stylings of the S.C.O.L.D. design method.
+// For terms and provenance see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace tests::tf { struct Options; }
+#endiv
+#divert <hpp>
+#import rigging.app.fixture.Core
+#import tests.fixture.Mainly
+#import tests.tf.Configuration
+namespace tests {
+  struct tf::Options : public rigging::app::fixture::Core<fixture::Mainly<Configuration<OPTIONS>>> {
+    static auto suite() -> Suite;
+    //
+    auto test_prefix() -> void;
+    auto test_libexec() -> void;
+  };
+}
+#endiv
+#divert <cpp>
+auto tests::tf::Options::suite() -> Suite {
+  auto series = Stream{"options"sv};
+  series << []() {
+              auto words = Stream{"words"sv};
+              words << add("usage", &Options::test_usage)
+                    << add("help", &Options::test_help)
+                    << add("version", &Options::test_version)
+                    << add("prefix", &Options::test_prefix)
+                    << add("libexec", &Options::test_libexec)
+                    << END;
+              return words;
+            }()
+         << []() {
+              auto flags = Stream{"flags"sv};
+              flags << add("h", &Options::test_h)
+                    << add("V", &Options::test_V)
+                    << END;
+              return flags;
+            }()
+         << add("bogon", &Options::test_bogon)
+         << END;
+  return settle(series);
+}
+namespace tests::tf {
+  auto tests::tf::Options::test_prefix() -> void  { exercise(OK, "--prefix=/tmp"); }
+  auto tests::tf::Options::test_libexec() -> void { exercise(OK, "--libexec=/tmp/libexec/temerarious-flagship"); }
+}
+#endiv

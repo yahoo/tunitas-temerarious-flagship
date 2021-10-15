@@ -25,10 +25,10 @@ $(app_tf_thunk_SOURCES_AGGREGATION) : bbDC_OPTIONS+=--no-insert-namespace
 #
 $(scold_cxxdir)/app/tf/thunks/dependencies.mk: $(app_tf_thunk_SOURCES_AGGREGATION)
 $(app_tf_thunk_SOURCES_AGGREGATION) : obj/src/%.cpp : src/%.xcpp
-	$(TF_V_COLD) $(call TF_XCPP2CPP, $<)
+	$(TF_V_DIS) $(call TF_XCPP2CPP, $<)
 	@test -e $@
 $(scold_cxxdir)/app/tf/thunks/dependencies.mk:
-	$(TF_V_BOTH) $(call TF_DEPENDENCIES, $^)
+	$(TF_V_DEP) $(call TF_DEPENDENCIES, $^)
 	@test -e $@
 include $(scold_cxxdir)/app/tf/thunks/dependencies.mk
 clean-dependencies::

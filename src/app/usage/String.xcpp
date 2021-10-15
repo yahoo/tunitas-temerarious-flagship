@@ -5,24 +5,11 @@
 // For terms, see the LICENSE file at https://git.tunitas.technology/all/components/basics/tree/LICENSE
 // For terms and provenance see the LICENSE file at the top of the repository.
 #divert <fpp>
-#import nonstd.string.Storage
+#import tunitas.string.Storage
 namespace app::usage {
   //
   // MUST be a type alias
   //
-  using String = nonstd::string::Storage;
-}
-#endiv
-#divert <cpp>
-#import cli.exception.formatting.Usage
-#import nonstd.same_as
-#import std.declval
-namespace {
-  namespace testate {
-    using namespace app::usage;
-    using namespace std;
-    using Result = decltype(declval<cli::exception::feature::Usage>().unformatted());
-    static_assert(same_as<String, Result>);
-  }
+  using String = tunitas::string::Storage;
 }
 #endiv

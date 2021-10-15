@@ -13,5 +13,3 @@ $libexec/roff -h
 $libexec/roff -b || test 0 != $?
 $libexec/roff --bogon || test 0 != $?
 date | $libexec/roff
-
-

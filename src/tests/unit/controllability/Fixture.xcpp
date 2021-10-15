@@ -1,0 +1,88 @@
+// This is C++ 23 -*- c++ -*- -std=c++23 in the stylings of the S.C.O.L.D. design method.
+// Copyright Yahoo Inc, 2021.
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-basics/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/components/basics/tree/LICENSE
+// For terms and provenance see the LICENSE file at the top of the repository.
+#divert <fpp>
+#import app.controllability
+namespace tests::unit::controllability {
+  namespace [[eponymous]] fixture {
+    class Fixture;
+    namespace library = ::app::controllability;
+  }
+  using fixture::Fixture;
+}
+#endiv
+#divert <hpp>
+#import app.controllability.Through
+namespace tests::unit::controllability {
+  struct fixture::Fixture : public cppunit::test::Fixture {
+    static auto suite() -> cppunit::Test *;
+    auto test_Comparable() -> void;
+    template<library::Through> auto test_through() -> void;
+    auto test_through_null() -> void;
+  protected:
+    struct Configuration;
+  };
+  namespace fixture {
+    template<> auto Fixture::test_through<library::Through::OPTIONS>() -> void;
+    template<> auto Fixture::test_through<library::Through::SETUP>() -> void;
+    template<> auto Fixture::test_through<library::Through::PERFORM>() -> void;
+  }
+}
+#endiv
+#divert <cpp>
+auto tests::unit::controllability::fixture::Fixture::suite() -> cppunit::Test * {
+  using namespace rigging::suite;
+  auto series = Stream{"controllability"};
+  series << call("Comparable", &Fixture::test_Comparable)
+         << []{
+              auto cmp = Stream{"operator<=>"sv};
+              cmp << call("null", &Fixture::test_through_null)
+                  << call("OPTIONS", &Fixture::test_through<library::Through::OPTIONS>)
+                  << call("SETUP", &Fixture::test_through<library::Through::SETUP>)
+                  << call("PERFORM", &Fixture::test_through<library::Through::PERFORM>)
+                  << END;
+              return cmp;
+            }()
+         << END;
+  return finalize(series);
+}
+#import tests.unit.controllability.Fixture.Configuration
+namespace tests::unit::controllability::fixture {
+  auto Fixture::test_Comparable() -> void {
+    auto cfg = Configuration{};
+    auto com = testing(cfg); // <------------------------------ test this
+    CPPUNIT_ASSERT(sizeof (com));
+  }
+  auto Fixture::test_through_null() -> void {
+    auto cfg = Configuration{};
+    CPPUNIT_ASSERT(false == cfg.test_mode);
+    CPPUNIT_ASSERT(not (testing(cfg) <= library::Through::OPTIONS));
+    CPPUNIT_ASSERT(not (testing(cfg) <= library::Through::SETUP));
+    CPPUNIT_ASSERT(not (testing(cfg) <= library::Through::PERFORM));
+  }
+  template<> auto Fixture::test_through<library::Through::OPTIONS>() -> void {
+    auto cfg = Configuration{library::Through::OPTIONS};
+    CPPUNIT_ASSERT(true == (true == cfg.test_mode));
+    CPPUNIT_ASSERT(true == (testing(cfg) <= library::Through::OPTIONS));
+    CPPUNIT_ASSERT(true == (testing(cfg) <= library::Through::SETUP));
+    CPPUNIT_ASSERT(true == (testing(cfg) <= library::Through::PERFORM));
+  }
+  template<> auto Fixture::test_through<library::Through::SETUP>() -> void {
+    auto cfg = Configuration{library::Through::SETUP};
+    CPPUNIT_ASSERT(true == cfg.test_mode);
+    CPPUNIT_ASSERT(false == (testing(cfg) <= library::Through::OPTIONS));
+    CPPUNIT_ASSERT(true == (testing(cfg) <= library::Through::SETUP));
+    CPPUNIT_ASSERT(true == (testing(cfg) <= library::Through::PERFORM));
+  }
+  template<> auto Fixture::test_through<library::Through::PERFORM>() -> void {
+    auto cfg = Configuration{library::Through::PERFORM};
+    CPPUNIT_ASSERT(true == cfg.test_mode);
+    CPPUNIT_ASSERT(false == (testing(cfg) <= library::Through::OPTIONS));
+    CPPUNIT_ASSERT(false == (testing(cfg) <= library::Through::SETUP));
+    CPPUNIT_ASSERT(true == (testing(cfg) <= library::Through::PERFORM));
+  }
+}
+#endiv

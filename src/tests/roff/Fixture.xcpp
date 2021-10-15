@@ -12,11 +12,15 @@ struct tests::roff::Fixture : public cppunit::test::Fixture {
 };
 #endiv
 #divert <cpp>
+#import tests.roff.Options
+#import tests.roff.Invocations
 namespace tests::roff {
   auto Fixture::suite() -> cppunit::Test * {
     using namespace rigging::suite;
     auto series = Stream{"roff"};
-    series << END;
+    series << add<Options>()
+           << add<Invocations>()
+           << END;
     return finalize(series);
   }
 }

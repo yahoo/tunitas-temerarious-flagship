@@ -1,0 +1,50 @@
+// This is C++ 23 -*- c++ -*- -std=c++23 in the stylings of the S.C.O.L.D. design method.
+// For terms and provenance see the LICENSE file at the top of the repository.
+#divert <fpp>
+#import tunitas.application.exits.constants
+namespace tests::roff { struct Invocations; }
+#endiv
+#divert <hpp>
+#import rigging.app.fixture.Core
+#import tests.fixture.Mainly
+#import tests.roff.Configuration
+struct tests::roff::Invocations : public rigging::app::fixture::Core<fixture::Mainly<Configuration<ALL>>> {
+  static auto suite() -> Suite;
+  auto test_zero() -> void;
+  auto test_empty() -> void;
+  auto test_empty_empty() -> void;
+  auto test_devnull() -> void;
+  auto test_devnull_devnull() -> void;
+  auto test_in() -> void;
+  auto test_in_out() -> void;
+};
+#endiv
+#divert <cpp>
+auto tests::roff::Invocations::suite() -> Suite {
+  auto series = Stream{"invocations"sv};
+  series << add("zero", &Invocations::test_zero)
+         << add("empty", &Invocations::test_empty)
+         << add("empty,empty", &Invocations::test_empty_empty)
+         << add("dev-null", &Invocations::test_devnull)
+         << add("dev-null,dev-null", &Invocations::test_devnull_devnull)
+         << add("in", &Invocations::test_in)
+         << add("in,out", &Invocations::test_in_out)
+         << END;
+  return settle(series);
+}
+namespace tests::roff {
+  auto Invocations::test_zero() -> void {
+    std::cerr << __FILE__ << ':' << __LINE__ << "reminder: this test will reading standard input, is it redirected from /dev/null?\n";
+    exercise(OK); // expects to be redirected FROM /dev/null
+  }
+  auto Invocations::test_empty() -> void       { exercise(USAGE, ""); }
+  auto Invocations::test_empty_empty() -> void { exercise(USAGE, ""s, ""s); }
+  auto Invocations::test_devnull() -> void         { exercise(USAGE, "/dev/null"s); }
+  auto Invocations::test_devnull_devnull() -> void { exercise(OK, "/dev/null"s, "/dev/null"s); }
+  auto Invocations::test_in() -> void     { exercise(USAGE, "tests/roff/one.roff"); }
+  auto Invocations::test_in_out() -> void { exercise(OK, "tests/roff/one.roff"s, "tests/roff/o.one.out"s); }
+  //
+  // reminder: there is a library of *.roff test examples in $(top_srcdir)/tests/readme
+  //
+}
+#endiv

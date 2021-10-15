@@ -1,0 +1,38 @@
+// This is C++ 23 -*- c++ -*- -std=c++23 in the stylings of the S.C.O.L.D. design method.
+// Copyright Yahoo Inc, 2021.
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-basics/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/components/basics/tree/LICENSE
+// For terms and provenance see the LICENSE file at the top of the repository.
+#divert <fpp>
+#import tests.fixture.Entrypoint.template
+#include <hpp/tests.tf.Configuration>
+#import tests.tf.Configuration
+namespace tests::fixture {
+  template<Through THROUGH> struct Entrypoint<tf::Configuration<THROUGH>>;
+}
+#endiv
+#divert <hpp>
+namespace tests::fixture {
+  template<Through THROUGH> struct Entrypoint<tf::Configuration<THROUGH>> {
+    using Configuration = tf::Configuration<THROUGH>;
+    using Exit = rigging::app::exits::Code;
+    using Program = rigging::app::options::Program;
+    using Arguments = rigging::app::options::Arguments;
+    auto operator()([[inout]] Configuration &, Arguments) const -> Exit;
+  protected:
+    // But we have to anchor because app::$something::main(...) accepts options::c::Argv, not options::Arguments
+    using Anchor = rigging::app::options::c::Anchor;
+  };
+}
+#endiv
+#divert <tpp>
+#import app.tf.main
+namespace tests::fixture {
+  template<Through THROUGH> auto Entrypoint<tf::Configuration<THROUGH>>::operator()(Configuration &cfg, Arguments arguments) const -> Exit {
+    arguments.push_front("tf"s);
+    auto anchor = Anchor{arguments};
+    return app::tf::main(cfg, move(anchor)); // this is the (only) uniqueness of the specialization
+  }
+}
+#endiv

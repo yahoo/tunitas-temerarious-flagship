@@ -11,6 +11,7 @@ namespace app::tf {
   }
   inline namespace interface_main { using namespace package_main::interface; }
 }
+#import app.controllability.Controllability
 #import tunitas.application.exits.Code
 #import tunitas.application.options.Program
 #import tunitas.application.exits.constants
@@ -27,19 +28,20 @@ namespace app::tf::package_main {
   namespace interface {
     using Argv = tunitas::application::options::c::Argv;
     using Exit = tunitas::application::exits::Code;
+    using app::controllability::Controllability;
   }
   namespace body {
     inline namespace constants { using namespace tunitas::application::exits::constants; } 
     namespace version = tunitas::flagship::temerarious::version;
-    using Program = tunitas::application::options::Program;
     using Vector = ::c::const_vector;
     using Arguments = tunitas::application::options::Arguments;
+    using Program = tunitas::application::options::Program;
     using String = tunitas::string::Storage;
     using Filepath = tunitas::file::Path;
     using tunitas::Optional;
     using tunitas::Tuple;
     using Config = autotools::autoconf::Config<tunitas::flagship::temerarious::CONFIG>;
-    enum class Dispensation { FAIL, USAGE, VERSION, EXEC };
+    using app::options::Dispensation;
   }
 }
 #endiv
@@ -47,7 +49,8 @@ namespace app::tf::package_main {
 namespace app::tf {
   namespace interface_main {
     inline auto main(int, char *[]) -> Exit;
-    auto main(Argv) -> Exit;
+    inline auto main(Argv) -> Exit;
+    auto main(Controllability const &, Argv) -> Exit;
   }
   namespace package_main::body {
     auto reexec_arguments(Program const &, Argv) -> Tuple<Dispensation, Exit, Vector, Optional<Filepath>>;
@@ -57,24 +60,30 @@ namespace app::tf {
 }
 #endiv
 #divert <ipp>
+#import std.exception
+#import std.clog
 namespace app::tf {
   namespace interface_main { using namespace package_main::body; } // the body sees the interface too
-  inline auto interface_main::main(int cc, char *vv[]) -> Exit { return main(Argv(cc, vv)); }
+  auto interface_main::main(int cc, char *vv[]) -> Exit { return main(Argv(cc, vv)); }
+  auto interface_main::main(Argv av) -> Exit try {
+    return main(Controllability{}, av);
+  } catch (std::exception const &e) {
+    std::clog << "error: unexpected exception " << e.what() << '\n';
+    return SOFTWARE;
+  }
 }
 #endiv
 #divert <cpp>
 #import app.tf.usage.Message
 #import c.rest
-#import std.clog
 #import tunitas.flagship.temerarious.version.Generator
-#import std.exception
 #import sys.posix.exec
 namespace app::tf {
-  auto interface_main::main(Argv av) -> Exit try {
+  auto interface_main::main(Controllability const &, Argv av) -> Exit {
     auto program = Program{av.front()};
     auto [dispensation, exit, vv, libexec] = reexec_arguments(program, av);
     switch (dispensation) {
-    case Dispensation::EXEC:
+    case Dispensation::PROCESS:
       { auto reexec = reexec_path(program, move(libexec), av, vv.front());
         auto reargs = Arguments{vv.begin(), vv.end()};
         reargs[0] = reexec; // so the other side sees the "as full path as possible" on the reexec (several of them relyo on that)
@@ -93,9 +102,6 @@ namespace app::tf {
       break;
     }
     return exit;
-  } catch (std::exception const &e) {
-    std::clog << "error: unexpected exception " << e.what() << '\n';
-    return SOFTWARE;
   }
   namespace package_main {
     auto body::reexec_arguments(Program const &program, Argv av) -> Tuple<Dispensation, Exit, Vector, Optional<Filepath>> {
@@ -133,9 +139,10 @@ namespace app::tf {
           break;
         }
       }
-      return {Dispensation::EXEC, {}, vv, move(libexec)};;
+      return {Dispensation::PROCESS, {}, vv, move(libexec)};;
     }
-    auto body::reexec_path(Program const &program, Optional<Filepath> libexec, Argv av, Filepath first) -> Filepath {
+    auto body::reexec_path(Program const &, Optional<Filepath> libexec, Argv av, Filepath first) -> Filepath {
+      // the first arument (Program) is unused because there are no error messages herein; but there could be (couldn't there?)
       auto redir = [&]() -> Filepath {
                      // If we can find it then take what is *actually( at hand
                      // Else fall back onto the configure-time path as-built.

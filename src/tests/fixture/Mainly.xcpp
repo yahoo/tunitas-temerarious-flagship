@@ -1,0 +1,40 @@
+// This is C++ 23 -*- c++ -*- -std=c++23 in the stylings of the S.C.O.L.D. design method.
+// For terms and provenance see the LICENSE file at the top of the repository.
+#divert <fpp>
+#import rigging.app.required.Configuration
+namespace tests::fixture {
+  //
+  // The commonality among the various Mainly classes
+  // Instantiations and specializations
+  //
+  // Specification:
+  //
+  //   Eschew copy pasta.
+  //   Specialize only that which is distinct.
+  //
+  // Design:
+  //
+  //   Yes.  And?
+  //
+  // Usage:
+  //
+  //   Hack the Spew (this is, after all, a test rig)
+  //
+  template<required::Configuration CONFIGURATION> class Mainly;
+}
+#endiv
+#divert <hpp>
+#import rigging.app.Mostly
+#import tests.fixture.Entrypoint
+namespace tests {
+  template<fixture::required::Configuration CONFIGURATION> class fixture::Mainly : public rigging::app::Mostly<CONFIGURATION> {
+    using Ancestor = rigging::app::Mostly<CONFIGURATION>;
+  public:
+    // These are all supplied by the ancestor
+    static_assert(sizeof (typename Ancestor::Configuration));
+    static_assert(sizeof (typename Ancestor::Exit));
+    static_assert(sizeof (typename Ancestor::Arguments));
+    struct Entrypoint : public fixture::Entrypoint<typename Ancestor::Configuration> { };
+  };
+}
+#endiv

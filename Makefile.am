@@ -25,6 +25,8 @@ DEVELOPMENT_AREAS = \
   $(end)
 TESTING_AREAS = \
   $(module_cppunit_prefix) \
+  $(module_rigging_app_prefix) \
+  $(module_rigging_core_prefix) \
   $(module_rigging_prefix) \
   $(end)
 INSTALLATION_AREAS = \
@@ -41,6 +43,7 @@ include src/app/roff/Makefrag.am
 include src/autotools/autoconf/Makefrag.am
 include src/std/Makefrag.am
 include src/tunitas/flagship/temerarious/Makefrag.am
+include src/tests/Makefrag.am
 include src/tests/catty/Makefrag.am
 include src/tests/roff/Makefrag.am
 include src/tests/tf/Makefrag.am
@@ -84,7 +87,7 @@ check_PROGRAMS = \
   check/bin/tf \
   check/bin/roff \
   $(end)
-check_LTLIBRARIES = $(none)
+check_LTLIBRARIES = check/lib/libtests.la
 
 # NEED THIS or else...
 # SHOULD already be supplied in .../am/build.am
@@ -146,7 +149,8 @@ Makefile_PACKAGE_CFLAGS_SET   =
 Makefile_PACKAGE_CXXLAGS_SET  = 
 Makefile_PACKAGE_LDFLAGS_SET  = 
 
-Makefile_CHECK_CPPFLAGS_SET = @CPPFLAGS_cppunit@ @CPPFLAGS_no_install@
+$(if $(checkobj),$(ok),$(error checkobj remains undefined))
+Makefile_CHECK_CPPFLAGS_SET = @CPPFLAGS_cppunit@ @CPPFLAGS_no_install@ -I$(checkobj)/modules # [[FIXTHIS]] remove with hypogeal-twilight >= 0.48
 Makefile_CHECK_CFLAGS_SET   =   @CFLAGS_cppunit@   @CFLAGS_no_install@
 Makefile_CHECK_CXXFLAGS_SET = @CXXFLAGS_cppunit@ @CXXFLAGS_no_install@
 Makefile_CHECK_LDFLAGS_SET  =  @LDFLAGS_cppunit@  @LDFLAGS_no_install@

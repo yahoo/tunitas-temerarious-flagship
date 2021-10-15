@@ -1,0 +1,60 @@
+// This is C++ 23 -*- c++ -*- -std=c++23 in the stylings of the S.C.O.L.D. design method.
+// Copyright Yahoo Inc, 2021.
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-basics/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/components/basics/tree/LICENSE
+// For terms and provenance see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace app::controllability {
+  //
+  // Comparisons on the levels of controllability.
+  //
+  // Specification:
+  //
+  //   Simple interface.
+  //   Non-test mode is the default.
+  //   Consult nearby Configuration for test_mode and also the test_level
+  //
+  // Design:
+  //
+  //   Respect the optionals.
+  //
+  // Usage:
+  //
+  //   if (testing(ctl) <= Through::SOMETHING); {
+  //      ...do something...
+  //   }
+  //
+  struct Comparable;
+}
+#endiv
+#divert <hpp>
+#import app.controllability.Through
+#import tunitas.Optional
+#import std.weak_ordering
+// #include <compare> // a.k.a. #import std.weak_ordering [[REMOVETHIS]] for v2-series v2.PLUS
+struct app::controllability::Comparable {
+  [[implicit]] Comparable() = default;
+  inline [[implicit]] Comparable(Through);
+  inline [[implicit]] Comparable(bool, tunitas::Optional<Through>);
+  inline auto operator<=>(Comparable const &) const -> std::weak_ordering;
+protected:
+  struct Lexicographic;
+  tunitas::Optional<Through> captured;
+};
+#endiv
+#divert <ipp>
+#import app.controllability.Comparable.Lexicographic
+namespace app::controllability {
+  Comparable::Comparable(Through t) : captured{t} { }
+  Comparable::Comparable(bool b, tunitas::Optional<Through> t) {
+    if (b) {
+      captured = t;
+    }
+  }
+  auto Comparable::operator<=>(Comparable const &other) const -> std::weak_ordering {
+    Lexicographic const lhs{*this}, rhs{other};
+    return lhs <=> rhs;
+  }
+}
+#endiv

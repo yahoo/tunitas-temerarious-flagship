@@ -1,0 +1,99 @@
+// This is C++ 23 -*- c++ -*- -std=c++23 in the stylings of the S.C.O.L.D. design method.
+// For terms and provenance see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace tests::tf { struct Invocations; }
+#endiv
+#divert <hpp>
+#import rigging.app.fixture.Core
+#import tests.fixture.Mainly
+#import tests.tf.Configuration
+struct tests::tf::Invocations : public rigging::app::fixture::Core<fixture::Mainly<Configuration<ALL>>> {
+  static auto suite() -> Suite;
+  auto test_zero() -> void;
+  auto test_empty() -> void;
+  //
+  auto test_echo_0() -> void;
+  auto test_echo_1() -> void;
+  auto test_echo_2() -> void;
+  auto test_echo_3() -> void;
+  //
+  auto test_ls() -> void;
+  auto test_list() -> void;
+  auto test_usage() -> void;
+  auto test_help() -> void;
+  auto test_version() -> void;
+  //
+  auto test_roff_usage() -> void;
+  auto test_roff_version() -> void;
+};
+#endiv
+#divert <cpp>
+auto tests::tf::Invocations::suite() -> Suite {
+  auto series = Stream{"invocations"sv};
+  series << add("zero", &Invocations::test_zero)
+         << add("empty", &Invocations::test_empty)
+         << []{
+              auto th = Stream{"echo"sv};
+              th << add("0", &Invocations::test_echo_0)
+                 << add("1", &Invocations::test_echo_1)
+                 << add("2", &Invocations::test_echo_2)
+                 << add("3", &Invocations::test_echo_3)
+                 << END;
+              return th;
+            }()
+         << []{
+              auto th = Stream{"ls"sv};
+              th << add("plain", &Invocations::test_ls)
+                 << END;
+              return th;
+            }()
+         << []{
+              auto th = Stream{"list"sv};
+              th << add("plain", &Invocations::test_list)
+                 << END;
+              return th;
+            }()
+         << []{
+              auto th = Stream{"usage"sv};
+              th << add("plain", &Invocations::test_usage)
+                 << END;
+              return th;
+            }()
+         << []{
+              auto th = Stream{"help"sv};
+              th << add("plain", &Invocations::test_help)
+                 << END;
+              return th;
+            }()
+         << []{
+              auto th = Stream{"version"sv};
+              th << add("plain", &Invocations::test_version)
+                 << END;
+              return th;
+            }()
+         << []{
+              auto ro = Stream{"roff"};
+              ro << add("usage", &Invocations::test_roff_usage)
+                 << add("version", &Invocations::test_roff_version)
+                 << END;
+              return ro;
+            }()
+         << END;
+  return settle(series);
+}
+namespace tests::tf {
+  auto Invocations::test_zero() -> void    { exercise(USAGE); }
+  auto Invocations::test_empty() -> void   { exercise(USAGE, ""); }
+  auto Invocations::test_echo_0() -> void  { exercise(OK, "echo"); }
+  auto Invocations::test_echo_1() -> void  { exercise(OK, "echo", "apple"); }
+  auto Invocations::test_echo_2() -> void  { exercise(OK, "echo", "apple", "banana"); }
+  auto Invocations::test_echo_3() -> void  { exercise(OK, "echo", "apple", "banana", "cherry"); }
+  auto Invocations::test_ls() -> void      { exercise(OK, "ls"); }
+  auto Invocations::test_list() -> void    { exercise(OK, "list"); }
+  auto Invocations::test_usage() -> void   { exercise(OK, "usage"); }
+  auto Invocations::test_help() -> void    { exercise(OK, "help"); }
+  auto Invocations::test_version() -> void { exercise(OK, "version"); }
+  auto Invocations::test_roff_usage() -> void   { exercise(OK, "roff", "usage"); }
+  auto Invocations::test_roff_version() -> void { exercise(OK, "roff", "version"); }
+}
+#endiv

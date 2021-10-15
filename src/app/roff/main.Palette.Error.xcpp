@@ -4,11 +4,18 @@
 // For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
 // For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
 #divert <fpp>
+//
+// Usage:
+//
+//   auto palette = Palette{...somehow...};
+//   error(palette) << "...something something something\n"; ............................. what you might expect but WATCHOUT for namespace error
+//   erroneity(palette) << "...something something something\n"; ......................... avoid occluding namespace error which blocks ADL
+//
 #include <hpp/app.roff.main.Palette>
 #endiv
 #divert <hpp>
 #import std.ostream
-namespace app::roff::package_body_main::body {
+namespace app::roff::package_main::body {
   inline auto error(Palette const &) -> Palette::Error;
   inline auto erroneity(Palette const &) -> Palette::Error; // because frequently ADL on error(...) is occluded by some visible namespace error
   template<typename TYPE> auto operator<<(Palette::Error const &, TYPE const &) -> std::ostream &;
@@ -16,7 +23,7 @@ namespace app::roff::package_body_main::body {
 }
 #endiv
 #divert <ipp>
-namespace app::roff::package_body_main {
+namespace app::roff::package_main {
   auto body::error(Palette const &y) -> Palette::Error { return {y}; }
   auto body::erroneity(Palette const &y) -> Palette::Error { return {y}; }
   template<typename TYPE> auto body::operator<<(Palette::Error const &e, TYPE const &t) -> std::ostream & { return e.palette.outbound << e.palette.program << ": error, " << t; }

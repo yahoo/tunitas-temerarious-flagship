@@ -4,20 +4,41 @@
 // For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
 // For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
 #divert <fpp>
+//
+// The palette of necessaries.
+//
+// Specification:
+//
+//   References only.
+//   Not copyable.
+//   Dubiously movable (no need).
+//
+// Design:
+//
+//   So that ADL can find it.
+//
+// Usage:
+//
+//   Exclusively within package_main::body::do_options(...)
+//
 #forward app.roff.main
 #endiv
 #divert <hpp>
 #import std.ostream
-namespace app::roff::package_body_main {
+#import tunitas.flagship.temerarious.processor.Preparation
+namespace app::roff::package_main {
   namespace body {
     inline auto operator<<(std::ostream &, Palette const &) -> std::ostream &;
   }
   class body::Palette {
     using Stream = std::ostream;
+    using Preparation = tunitas::flagship::temerarious::processor::Preparation;
   public:
     inline [[implicit]] Palette(Stream &, Program const &, [[inout]] Preparation &);
     Palette(Palette const &) = delete;
     auto operator=(Palette const &) -> Palette & = delete;
+    inline Palette(Palette &&);
+    inline auto operator=(Palette &&) -> Palette &;
     std::ostream &outbound;
     Program const &program; // quirky and probably unnecessary (why not copy it?) ... but the origin will stay stationary
     Preparation &preparation;
@@ -37,11 +58,36 @@ namespace app::roff::package_body_main {
 #import app.roff.main.Palette.Error
 #import app.roff.main.Palette.Warning
 #import app.roff.main.Palette.Notice
-namespace app::roff::package_body_main::body {
+namespace app::roff::package_main::body {
   Palette::Palette(Stream &s, Program const &p, Preparation &n)
     : outbound{s}
     , program{move(p)}
     , preparation{n}
   { }
+  Palette::Palette(Palette &&other)
+    : outbound{other.outbound} // [[irk]] these are all references so we have to (manually, explicitly) rebind them in "move"
+    , program{other.program}
+    , preparation{other.preparation}
+    { }
+  auto Palette::operator=(Palette &&other) -> Palette & {
+    // This overwrite-as-if-uninitialized works because 
+    new (this) Palette{forward<Palette>(other)}; // ibidem.
+    return *this;
+  }
+}
+#endiv
+#divert <cpp>
+#import std.is_copy_constructible
+#import std.is_copy_assignable
+#import std.is_move_constructible
+#import std.is_move_assignable
+namespace {
+  namespace testate {
+    using namespace app::roff::package_main::body;
+    static_assert(not std::is_copy_constructible_v<Palette>);
+    static_assert(not std::is_copy_assignable_v<Palette>);
+    static_assert(std::is_move_constructible_v<Palette>);
+    static_assert(std::is_move_assignable_v<Palette>);
+  }
 }
 #endiv

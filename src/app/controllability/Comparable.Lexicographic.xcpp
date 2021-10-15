@@ -1,0 +1,44 @@
+// This is C++ 23 -*- c++ -*- -std=c++23 in the stylings of the S.C.O.L.D. design method.
+// Copyright Yahoo Inc, 2021.
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-basics/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/components/basics/tree/LICENSE
+// For terms and provenance see the LICENSE file at the top of the repository.
+#divert <fpp>
+#include <hpp/app.controllability.Comparable>
+#endiv
+#divert <hpp>
+#import app.controllability.Through
+#import std.optional
+#import std.weak_ordering
+namespace app::controllability {
+  //
+  // inverts the sense, making undefined greater than anything else.
+  // Therefore, the default operator<=> does the right thing.
+  //
+  // Table
+  //
+  //   (true,{}}       >  {false,, ...anything...} 
+  //   (true,{}}       >= {true, {}}
+  //
+  //   (false,OPTIONS} <= {false,, SETUP}
+  //   (false,OPTIONS} <= {false,, PREPARE}
+  //   (false,OPTIONS} <= {false,, PROCESS}
+  //
+  struct Comparable::Lexicographic {
+    bool undefined;
+    std::optional<Through> value;
+    inline Lexicographic(Comparable const &);
+    auto operator<=>(Lexicographic const &) const -> std::weak_ordering = default;
+  };
+}
+#endiv
+#divert <ipp>
+#import app.controllability.Comparable
+namespace app::controllability {
+  Comparable::Lexicographic::Lexicographic(Comparable const &c)
+    : undefined{!c.captured} // the magic happens right here
+    , value{c.captured}
+  { }
+}
+#endiv

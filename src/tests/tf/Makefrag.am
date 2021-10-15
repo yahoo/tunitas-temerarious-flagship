@@ -17,6 +17,9 @@ check_bin_tf_SOURCES = \
   obj/src/tests/tf/c.main.cpp \
   obj/src/tests/tf/namespace.cpp \
   obj/src/tests/tf/Fixture.cpp \
+  obj/src/tests/tf/Configuration.cpp \
+  obj/src/tests/tf/Options.cpp \
+  obj/src/tests/tf/Invocations.cpp \
   $(end)
 #
 $(scold_cxxdir)/tests/tf/dependencies.mk: $(check_bin_tf_SOURCES)

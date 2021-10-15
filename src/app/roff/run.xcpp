@@ -5,28 +5,26 @@
 // For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
 #divert <fpp>
 namespace app::roff {
-  namespace package_body_run {
+  namespace package_run {
     namespace interface { }
     namespace body { using namespace interface; }
   }
-  inline namespace package_run {
-    inline namespace interface { using namespace package_body_run::body; }
-  }
+  inline namespace interface_run { using namespace package_run::body; }
 }
-#import sys.exits.constants // [[FIXTHIS]] move to cli.exits.constants when module-options >= 2.0 is ready
+#import tunitas.application.exits.constants
 #import tunitas.file
 #import tunitas.flagship.temerarious.processor.Preparation
 #import tunitas.string
 #import tunitas.flagship.temerarious.processor
 #import tunitas.flagship.temerarious.stream
-namespace app::roff::package_body_run {
+namespace app::roff::package_run {
   namespace interface {
     using Exit = sys::exits::Code;
     namespace file = tunitas::file;
     using tunitas::flagship::temerarious::processor::Preparation;
   }
   namespace body {
-    using namespace sys::exits::constants;
+    using namespace tunitas::application::exits::constants;
     namespace string = tunitas::string;
     namespace processor = tunitas::flagship::temerarious::processor;
     namespace stream = tunitas::flagship::temerarious::stream;
@@ -37,7 +35,8 @@ namespace app::roff::package_body_run {
 #import std.istream
 #import std.ostream
 #import tunitas.file.Path
-namespace app::roff::package_body_run::interface {
+namespace app::roff::interface_run {
+  
   //
   // This is much simpler now that the core off the processor has moved into the library
   //
@@ -59,8 +58,9 @@ namespace app::roff::package_body_run::interface {
 #import tunitas.flagship.temerarious.stream.Input
 #import tunitas.flagship.temerarious.stream.Output
 #import tunitas.flagship.temerarious.processor.run
-namespace app::roff::package_body_run {
-  auto interface::run(file::Path const &infile, file::Path const &outfile, Preparation preparation) -> Exit {
+namespace app::roff {
+  namespace interface_run { using namespace package_run::body; }
+  auto interface_run::run(file::Path const &infile, file::Path const &outfile, Preparation preparation) -> Exit {
     auto erroneity = stream::Output{std::clog};
     // The use of the temerarious streams (just std fstreams) also captures the name of the file for error messaging
     if (auto in = stream::Input{infile}; !in) {
@@ -72,7 +72,7 @@ namespace app::roff::package_body_run {
       return good(ess) ? OK : FAIL;
     }
   }
-  auto interface::run(std::istream &in, std::ostream &out, Preparation preparation) -> Exit {
+  auto interface_run::run(std::istream &in, std::ostream &out, Preparation preparation) -> Exit {
     auto erroneity = stream::Output{std::clog};
     auto outbound = stream::Output{out};
     auto inbound = stream::Input{in};

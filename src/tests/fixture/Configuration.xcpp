@@ -1,0 +1,51 @@
+// This is C++ 23 -*- c++ -*- -std=c++23 in the stylings of the S.C.O.L.D. design method.
+// For terms and provenance see the LICENSE file at the top of the repository.
+#divert <fpp>
+#import app.controllability.Through
+namespace tests::fixture {
+  //
+  // Configure the configuration for testing.
+  // Parameterized around the Configuration-Under-Test (CUT)
+  //
+  // Specification:
+  //
+  //   Descendant of the Configuration Under Test (CUT) as a CRTP (Curiously-Recurring ....you know...)
+  //   Set the configuration up in the indicated testing mode
+  //   As a companion for test::fixture::Mainly<Configuration<...>>
+  //
+  // Design:
+  //
+  //   Separate types for separate modes.
+  //
+  // Usage:
+  //
+  //   auto cfg = Configuration{};
+  //
+  using app::controllability::Through;
+  template<Through> struct Configuration;
+}
+#endiv
+#divert <hpp>
+#import app.controllability.Controllability
+#import tunitas.application.options.Program
+namespace tests {
+  template<fixture::Through STAGE> class fixture::Configuration : public app::controllability::Controllability {
+    using Ancestor = app::controllability::Controllability;
+    using Program = tunitas::application::options::Program;
+  public:
+    inline static constexpr auto TESTING_LEVEL = STAGE;
+    inline explicit Configuration(); // .......... used herein for testing
+    inline explicit Configuration(Program); // ... uncalled ... but needed to satisfy the required::Configuration<CONTROLLABILITY>
+    bool dry_run_mode{}; // ...................... unused ..... but also needed to satisfy 
+  };
+}
+#endiv
+#divert <ipp>
+namespace tests::fixture {
+  template<Through _> Configuration<_>::Configuration(Program) : Configuration{} { }
+  template<Through _> Configuration<_>::Configuration() {
+    this->test_mode = true;
+    this->test_level = TESTING_LEVEL;
+  }
+}
+#endiv

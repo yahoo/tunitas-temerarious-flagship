@@ -1,0 +1,26 @@
+// This is C++ 23 -*- c++ -*- -std=c++23 in the stylings of the S.C.O.L.D. design method.
+// Copyright Yahoo Inc, 2021.
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-basics/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/components/basics/tree/LICENSE
+// For terms and provenance see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace app::controllability {
+  //
+  // The test exit points.
+  // see main.xcpp
+  //
+  enum Through {
+    OPTIONS, // ... options processing, argument examination individually
+    SETUP, // ..... combinations of options and defaulting logic
+    PERFORM, // ... includes grepping the discovered candidates
+    ALL = PERFORM,
+  };
+}
+#endiv
+#divert <hpp>
+#import std.underlying_type
+namespace app::controllability {
+  inline constexpr auto underlying(Through t) { return std::underlying_type_t<Through>(t); }
+}
+#endiv

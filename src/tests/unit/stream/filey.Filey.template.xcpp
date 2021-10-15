@@ -89,7 +89,7 @@ namespace tests::unit::stream::filey {
     Ancestors::Exerciser::exercise(subject);
   }
   template<typename _> auto Filey<_>::suite() -> cppunit::Test * {
-    auto series = Stream{typeid(Subject).name()};
+    auto series = Stream{"File-Of-"s + typeid(Subject).name()};
     series << []{
                 auto use = Stream{"usage"};
                 use << []{

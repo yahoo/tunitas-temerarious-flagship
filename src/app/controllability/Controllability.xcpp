@@ -1,0 +1,53 @@
+// This is C++ 23 -*- c++ -*- -std=c++23 in the stylings of the S.C.O.L.D. design method.
+// Copyright Yahoo Inc, 2021.
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-basics/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/components/basics/tree/LICENSE
+// For terms and provenance see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace app::controllability {
+  //
+  // The controllability of a main(...)
+  //
+  // Specification:
+  //
+  //   Satisfies rigging::app::required::Configuration.
+  //   Like a Configuration, but lighter and simpler.
+  //   Offer the relevant fields for use.
+  //
+  //   Plays well with Comparable.
+  //   Plays well with testing(Controllability const &)
+  //
+  // Design:
+  //
+  //   Just the fields at issue (i.e. not the rest of the inventory of Configuration.
+  //
+  // Usage:
+  //
+  //   auto ctl = Controllability{};
+  //
+  //   auto cmp = testing(ctl); ........................................ ADL will find this
+  //
+  struct Controllability;
+}
+#endiv
+#divert <hpp>
+#import tunitas.Optional
+#import app.controllability.Through
+#forward app.controllability.Comparable
+namespace app {
+  namespace controllability {
+    inline auto testing(Controllability const &) -> Comparable;
+  }
+  struct controllability::Controllability {
+    bool test_mode{};
+    tunitas::Optional<Through> test_level{};
+  };
+}
+#endiv
+#divert <ipp>
+#import app.controllability.Comparable
+namespace app {
+  inline auto controllability::testing(Controllability const &ctl) -> Comparable { return {ctl.test_mode, ctl.test_level}; }
+}
+#endiv

@@ -17,6 +17,9 @@ check_bin_roff_SOURCES = \
   obj/src/tests/roff/c.main.cpp \
   obj/src/tests/roff/namespace.cpp \
   obj/src/tests/roff/Fixture.cpp \
+  obj/src/tests/roff/Configuration.cpp \
+  obj/src/tests/roff/Options.cpp \
+  obj/src/tests/roff/Invocations.cpp \
   $(end)
 #
 $(scold_cxxdir)/tests/roff/dependencies.mk: $(check_bin_roff_SOURCES)

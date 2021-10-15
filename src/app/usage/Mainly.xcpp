@@ -6,7 +6,7 @@
 // For terms and provenance see the LICENSE file at the top of the repository.
 #divert <fpp>
 #import app.usage.required.Generator
-#import cli.exits.constants
+#import tunitas.application.exits.constants
 namespace app::usage {
   //
   // The main(...) of a usage thunk
@@ -21,18 +21,18 @@ namespace app::usage {
   //
   namespace [[eponymous]] mainly {
     template<required::Generator> struct Mainly;
-    using namespace cli::exits::constants;
+    using namespace tunitas::application::exits::constants;
   }
   using mainly::Mainly;
 }
 #endiv
 #divert <hpp>
-#import cli.exits.Code
+#import tunitas.application.exits.Code
 #import std.ostream
 namespace app::usage {
   template<usage::required::Generator GENERATOR> struct mainly::Mainly {
     using Generator = GENERATOR;
-    using Exit = cli::exits::Code;
+    using Exit = tunitas::application::exits::Code;
     using Stream = std::ostream;
     inline explicit Mainly();
     inline explicit Mainly(Stream &);

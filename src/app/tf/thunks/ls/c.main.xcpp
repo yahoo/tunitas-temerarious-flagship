@@ -5,9 +5,9 @@
 // For terms, see the LICENSE file at https://git.tunitas.technology/all/components/basics/tree/LICENSE
 // For terms and provenance see the LICENSE file at the top of the repository.
 #divert <cpp>
-#import cli.exits.constants
-#import cli.options.Arguments
 #import nonstd.range.forward
+#import tunitas.application.exits.constants
+#import tunitas.application.options.Arguments
 #import tunitas.file.Path
 #import tunitas.string.literals
 #import std.clog
@@ -16,12 +16,12 @@
 #import sys.posix.exec
 auto main(int cc, char *vv[]) -> int {
   using namespace tunitas::string::literals;
-  using namespace cli::exits::constants;
+  using namespace tunitas::application::exits::constants;
   try {
     namespace file = tunitas::file;
     using nonstd::range::forward;
     using std::next;
-    auto arguments = cli::options::Arguments{&vv[0], &vv[cc]};
+    auto arguments = tunitas::application::options::Arguments{&vv[0], &vv[cc]};
     auto parent_directory_of = [](file::Path candidate) -> file::Path {
                                  auto root = candidate.parent_path();
                                  if (root.empty()) { root = "."s; }
@@ -59,7 +59,7 @@ auto main(int cc, char *vv[]) -> int {
     arguments.at(0) = "/bin/ls"s;
     auto execed = sys::posix::exec(arguments.front(), arguments);
     std::clog << "error: could not exec because " << error_code(execed).message() << '\n';
-    return cli::exits::FAIL;
+    return FAIL;
   } catch (std::exception const &e) {
     std::clog << "error: unexpected exception " << e.what() << '\n';
     return SOFTWARE;

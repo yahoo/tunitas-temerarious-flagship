@@ -56,6 +56,7 @@ TF_WITH_MODULE([posix])
 TF_WITH_MODULE([std])
 TF_WITH_MODULE([string])
 
+TF_WITH_MODULE([rigging-app]) dnl TESTING_AREAS only
 TF_WITH_MODULE([rigging]) dnl TESTING_AREAS only
 TF_WITH_MODULE([cppunit]) dnl TESTING_AREAS only and not needed when using module-rigging >= 2.0
 TF_WITH_NONSTD([cppunit]) dnl ibidem

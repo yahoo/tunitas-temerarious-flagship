@@ -1,0 +1,40 @@
+// This is C++ 23 -*- c++ -*- -std=c++23 in the stylings of the S.C.O.L.D. design method.
+// Copyright Yahoo Inc, 2021.
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-basics/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/components/basics/tree/LICENSE
+// For terms and provenance see the LICENSE file at the top of the repository.
+#divert <fpp>
+#include <hpp/tests.unit.controllability.Fixture>
+#endiv
+#divert <hpp>
+#import app.controllability.Controllability
+namespace tests::unit::controllability::fixture {
+  class Fixture::Configuration : public ::app::controllability::Controllability {
+    using Ancestor = ::app::controllability::Controllability;
+  public:
+    //
+    // The constructors allow the establishment of the various modes.
+    //
+    explicit Configuration() = default;
+    explicit Configuration(bool test_mode);
+    explicit Configuration(library::Through);
+    explicit Configuration(bool test_mode, library::Through);
+  };
+}
+#endiv
+#divert <cpp>
+namespace tests::unit::controllability::fixture {
+  Fixture::Configuration::Configuration(bool arg_test_mode) {
+    this->test_mode = arg_test_mode;
+  }
+  Fixture::Configuration::Configuration(library::Through arg_through) {
+    this->test_mode = true;
+    this->test_level = arg_through;
+  }
+  Fixture::Configuration::Configuration(bool arg_test_mode, library::Through arg_through) {
+    this->test_mode = arg_test_mode;
+    this->test_level = arg_through;
+  }
+}
+#endiv

@@ -99,7 +99,7 @@ namespace tests::unit::stream::streamy {
     Ancestors::Exerciser::exercise(subject);
   }
   template<typename _> auto Streamy<_>::suite() -> cppunit::Test * {
-    auto series = Stream{typeid(Subject).name()};
+    auto series = Stream{"Stream-Of-"s + typeid(Subject).name()};
     series << []{
                 auto use = Stream{"usage"};
                 use << []{

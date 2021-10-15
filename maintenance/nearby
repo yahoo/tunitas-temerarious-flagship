@@ -163,6 +163,8 @@ eval \
     ${with_module_options:+--with-module-options=$with_module_options} \
     ${with_module_posix:+--with-module-posix=$with_module_posix} \
     ${with_module_rigging:+--with-module-rigging=$with_module_rigging} \
+    ${with_module_rigging_app:+--with-module-rigging-app=$with_module_rigging_app} \
+    ${with_module_rigging_core:+--with-module-rigging-core=$with_module_rigging_core} \
     ${with_module_std:+--with-module-std=$with_module_std} \
     ${with_module_string:+--with-module-string=$with_module_string} \
     ${with_module_sys:+--with-module-sys=$with_module_sys} \

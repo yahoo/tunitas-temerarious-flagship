@@ -5,11 +5,14 @@
 // For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
 #divert <fpp>
 #import tests
-namespace tests::roff { }
+#import tunitas.application.exits.constants
+namespace tests::roff {
+  using namespace tunitas::application::exits;
+}
+#import tests.fixture.environment // tests::cppunit::Test and all that
 #endiv
 #divert <hpp>
-#import tests.cppunit.Test // enable v1-series and v2-series APIs (moving or simulating cppunit::Test0
-#import tests.cppunit.test.Fixture // ibidem.
+// not more yet(?)
 #endiv
 #divert <ipp>
 #import rigging.suite.io

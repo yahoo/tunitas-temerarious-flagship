@@ -6,11 +6,16 @@
 #divert <fpp>
 #import tunitas.application
 #import tunitas.application.required
+#import tunitas.application.options
 #import tunitas.string.literals
 namespace app {
   using namespace tunitas::application;
   using namespace tunitas::string::literals;
   namespace [[nodirectory]] required { using namespace tunitas::application::required; }
+  namespace [[nodirectory]] options {
+    using namespace tunitas::application::options;
+    enum class Dispensation { FAIL, USAGE, VERSION, PROCESS };
+  }
 }
 #endiv
 #divert <hpp>

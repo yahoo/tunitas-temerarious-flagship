@@ -1,0 +1,37 @@
+// This is C++ 23 -*- c++ -*- -std=c++23 in the stylings of the S.C.O.L.D. design method.
+// Copyright Yahoo Inc, 2021.
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-basics/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/components/basics/tree/LICENSE
+// For terms and provenance see the LICENSE file at the top of the repository.
+#divert <fpp>
+#import rigging.app.required.Configuration
+#import app.controllability.Through
+namespace tests::fixture {
+  //
+  // The entrypoint.
+  //
+  // Specification:
+  //
+  //   Descendants only.
+  //   Ancestor of nearby Mainly<CONFIGURATION>::Entrypoint
+  //
+  // Design:
+  //
+  //   Whereas partial specialization of nested classes (only) is arduous).
+  //
+  // Usage:
+  //
+  //   As Such.
+  //
+  template<required::Configuration CONFIGURATION> struct Entrypoint;
+  using app::controllability::Through; // all specializations will need this
+}
+#endiv
+#divert <hpp>
+// All specializations will need these
+#import rigging.app.options.c.Anchor
+#import rigging.app.options.Program
+#import rigging.app.options.Arguments
+#import rigging.app.exits.Code
+#endiv

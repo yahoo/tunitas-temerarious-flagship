@@ -5,7 +5,7 @@
 // For terms, see the LICENSE file at https://git.tunitas.technology/all/components/basics/tree/LICENSE
 // For terms and provenance see the LICENSE file at the top of the repository.
 #divert <cpp>
-#import cli.exits.constants
+#import tunitas.application.exits.constants
 #import nonstd.directory.Range // [[FIXTHIS?]] use the version in tunitas-basics >= X.Y when such does materialize therein
 #import nonstd.directory.Iterator
 #import nonstd.directory.Entry
@@ -20,7 +20,7 @@
 #import std.vector
 auto main(int cc, char *vv[]) -> int {
   using namespace tunitas::string::literals;
-  using namespace cli::exits::constants;
+  using namespace tunitas::application::exits::constants;
   using namespace langu::age;
   namespace directory = nonstd::directory;
   try {

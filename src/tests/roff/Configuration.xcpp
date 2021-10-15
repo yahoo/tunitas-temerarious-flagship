@@ -1,0 +1,49 @@
+// This is C++ 23 -*- c++ -*- -std=c++23 in the stylings of the S.C.O.L.D. design method.
+// For terms and provenance see the LICENSE file at the top of the repository.
+#divert <fpp>
+#import app.controllability.Through
+namespace tests::roff {
+  //
+  // The configurations.
+  //
+  // Specification:
+  //
+  //   Specializations only.
+  //   Set the configuration up in the indicated testing mode
+  //   Works in test::fixture::Mainly<Configuration>
+  //
+  // Design:
+  //
+  //   Separate types for separate modes.
+  //
+  // Usage:
+  //
+  //   auto cfg = Configuration{};
+  //
+  using app::controllability::Through;
+  using enum Through;
+  template<Through> struct Configuration;
+}
+#endiv
+#divert <hpp>
+#import tests.fixture.Configuration
+namespace tests {
+  template<roff::Through STAGE> class roff::Configuration : public fixture::Configuration<STAGE> {
+    using Ancestor = fixture::Configuration<STAGE>;
+  public:
+    using Ancestor::Configuration;
+  };
+}
+#endiv
+#divert <cpp>
+#import rigging.app.required.Configuration
+namespace {
+  namespace testate {
+    using namespace tests::roff;
+    namespace required = rigging::app::required;
+    static_assert(required::Configuration<Configuration<Through::OPTIONS>>);
+    static_assert(required::Configuration<Configuration<Through::SETUP>>);
+    static_assert(required::Configuration<Configuration<Through::PERFORM>>);
+  }
+}
+#endiv

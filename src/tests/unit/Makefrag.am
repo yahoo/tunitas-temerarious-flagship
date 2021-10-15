@@ -27,6 +27,7 @@ check_bin_unit_SOURCES = \
   obj/src/tests/unit/roff.Fixture.cpp \
   obj/src/tests/unit/tf.Fixture.cpp \
   obj/src/tests/unit/directive.Fixture.cpp \
+  $(obj_src_tests_unit_controllability_SUBSOURCES) \
   $(obj_src_tests_unit_error_SUBSOURCES) \
   $(obj_src_tests_unit_exception_SUBSOURCES) \
   $(obj_src_tests_unit_field_SUBSOURCES) \
@@ -38,6 +39,7 @@ check_bin_unit_SOURCES = \
   obj/src/tests/unit/variable.Fixture.cpp \
   $(end)
 #
+include src/tests/unit/controllability/Makefrag.am
 include src/tests/unit/error/Makefrag.am
 include src/tests/unit/exception/Makefrag.am
 include src/tests/unit/field/Makefrag.am

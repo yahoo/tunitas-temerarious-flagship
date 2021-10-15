@@ -13,6 +13,7 @@ struct tests::unit::Fixture : public cppunit::test::Fixture {
 #endiv
 #divert <cpp>
 #import tests.unit.app.Fixture
+#import tests.unit.controllability.Fixture
 #import tests.unit.roff.Fixture
 #import tests.unit.tf.Fixture
 #import tests.unit.directive.Fixture
@@ -30,8 +31,7 @@ namespace tests::unit {
     using namespace rigging::suite;
     auto series = Stream{"unit"};
     series << add<app::Fixture>()
-           << add<roff::Fixture>()
-           << add<tf::Fixture>()
+           << add<controllability::Fixture>()
            << add<directive::Fixture>()
            << add<error::Fixture>()
            << add<exception::Fixture>()
@@ -39,8 +39,10 @@ namespace tests::unit {
            << add<input::Fixture>()
            << add<parser::Fixture>()
            << add<processor::Fixture>()
+           << add<roff::Fixture>()
            << add<source::Fixture>()
            << add<stream::Fixture>()
+           << add<tf::Fixture>()
            << add<variable::Fixture>()
            << END;
     return finalize(series);

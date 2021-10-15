@@ -10,16 +10,3 @@ namespace app::version {
   static_assert(sizeof (String), "already visible");
 }
 #endiv
-#divert <cpp>
-#import cli.exception.formatting.Version
-#import nonstd.same_as
-#import std.declval
-namespace {
-  namespace testate {
-    using namespace app::version;
-    using namespace std;
-    using Result = decltype(declval<cli::exception::feature::Version>().version());
-    static_assert(same_as<Result, String>);
-  }
-}
-#endiv

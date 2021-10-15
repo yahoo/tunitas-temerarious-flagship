@@ -18,7 +18,7 @@ namespace tunitas::flagship::temerarious::version {
   //   cerr << generated;
   //
   using String = 
-#if 0
+#if 0 // ibidem.
     cli::options::version::String;
 #else
   ::options::version::String;

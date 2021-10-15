@@ -1,0 +1,16 @@
+# This is a -*- Makefile -* which is managed by automake and evaluated by GNU make
+# Copyright Yahoo Inc, 2021.
+# Licensed under the terms of the Apache-2.0 license.
+# For terms, see the LICENSE file at https://github.com/yahoo/tunitas-basics/blob/master/LICENSE
+# For terms, see the LICENSE file at https://git.tunitas.technology/all/components/basics/tree/LICENSE
+#
+tests_fixture_SUBSOURCES = \
+  check/obj/src/tests/fixture/namespace.cpp \
+  check/obj/src/tests/fixture/environment.cpp \
+  check/obj/src/tests/fixture/Mainly.cpp \
+  check/obj/src/tests/fixture/Configuration.cpp \
+  check/obj/src/tests/fixture/Entrypoint.template.cpp \
+  check/obj/src/tests/fixture/Entrypoint.roff.Configuration.cpp \
+  check/obj/src/tests/fixture/Entrypoint.tf.Configuration.cpp \
+  check/obj/src/tests/fixture/Entrypoint.cpp \
+  $(end)

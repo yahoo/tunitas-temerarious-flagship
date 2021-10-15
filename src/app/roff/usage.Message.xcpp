@@ -49,7 +49,7 @@ namespace app::roff::usage {
         << "\n--define <NAME>=<VALUE> ........ define NAME as VALUE in the global dictionary"
         << "\n--define <NAME> ................ define NAME as (empty) in the global dictionary"
         << "\n-D<NAME>=<VALUE> ............... same, using the well-known idiom of the C preprocessor"
-        << "\n-D<NAME>=<VALUE> ............... same"
+        << "\n-D<NAME> ....................... same"
         << "\n--include <DIRECTORY> .......... add <DIRECTORY> to the searchpath"
         << "\n-I<DIRECTORY> .................. same, using the well-known idiom of the C preprocessor"
         << "\n--version ...................... emit the version of the this package"

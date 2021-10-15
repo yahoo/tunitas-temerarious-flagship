@@ -1,0 +1,80 @@
+// This is C++ 23 -*- c++ -*- -std=c++23 in the stylings of the S.C.O.L.D. design method.
+// For terms and provenance see the LICENSE file at the top of the repository.
+#divert <fpp>
+namespace tests::roff { struct Options; }
+#endiv
+#divert <hpp>
+#import rigging.app.fixture.Core
+#import tests.fixture.Mainly
+#import tests.roff.Configuration
+namespace tests {
+  struct roff::Options : public rigging::app::fixture::Core<fixture::Mainly<Configuration<OPTIONS>>> {
+    static auto suite() -> Suite;
+    //
+    auto test_define_NAME() -> void;
+    auto test_define_NAMEeqVALUE() -> void;
+    auto test_DNAME() -> void;
+    auto test_DNAMEeqVALUE() -> void;
+    //
+    auto test_include_DIRECTORY() -> void;
+    auto test_IDIRECTORY() -> void;
+  };
+}
+#endiv
+#divert <cpp>
+auto tests::roff::Options::suite() -> Suite {
+  auto series = Stream{"options"sv};
+  series << []() {
+              auto words = Stream{"words"sv};
+              words << add("usage", &Options::test_usage)
+                    << add("help", &Options::test_help)
+                    << add("version", &Options::test_version)
+                    << []{
+                         auto def = Stream{"define"sv};
+                         def << add("--define_NAME", &Options::test_define_NAME)
+                             << add("--define_NAME=value", &Options::test_define_NAMEeqVALUE)
+                             << END;
+                         return def;
+                       }()
+                    << []{
+                         auto inc = Stream{"include"sv};
+                         inc << add("--include_DIRECTORY", &Options::test_include_DIRECTORY)
+                             << END;
+                         return inc;
+                       }()
+                    << END;
+              return words;
+            }()
+         << []() {
+              auto flags = Stream{"flags"sv};
+              flags << add("h", &Options::test_h)
+                    << add("V", &Options::test_V)
+                    << []{
+                         auto def = Stream{"D"sv};
+                         def << add("-DNAME", &Options::test_DNAME)
+                             << add("-DNAME=VALUE", &Options::test_DNAMEeqVALUE)
+                             << END;
+                         return def;
+                       }()
+                    << []{
+                         auto inc = Stream{"I"sv};
+                         inc << add("-IDIRECTORY", &Options::test_IDIRECTORY)
+                             << END;
+                         return inc;
+                       }()
+                    << END;
+              return flags;
+            }()
+         << add("bogon", &Options::test_bogon)
+         << END;
+  return settle(series);
+}
+namespace tests::roff {
+  auto Options::test_define_NAME() -> void        { exercise(OK, "--define"s, "SOMETHING"s); }
+  auto Options::test_define_NAMEeqVALUE() -> void { exercise(OK, "--define"s, "SOMETHING=SOMETHING"s); }
+  auto Options::test_DNAME() -> void              { exercise(OK, "-DSOMETHING"s); }
+  auto Options::test_DNAMEeqVALUE() -> void       { exercise(OK, "-DSOMETHING=SOMETHING"s); }
+  auto Options::test_include_DIRECTORY() -> void  { exercise(OK, "--include"s, "/tmp"s); }
+  auto Options::test_IDIRECTORY() -> void         { exercise(OK, "-I/tmp"s); }
+}
+#endiv

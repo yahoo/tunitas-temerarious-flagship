@@ -95,8 +95,13 @@ namespace tests::unit::exception::input::fixture {
   auto Fixture::suite() -> cppunit::Test * {
     using namespace rigging::suite;
     auto series = Stream{"input"};
-    series << call("Present", &Fixture::test_constructor_path_reason<library::Present>)
-           << call("Missing", &Fixture::test_constructor_path_reason<library::Missing>)
+    series << []{
+                auto con = Stream{"constructor"};
+                con << call("Present", &Fixture::test_constructor_path_reason<library::Present>)
+                    << call("Missing", &Fixture::test_constructor_path_reason<library::Missing>)
+                    << END;
+                return con;
+              }()
            << []{
                 auto asp = Stream{"Aspect"};
                 asp << call("Present", &Fixture::test_Aspect<library::Present>)
