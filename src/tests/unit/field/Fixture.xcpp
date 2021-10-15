@@ -34,10 +34,10 @@ namespace tests::unit::field {
                              << call("identifier&...more...", &Fixture::test_identifier_and_more)
                              << call("filepath", &Fixture::test_filepath)
                              << END;
-                         return move(get);
+                         return get;
                        }()
                     << END;
-                return move(use);
+                return use;
               }()
            << []{
                 auto get = Stream{"get"};
@@ -46,7 +46,7 @@ namespace tests::unit::field {
                     << add<get::Identifier_And_More>()
                     << add<get::Filepath>()
                     << END;
-                return move(get);
+                return get;
               }()
            << add<body::Fixture>()
            << END;

@@ -102,7 +102,7 @@ namespace tests::unit::exception::processor::fixture {
                     << call("Input", &Fixture::test_Aspect<library::Input>)
                     << call("Input", &Fixture::test_Aspect<library::State>)
                     << END;
-                return move(asp);
+                return asp;
               }()
            << END;
     return finalize(series);

@@ -103,7 +103,7 @@ auto tests::unit::suffix::Fixture::suite() -> cppunit::Test * {
               lim << call("Suffix", &Fixture::test_Limits<scold::easy::suffix::Suffix>)
                   << call("Step", &Fixture::test_Limits<scold::easy::suffix::Step>)
                 ;
-              return move(lim);
+              return lim;
             }()
          << call("Neighbors", &Fixture::test_Neighbors)
          << call("Suffix", &Fixture::test_Suffix)

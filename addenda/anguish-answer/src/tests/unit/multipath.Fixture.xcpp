@@ -106,7 +106,7 @@ auto tests::unit::multipath::fixture::Fixture::suite() -> cppunit::Test * {
               det << call("path", &Fixture::test_defined_path)
                   << call("optional<path>", &Fixture::test_defined_optional_path)
                   << END;
-              return move(det);
+              return det;
             }()
          << call("reconstruct", &Fixture::test_reconstruct)
          << call("dedot", &Fixture::test_dedot)

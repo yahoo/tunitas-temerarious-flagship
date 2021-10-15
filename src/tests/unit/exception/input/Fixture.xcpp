@@ -107,7 +107,7 @@ namespace tests::unit::exception::input::fixture {
                 asp << call("Present", &Fixture::test_Aspect<library::Present>)
                     << call("Missing", &Fixture::test_Aspect<library::Missing>)
                     << END;
-                return move(asp);
+                return asp;
               }()
            << add<Missing>()
            << add<Present>()

@@ -120,7 +120,7 @@ auto tests::unit::want::mvr::Fixture::suite() -> cppunit::Test * {
            << add<SAV<std::string>>()
            << add<SAV<std::tuple<bool, int, std::string>>>()
            ;
-         return move(v);
+         return v;
        }()
     ;
   return finalize(s);

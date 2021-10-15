@@ -38,10 +38,10 @@ namespace tests::unit::error::condition {
                          auto ver = Stream{"conversion"};
                          ver << call("Companion", &Fixture::test_constructor_conversion_Companion)
                              << END;
-                         return move(ver);
+                         return ver;
                        }()
                     << END;
-                return move(con);
+                return con;
               }()
            << END;
     return finalize(series);

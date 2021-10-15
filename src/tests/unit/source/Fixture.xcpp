@@ -61,7 +61,7 @@ namespace tests::unit::source {
                     << call("Name", &Fixture::test_Name)
                     << call("Line", &Fixture::test_Line)
                     << END;
-                return move(use);
+                return use;
               }()
            << add<Line>()
            << add<Name>()

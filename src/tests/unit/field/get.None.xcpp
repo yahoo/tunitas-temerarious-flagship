@@ -48,7 +48,7 @@ namespace tests::unit::field::get {
                 cas << call("1", &None::test_case_1)
                     << call("2", &None::test_case_2)
                     << END;
-                return move(cas);
+                return cas;
               }()
            << END;
     return finalize(series);

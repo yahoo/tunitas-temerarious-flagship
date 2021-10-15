@@ -41,7 +41,7 @@ namespace tests::unit::parser {
                 auto use = Stream{"usage"};
                 use << call("assess", &Fixture::test_usage_assess)
                     << END;
-                return move(use);
+                return use;
               }()
            << add<assess::Fixture>()
            << END;

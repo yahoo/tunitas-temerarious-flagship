@@ -182,10 +182,10 @@ namespace tests::unit::field::body::fixture {
                         some << call("good", &Fixture::test_identifier_some_good)
                              << call("fai", &Fixture::test_identifier_some_fail)
                              << END;
-                        return move(some);
+                        return some;
                       }()
                    << END;
-                return move(id);
+                return id;
               }()
            << []{
                 auto text = Stream{"text"};
@@ -195,10 +195,10 @@ namespace tests::unit::field::body::fixture {
                           some << call("good", &Fixture::test_text_some_good)
                                << call("fail", &Fixture::test_text_some_fail)
                                << END;
-                          return move(some);
+                          return some;
                         }()
                      << END;
-                return move(text);
+                return text;
               }()
            << []{
                 auto path = Stream{"filepath"};
@@ -208,10 +208,10 @@ namespace tests::unit::field::body::fixture {
                           some << call("good", &Fixture::test_filepath_some_good)
                                << call("fail", &Fixture::test_filepath_some_fail)
                                << END;
-                          return move(some);
+                          return some;
                         }()
                      << END;
-                return move(path);
+                return path;
               }()
            << call("find_first_blank", &Fixture::test_find_first_blank)
            << []{
@@ -221,10 +221,10 @@ namespace tests::unit::field::body::fixture {
                           yet << call("empty", &Fixture::test_ensure_not_empty_yet_is_empty)
                               << call("full", &Fixture::test_ensure_not_empty_yet_is_full)
                               << END;
-                          return move(yet);
+                          return yet;
                         }()
                      << END;
-                return move(sure);
+                return sure;
               }()
            << END;
     return finalize(series);

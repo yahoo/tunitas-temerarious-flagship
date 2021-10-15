@@ -83,22 +83,22 @@ namespace tests::unit::stream::output {
                                   ver << call("stream", &Fixture::test_constructor_conversion_stream)
                                       << call("file", &Fixture::test_constructor_conversion_file)
                                       << END;
-                                  return move(ver);
+                                  return ver;
                                 }()
                              << call("copy", &Fixture::test_constructor_copy)
                              << call("move", &Fixture::test_constructor_move)
                              << END;
-                         return move(con);
+                         return con;
                        }()
                     << []{
                          auto ass = Stream{"assignment"};
                          ass << call("copy", &Fixture::test_assignment_copy)
                              << call("move", &Fixture::test_assignment_move)
                              << END;
-                         return move(ass);
+                         return ass;
                        }()
                     << END;
-                return move(use);
+                return use;
               }()
            << add<Filey<library::Output>>()
            << add<Streamy<library::Output>>()

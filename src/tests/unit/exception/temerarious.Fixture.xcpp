@@ -130,7 +130,7 @@ namespace tests::unit::exception::temerarious::fixture {
                     << call("System", &Fixture::test_Aspect<library::System>)
                     << call("Filesystem", &Fixture::test_Aspect<library::Filesystem>)
                     << END;
-                return move(asp);
+                return asp;
               }()
            << END;
     return finalize(series);

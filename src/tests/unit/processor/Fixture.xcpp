@@ -32,7 +32,7 @@ namespace tests::unit::processor {
                 auto use = Stream{"usage"};
                 use << call("Preparation", &Fixture::test_usage_Preparation)
                     << END;
-                return move(use);
+                return use;
               }()
            << add<state::Fixture>()
            << END;

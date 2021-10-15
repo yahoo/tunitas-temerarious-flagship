@@ -67,7 +67,7 @@ auto tests::unit::exception::app::fixture::Fixture::suite() -> cppunit::Test * {
               asp << call("File", &Fixture::test_Aspect<rofflib::File>)
                   << call("File", &Fixture::test_Aspect<library::Testing>)
                   << END;
-              return move(asp);
+              return asp;
             }()
          << END;
   return finalize(series);

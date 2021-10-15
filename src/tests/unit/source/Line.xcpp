@@ -54,7 +54,7 @@ namespace tests::unit::source {
                 inc << call("pre", &Line::test_operator_inc_pre)
                     << call("post", &Line::test_operator_inc_post)
                     << END;
-                return move(inc);
+                return inc;
               }()
            << call("operator<<", &Line::test_operator_insert)
            << END;

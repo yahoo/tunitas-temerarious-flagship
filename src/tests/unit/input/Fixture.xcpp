@@ -50,7 +50,7 @@ namespace tests::unit::input {
                 use << call("Frame", &Fixture::test_usage_Frame)
                     << call("Frame", &Fixture::test_usage_Stack)
                     << END;
-                return move(use);
+                return use;
               }()
            << END;
     return finalize(series);

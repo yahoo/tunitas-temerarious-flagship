@@ -115,7 +115,7 @@ namespace tests::unit::parser::assess {
                     << call("include", &Fixture::test_dot_include)
                     << call("read", &Fixture::test_dot_read)
                     << END;
-                return move(dot);
+                return dot;
               }()
            << []{
                 auto err = Stream{"error"};
@@ -123,14 +123,14 @@ namespace tests::unit::parser::assess {
                     << call("bogus", &Fixture::test_error_dot_bogus)
                     << call("space", &Fixture::test_error_space_dot)
                     << END;
-                return move(err);
+                return err;
               }()
            << []{
                 auto pass = Stream{"passthrough"};
                 pass << call("empty", &Fixture::test_passthrough_empty)
                      << call("something", &Fixture::test_passthrough_something)
                      << END;
-                return move(pass);
+                return pass;
               }()
            << END;
     return finalize(series);

@@ -39,7 +39,7 @@ namespace tests::unit::error {
                 com << call("Code", &Fixture::test_companion_Code)
                     << call("Condition", &Fixture::test_companion_Condition)
                     << END;
-                return move(com);
+                return com;
               }()
            << add<code::Fixture>()
            << add<condition::Fixture>()

@@ -100,11 +100,11 @@ auto tests::unit::processor::Entail::suite() -> cppunit::Test * {
                       << call("2", &Entail::test_operator_call_good_2)
                       << call("comment", &Entail::test_operator_call_good_comment_bleeds)
                     ;
-                  return move(sub);
+                  return sub;
                 }()
              << call("fail", &Entail::test_operator_call_fail)
            ;
-         return move(ope);
+         return ope;
        }()
     ;
   return finalize(s);

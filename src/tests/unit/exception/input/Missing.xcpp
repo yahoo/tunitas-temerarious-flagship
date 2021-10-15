@@ -98,7 +98,7 @@ namespace tests::unit::exception::input {
                     << call("source::Name", &Missing::test_constructor_name)
                     << call("source::Location", &Missing::test_constructor_location)
                     << END;
-                return move(con);
+                return con;
               }()
            << call("what", &Missing::test_what)
            << call("whence", &Missing::test_whence)

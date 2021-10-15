@@ -95,14 +95,14 @@ namespace tests::unit::field::get {
                     << call("multiple", &Filepath::test_fail_multiple)
                     << call("badform", &Filepath::test_fail_badform)
                     << END;
-                return move(bad);
+                return bad;
               }()
            << []{
                 auto cas = Stream{"case"};
                 cas << call("1", &Filepath::test_case_1)
                     << call("2", &Filepath::test_case_2)
                     << END;
-                return move(cas);
+                return cas;
               }()
            << END;
     return finalize(series);

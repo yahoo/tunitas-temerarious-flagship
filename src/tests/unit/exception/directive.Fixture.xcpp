@@ -105,7 +105,7 @@ namespace tests::unit::exception::directive::fixture {
                     << call("State", &Fixture::test_Aspect<library::State>)
                     << call("Variable", &Fixture::test_Aspect<library::Variable>)
                     << END;
-                return move(asp);
+                return asp;
               }()
            << END;
     return finalize(series);

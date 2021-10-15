@@ -34,7 +34,7 @@ auto tests::roff::Invocations::suite() -> Suite {
 }
 namespace tests::roff {
   auto Invocations::test_zero() -> void {
-    std::cerr << __FILE__ << ':' << __LINE__ << "reminder: this test will reading standard input, is it redirected from /dev/null?\n";
+    std::cerr << __FILE__ << ':' << __LINE__ << ": reminder, this test will reading standard input, is it redirected from /dev/null?\n";
     exercise(OK); // expects to be redirected FROM /dev/null
   }
   auto Invocations::test_empty() -> void       { exercise(USAGE, ""); }

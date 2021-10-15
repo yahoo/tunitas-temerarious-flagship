@@ -134,7 +134,7 @@ namespace tests::unit::field::get {
                     << call("multiple", &Identifier::test_fail_multiple)
                     << call("badform", &Identifier::test_fail_badform)
                     << END;
-                return move(bad);
+                return bad;
               }()
            << []{
                 auto cas = Stream{"case"};
@@ -142,7 +142,7 @@ namespace tests::unit::field::get {
                     << call("2", &Identifier::test_case_2)
                     << call("3", &Identifier::test_case_3)
                     << END;
-                return move(cas);
+                return cas;
               }()
            << END;
     return finalize(series);

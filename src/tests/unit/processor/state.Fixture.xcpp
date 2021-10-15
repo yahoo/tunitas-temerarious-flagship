@@ -52,7 +52,7 @@ namespace tests::unit::processor::state::fixture {
                 auto con = Stream{"constructor"};
                 con << call("default", &Fixture::test_constructor_default)
                     << END;
-                return move(con);
+                return con;
               }()
            << call("dump", &Fixture::test_dump)
            << END;

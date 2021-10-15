@@ -75,7 +75,7 @@ namespace tests::unit::source {
                     << call("file::Path", &Location::test_constructor_2view)
                     << call("Name", &Location::test_constructor_2name)
                     << END;
-                return move(con);
+                return con;
               }()
            << call("line", &Location::test_line)
            << call("fileview", &Location::test_fileview)

@@ -62,7 +62,7 @@ namespace tests::unit::source {
                 con << call("std::source_location", &Name::test_constructor_std)
                     << call("1view", &Name::test_constructor_1view)
                     << END;
-                return move(con);
+                return con;
               }()
            << call("fileview", &Name::test_fileview)
            << call("filepath", &Name::test_filepath)
