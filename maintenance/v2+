@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -p
 # Copyright Yahoo Inc, 2021.
 # Licensed under the terms of the Apache-2.0 license.
 # For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
