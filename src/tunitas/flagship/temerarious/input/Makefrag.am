@@ -4,12 +4,12 @@
 # For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
 # For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
 #
-obj_src_tunitas_flagship_temerarious_input_SUBSOURCES = \
+tunitas_flagship_temerarious_input_SUBSOURCES = \
   obj/src/tunitas/flagship/temerarious/input/namespace.cpp \
   obj/src/tunitas/flagship/temerarious/input/Frame.cpp \
   obj/src/tunitas/flagship/temerarious/input/condition.Stack.cpp \
   obj/src/tunitas/flagship/temerarious/input/Stack.cpp \
-  $(obj_src_tunitas_flagship_temerarious_input_exception_SUBSOURCES) \
+  $(tunitas_flagship_temerarious_input_exception_SUBSOURCES) \
   $(end)
 #
 include src/tunitas/flagship/temerarious/input/exception/Makefrag.am

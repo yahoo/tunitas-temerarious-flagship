@@ -1,3 +1,4 @@
 See configure.ac
+see autotools::autoconf::Config<tunitas::flagship::temerarious::CONFIG>, specifically package_version_string()
 See config.h
-Starting with v2.0.0-0.devel VERSION Is defined in configure.ac and manifest in config.h
+Starting with v2.0.0-0.devel VERSION Is defined in configure.ac and manifest in autotools::autoconf::Config<CONFIG> which is derived from config.h

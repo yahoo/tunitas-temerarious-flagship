@@ -1,0 +1,31 @@
+# This is a GNU -*- Makefile -*- fragment which is managed by automake
+# For terms and provenance see the LICENSE file at the top of this repository.
+#
+noinst_lib_libautotools_autoconf_tunitas_flagship_temerarious_la_CPPFLAGS = $(PACKAGE_CPPFLAGS_SET)
+noinst_lib_libautotools_autoconf_tunitas_flagship_temerarious_la_CXXFLAGS = $(PACKAGE_CXXFLAGS_SET)
+noinst_lib_libautotools_autoconf_tunitas_flagship_temerarious_la_LDFLAGS = $(PACKAGE_LDFLAGS_SET)
+noinst_lib_libautotools_autoconf_tunitas_flagship_temerarious_la_LIBADD = 
+noinst_lib_libautotools_autoconf_tunitas_flagship_temerarious_la_MODULES = $(call HT_SOURCEStoMODULES,$(noinst_lib_libautotools_autoconf_tunitas_flagship_temerarious_la_SOURCES))
+noinst_lib_libautotools_autoconf_tunitas_flagship_temerarious_la_SOURCES = noinst/obj/src/autotools/autoconf/Config/tunitas/flagship/temerarious/CONFIG.cpp
+noinst_lib_libautotools_autoconf_tunitas_flagship_temerarious_la_DEPENDS = $(scold_noinst_mkdir)/libautotools-autoconf+tunitas-flagship-temerarious.mk
+#
+autotools_autoconf_IMPORT = tunitas.flagship.temerarious
+include src/autotools/autoconf/Makefrag.am
+#
+$(noinst_lib_libautotools_autoconf_tunitas_flagship_temerarious_la_SOURCES) : DISCOFLAGS+=--no-insert-namespace
+$(noinst_lib_libautotools_autoconf_tunitas_flagship_temerarious_la_SOURCES) : DC_FLAGS+=$(DISCOFLAGS)
+$(noinst_lib_libautotools_autoconf_tunitas_flagship_temerarious_la_SOURCES) : bbDC_FLAGS+=$(DISCOFLAGS)
+#
+$(noinst_lib_libautotools_autoconf_tunitas_flagship_temerarious_la_SOURCES) : disco_objdir=$(tf_noinst_objdir)
+$(noinst_lib_libautotools_autoconf_tunitas_flagship_temerarious_la_SOURCES) : disco_srcdir=$(tf_noinst_cxx_srcdir)
+$(noinst_lib_libautotools_autoconf_tunitas_flagship_temerarious_la_SOURCES) : scold_objdir=$(disco_objdir)# [[REMOVEWHEN]] temerarious-flagship >= 2.0
+$(noinst_lib_libautotools_autoconf_tunitas_flagship_temerarious_la_SOURCES) : scold_srcdir=$(disco_srcdir)# [[REMOVEWHEN]] temerarious-flagship >= 2.0
+$(noinst_lib_libautotools_autoconf_tunitas_flagship_temerarious_la_SOURCES) : noinst/obj/src/%.cpp : noinst/obj/src/%.xcpp
+	$(HT_V_COLD) $(call HT_XCPP2CPP, $<)
+	@test -e $@
+$(noinst_lib_libautotools_autoconf_tunitas_flagship_temerarious_la_DEPENDS): $(noinst_lib_libautotools_autoconf_tunitas_flagship_temerarious_la_SOURCES)
+$(noinst_lib_libautotools_autoconf_tunitas_flagship_temerarious_la_DEPENDS):
+	$(HT_V_BOTH) $(call HT_DEPENDENCIES, $^)
+	@test -e $@
+include $(noinst_lib_libautotools_autoconf_tunitas_flagship_temerarious_la_DEPENDS)
+clean-dependencies:: ; rm -f $(noinst_lib_libautotools_autoconf_tunitas_flagship_temerarious_la_DEPENDS)

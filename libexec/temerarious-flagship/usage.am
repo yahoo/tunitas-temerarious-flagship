@@ -7,6 +7,5 @@
 libexec_temerarious_flagship_usage_CPPFLAGS = $(PACKAGE_CPPFLAGS_SET)
 libexec_temerarious_flagship_usage_CXXFLAGS = $(PACKAGE_CXXFLAGS_SET)
 libexec_temerarious_flagship_usage_LDFLAGS = $(PACKAGE_LDFLAGS_SET)
-libexec_temerarious_flagship_usage_LDADD = lib/libapp-tf.la
-libexec_temerarious_flagship_usage_MODULES = $(none)
-libexec_temerarious_flagship_usage_SOURCES = obj/src/app/tf/thunks/usage/c.main.cpp
+libexec_temerarious_flagship_usage_LDADD = noinst/lib/libapp-tf.la
+libexec_temerarious_flagship_usage_SOURCES = noinst/obj/src/app/thunks/usage/c.main.cpp

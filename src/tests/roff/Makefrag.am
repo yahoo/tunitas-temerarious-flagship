@@ -4,31 +4,11 @@
 # For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
 # For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
 #
-check_bin_roff = check/bin/roff
-check_bin_roff_LDADD = \
-  $(lib_libapp_roff_la) \
-  -lrigging-bench-module \
+tests_roff_SUBSOURCES = \
+  check/obj/src/tests/roff/c.main.cpp \
+  check/obj/src/tests/roff/namespace.cpp \
+  check/obj/src/tests/roff/Fixture.cpp \
+  check/obj/src/tests/roff/Configuration.cpp \
+  check/obj/src/tests/roff/Options.cpp \
+  check/obj/src/tests/roff/Invocations.cpp \
   $(end)
-check_bin_roff_LDFLAGS = $(CHECK_LDFLAGS_SET)
-$(check_bin_roff_OBJECTS): AM_CPPFLAGS+=$(AND_CHECK_CPPFLAGS_SET)
-$(check_bin_roff_OBJECTS): AM_CXXFLAGS+=$(AND_CHECK_CXXFLAGS_SET)
-check_bin_roff_MODULES = $(none)
-check_bin_roff_SOURCES = \
-  obj/src/tests/roff/c.main.cpp \
-  obj/src/tests/roff/namespace.cpp \
-  obj/src/tests/roff/Fixture.cpp \
-  obj/src/tests/roff/Configuration.cpp \
-  obj/src/tests/roff/Options.cpp \
-  obj/src/tests/roff/Invocations.cpp \
-  $(end)
-#
-$(scold_cxxdir)/tests/roff/dependencies.mk: $(check_bin_roff_SOURCES)
-$(check_bin_roff_SOURCES) : obj/src/%.cpp : src/%.xcpp
-	$(TF_V_DIS) $(call TF_XCPP2CPP, $<)
-	$(TF_V_DONE) test -e $@
-$(scold_cxxdir)/tests/roff/dependencies.mk:
-	$(TF_V_DEP) $(call TF_DEPENDENCIES, $^)
-	$(TF_V_DONE) test -e $@
-include $(scold_cxxdir)/tests/roff/dependencies.mk
-clean-dependencies::
-	rm -f $(scold_cxxdir)/tests/roff/dependencies.mk

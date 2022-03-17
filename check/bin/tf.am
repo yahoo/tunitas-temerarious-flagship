@@ -1,0 +1,27 @@
+# This is a GNU -*- Makefile -*- which is managed by automake.
+# Copyright Yahoo Inc, 2022.
+# Licensed under the terms of the Apache-2.0 license.
+# For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+# For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#
+check_bin_tf = check/bin/tf$(error REMOVE)
+check_bin_tf_CPPFLAGS = $(CHECK_CPPFLAGS_SET)
+check_bin_tf_CXXFLAGS = $(CHECK_CXXFLAGS_SET)
+check_bin_tf_LDFLAGS = $(CHECK_LDFLAGS_SET)
+check_bin_tf_LDADD = \
+  noinst/lib/libapp-tf.la \
+  -lrigging++ \
+  $(end)
+check_bin_tf_SOURCES = $(tests_tf_SUBSOURCES)
+include src/tests/tf/Makefrag.am
+$(check_bin_tf_SOURCES) : disco_objdir=check/obj
+$(check_bin_tf_SOURCES) : scold_objdir=$(disco_objdir)
+$(check_bin_tf_SOURCES) : check/obj/src/%.cpp : src/%.xcpp
+	$(TF_V_DIS) $(call TF_XCPP2CPP, $<)
+	$(TF_V_DONE) test -e $@
+$(tf_check_mkdir)/tf.mk: $(check_bin_tf_SOURCES)
+$(tf_check_mkdir)/tf.mk:
+	$(TF_V_DEP) $(call TF_DEPENDENCIES, $^)
+	$(TF_V_DONE) test -e $@
+include $(tf_check_mkdir)/tf.mk
+clean-dependencies:: ; rm -f $(tf_check_mkdir)/tf.mk

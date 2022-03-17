@@ -4,10 +4,10 @@
 # For terms, see the LICENSE file at https://github.com/yahoo/tunitas-basics/blob/master/LICENSE
 # For terms, see the LICENSE file at https://git.tunitas.technology/all/components/basics/tree/LICENSE
 #
-obj_src_app_controllability_SUBSOURCES = \
-  obj/src/app/controllability/namespace.cpp \
-  obj/src/app/controllability/Controllability.cpp \
-  obj/src/app/controllability/Through.cpp \
-  obj/src/app/controllability/Comparable.cpp \
-  obj/src/app/controllability/Comparable.Lexicographic.cpp \
+app_controllability_SUBSOURCES = \
+  noinst/obj/src/app/controllability/namespace.cpp \
+  noinst/obj/src/app/controllability/Controllability.cpp \
+  noinst/obj/src/app/controllability/Through.cpp \
+  noinst/obj/src/app/controllability/Comparable.cpp \
+  noinst/obj/src/app/controllability/Comparable.Lexicographic.cpp \
   $(end)

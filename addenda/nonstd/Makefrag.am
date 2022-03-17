@@ -4,25 +4,10 @@
 # For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
 # For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
 #
-lib_libaddenda_nonstd_la_LIBADD = $(none)
-lib_libaddenda_nonstd_la_LDFLAGS = $(PACKAGE_LDFLAGS_SET)
-lib_libaddenda_nonstd_la_MODULES = $(call TF_SOURCEStoMODULES, $(lib_libaddenda_nonstd_la_SOURCES))
-lib_libaddenda_nonstd_la_SOURCES = \
-  obj/src/nonstd/errcode.cpp \
+addenda_nonstd_SUBSOURCES = \
+  noinst/obj/src/nonstd/errcode.cpp \
   $(end)
 #
-$(lib_libaddenda_nonstd_la_SOURCES) : DC_OPTIONS+=--no-insert-namespace
-$(lib_libaddenda_nonstd_la_SOURCES) : bbDC_OPTIONS+=--no-insert-namespace
-#
-$(scold_cxxdir)/nonstd/dependencies.mk $(lib_libaddenda_nonstd_la_SOURCES) : scold_srcdir=addenda
-#
-$(scold_cxxdir)/nonstd/dependencies.mk: $(lib_libaddenda_nonstd_la_SOURCES)
-$(lib_libaddenda_nonstd_la_SOURCES) : obj/src/%.cpp : addenda/%.xcpp
-	$(TF_V_DIS) $(call TF_XCPP2CPP, $<)
-	$(TF_V_DONE) test -e $@
-$(scold_cxxdir)/nonstd/dependencies.mk:
-	$(TF_V_DEP) $(call TF_DEPENDENCIES, $^)
-	$(TF_V_DONE) test -e $@
-include $(scold_cxxdir)/nonstd/dependencies.mk
-clean-dependencies::
-	rm -f $(scold_cxxdir)/nonstd/dependencies.mk
+$(addenda_nonstd_SUBSOURCES) : DISCOFLAGS+=--no-insert-namespace
+$(addenda_nonstd_SUBSOURCES) : DC_FLAGS+=$(DISCOFLAGS)
+$(addenda_nonstd_SUBSOURCES) : bbDC_FLAGS+=$(DISCOFLAGS)

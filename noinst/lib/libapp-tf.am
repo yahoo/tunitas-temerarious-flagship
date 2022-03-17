@@ -1,0 +1,23 @@
+# This is a GNU -*- Makefile -*- which is managed by automake.
+# Copyright Yahoo Inc, 2022.
+# Licensed under the terms of the Apache-2.0 license.
+# For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+# For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#
+noinst_lib_libapp_tf_la_CPPFLAGS = $(PACKAGE_CPPFLAGS_SET)
+noinst_lib_libapp_tf_la_CXXFLAGS = $(PACKAGE_CXXFLAGS_SET)
+noinst_lib_libapp_tf_la_LDFLAGS = $(PACKAGE_LDFLAGS_SET)
+noinst_lib_libapp_tf_la_LIBADD = noinst/lib/libapp.la -ltunitas-application
+noinst_lib_libapp_tf_la_SOURCES = $(app_tf_SUBSOURCES)
+include src/app/tf/Makefrag.am
+$(noinst_lib_libapp_tf_la_SOURCES) : disco_objdir=noinst/obj
+$(noinst_lib_libapp_tf_la_SOURCES) : scold_objdir=$(disco_objdir)
+$(noinst_lib_libapp_tf_la_SOURCES) : noinst/obj/src/%.cpp : src/%.xcpp
+	$(TF_V_DIS) $(call TF_XCPP2CPP, $<)
+	$(TF_V_DONE) test -e $@
+$(tf_noinst_mkdir)/libapp-tf.mk: $(noinst_lib_libapp_tf_la_SOURCES)
+$(tf_noinst_mkdir)/libapp-tf.mk:
+	$(TF_V_DEP) $(call TF_DEPENDENCIES, $^)
+	$(TF_V_DONE) test -e $@
+include $(tf_noinst_mkdir)/libapp-tf.mk
+clean-dependencies:: ; rm -f $(tf_noinst_mkdir)/libapp-tf.mk

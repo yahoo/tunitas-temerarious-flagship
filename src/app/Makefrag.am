@@ -4,37 +4,15 @@
 # For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
 # For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
 #
-lib_libapp_la = lib/libapp.la
-lib_libapp_la_CPPFLAGS = $(PACKAGE_CPPFLAGS_SET)
-lib_libapp_la_CXXFLAGS = $(PACKAGE_CXXFLAGS_SET)
-lib_libapp_la_LDFLAGS = $(PACKAGE_LDFLAGS_SET)
-lib_libapp_la_LIBADD = \
-  -ltunitas-application \
-  -ltunitas \
-  -loptions-module \
-  -lnonstd-module
-  $(end) # [[TODO]] remove the -module suffix when module-options, module-nonstd >= 2.0 is ready with the ++ suffix -lnonstd++
-lib_libapp_la_MODULES = $(call TF_SOURCEStoMODULES, $(lib_libapp_la_SOURCES))
-lib_libapp_la_SOURCES = \
-  obj/src/app/namespace.cpp \
-  $(obj_src_app_controllability_SUBSOURCES) \
-  $(obj_src_app_exception_SUBSOURCES) \
-  $(obj_src_app_usage_SUBSOURCES) \
-  $(obj_src_app_version_SUBSOURCES) \
+app_SUBSOURCES = \
+  noinst/obj/src/app/namespace.cpp \
+  $(app_controllability_SUBSOURCES) \
+  $(app_exception_SUBSOURCES) \
+  $(app_usage_SUBSOURCES) \
+  $(app_version_SUBSOURCES) \
   $(end)
 #
 include src/app/controllability/Makefrag.am
 include src/app/exception/Makefrag.am
 include src/app/usage/Makefrag.am
 include src/app/version/Makefrag.am
-#
-$(scold_cxxdir)/app/dependencies.mk: $(lib_libapp_la_SOURCES)
-$(lib_libapp_la_SOURCES) : obj/src/%.cpp : src/%.xcpp
-	$(TF_V_DIS) $(call TF_XCPP2CPP, $<)
-	$(TF_V_DONE) test -e $@
-$(scold_cxxdir)/app/dependencies.mk:
-	$(TF_V_DEP) $(call TF_DEPENDENCIES, $^)
-	$(TF_V_DONE) test -e $@
-include $(scold_cxxdir)/app/dependencies.mk
-clean-dependencies::
-	rm -f $(scold_cxxdir)/app/dependencies.mk

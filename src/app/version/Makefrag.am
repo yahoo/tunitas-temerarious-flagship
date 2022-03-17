@@ -4,8 +4,8 @@
 # For terms, see the LICENSE file at https://github.com/yahoo/tunitas-basics/blob/master/LICENSE
 # For terms, see the LICENSE file at https://git.tunitas.technology/all/components/basics/tree/LICENSE
 #
-obj_src_app_version_SUBSOURCES = \
-  obj/src/app/version/namespace.cpp \
-  obj/src/app/version/String.cpp \
-  obj/src/app/version/Generator.cpp \
+app_version_SUBSOURCES = \
+  noinst/obj/src/app/version/namespace.cpp \
+  noinst/obj/src/app/version/String.cpp \
+  noinst/obj/src/app/version/Generator.cpp \
   $(end)

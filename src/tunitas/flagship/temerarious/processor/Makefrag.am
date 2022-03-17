@@ -4,12 +4,12 @@
 # For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
 # For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
 #
-obj_src_tunitas_flagship_temerarious_processor_SUBSOURCES = \
+tunitas_flagship_temerarious_processor_SUBSOURCES = \
   obj/src/tunitas/flagship/temerarious/processor/namespace.cpp \
   obj/src/tunitas/flagship/temerarious/processor/State.cpp \
   obj/src/tunitas/flagship/temerarious/processor/State.Dumper.cpp \
   obj/src/tunitas/flagship/temerarious/processor/Preparation.cpp \
-  $(obj_src_tunitas_flagship_temerarious_processor_exception_SUBSOURCES) \
+  $(tunitas_flagship_temerarious_processor_exception_SUBSOURCES) \
   obj/src/tunitas/flagship/temerarious/processor/run.cpp \
   $(end)
 #

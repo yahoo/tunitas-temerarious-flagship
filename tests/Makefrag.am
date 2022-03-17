@@ -1,0 +1,41 @@
+# This is a GNU -*- Makefile -*- which is managed by automake.
+# Copyright Yahoo Inc, 2022.
+# Licensed under the terms of the Apache-2.0 license.
+# For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+# For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENS
+#
+XPASS_TESTS = \
+  $(tests_unit_XPASS_TESTS) \
+  $(tests_tf_XPASS_TESTS) \
+  $(tests_roff_XPASS_TESTS) \
+  $(tests_scripty_tf_XPASS_TESTS) \
+  $(tests_scripty_roff_XPASS_TESTS) \
+  $(tests_readme_XPASS_TESTS) \
+  $(end)
+XFAIL_TESTS = \
+  $(tests_unit_XFAIL_TESTS) \
+  $(tests_catty_XFAIL_TESTS) \
+  $(tests_tf_XFAIL_TESTS) \
+  $(tests_roff_XFAIL_TESTS) \
+  $(tests_scripty_tf_XFAIL_TESTS) \
+  $(tests_scripty_roff_XFAIL_TESTS) \
+  $(tests_readme_XFAIL_TESTS) \
+  $(end)
+TESTS = \
+  $(tests_unit_TESTS) \
+  $(tests_catty_TESTS) \
+  $(tests_tf_TESTS) \
+  $(tests_roff_TESTS) \
+  $(tests_scripty_tf_TESTS) \
+  $(tests_scripty_roff_TESTS) \
+  $(tests_readme_TESTS) \
+  $(end)
+
+#
+include tests/unit/Makefrag.am
+include tests/catty/Makefrag.am
+include tests/tf/Makefrag.am
+include tests/roff/Makefrag.am
+include tests/scripty/roff/Makefrag.am
+include tests/scripty/tf/Makefrag.am
+include tests/readme/Makefrag.am

@@ -1,0 +1,23 @@
+# This is a GNU -*- Makefile -*- which is managed by automake.
+# Copyright Yahoo Inc, 2022.
+# Licensed under the terms of the Apache-2.0 license.
+# For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+# For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#
+bin_tf = bin/tf$(error REMOVE)
+bin_tf_CPPFLAGS = $(PACKAGE_CPPFLAGS_SET)
+bin_tf_CXXFLAGS = $(PACKAGE_CXXFLAGS_SET)
+bin_tf_LDFLAGS = $(PACKAGE_LDFLAGS_SET)
+bin_tf_LDADD = noinst/lib/libapp-tf.la
+bin_tf_SOURCES = noinst/obj/src/app/tf/c.main.cpp
+$(bin_tf_SOURCES)  : disco_objdir=noinst/obj
+$(bin_tf_SOURCES)  : scold_objdir=$(disco_objdir)
+$(bin_tf_SOURCES)  : noinst/obj/src/%.cpp : src/%.xcpp
+	$(TF_V_DIS) $(call TF_XCPP2CPP, $<)
+	$(TF_V_DONE) test -e $@
+$(ht_noinst_mkdir)/tf.mk: $(bin_tf_SOURCES)
+$(ht_noinst_mkdir)/tf.mk:
+	$(TF_V_DEP) $(call TF_DEPENDENCIES, $^)
+	$(TF_V_DONE) test -e $@
+include $(ht_noinst_mkdir)/tf.mk
+clean-dependencies:: ; rm -f $(ht_noinst_mkdir)/tf.mk

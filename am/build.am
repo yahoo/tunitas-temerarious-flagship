@@ -39,6 +39,7 @@
 #    TESTS = ...
 #    ...etc...
 #    
+# $(info TRACE hypogeal_twilight_datadir=$(hypogeal_twilight_datadir))
 ifneq "0" "$(words $(wildcard $(hypogeal_twilight_datadir)/mk/sys.o.DUMMIES.mk))"
 # not (yet) available in hypogeal-twilight 0.46, so look to the else clause
 include $(hypogeal_twilight_datadir)/mk/sys.o.DUMMIES.mk
@@ -74,6 +75,18 @@ else
 include $(hypogeal_twilight_datadir)/am/EXTERNAL-PATHS.mk
 include $(hypogeal_twilight_datadir)/am/compile.mk
 endif
+#
+# Expected evolution of hypogeal-twilight is something like :
+#
+#    "bb"-prefixed -\ (then)
+#                    |
+#                    \---> DC -\ (then)
+#                              |
+#                              \---> DISCO (finally in hypogeal-twilight >= 0.50)
+#
+# There MUST be compatibility along the way to allow for Tunitas Technologies and downstream to have continuity.
+# temerarious-flagship SHOULD use $(DISCO), but historically uses any of $(DC) $(bbDC) and others
+#
 $(if $(DC),$(__OK),$(error DC is not set, you should call TF_PROG_DC in configure.ac))
 ifeq "FAIL" "$(shell type -p $(DC) 2>/dev/null || echo FAIL)"
 $(warning DC=$(DC) and $(DC) is not in your PATH)
@@ -84,8 +97,27 @@ DC := $(std_scold_prefix)/bin/$(DC)
 $(warning have reset DC=$(DC))
 endif
 endif
-# temerarious-flagship uses $(DC)
-# hypogeal-twilight still uses $(bbDC) but will use $(DC) one day soon
+ifneq "1" "$(words $(DISCO))"
+$(if $(VERBOSITY_CONDITION),\
+     $(warning DISCO is not set, you should call TF_PROG_DISCO in configure.ac)\
+     $(warning setting DISCO=$(DC) to provide consistency until TF_PROG_DISCO covers this))
+DISCO := $(DC)
+endif
+ifeq "FAIL" "$(shell type -p $(DISCO) 2>/dev/null || echo FAIL)"
+$(warning DISCO=$(DISCO) and $(DISCO) is not in your PATH)
+ifneq "0" "$(words $(wildcard $(std_scold_prefix)/bin/$(DISCO)))"
+$(warning yet $(std_scold_prefix)/$(DISCO) exists so as a temporary hack, the build system will use that.)
+$(warning SUGGEST adding 'export PATH=$(std_scold_prefix)/bin:$${PATH}' to your build environment or ~/.bash_profile)
+DISCO := $(std_scold_prefix)/bin/$(DISCO)
+$(warning have reset DISCO=$(DISCO))
+endif
+endif
+#
+# prefer DISCO=disco'
+# allow: DC, bbDC and other variants
+# allow 'remonstrate' (the older developmental name)
+# hypogeal-twilight still supports (bbDC), $(DC) and of course (DISCO)
+#
 ifeq "remonstrate" "$(bbDC)"
 ifeq "1" "$(words $(DC))"
 bbDC = $(DC)
@@ -168,3 +200,54 @@ __tf_DUN_  = $(__tf_DUN_0)
 __tf_DUN_0_LOUD = @echo "  TF-DONE  $@";
 __tf_DUN_0 = @
 __tf_DUN_1 = 
+
+#
+# The 'tf_' prefix is preferred over the 'ht_' prefix
+# but the migration is slow.
+#
+tf_srcdir = $(ht_srcdir)
+tf_objdir = $(ht_objdir)
+tf_mkdir = $(ht_mkdir)
+tf_cxx_srcdir     = $(ht_cxx_srcdir)
+tf_cxx_modulesdir = $(ht_cxx_modulesdir)
+tf_cxx_includedir = $(ht_cxx_includedir)
+tf_includedir = $(ht_includedir)
+tf_modulesdir = $(ht_modulesdir)
+tf_cxxdir = $(ht_cxxdir)
+#
+tf_check_srcdir         = $(ht_check_srcdir)
+tf_check_objdir         = $(ht_check_objdir)
+tf_check_mkdir          = $(ht_check_mkdir)
+tf_check_cxx_srcdir     = $(ht_check_cxx_srcdir)
+tf_check_cxx_includedir = $(ht_check_cxx_includedir)
+tf_check_cxx_modulesdir = $(ht_check_cxx_modulesdir)
+#
+# [[disallowed]] but a common mis-use
+tf_check_includedir = $(ht_check_includedir)
+tf_check_modulesdir = $(ht_check_modulesdir)
+tf_check_cxxdir     = $(ht_check_cxxdir)
+# [[disallowed]] outrigtf
+tf_checksrcdir     = $(ht_checksrcdir)
+tf_checkobjdir     = $(ht_checkobjdir)
+tf_checkcxx_srcdir = $(ht_checkcxx_srcdir)
+# [[deprecating]]
+tf_check_obj       = $(ht_check_obj)
+tf_checkobj        = $(ht_checkobj)
+#
+tf_noinst_srcdir         = $(ht_noinst_srcdir)
+tf_noinst_objdir         = $(ht_noinst_objdir)
+tf_noinst_mkdir          = $(ht_noinst_mkdir)
+tf_noinst_cxx_srcdir     = $(ht_noinst_cxx_srcdir)
+tf_noinst_cxx_includedir = $(ht_noinst_cxx_includedir)
+tf_noinst_cxx_modulesdir = $(ht_noinst_cxx_modulesdir)
+#
+# [[disallowed]] but a common mis-use
+tf_noinst_includedir = $(ht_noinst_includedir)
+tf_noinst_modulesdir = $(ht_noinst_modulesdir)
+tf_noinst_cxxdir     = $(ht_noinst_cxxdir)
+#
+# [[disallowed]] outright
+tf_noinstsrcdir     = $(ht_noinstsrcdir)
+tf_noinstobjdir     = $(ht_noinstobjdir)
+tf_noinstcxx_srcdir = $(ht_noinstcxx_srcdir)
+

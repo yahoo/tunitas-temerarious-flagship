@@ -4,6 +4,6 @@
 # For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
 # For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
 #
-obj_src_tunitas_flagship_temerarious_required_SUBSOURCES = \
+tunitas_flagship_temerarious_required_SUBSOURCES = \
   obj/src/tunitas/flagship/temerarious/required/namespace.cpp \
   $(end)

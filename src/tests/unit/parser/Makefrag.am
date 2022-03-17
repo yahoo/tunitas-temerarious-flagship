@@ -4,10 +4,10 @@
 # For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
 # For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
 #
-obj_src_tests_unit_parser_SUBSOURCES = \
-  obj/src/tests/unit/parser/namespace.cpp \
-  obj/src/tests/unit/parser/Fixture.cpp \
-  $(obj_src_tests_unit_parser_assess_SUBSOURCES) \
+tests_unit_parser_SUBSOURCES = \
+  check/obj/src/tests/unit/parser/namespace.cpp \
+  check/obj/src/tests/unit/parser/Fixture.cpp \
+  $(tests_unit_parser_assess_SUBSOURCES) \
   $(end)
 #
 include src/tests/unit/parser/assess/Makefrag.am

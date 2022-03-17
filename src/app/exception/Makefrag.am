@@ -4,9 +4,9 @@
 # For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
 # For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
 #
-obj_src_app_exception_SUBSOURCES = \
-  obj/src/app/exception/namespace.cpp \
-  obj/src/app/exception/Aspect.cpp \
-  obj/src/app/exception/Testing.cpp \
-  obj/src/app/exception/facet.Quitting.cpp \
+app_exception_SUBSOURCES = \
+  noinst/obj/src/app/exception/namespace.cpp \
+  noinst/obj/src/app/exception/Aspect.cpp \
+  noinst/obj/src/app/exception/Testing.cpp \
+  noinst/obj/src/app/exception/facet.Quitting.cpp \
   $(end)

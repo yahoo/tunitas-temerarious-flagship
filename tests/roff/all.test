@@ -1,4 +1,5 @@
 #!/bin/sh
 __topdir=$(realpath ${0%/*}/../..)
 export PATH="${__topdir?}/check/bin:${__topdir?}/bin:$PATH"
+exec < /dev/null
 roff /

@@ -4,9 +4,9 @@
 # For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
 # For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
 #
-obj_src_tests_unit_error_SUBSOURCES = \
-  obj/src/tests/unit/error/namespace.cpp \
-  obj/src/tests/unit/error/Fixture.cpp \
-  obj/src/tests/unit/error/code.Fixture.cpp \
-  obj/src/tests/unit/error/condition.Fixture.cpp \
+tests_unit_error_SUBSOURCES = \
+  check/obj/src/tests/unit/error/namespace.cpp \
+  check/obj/src/tests/unit/error/Fixture.cpp \
+  check/obj/src/tests/unit/error/code.Fixture.cpp \
+  check/obj/src/tests/unit/error/condition.Fixture.cpp \
   $(end)

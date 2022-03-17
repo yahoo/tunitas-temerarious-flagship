@@ -10,49 +10,52 @@ AUTOMAKE_OPTIONS = no-define subdir-objects foreign
 ACLOCAL_AMFLAGS = -I m4
 
 default:
+include tests/Makefrag.am
 include @temerarious_flagship_datadir@/am/build.am
 include mk/check-ac.mk
 
 DEVELOPMENT_AREAS = \
   $(module_langu_prefix) \
   $(module_nonstd_prefix) \
-  $(module_options_prefix) \
-  $(module_posix_prefix) \
-  $(module_std_prefix) \
-  $(module_string_prefix) \
+  $(module_cli_core_prefix) \
   $(module_sys_prefix) \
   $(tunitas_basics_prefix) \
+  $(deprecated_DEVELOPMENT_AREAS) \
   $(end)
 TESTING_AREAS = \
-  $(module_cppunit_prefix) \
   $(module_rigging_app_prefix) \
   $(module_rigging_core_prefix) \
-  $(module_rigging_prefix) \
+  $(deprecated_TESTING_AREAS) \
   $(end)
 INSTALLATION_AREAS = \
   $(nonstd_gcc_prefix) \
   $(std_scold_prefix) \
   $(std_tunitas_prefix) \
+  $(deprecated_INSTALLATION_AREAS) \
   $(end)
 
-include addenda/nonstd/Makefrag.am
-include src/app/Makefrag.am
-include src/app/tf/Makefrag.am
-include src/app/tf/thunks/Makefrag.am
-include src/app/roff/Makefrag.am
-include src/autotools/autoconf/Makefrag.am
-include src/std/Makefrag.am
-include src/tunitas/flagship/temerarious/Makefrag.am
-include src/tests/Makefrag.am
-include src/tests/catty/Makefrag.am
-include src/tests/roff/Makefrag.am
-include src/tests/tf/Makefrag.am
-include src/tests/unit/Makefrag.am
+include bin/tf.am
+include check/bin//catty.am
+include check/bin//roff.am
+include check/bin//tf.am
+include check/bin//unit.am
+include check/lib/libtests.am
+include libexec/temerarious-flagship/roff.am
+include libexec/temerarious-flagship/thunks.am # which recursively includes at least: echo help list ls usage version
+include lib/libtunitas-flagship-temerarious.am
+include noinst/lib/libaddenda+nonstd.am
+include noinst/lib/libapp.am
+include noinst/lib/libapp-roff.am
+include noinst/lib/libapp-tf.am
+include noinst/lib/libautotools-autoconf+tunitas-flagship-temerarious.am
+include noinst/lib/libstd+tunitas-flagship-temerarious.am
+include noinst/lib/libtunitas-flagship-temerarious.am
 
 # install rules arrive from from @temerarious_flagship_datadir@/am/install.am
 INSTALL_MODULES = \
-  $(lib_libtunitas_flagship_temerarious_la) \
-  $(lib_libwant_la) \
+  $(noinst_lib_libtunitas_flagship_temerarious_la_MODULES) \
+  $(noinst_lib_libautotools_autoconf_tunitas_flagship_temerarious_la_MODULES) \
+  $(noinst_lib_libstd_tunitas_flagship_temerarious_la_MODULES) \
   $(end)
 $(if $(DEBUGGING_CONDITION),$(info DEBUG INSTALL_MODULES=$(INSTALL_MODULES)))
 
@@ -67,19 +70,20 @@ libexec_temerarious_flagship_PROGRAMS = \
   libexec/temerarious-flagship/echo \
   libexec/temerarious-flagship/help \
   libexec/temerarious-flagship/list \
-  libexec/temerarious-flagship/ls \
+  libexec/temerarious-flagship/eles \
   libexec/temerarious-flagship/roff \
   libexec/temerarious-flagship/usage \
   libexec/temerarious-flagship/version \
   $(end)
 lib_LTLIBRARIES = lib/libtunitas-flagship-temerarious.la
 noinst_LTLIBRARIES = \
-  lib/libaddenda,nonstd.la \
-  lib/libautotools-autoconf.la \
-  lib/libstd,temerarious-flagship.la \
-  lib/libapp.la \
-  lib/libapp-roff.la \
-  lib/libapp-tf.la \
+  noinst/lib/libaddenda+nonstd.la \
+  noinst/lib/libautotools-autoconf+tunitas-flagship-temerarious.la \
+  noinst/lib/libstd+tunitas-flagship-temerarious.la \
+  noinst/lib/libtunitas-flagship-temerarious.la \
+  noinst/lib/libapp.la \
+  noinst/lib/libapp-roff.la \
+  noinst/lib/libapp-tf.la \
   $(end)
 check_PROGRAMS = \
   check/bin/unit \
@@ -94,40 +98,6 @@ check_LTLIBRARIES = check/lib/libtests.la
 # NEED ---> module_sys_datadir = $(dir $(word 1, $(wildcard $(addsuffix /mk /share/module-sys/mk,$(module_sys_prefix) $(std_scold_prefix) $(prefix)))))
 # NEED ---> .PRECIOUS: $(module_sys_datadir)/mk/sys.o.DUMMIES.mk
 # NEED ---> include $(module_sys_datadir)/mk/sys.o.DUMMIES.mk
-
-include tests/unit/Makefrag.am
-include tests/catty/Makefrag.am
-include tests/tf/Makefrag.am
-include tests/roff/Makefrag.am
-include tests/scripty/roff/Makefrag.am
-include tests/scripty/tf/Makefrag.am
-include tests/readme/Makefrag.am
-XPASS_TESTS = \
-  $(tests_unit_XPASS_TESTS) \
-  $(tests_tf_XPASS_TESTS) \
-  $(tests_roff_XPASS_TESTS) \
-  $(tests_scripty_tf_XPASS_TESTS) \
-  $(tests_scripty_roff_XPASS_TESTS) \
-  $(tests_readme_XPASS_TESTS) \
-  $(end)
-XFAIL_TESTS = \
-  $(tests_unit_XFAIL_TESTS) \
-  $(tests_catty_XFAIL_TESTS) \
-  $(tests_tf_XFAIL_TESTS) \
-  $(tests_roff_XFAIL_TESTS) \
-  $(tests_scripty_tf_XFAIL_TESTS) \
-  $(tests_scripty_roff_XFAIL_TESTS) \
-  $(tests_readme_XFAIL_TESTS) \
-  $(end)
-TESTS = \
-  $(tests_unit_TESTS) \
-  $(tests_catty_TESTS) \
-  $(tests_tf_TESTS) \
-  $(tests_roff_TESTS) \
-  $(tests_scripty_tf_TESTS) \
-  $(tests_scripty_roff_TESTS) \
-  $(tests_readme_TESTS) \
-  $(end)
 
 # The Makefile_*SET variables are assembled by .../toolflags.mk
 
@@ -167,3 +137,18 @@ clean-dependencies::
 clean-local:: clean-dependencies
 
 default: all
+
+deprecated_DEVELOPMENT_AREAS = \
+  $(module_options_prefix) \
+  $(module_posix_prefix) \
+  $(module_std_prefix) \
+  $(module_string_prefix) \
+  $(end)
+deprecated_TESTING_AREAS = \
+  $(module_cppunit_prefix) \
+  $(module_rigging_prefix) \
+  $(end)
+deprecated_INSTALLATION_AREAS = \
+  $(none) \
+  $(end)
+

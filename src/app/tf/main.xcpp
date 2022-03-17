@@ -162,7 +162,14 @@ namespace app::tf {
                        return Config::package_applibexecdir();
                      }
                    }();
-      return redir / first.filename();
+      auto subcommand = [first]{
+                          auto duhfault = first.filename();
+                          if ("ls"s == duhfault) {
+                            duhfault = "eles"s; // because "eles" cannot be called "ls" lest that conflict with /bin/ls which MUST NOT ever be shaddowed
+                          }
+                          return duhfault;
+                        }();
+      return redir / subcommand;
     }
     auto body::guess_actual_installed_prefix(Argv av) -> Optional<Filepath> {
       //

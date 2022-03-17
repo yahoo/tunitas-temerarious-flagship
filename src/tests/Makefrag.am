@@ -4,28 +4,9 @@
 # For terms, see the LICENSE file at https://github.com/yahoo/tunitas-basics/blob/master/LICENSE
 # For terms, see the LICENSE file at https://git.tunitas.technology/all/components/basics/tree/LICENSE
 #
-check_lib_libtests_la_CPPFLAGS = $(CHECK_CPPFLAGS_SET)
-check_lib_libtests_la_CXXFLAGS = $(CHECK_CXXFLAGS_SET)
-check_lib_libtests_la_LDFLAGS = $(CHECK_LDFLAGS_SET)
-check_lib_libtests_la_LIBADD = $(none)
-check_lib_libtests_la_MODULES = $(none)
-check_lib_libtests_la_SOURCES = \
+tests_SUBSOURCES = \
   check/obj/src/tests/namespace.cpp \
   $(tests_fixture_SUBSOURCES) \
   $(end)
 #
 include src/tests/fixture/Makefrag.am
-#
-src_tests_SCOLD_OVERRIDES = $(checkobj)/src/tests/dependencies.mk $(check_lib_libtests_la_SOURCES)
-$(src_tests_SCOLD_OVERRIDES) : scold_objdir=$(checkobj)
-#
-$(checkobj)/src/tests/dependencies.mk: $(check_lib_libtests_la_SOURCES)
-$(check_lib_libtests_la_SOURCES) : $(checkobj)/src/%.cpp : src/%.xcpp
-	$(HT_V_COLD) $(call HT_XCPP2CPP, $<)
-	@test -e $@
-$(checkobj)/src/tests/dependencies.mk:
-	$(HT_V_BOTH) $(call HT_DEPENDENCIES, $^)
-	@test -e $@
-include $(checkobj)/src/tests/dependencies.mk
-clean-dependencies::
-	rm -f $(checkobj)/src/tests/dependencies.mk

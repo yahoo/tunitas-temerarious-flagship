@@ -1,0 +1,37 @@
+# This is a -*- Makefile -* which is managed by automake and evaluated by GNU make
+# Copyright Yahoo Inc, 2021.
+# Licensed under the terms of the Apache-2.0 license.
+# For terms, see the LICENSE file at https://github.com/yahoo/tunitas-basics/blob/master/LICENSE
+# For terms, see the LICENSE file at https://git.tunitas.technology/all/components/basics/tree/LICENSE
+#
+app_thunks_SUPERSOURCES = \
+  $(libexec_temerarious_flagship_echo_SOURCES) \
+  $(libexec_temerarious_flagship_eles_SOURCES) \
+  $(libexec_temerarious_flagship_list_SOURCES) \
+  $(libexec_temerarious_flagship_help_SOURCES) \
+  $(libexec_temerarious_flagship_usage_SOURCES) \
+  $(libexec_temerarious_flagship_version_SOURCES) \
+  $(end)
+#
+include libexec/temerarious-flagship/echo.am
+include libexec/temerarious-flagship/list.am
+include libexec/temerarious-flagship/eles.am
+include libexec/temerarious-flagship/help.am
+include libexec/temerarious-flagship/usage.am
+include libexec/temerarious-flagship/version.am
+#
+$(app_thunks_SUPERSOURCES) : DISCOFLAGS+=--no-insert-namespace
+$(app_thunks_SUPERSOURCES) : DC_FLAGS+=$(DISCOFLAGS)
+$(app_thunks_SUPERSOURCES) : bbDC_FLAGS+=$(DISCOFLAGS)
+#
+$(app_thunks_SUPERSOURCES) : disco_objdir=noinst/obj
+$(app_thunks_SUPERSOURCES) : scold_objdir=$(disco_objdir)
+$(app_thunks_SUPERSOURCES) : noinst/obj/src/%.cpp : src/%.xcpp
+	$(TF_V_DIS) $(call TF_XCPP2CPP, $<)
+	@test -e $@
+$(tf_noinst_mkdir)/thunks.mk: $(app_thunks_SUPERSOURCES)
+$(tf_noinst_mkdir)/thunks.mk:
+	$(TF_V_DEP) $(call TF_DEPENDENCIES, $^)
+	@test -e $@
+include $(tf_noinst_mkdir)/thunks.mk
+clean-dependencies:: ; rm -f $(tf_noinst_mkdir)/thunks.mk

@@ -1,0 +1,28 @@
+# This is a GNU -*- Makefile -*- which is managed by automake.
+# Copyright Yahoo Inc, 2022.
+# Licensed under the terms of the Apache-2.0 license.
+# For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+# For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#
+noinst_lib_libtunitas_flagship_temerarious_la_CPPFLAGS = $(PACKAGE_CPPFLAGS_SET)
+noinst_lib_libtunitas_flagship_temerarious_la_CXXFLAGS = $(PACKAGE_CXXFLAGS_SET)
+noinst_lib_libtunitas_flagship_temerarious_la_LDFLAGS = $(PACKAGE_LDFLAGS_SET)
+noinst_lib_libtunitas_flagship_temerarious_la_LIBADD = \
+  noinst/lib/libaddenda+nonstd.la \
+  noinst/lib/libautotools-autoconf+tunitas-flagship-temerarious.la \
+  noinst/lib/libstd+tunitas-flagship-temerarious.la \
+  -ltunitas \
+  -lsys++-posix -lsys++ -lnonstd++ \
+  $(end)
+noinst_lib_libtunitas_flagship_temerarious_la_MODULES = $(call TF_SOURCEStoMODULES, $(noinst_lib_libtunitas_flagship_temerarious_la_SOURCES))
+noinst_lib_libtunitas_flagship_temerarious_la_SOURCES = $(tunitas_flagship_temerarious_SUBSOURCES)
+include src/tunitas/flagship/temerarious/Makefrag.am
+$(noinst_lib_libtunitas_flagship_temerarious_la_SOURCES) : obj/src/%.cpp : src/%.xcpp
+	$(TF_V_DIS) $(call TF_XCPP2CPP, $<)
+	$(TF_V_DONE) test -e $@
+$(tf_noinst_mkdir)/libtunitas-flagship-temerarious.mk: $(noinst_lib_libtunitas_flagship_temerarious_la_SOURCES)
+$(tf_noinst_mkdir)/libtunitas-flagship-temerarious.mk:
+	$(TF_V_DEP) $(call TF_DEPENDENCIES, $^)
+	$(TF_V_DONE) test -e $@
+include $(tf_noinst_mkdir)/libtunitas-flagship-temerarious.mk
+clean-dependencies:: ; rm -f $(tf_noinst_mkdir)/libtunitas-flagship-temerarious.mk

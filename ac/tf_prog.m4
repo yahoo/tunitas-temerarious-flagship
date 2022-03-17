@@ -22,6 +22,7 @@ dnl Some basic well-understood checkification of tools (programs).
 dnl Following the paradigm of AC_PROG_CXX, etc.
 dnl
 AC_DEFUN([TF_PROG_DC], [
+    AC_REQUIRE([HT_PROG_DC])
     AC_ARG_VAR([DC], [The S.C.O.L.D. CPP Language Disaggregation Compiler (DC)])
     : ${DC:=remonstrate}
     if ! type -p ${DC?} ; then
@@ -40,6 +41,12 @@ AC_DEFUN([TF_PROG_DC], [
 	    AC_MSG_WARN([this build can reasonably be expected to fail])
 	fi			    
     fi
+])
+
+AC_DEFUN([TF_PROG_DISCO], [
+    AC_REQUIRE([HT_PROG_DISCO)]
+    AC_REQUIRE([TF_PROG_DC])
+    : ${DISCO:=${DC?}}
 ])
 
 AC_DEFUN([TF_PROG_GCC], [
