@@ -93,7 +93,6 @@ check_PROGRAMS = \
   $(end)
 check_LTLIBRARIES = check/lib/libtests.la
 
-# NEED THIS or else...
 # SHOULD already be supplied in .../am/build.am
 # NEED ---> module_sys_datadir = $(dir $(word 1, $(wildcard $(addsuffix /mk /share/module-sys/mk,$(module_sys_prefix) $(std_scold_prefix) $(prefix)))))
 # NEED ---> .PRECIOUS: $(module_sys_datadir)/mk/sys.o.DUMMIES.mk
