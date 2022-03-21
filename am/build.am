@@ -39,7 +39,14 @@
 #    TESTS = ...
 #    ...etc...
 #    
-# implementation details
+ifneq "0" "$(words $(wildcard $(hypogeal_twilight_datadir)/mk/sys.o.DUMMIES.mk))"
+# not available in hypogeal-twilight 0.46, so look to the else clause
+include $(hypogeal_twilight_datadir)/mk/sys.o.DUMMIES.mk
+else
+ifneq "0" "$(words $(wildcard $(temerarious_flagship_datadir)/mk/sys.o.DUMMIES.mk))"
+include $(temerarious_flagship_datadir)/mk/sys.o.DUMMIES.mk
+endif
+endif
 ifneq "0" "$(words $(wildcard $(hypogeal_twilight_datadir)/am/compile.am))"
 # current as of hypogeal-twilight >= 0.45.0-0.devel (mainline, Epoch:0)
 # WATCHOUT because this idiom MAY NOT be in the "ahead release" series Epoch:2 viz hypogeal-twilight >= 2:0.45
@@ -82,8 +89,32 @@ define TF_COMPILE =
 	: AVOID instead use TF_DEPENDENCIES in the dependency-tracing style
 	{ $(call TF_DISAGGREGATE_COMPILE, $1) ; } && { $(call TF_DEPENDENCIES_COMPILE, $1) ; }
 endef
-TF_DISAGGREGATE = $(call TF_COMPILE, $1)$(warning TF_DISAGGREGATE is deprecated, instead prefer TF_COMPILE)
-TF_SOURCEStoMODULES = $(call HGTW_SOURCEStoMODULES, $1)
+TF_DISAGGREGATE = \
+  $(call TF_COMPILE, $1) \
+  $(warning TF_DISAGGREGATE is deprecated, instead prefer TF_COMPILE)
+TF_SOURCEStoMODULES = \
+  $(if $(HT_SOURCEStoMODULES), \
+       $(call HT_SOURCEStoMODULES, $1), \
+       $(if $(HGTW_SOURCEStoMODULES), \
+            $(call HGTW_SOURCEStoMODULES, $1), \
+            $(if $(SCOLD_SOURCEStoMODULES), \
+                 $(call SCOLD_SOURCEStoMODULES, $1), \
+                 $(error no SOURCEStoMODULES at all))))
+#
+# PREFER the use of TF_XCPP2CPP and TF_DEPENDENCIES
+# Usage:
+#
+#     $(scold_cxxdir)/want/dependencies.mk: $(lib_libwant_la_SOURCES)
+#     $(lib_libwant_la_SOURCES) : obj/src/%.cpp : src/%.xcpp
+#     	$(TF_V_DIS) $(call TF_XCPP2CPP, $<)
+#     	$(TF_V_DUN) test -e $@
+#     $(scold_cxxdir)/want/dependencies.mk:
+#     	$(TF_V_COM) $(call TF_DEPENDENCIES, $^)
+#     	$(TF_V_DUN) test -e $@
+#     include $(scold_cxxdir)/want/dependencies.mk
+#     clean-dependencies::
+#     	rm -f $(scold_cxxdir)/want/dependencies.mk
+#
 TF_XCPP2CPP = $(call HT_XCPP2CPP,$1)
 TF_DEPENDENCIES = $(call HT_DEPENDENCIES,$1)
 
