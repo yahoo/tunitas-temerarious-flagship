@@ -4,6 +4,7 @@ This is The Tunitas Build System.  This is an [autotools-based](https://www.gnu.
 
 What's with the name?  See the [definition](#definition).
 
+Current work with modern-generation tooling, <em>e.g.</em> circa Fedora 36+ and GCC 12+, is occurring around the <em>v2-themed</em> feature branches.
 ## Table of Contents
 
 - [Background](#background)
