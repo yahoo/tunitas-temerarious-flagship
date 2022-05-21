@@ -4,8 +4,8 @@
 # For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
 # For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
 #
+tests_catty_TESTS = $(tests_catty_XFAIL_TESTS) $(tests_catty_XGOOD_TESTS)
 tests_catty_XFAIL_TESTS = 
-tests_catty_TESTS = \
+tests_catty_XGOOD_TESTS = \
   tests/catty/run.test \
-  $(tests_catty_XFAIL_TESTS) \
   $(end)

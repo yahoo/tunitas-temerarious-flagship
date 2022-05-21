@@ -39,3 +39,64 @@ include tests/roff/Makefrag.am
 include tests/scripty/roff/Makefrag.am
 include tests/scripty/tf/Makefrag.am
 include tests/readme/Makefrag.am
+
+our_TESTS_bases = $(patsubst %.log, %, $(TEST_LOGS)
+our_TESTS_log = $(addsuffix .log, $(our__TESTS_bases))
+our_TESTS_trs = $(addsuffix .trs, $(our__TESTS_bases))
+$(our_TESTS_log) : $(check_PROGRAMS) $(check_LTLIBRARIES)
+tests/run-TESTS: $(check_PROGRAMS) $(check_LTLIBRARIES)
+	@rm -f $(RECHECK_LOGS) \
+	       $(RECHECK_LOGS:.log=.trs) \
+	       $(TEST_SUITE_LOG)
+	$(MAKE) $(AM_MAKEFLAGS) $(TEST_SUITE_LOG)
+
+# make check SLOW=1
+#
+# These are very very slow tests.  They run the autotools buildconf-configure-make process for each and every known m4 macro
+# to "prove" that it compiles and (uh) works for some basic definition of "works"   You want to run these at least at release signoff.
+#
+# WATCHOUT - Be sure to run these tests ONLY afer the "all" part of the build system has stabilized.
+# WATCHOUT - That is quirky to accomplish in automake as sometimes it provides rules and sometimes you can overide them; Sometimes not.
+#
+#   check: check-am
+#   check-am: all-am
+# 	$(MAKE) $(AM_MAKEFLAGS) $(check_PROGRAMS) $(check_LTLIBRARIES)
+# 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
+#
+# Solution:
+#                                       <------ pointless? (incorrect?) ------>
+#   $(TESTS_AC.fast) : ???check-am??? # $(check_PROGRAMS) $(check_LTLIBRARIES)
+#   $(TESTS_AC.slow) : ???check-am??? # $(check_PROGRAMS) $(check_LTLIBRARIES)
+#
+# WATCHOUT - whereas the 'install' rule is known to automake and can't be appended into, 'check' has no such behavior
+# n.b. we thus CAN depend upon augmantations of 'make check'
+tests/run-ac-TESTS: check-ac-$(if $(SLOW),slow,fast)
+
+TESTS_AC.test = $(wildcard tests/ac/*/run.test)
+TESTS_AC.fast = $(patsubst %.test, %.fast, $(TESTS_AC.test))
+TESTS_AC.slow = $(patsubst %.test, %.slow, $(TESTS_AC.test))
+
+# align the prettiness
+# witness
+#  "  CXX      obj/src/tests/unit/variable.Fixture.o"
+
+.PHONY: check-ac-fast
+check-ac-fast: $(TESTS_AC.fast)
+$(TESTS_AC.fast) : $(check_PROGRAMS) $(check_LTLIBRARIES)
+.PHONY: $(__TESTS_AC.fast)
+$(TESTS_AC.fast) : %.fast : %.test
+	@echo "FAST: (skipped) $<"
+
+.PHONY: check-ac-slow
+check-ac-slow: $(TESTS_AC.slow)
+$(TESTS_AC.slow) : $(check_PROGRAMS) $(check_LTLIBRARIES)
+.PHONY: $(__TESTS_AC.slow)
+$(TESTS_AC.slow) : %.slow : %.test
+	@tests/ac/driver $<
+
+__TESTS_AC.REQUIRED := $(shell tests/ac/generate-test-list ac/*.m4)
+__TESTS_AC.OBSERVED = $(patsubst %/,%, $(dir $(wildcard tests/ac/*/run.test)))
+__TESTS_AC.MISSING = $(filter-out $(__TESTS_AC_OBSERVED), $(__TESTS_AC_REQUIRED))
+$(if $(__TESTS_AC.MISSING),$(error the following m4 macro AC_DEFUN have no tests $(__TESTS_AC.MISSING)))
+debug.required-test-list: ; echo $(__TESTS_AC.REQUIRED)
+debug.observed-test-list: ; echo $(__TESTS_AC.OBSERVED)

@@ -8,11 +8,31 @@
 # cannot -Wall -Werror
 AUTOMAKE_OPTIONS = no-define subdir-objects foreign
 ACLOCAL_AMFLAGS = -I m4
+AM_MAKEFLAGS= \
+  MAKEFLAGS='$(MAKEFLAGS)' \
+  CPPFLAGS='$(CPPFLAGS)' \
+  CXXFLAGS='$(CXXFLAGS)' \
+  LDFLAGS='$(LDFLAGS)' \
+  $(end)
 
 default:
+# This bad design ... with limited tooling ... trying to get 'make' and one Makefile to do too many things "automatically"
+# This recursion and the ordering can't be fixed or overridden.
+#
+# WATCHOUT ---> The default 'all' rule DOES NOT pass command-line variable embellishments down one gratuitous level
+# WATCHOUT ---> all: config.h
+# WATCHOUT --->	     $(MAKE) $(AM_MAKEFLAGS) all-am
+# WATCHOUT --->	     $(MAKE) $(AM_MAKEFLAGS) all-am
+# WATCHOUT ---> all-am: Makefile $(PROGRAMS) $(LTLIBRARIES) config.h
+# WATCHOUT ---> 
+# WATCHOUT ---> The default 'check' rule DOES NOT pass command-line variable embellishments down one gratuitous level
+# WATCHOUT ---> check: check-am
+# WATCHOUT ---> check-am: all-am
+# WATCHOUT ---> 	$(MAKE) $(AM_MAKEFLAGS) $(check_PROGRAMS) $(check_LTLIBRARIES)
+# WATCHOUT ---> 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
+#
 include tests/Makefrag.am
 include @temerarious_flagship_datadir@/am/build.am
-include mk/check-ac.mk
 
 DEVELOPMENT_AREAS = \
   $(module_langu_prefix) \
@@ -150,4 +170,3 @@ deprecated_TESTING_AREAS = \
 deprecated_INSTALLATION_AREAS = \
   $(none) \
   $(end)
-

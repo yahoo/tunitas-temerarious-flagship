@@ -79,24 +79,16 @@ namespace tests::unit::field::body::fixture {
     }
   }
   auto Fixture::test_identifier_some_good() -> void {
-    // https://github.com/cplusplus/papers/issues/939
-    // https://wg21.link/p2012r0
-    [p2012=generate_identifier_goodness()]{
-      for (auto const item : p2012) {
-        auto good = library::isidentifier(item); // <-------------------- test this
-        CPPUNIT_ASSERT(good);
-      }
-    }();
+    for (auto const hold=generate_identifier_goodness(); auto const &item : hold) {
+      auto good = library::isidentifier(item); // <-------------------- test this
+      CPPUNIT_ASSERT(good);
+    }
   }
   auto Fixture::test_identifier_some_fail() -> void {
-    // https://github.com/cplusplus/papers/issues/939
-    // https://wg21.link/p2012r0
-    [p2012=generate_identifier_failures()]{
-      for (auto const item : p2012) {
-        auto good = library::isidentifier(item); // <-------------------- test this
-        CPPUNIT_ASSERT(!good);
-      }
-    }();
+    for (auto const hold=generate_identifier_failures(); auto const &item : hold) {
+      auto good = library::isidentifier(item); // <-------------------- test this
+      CPPUNIT_ASSERT(!good);
+    }
   }
   auto Fixture::test_filepath_each() -> void {
     for (auto i{0u}, e{256u}; e != i; ++i) {
@@ -107,24 +99,16 @@ namespace tests::unit::field::body::fixture {
     }
   }
   auto Fixture::test_filepath_some_good() -> void {
-    // https://github.com/cplusplus/papers/issues/939
-    // https://wg21.link/p2012r0
-    [p2012=generate_filepath_goodness()]{
-      for (auto const item : p2012) {
-        auto good = library::isfilepath(item); // <-------------------- test this
-        CPPUNIT_ASSERT(good);
-      }
-    }();
+    for (auto const hold=generate_filepath_goodness(); auto const &item : hold) {
+      auto good = library::isfilepath(item); // <-------------------- test this
+      CPPUNIT_ASSERT(good);
+    }
   }
   auto Fixture::test_filepath_some_fail() -> void {
-    // https://github.com/cplusplus/papers/issues/939
-    // https://wg21.link/p2012r0
-    [p2012=generate_filepath_failures()]{
-      for (auto const item : p2012) {
-        auto good = library::isfilepath(item); // <-------------------- test this
-        CPPUNIT_ASSERT(!good);
-      }
-    }();
+    for (auto const hold=generate_filepath_failures(); auto const &item : hold) {
+      auto good = library::isfilepath(item); // <-------------------- test this
+      CPPUNIT_ASSERT(!good);
+    }
   }
   auto Fixture::test_text_each() -> void {
     for (auto i{0u}, e{256u}; e != i; ++i) {
@@ -134,24 +118,16 @@ namespace tests::unit::field::body::fixture {
     }
   }
   auto Fixture::test_text_some_good() -> void {
-    // https://github.com/cplusplus/papers/issues/939
-    // https://wg21.link/p2012r0
-    [p2012=generate_text_goodness()]{
-      for (auto const item : p2012) {
-        auto good = library::istext(item); // <-------------------- test this
-        CPPUNIT_ASSERT(good);
-      }
-    }();
+    for (auto const hold=generate_text_goodness(); auto const &item : hold) {
+      auto good = library::istext(item); // <-------------------- test this
+      CPPUNIT_ASSERT(good);
+    }
   }
   auto Fixture::test_text_some_fail() -> void {
-    // https://github.com/cplusplus/papers/issues/939
-    // https://wg21.link/p2012r0
-    [p2012=generate_text_failures()]{
-      for (auto const item : p2012) {
-        auto good = library::istext(item); // <-------------------- test this
-        CPPUNIT_ASSERT(!good);
-      }
-    }();
+    for (auto const hold=generate_text_failures(); auto const &item : hold) {
+      auto good = library::istext(item); // <-------------------- test this
+      CPPUNIT_ASSERT(!good);
+    }
   }
   auto Fixture::test_find_first_blank() -> void {
     CPPUNIT_ASSERT(2 == library::find_first_blank("ab "sv));

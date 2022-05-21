@@ -3,6 +3,10 @@
 # Licensed under the terms of the Apache-2.0 license.
 # See the LICENSE file in https://github.com/yahoo/temerarious-flagship/blob/master/LICENSE for terms.
 # See the LICENSE file at the top of this repository.
+#
+# Some day ... one day...
+# let this be a stand-alone MAkefile (i.e. NOT included into $(top_srcdir)/Makefile.am_
+#
 default:
 all:
 install:

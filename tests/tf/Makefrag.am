@@ -4,8 +4,8 @@
 # For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
 # For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
 #
+tests_tf_TESTS = $(tests_tf_XFAIL_TESTS) $(tests_tf_XGOOD_TESTS)
 tests_tf_XFAIL_TESTS =
-tests_tf_TESTS = \
+tests_tf_XGOOD_TESTS = \
   tests/tf/all.test
-  $(tests_tf_XFAIL_TESTS) \
   $(end)

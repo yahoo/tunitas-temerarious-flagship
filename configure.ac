@@ -14,7 +14,7 @@ dnl
 dnl autoreconf --force --verbose --install
 dnl autoreconf -vfi
 dnl
-AC_INIT([temerarious-flagship], [2.0.1], [tunitas@tunitas.technology])
+AC_INIT([temerarious-flagship], [2.0.2], [tunitas@tunitas.technology])
 dnl and yes there are other flagships and other toolings (packages-named "flagship" and packages named "tooling")
 TF_INIT(AC_PACKAGE_NAME, AC_PACKAGE_VERSION, AC_PACKAGE_BUGREPORT)
 
