@@ -50,13 +50,7 @@
 : ${with_worktrees:=${with_build?}/worktrees}
 : ${with_nearby=${with_build?}/scold}
 : ${TAG:=STABLE}
-
-
-# some early aliasing
-: ${with_hypogeal_twilight:=${with_worktrees?}/hypogeal-twilight/v0.${HYPOGEAL:-${SCOLD:-${NEARBY:-${TAG?}}}}}
-source ${with_hypogeal_twilight?}/maintenance/fragment.module-cli-core.sh || exit ${EX_SOFTWARE:-70}
-source ${with_hypogeal_twilight?}/maintenance/fragment.module-cli-shell.sh || exit ${EX_SOFTWARE:-70}
-source ${with_hypogeal_twilight?}/maintenance/fragment.module-rigging-core.sh || exit ${EX_SOFTWARE:-70}
+: ${TRACE:=0}
 
 : ${with_nonstd_boost:=no}
 : ${with_nonstd_gcc:=no}
@@ -127,7 +121,12 @@ TUNITAS_UNIVERSE=( \
     rockaway \
     scarpet \
     walker \
-)
+    )
+function trace() {
+    if ((TRACE)) ; then
+        echo "TRACE $@"
+    fi
+}
 function extract_long_directory_name() {
     local split=($(echo -n $1 | sed -e 's,/, ,g'))
     local candidate=${split[0]}
@@ -180,7 +179,13 @@ function load_series() {
         else
             version=$(extract_version $spec)
             VARIABLE=$(extract_VARIABLE $spec)
+            eval trace "$VARIABLE=\$$VARIABLE $SERIES=\$$SERIES NEARBY=\$NEARBY TAG=\$TAG"
             if [[ -d ${with_worktrees?}/$short_project ]] ; then
+                # eval trace ": \${$with:=\${with_worktrees?}/$short_project/$version.\${$VARIABLE:-\${$SERIES:-\${NEARBY:-\${TAG?}}}}}"
+                # eval trace "\${$VARIABLE:-\${$SERIES:-\${NEARBY:-\${TAG?}}}}"
+                # eval trace "\${$SERIES:-\${NEARBY:-\${TAG?}}}"
+                # eval trace "\${NEARBY:-\${TAG?}}"
+                # eval trace "\${TAG?}"
                 eval ": \${$with:=\${with_worktrees?}/$short_project/$version.\${$VARIABLE:-\${$SERIES:-\${NEARBY:-\${TAG?}}}}}"
             elif [[ -d $cluster/$long_project ]] ; then
                 eval ": \${$with:=$cluster/$long_project}"
@@ -190,9 +195,10 @@ function load_series() {
                 eval ": \${$with:=no}"
             fi
         fi
-        eval echo "DEBUG $with=\$$with"
+        eval trace "$with=\$$with"
     done
 }
+set -xv
 load_series /build/scold SCOLD ${SCOLD_UNIVERSE[@]}
 load_series /build/useful USEFUL ${USEFUL_UNIVERSE[@]}
 load_series /build/tunitas TUNITAS ${TUNITAS_UNIVERSE[@]}
@@ -203,4 +209,9 @@ load_series /build/tunitas TUNITAS ${TUNITAS_UNIVERSE[@]}
 : ${with_tunitas_basics:=${with_basics?}}
 : ${with_tunitas_butano:=${with_butano?}}
 : ${with_tunitas_lobitos:=${with_lobitos?}}
+
+: ${with_hypogeal_twilight:=${with_worktrees?}/hypogeal-twilight/v0.${HYPOGEAL:-${SCOLD:-${NEARBY:-${TAG?}}}}}
+source ${with_hypogeal_twilight?}/maintenance/fragment.module-cli-core.sh || exit ${EX_SOFTWARE:-70}
+source ${with_hypogeal_twilight?}/maintenance/fragment.module-cli-shell.sh || exit ${EX_SOFTWARE:-70}
+source ${with_hypogeal_twilight?}/maintenance/fragment.module-rigging-core.sh || exit ${EX_SOFTWARE:-70}
 set +xv
