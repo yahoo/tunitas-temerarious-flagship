@@ -18,7 +18,7 @@ Current work with modern-generation tooling, <em>e.g.</em> circa Fedora 36+ and 
 
 ## Background
 
-Most (almost all) projects in the Tunitas family use the Scalable Object Location Disaggregation (S.C.O.L.D.) compiler to manage the C++ declarations and definitions as "header files" in the form of _modules_. We know.  This system has something of the flavor of the upcoming _C++20 Modules TS_ but works with the existing include-by-cut&amp;-paste of the old school C Preprocessor based compiler implementations.  Elsewhere, we use C++ 20 to the fullest extent of the language standard, as it is rendered by <strike>GCC 7, GCC 8 and GCC 9</strike> GCC 10, GCC 11 and GCC 12 including any other available extensions towards C++2b, C++2c &amp; C++23 when and as such are available, __e.g.__ concepts, filesystem, network, ranges.  When modules _really_ "arrive with stability" they will be adopted with support herein.
+Most (almost all) projects in the Tunitas family use the Scalable Original Location Disaggregation (S.C.O.L.D.) compiler to manage the C++ declarations and definitions as "header files" in the form of _modules_. Yes, we know.  This system has something of the flavor of the upcoming _C++20 Modules TS_ but works with the existing include-by-cut&amp;-paste of the old school C Preprocessor based compiler implementations.  Elsewhere, we use C++ 23 to the fullest extent of the language standard, as it is rendered by <strike>GCC 7, GCC 8, GCC 9, GCC 10, GCC 11</strike>, GCC 12, and GCC 13 including any other available extensions towards C++2c &amp; C++23 when and as such are available, __e.g.__ concepts, filesystem, network, ranges.  When modules _really_ "arrive with stability" they will be adopted with support herein.
 
 ## Installation
 
@@ -107,7 +107,7 @@ In another configuration mangement regimen they might be versioned separately.
 
 ## Contribute
 
-Please refer to [contributions statement](Contributing.md) for information about how to get involved. We welcome issues, questions. Pull Requests are welcome.
+Please refer to the [contribution instructions](Contributing.md) for information about how to get involved. We welcome issues, questions. Pull Requests are welcome.
 
 ## Maintainers
 - Wendell Baker <wbaker@yahooinc.com>
