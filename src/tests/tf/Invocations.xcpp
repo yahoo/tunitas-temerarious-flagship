@@ -84,16 +84,20 @@ auto tests::tf::Invocations::suite() -> Suite {
 namespace tests::tf {
   auto Invocations::test_zero() -> void    { exercise(USAGE); }
   auto Invocations::test_empty() -> void   { exercise(USAGE, ""); }
-  auto Invocations::test_echo_0() -> void  { exercise(OK, "echo"); }
-  auto Invocations::test_echo_1() -> void  { exercise(OK, "echo", "apple"); }
-  auto Invocations::test_echo_2() -> void  { exercise(OK, "echo", "apple", "banana"); }
-  auto Invocations::test_echo_3() -> void  { exercise(OK, "echo", "apple", "banana", "cherry"); }
-  auto Invocations::test_ls() -> void      { exercise(OK, "ls"); }
-  auto Invocations::test_list() -> void    { exercise(OK, "list"); }
-  auto Invocations::test_usage() -> void   { exercise(OK, "usage"); }
-  auto Invocations::test_help() -> void    { exercise(OK, "help"); }
-  auto Invocations::test_version() -> void { exercise(OK, "version"); }
-  auto Invocations::test_roff_usage() -> void   { exercise(OK, "roff", "usage"); }
-  auto Invocations::test_roff_version() -> void { exercise(OK, "roff", "version"); }
+  //
+  // WATCHOUT - these tests only work with --prefix=SOMETHING because the underlying exercise(...) uses Program{"a.out"} and the tf system
+  // expects to have a valid fullish path to the executable from which to derive ${prefix}.  So we have to give it a workable prefix.
+  //
+  auto Invocations::test_echo_0() -> void  { exercise(OK, "--prefix=.", "echo"); }
+  auto Invocations::test_echo_1() -> void  { exercise(OK, "--prefix=.", "echo", "apple"); }
+  auto Invocations::test_echo_2() -> void  { exercise(OK, "--prefix=.", "echo", "apple", "banana"); }
+  auto Invocations::test_echo_3() -> void  { exercise(OK, "--prefix=.", "echo", "apple", "banana", "cherry"); }
+  auto Invocations::test_ls() -> void      { exercise(OK, "--prefix=.", "ls"); }
+  auto Invocations::test_list() -> void    { exercise(OK, "--prefix=.", "list"); }
+  auto Invocations::test_usage() -> void   { exercise(OK, "--prefix=.", "usage"); }
+  auto Invocations::test_help() -> void    { exercise(OK, "--prefix=.", "help"); }
+  auto Invocations::test_version() -> void { exercise(OK, "--prefix=.", "version"); }
+  auto Invocations::test_roff_usage() -> void   { exercise(OK, "--prefix=.", "roff", "usage"); }
+  auto Invocations::test_roff_version() -> void { exercise(OK, "--prefix=.", "roff", "version"); }
 }
 #endiv

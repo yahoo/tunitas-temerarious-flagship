@@ -1,0 +1,148 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Yahoo Inc, 2022.
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+namespace app::definitions {
+  namespace package_main {
+    namespace body::exported { }
+    namespace interface = body::exported;
+  }
+  using namespace package_main::interface;
+}
+#import app.controllability.Controllability
+#import app.controllability.Through
+#import app.exception.facet.Quitting
+#import autotools.autoconf.Config.tunitas.flagship.temerarious.CONFIG
+#import langu.age
+#import tunitas.application.exits.constants
+#import tunitas.application.exits.Code
+#import tunitas.application.options // namespace options::c
+#import tunitas.application.options.Arguments
+#import tunitas.application.options.Program
+#import tunitas.Optional
+#import tunitas.string
+#import tunitas.Tuple
+namespace app::definitions::package_main {
+  namespace c = tunitas::application::options::c;
+  using tunitas::application::options::Program;
+  using tunitas::application::options::Arguments;
+  using Exit = tunitas::application::exits::Code;
+  using app::controllability::Controllability;
+  namespace body {
+    namespace version = tunitas::flagship::temerarious::version;
+    namespace string = tunitas::string;
+    inline namespace constants { using namespace tunitas::application::exits::constants; } 
+    using namespace langu::age;
+    //
+    struct Experience;
+    using Config = autotools::autoconf::Config<tunitas::flagship::temerarious::CONFIG>;
+    using tunitas::Optional;
+    using tunitas::Tuple;
+    using app::options::Dispensation;
+    using app::controllability::Through;
+  }
+}
+#endiv
+#divert <hpp>
+#import app.definitions.Configuration
+#import tunitas.application.exits.Code
+#import tunitas.application.options.c.Argv
+#import tunitas.string.View
+#import tunitas.string.Storage
+#import tunitas.flagship.temerarious.directive.field // is_identifier(...)
+#import std.ostream
+namespace app::definitions::package_main::body {
+  namespace exported {
+    inline auto main(int, char *[]) -> Exit;
+    inline auto main(c::Argv) -> Exit;
+    auto main(Controllability const &, Program, Arguments) -> Exit;
+  }
+  auto strip_options([[inout]] Experience &, [[inout]], Configuration &, [[inout]] Arguments &) -> Tuple<Dispensation, Exit>;
+}
+#import app.definitions.main.Experience
+#endiv
+#divert <ipp>
+#import std.clog
+#import substd.exception.Exception
+#import nonstd.exception.Exception
+namespace app::definitions::package_main {
+  inline auto interface::main(int cc, char *vv[]) -> Exit { return main(c::Argv(cc, vv)); }
+  auto interface::main(c::Argv av) -> Exit try {
+    auto ctl = Controllability{};
+    auto program = Program{av.front()};
+    auto arguments = Arguments{1+av.begin(), av.end()};
+    return main(ctl, move(program), move(arguments));
+  } catch (substd::exception::Exception const &e) {
+    std::clog << Config::package() << ": error, there was an unexpected problem saying " << e.what() << '\n';
+    return SOFTWARE;
+  }
+}
+#endiv
+#divert <cpp>
+#import app.exception.Testing
+#import app.definitions.run
+#import app.definitions.usage.Message
+#import langu.age.q
+#import nonstd.exception.Unimplemented
+#import nonstd.same_as
+#import std.clog
+#import tunitas.flagship.temerarious.version.Generator
+namespace app::definitions::package_main {
+  auto interface::main(Controllability const &ctl, Program program, Arguments arguments) -> Exit try {
+    auto exp = Experience{std::clog, program};
+    auto cfg = Configuration{};
+    auto [dispensation, exit] = strip_options(exp, cfg, arguments);
+    if (testing(ctl) <= Through::OPTIONS) { throw exception::Testing{program}; }
+    switch (dispensation) {
+    case Dispensation::USAGE:
+      std::cout << usage::Message{}(program) << '\n';
+      break;
+    case Dispensation::VERSION:
+      std::cout << version::Generator{} << '\n';
+      break;
+    case Dispensation::PROCESS:
+      if (auto count=arguments.size(); 0 != count) {
+        warning(exp) << "there are excess words after the options, which will be ignored\n";
+      }
+      return run(cfg, std::cout);
+    case Dispensation::FAIL:
+      // The complaint MUSt have already been issued (nothing further is announced herein)
+    default:
+      break;
+    }
+    return exit;
+  } catch (exception::facet::Quitting const &e) {
+    e.stream() << e.what() << '\n';
+    return e.exit();
+  }
+  auto body::strip_options(Experience &exp, Configuration &cfg, Arguments &arguments) -> Tuple<Dispensation, Exit> {
+    auto exit = OK;
+    while (!arguments.empty()) {
+      static_assert(nonstd::same_as<tunitas::string::Storage, Arguments::value_type>);
+      auto const &item = arguments.front();
+      if (item.empty()) {
+        erroneity(exp) << "the <filepath> cannot be empty\n";
+        return {Dispensation::FAIL, USAGE};
+      } else if ("--usage"s == item || "--help"s == item || "-h"s == item) {
+        return {Dispensation::USAGE, OK};
+      } else if ("--version"s == item || "-V"s == item) {
+        return {Dispensation::VERSION, OK};
+      } else if ("--"s == item) {
+        // The options formally end at an explicit "--"
+        arguments.pop_front();
+        break;
+      } else if ('-' == item.front()) {
+        erroneity(exp) << "invalid option (use --usage to explore)\n";
+        return {Dispensation::FAIL, USAGE};
+      } else {
+        // The options have ended
+        break;
+      }
+    }
+    auto dispensation = good(exit) ? Dispensation::PROCESS : Dispensation::FAIL;
+    return {dispensation, exit};
+  }
+}
+#endiv

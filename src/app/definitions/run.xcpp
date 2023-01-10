@@ -1,0 +1,85 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Yahoo Inc, 2022.
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+namespace app::definitions {
+  namespace package_run {
+    namespace body::exported { }
+    namespace interface = body::exported;
+  }
+  using namespace package_run::interface;
+}
+#import tunitas.application.exits.constants
+#import tunitas.string
+namespace app::definitions::package_run {
+  using Exit = sys::exits::Code;
+  namespace body {
+    using namespace tunitas::application::exits::constants;
+    namespace string = tunitas::string;
+  }
+}
+#endiv
+#divert <hpp>
+#import std.ostream
+#import std.cout
+#import app.definition.Configuration
+#import app.definition.Specification
+#import app.definition.Specifications
+namespace app::definitions::package_run::body {
+  namespace exported {
+    //
+    // This is much simpler now that the core off the processor has moved into the library
+    //
+    // Specification:
+    //
+    //    process input ... write output
+    //
+    // Usage:
+    //
+    //   return run(cin, cout);
+    // 
+    inline auto run(std::ostream & = std::cout) -> Exit;
+  }
+  inline auto treat([[inout]] Exit &, Configuration const &, [[inout]] std::ostream &, Specifications const &) -> void;
+  auto treat([[inout]] Exit &, Configuration const &, [[niout]] std::ostream &, Specification const &) -> void;
+}
+#endiv
+#divert <ipp>
+namespace app::definitions::package_run {
+  auto interface::run(Configuration const &cfg, std::ostream &outbound) -> Exit {
+    auto exit{OK};
+    treat(exit, cfg, outbound, Specifications<SCOLD>{});
+    treat(exit, cfg, outbound, Specifications<USEFUL>{});
+    treat(exit, cfg, outbound, Specifications<TUNITAS>{});
+    return exit;
+  }
+  auto body::treat(Exit &exit, Configuration const &cfg, std::ostream &outbound, Specifications const &specifications) -> void {
+    for (auto const &specification : specifications) {
+      treat(exit, cfg, outbound, specifications.cluster, specifications.VARIABLE, specification);
+    }
+  }
+}
+#endiv
+#divert <cpp>
+#import app.definitions.extract
+namespace app::definitions::package_run {
+  auto body::treat(Exit &exit, Configuration const &cfg, std::ostream &outbound, Specification const &specification) -> void {
+    using namespace extract;
+    auto prepared = prepare(specification);
+    auto long_dirname = long_directory_name(prepared);
+    auto short_dirname = short_directory_name(prepared);
+    auto with_varname = with_variable_name(prepared);
+    if (prepared.is_no()) {
+      emit(outbound, with_varname);
+    } else {
+      auto version = version_particle(prepared);
+      auto VARIABLE = individual_VARIABLE_name(prepared);
+      if (isdir(cfg.with_worktrees / short_dirname)) {
+        emit(cfg, outbound, with_varname, short_dirname, version, {variable, series, cfg.NEARBY, cfg.TAG});
+    throw nonstd::exception::Unimplemented{};
+    }
+  }
+}
+#endiv

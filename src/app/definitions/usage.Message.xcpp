@@ -1,0 +1,60 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Yahoo Inc, 2022.
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+namespace app::definitions::usage {
+  //
+  // The usage message generator
+  //
+  // Usage:
+  //
+  //   auto program = Program{...somehow...};
+  //
+  //   auto generator = usage::Message{};
+  //   std::cout << generator(program) << '\n';
+  //
+  //   std::cout << usage::Message{}(program} << '\n';
+  //
+  struct Message;
+}
+#endiv
+#divert <hpp>
+#import tunitas.application.options.Program
+#import tunitas.string.Storage
+#import std.ostream
+class app::definitions::usage::Message {
+  using Program = tunitas::application::options::Program;
+  using String = tunitas::string::Storage;
+public:
+  Message() = default;
+  inline auto operator()() const -> String;
+  auto operator()(Program const &) const -> String;
+};
+#endiv
+#divert <ipp>
+namespace app::definitions::usage {
+  auto Message::operator()() const -> String { return operator()(Program{"definitions"}); }
+}
+#endiv
+#divert <cpp>
+#import std.ostringstream
+namespace app::definitions::usage {
+  auto Message::operator()(Program const &program) const -> String {
+    std::ostringstream buf;
+    buf << "usage: " << program << " [...options...] [...files.definitions]"
+        << "\n"
+        << "\nWhere the [...options...] comprise"
+        << "\n--define <NAME>=<VALUE> ........ define NAME as VALUE in the global dictionary"
+        << "\n--define <NAME> ................ define NAME as (empty) in the global dictionary"
+        << "\n-D<NAME>=<VALUE> ............... same, using the well-known idiom of the C preprocessor"
+        << "\n-D<NAME> ....................... same"
+        << "\n--include <DIRECTORY> .......... add <DIRECTORY> to the searchpath"
+        << "\n-I<DIRECTORY> .................. same, using the well-known idiom of the C preprocessor"
+        << "\n--version ...................... emit the version of the this package"
+        << "\n--help, --usage ................ this message."; // no final \n
+    return buf.str();
+  }
+}
+#endiv

@@ -1,0 +1,108 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Yahoo Inc, 2022.
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+namespace app::definition::extract {
+  namespace package_extract {
+    namespace body::exported { }
+    namespace interface = body::exported;
+  }
+  using namespace package_extract::exported;
+}
+#import tunitas.string
+namespace app::definition::extract::package_extract {
+  namespace string = tunitas::string;
+  namespace body { }
+}
+#endiv
+#divert <hpp>
+#import tunitas.string.Storage
+#import app.definition.Prepared
+namespace app::definition::extract::package_extract::body {
+  namespace exported {
+    //
+    // Usage:
+    //
+    //   #import app.definition.extract
+    //   using namespace extract;
+    //
+    //   auto specification = Specification{...somehow...};
+    //   auto prepared = prepare(specification);
+    //
+    //   auto longdir = long_directory_name(prepared);
+    //   auto shortdir = short_directory_name(prepared);
+    //   ...etc...
+    //
+    inline auto long_directory_name(Prepared const &) -> string::Storage;
+    inline auto short_directory_name(Prepared const &) -> string::Storage;
+    inline auto is_no(Prepared const &) -> bool;
+    inline auto version_particle(Prepared const &) -> string::Storage;
+    inline auto with_variable_name(Prepared const &) -> string::Storage;
+    inline auto individual_VARIABLE_name(Prepared const &) -> string::Storage;
+  }
+}
+#endiv
+#divert <ipp>
+#import nonstd.exception.Unimplemented
+namespace app::definition::extract::package_extract {
+  auto interface::long_directory_name(Prepared const &prepared) -> string::Storage {
+    //
+    // + (plus) is allowed for microhttpd++
+    // - (dash) is allowed for rigging-app etc.
+    //
+    // local split=($(echo -n $1 | sed -e 's,/, ,g'))
+    // local candidate=${split[0]}
+    // echo -n ${candidate#module-} | tr -c '[\-a-zA-Z0-9_+]' _ 
+    throw nonstd::exception::Unimplemented{};
+  }
+  auto interface::short_directory_name(Prepared const &prepared) -> string::Storage {
+    //
+    // local long=$(extract_long_directory_name $1)
+    // echo -n ${long#module-}
+    throw nonstd::exception::Unimplemented{};
+  }
+  auto interface::is_no(Prepared const &prepared) -> bool {
+    //
+    // local split=($(echo -n $1 | sed -e 's,/, ,g'))
+    // if ((1 < ${#split[@]})); then
+    //    if [[ no == ${split[1]} ]] ; then
+    //       return 0 # is "no"
+    //    fi
+    // fi
+    // return 1 # is not "no"
+    throw nonstd::exception::Unimplemented{};
+  }
+  auto interface::version_particle(Prepared const &prepared) -> string::Storage {
+    //
+    // local split=($(echo -n $1 | sed -e 's,/, ,g'))
+    // if ((1 < ${#split[@]})); then
+    //    echo -n ${split[1]}
+    // else
+    //    echo -n v0
+    // fi
+    throw nonstd::exception::Unimplemented{};
+  }
+  auto interface::with_variable_name(Prepared const &prepared) -> string::Storage {
+    //
+    // local split=($(echo -n $1 | sed -e 's,/, ,g'))
+    // local candidate=${split[0]}
+    // echo -n with_${candidate} | tr -c '[a-zA-Z0-9_]' _ # + is not allowed for with_microhttpd__
+    //
+    throw nonstd::exception::Unimplemented{};
+  }
+  auto interface::individual_VARIABLE_name(Prepared const &prepared) -> string::Storage {
+    //
+    // local split=($(echo -n $1 | sed -e 's,/, ,g'))
+    // if ((2 < ${#split[@]})); then
+    //    echo -n ${split[2]}
+    // else
+    //    local short=$(extract_short_directory_name $1)
+    //    echo -n ${short?} | tr -d + | tr -c '[a-zA-Z0-9_]' _ | tr a-z A-Z # + is not allowed for MICROHTTPD (no plus or underscore)
+    // fi
+    //
+    throw nonstd::exception::Unimplemented{};
+  }
+}
+#endiv

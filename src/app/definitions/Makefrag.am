@@ -1,0 +1,21 @@
+# This is a GNU -*- Makefile -*- which is managed by automake.
+# Copyright Yahoo Inc, 2021.
+# Licensed under the terms of the Apache-2.0 license.
+# For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+# For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#
+app_definitions_SUBSOURCES = \
+  noinst/obj/src/app/definitions/namespace.cpp \
+  noinst/obj/src/app/definitions/main.cpp \
+  noinst/obj/src/app/definitions/main.Experience.cpp \
+  noinst/obj/src/app/definitions/main.Experience.Error.cpp \
+  noinst/obj/src/app/definitions/main.Experience.Warning.cpp \
+  noinst/obj/src/app/definitions/main.Experience.Notice.cpp \
+  noinst/obj/src/app/definitions/run.cpp \
+  noinst/obj/src/app/definitions/run.Configuration.cpp \
+  noinst/obj/src/app/definitions/usage.Message.cpp \
+  noinst/obj/src/app/definitions/extract.cpp \
+  noinst/obj/src/app/definitions/Specifications.cpp \
+  noinst/obj/src/app/definitions/Specification.cpp \
+  noinst/obj/src/app/definitions/Prepared.cpp \
+  $(end)

@@ -1,0 +1,95 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Yahoo Inc, 2022.
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+//
+// The experience of necessaries (huh?).
+// The messagerie.(huh?)
+// The experience of error messages.
+//
+// Specification:
+//
+//   References only.
+//   Not copyable.
+//   Dubiously movable (no need).
+//
+// Design:
+//
+//   So that ADL can find it.
+//
+// Usage:
+//
+//   Exclusively within package_main::body::do_options(...)
+//
+#forward app.definitions.main
+#endiv
+#divert <hpp>
+#import std.ostream
+#import tunitas.flagship.temerarious.processor.Preparation
+namespace app::definitions::package_main {
+  namespace body {
+    inline auto operator<<(std::ostream &, Experience const &) -> std::ostream &;
+  }
+  class body::Experience {
+    using Stream = std::ostream;
+    using Preparation = tunitas::flagship::temerarious::processor::Preparation;
+  public:
+    inline [[implicit]] Experience(Stream &, Program const &, [[inout]] Preparation &);
+    Experience(Experience const &) = delete;
+    auto operator=(Experience const &) -> Experience & = delete;
+    inline Experience(Experience &&);
+    inline auto operator=(Experience &&) -> Experience &;
+    std::ostream &outbound;
+    Program const &program; // quirky and probably unnecessary (why not copy it?) ... but the origin will stay stationary
+    Preparation &preparation;
+  private:
+    struct Base {
+      [[implicit]] Base(Experience const &y) : experience{y} { }
+      Experience const &experience;
+    };
+  public:
+    struct Error;
+    struct Warning;
+    struct Notice;
+  };
+}
+#endiv
+#divert <ipp>
+#import app.definitions.main.Experience.Error
+#import app.definitions.main.Experience.Warning
+#import app.definitions.main.Experience.Notice
+namespace app::definitions::package_main::body {
+  Experience::Experience(Stream &s, Program const &p, Preparation &n)
+    : outbound{s}
+    , program{move(p)}
+    , preparation{n}
+  { }
+  Experience::Experience(Experience &&other)
+    : outbound{other.outbound} // [[irk]] these are all references so we have to (manually, explicitly) rebind them in "move"
+    , program{other.program}
+    , preparation{other.preparation}
+    { }
+  auto Experience::operator=(Experience &&other) -> Experience & {
+    // This overwrite-as-if-uninitialized works because [reasons]
+    new (this) Experience{forward<Experience>(other)}; // ibidem.
+    return *this;
+  }
+}
+#endiv
+#divert <cpp>
+#import std.is_copy_constructible
+#import std.is_copy_assignable
+#import std.is_move_constructible
+#import std.is_move_assignable
+namespace {
+  namespace testate {
+    using namespace app::definitions::package_main::body;
+    static_assert(not std::is_copy_constructible_v<Experience>);
+    static_assert(not std::is_copy_assignable_v<Experience>);
+    static_assert(std::is_move_constructible_v<Experience>);
+    static_assert(std::is_move_assignable_v<Experience>);
+  }
+}
+#endiv

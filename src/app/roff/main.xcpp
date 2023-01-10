@@ -6,10 +6,10 @@
 #divert <fpp>
 namespace app::roff {
   namespace package_main {
-    namespace interface { }
-    namespace body { using namespace interface; }
+    namespace body::exported { }
+    namespace interface = body::exported;
   }
-  inline namespace interface_main { using namespace package_main::body; }
+  using namespace package_main::interface;
 }
 #import app.controllability.Controllability
 #import app.controllability.Through
@@ -29,13 +29,11 @@ namespace app::roff {
 #import sys.posix.stat
 #import sys.posix.isdir
 namespace app::roff::package_main {
-  namespace interface {
-    namespace c = tunitas::application::options::c;
-    using tunitas::application::options::Program;
-    using tunitas::application::options::Arguments;
-    using Exit = tunitas::application::exits::Code;
-    using app::controllability::Controllability;
-  }
+  namespace c = tunitas::application::options::c;
+  using tunitas::application::options::Program;
+  using tunitas::application::options::Arguments;
+  using Exit = tunitas::application::exits::Code;
+  using app::controllability::Controllability;
   namespace body {
     namespace version = tunitas::flagship::temerarious::version;
     namespace string = tunitas::string;
@@ -60,29 +58,27 @@ namespace app::roff::package_main {
 #import tunitas.string.Storage
 #import tunitas.flagship.temerarious.directive.field // is_identifier(...)
 #import std.ostream
-namespace app::roff {
-  namespace interface_main {
+namespace app::roff::package_main::body {
+  namespace exported {
     inline auto main(int, char *[]) -> Exit;
     inline auto main(c::Argv) -> Exit;
     auto main(Controllability const &, Program, Arguments) -> Exit;
   }
-  namespace package_main::body {
-    using tunitas::flagship::temerarious::directive::field::is_identifier;
-    auto do_options([[inout]] Palette &, [[inout]] Arguments &) -> Tuple<Dispensation, Exit>;
-    auto get_define(string::View syntax) -> Tuple<Optional<string::Storage>, Optional<string::Storage>>;
-    //
-    // Validate (warn) if the directory is not a directory.
-    // Silent if the directory does not exist at all.
-    //
-    auto accept_searchpath_directory([[inout]] Palette &, string::View flag_leader, string::Storage directory) -> Exit;
-    //
-    // syntax shall look like one of
-    //
-    //   NAME=VALUE ............... as -DNAME=VALUE
-    //   NAME ..................... '='
-    //
-    auto accept_variable_definition([[inout]] Palette &, string::View flag_leader, string::View syntax) -> Exit;
-  }
+  using tunitas::flagship::temerarious::directive::field::is_identifier;
+  auto do_options([[inout]] Palette &, [[inout]] Arguments &) -> Tuple<Dispensation, Exit>;
+  auto get_define(string::View syntax) -> Tuple<Optional<string::Storage>, Optional<string::Storage>>;
+  //
+  // Validate (warn) if the directory is not a directory.
+  // Silent if the directory does not exist at all.
+  //
+  auto accept_searchpath_directory([[inout]] Palette &, string::View flag_leader, string::Storage directory) -> Exit;
+  //
+  // syntax shall look like one of
+  //
+  //   NAME=VALUE ............... as -DNAME=VALUE
+  //   NAME ..................... '='
+  //
+  auto accept_variable_definition([[inout]] Palette &, string::View flag_leader, string::View syntax) -> Exit;
 }
 #import app.roff.main.Palette
 #endiv
@@ -90,9 +86,9 @@ namespace app::roff {
 #import std.clog
 // not until v2 #import substd.exception.Exception
 #import nonstd.exception.Exception
-namespace app::roff {
-  inline auto interface_main::main(int cc, char *vv[]) -> Exit { return main(c::Argv(cc, vv)); }
-  auto interface_main::main(c::Argv av) -> Exit try {
+namespace app::roff::package_main {
+  inline auto interface::main(int cc, char *vv[]) -> Exit { return main(c::Argv(cc, vv)); }
+  auto interface::main(c::Argv av) -> Exit try {
     auto ctl = Controllability{};
     auto program = Program{av.front()};
     auto arguments = Arguments{1+av.begin(), av.end()};
@@ -117,8 +113,8 @@ namespace app::roff {
 #import nonstd.same_as
 #import std.clog
 #import tunitas.flagship.temerarious.version.Generator
-namespace app::roff {
-  auto interface_main::main(Controllability const &ctl, Program program, Arguments arguments) -> Exit try {
+namespace app::roff::package_main {
+  auto interface::main(Controllability const &ctl, Program program, Arguments arguments) -> Exit try {
     auto preparation = Preparation{};
     auto palette = Palette{std::clog, program, preparation};
     auto [dispensation, exit] = do_options(palette, arguments);
@@ -155,117 +151,115 @@ namespace app::roff {
     e.stream() << e.what() << '\n';
     return e.exit();
   }
-  namespace package_main {
-    auto body::do_options(Palette &palette, Arguments &arguments) -> Tuple<Dispensation, Exit> {
-      auto exit = OK;
-      while (!arguments.empty()) {
-        static_assert(nonstd::same_as<tunitas::string::Storage, Arguments::value_type>);
-        auto const &item = arguments.front();
-        if (item.empty()) {
-          erroneity(palette) << "the <filepath> cannot be empty\n";
-          return {Dispensation::FAIL, USAGE};
-        } else if ("--usage"s == item || "--help"s == item || "-h"s == item) {
-          return {Dispensation::USAGE, OK};
-        } else if ("--version"s == item || "-V"s == item) {
-          return {Dispensation::VERSION, OK};
-        } else if (auto option="--include"s; option == item) {
-          arguments.pop_front();
-          if (arguments.empty()) {
-            erroneity(palette) << "the " << q(option) << " must be followed by the name of directory\n";
-            return {Dispensation::FAIL, USAGE};
-          } else {
-            exit &= accept_searchpath_directory(palette, move(option), move(arguments.front()));
-            arguments.pop_front();
-          }
-        } else if (auto leader="-I"s, actual=item.substr(0, leader.size()); leader == actual) {
-          exit &= accept_searchpath_directory(palette, move(leader), item.substr(leader.size()));
-          arguments.pop_front();
-        } else if (auto option="--define"s; option == item) {
-          arguments.pop_front();
-          if (arguments.empty()) {
-            erroneity(palette) << "the " << q(option) << " must be followed by a NAME or NAME=VALU\n";
-            return {Dispensation::FAIL, USAGE};
-          } else {
-            exit &= accept_variable_definition(palette, move(option), move(arguments.front()));
-            arguments.pop_front();
-          }
-        } else if (auto leader="-D"s, actual=item.substr(0, leader.size()); leader == actual) {
-          exit &= accept_variable_definition(palette, move(leader), item.substr(leader.size()));
-          arguments.pop_front();
-        } else if ("--"s == item) {
-          // The options formally end at an explicit "--"
-          arguments.pop_front();
-          break;
-        } else if ('-' == item.front()) {
-          erroneity(palette) << "invalid option (use --usage to explore)\n";
+  auto body::do_options(Palette &palette, Arguments &arguments) -> Tuple<Dispensation, Exit> {
+    auto exit = OK;
+    while (!arguments.empty()) {
+      static_assert(nonstd::same_as<tunitas::string::Storage, Arguments::value_type>);
+      auto const &item = arguments.front();
+      if (item.empty()) {
+        erroneity(palette) << "the <filepath> cannot be empty\n";
+        return {Dispensation::FAIL, USAGE};
+      } else if ("--usage"s == item || "--help"s == item || "-h"s == item) {
+        return {Dispensation::USAGE, OK};
+      } else if ("--version"s == item || "-V"s == item) {
+        return {Dispensation::VERSION, OK};
+      } else if (auto option="--include"s; option == item) {
+        arguments.pop_front();
+        if (arguments.empty()) {
+          erroneity(palette) << "the " << q(option) << " must be followed by the name of directory\n";
           return {Dispensation::FAIL, USAGE};
         } else {
-          // The options have ended
-          break;
+          exit &= accept_searchpath_directory(palette, move(option), move(arguments.front()));
+          arguments.pop_front();
         }
+      } else if (auto leader="-I"s, actual=item.substr(0, leader.size()); leader == actual) {
+        exit &= accept_searchpath_directory(palette, move(leader), item.substr(leader.size()));
+        arguments.pop_front();
+      } else if (auto option="--define"s; option == item) {
+        arguments.pop_front();
+        if (arguments.empty()) {
+          erroneity(palette) << "the " << q(option) << " must be followed by a NAME or NAME=VALU\n";
+          return {Dispensation::FAIL, USAGE};
+        } else {
+          exit &= accept_variable_definition(palette, move(option), move(arguments.front()));
+          arguments.pop_front();
+        }
+      } else if (auto leader="-D"s, actual=item.substr(0, leader.size()); leader == actual) {
+        exit &= accept_variable_definition(palette, move(leader), item.substr(leader.size()));
+        arguments.pop_front();
+      } else if ("--"s == item) {
+        // The options formally end at an explicit "--"
+        arguments.pop_front();
+        break;
+      } else if ('-' == item.front()) {
+        erroneity(palette) << "invalid option (use --usage to explore)\n";
+        return {Dispensation::FAIL, USAGE};
+      } else {
+        // The options have ended
+        break;
       }
-      auto dispensation = good(exit) ? Dispensation::PROCESS : Dispensation::FAIL;
-      return {dispensation, exit};
     }
-    auto body::get_define(string::View syntax) -> Tuple<Optional<string::Storage>, Optional<string::Storage>> {
-      if (syntax.empty()) {
-        //
-        // Nope.
-        //
+    auto dispensation = good(exit) ? Dispensation::PROCESS : Dispensation::FAIL;
+    return {dispensation, exit};
+  }
+  auto body::get_define(string::View syntax) -> Tuple<Optional<string::Storage>, Optional<string::Storage>> {
+    if (syntax.empty()) {
+      //
+      // Nope.
+      //
+      return {};
+    } else if (auto eq = syntax.find('='); string::View::npos != eq) {
+      //
+      // One among:
+      //
+      //   NAME=       .................... with empty VALUE; valid if NAME is an identifier
+      //   =VALUE      .................... invalid NAME
+      //   NAME=VALUE  .................... valid if NAME is an identifier
+      //
+      auto name = string::Storage{syntax.data(), eq};
+      auto value = string::Storage{1+eq+syntax.data(), syntax.size()-1-eq};
+      if (is_identifier(name)) {
+        return {name, value};
+      } else {
         return {};
-      } else if (auto eq = syntax.find('='); string::View::npos != eq) {
-        //
-        // One among:
-        //
-        //   NAME=       .................... with empty VALUE; valid if NAME is an identifier
-        //   =VALUE      .................... invalid NAME
-        //   NAME=VALUE  .................... valid if NAME is an identifier
-        //
-        auto name = string::Storage{syntax.data(), eq};
-        auto value = string::Storage{1+eq+syntax.data(), syntax.size()-1-eq};
-        if (is_identifier(name)) {
-          return {name, value};
-        } else {
-          return {};
-        }
+      }
+    } else {
+      //
+      //   NAME .......................... valid if NAME is an identifier 
+      //
+      if (is_identifier(syntax)) {
+        return {string::Storage{syntax.data(), syntax.size()}, {}};
       } else {
-        //
-        //   NAME .......................... valid if NAME is an identifier 
-        //
-        if (is_identifier(syntax)) {
-          return {string::Storage{syntax.data(), syntax.size()}, {}};
-        } else {
-          return {};
-        }
+        return {};
       }
     }
-    auto body::accept_variable_definition(Palette &palette, string::View leader, string::View syntax) -> Exit {
-      auto [name, value] = get_define(syntax);
-      if (!name) {
-        erroneity(palette) << "incomprehensible definition " << syntax << '\n';
-        return USAGE;
-      } else {
-        palette.preparation.defines[*name] = value.value_or("");
-        return OK;
-      }
+  }
+  auto body::accept_variable_definition(Palette &palette, string::View leader, string::View syntax) -> Exit {
+    auto [name, value] = get_define(syntax);
+    if (!name) {
+      erroneity(palette) << "incomprehensible definition " << syntax << '\n';
+      return USAGE;
+    } else {
+      palette.preparation.defines[*name] = value.value_or("");
+      return OK;
     }
-    auto body::accept_searchpath_directory(Palette &palette, string::View leader, string::Storage directory) -> Exit {
-      if (directory.empty()) {
-        warning(palette) << "ignoring empty directory name\n";
-        notice(palette) << "empty element cannot be inserted in the searchpath\n";
-        return USAGE;
-      } else if (auto status=sys::posix::stat(directory); good(status) && !sys::posix::isdir(value(status))) {
-        // It's okay if the directory does not exist (silence on that account
-        // It's NOT okay if the name exists as something *other* than a directory.
-        warning(palette) << "the name " << directory << " does not refer to a directory\n";
-        notice(palette) << "that name will be ignored in search path lookup\n";
-        //
-        // If this is just a warning then we can't declare a failure here
-        return OK;
-      } else {
-        palette.preparation.search.push_back(move(directory));
-        return OK;
-      }
+  }
+  auto body::accept_searchpath_directory(Palette &palette, string::View leader, string::Storage directory) -> Exit {
+    if (directory.empty()) {
+      warning(palette) << "ignoring empty directory name\n";
+      notice(palette) << "empty element cannot be inserted in the searchpath\n";
+      return USAGE;
+    } else if (auto status=sys::posix::stat(directory); good(status) && !sys::posix::isdir(value(status))) {
+      // It's okay if the directory does not exist (silence on that account
+      // It's NOT okay if the name exists as something *other* than a directory.
+      warning(palette) << "the name " << directory << " does not refer to a directory\n";
+      notice(palette) << "that name will be ignored in search path lookup\n";
+      //
+      // If this is just a warning then we can't declare a failure here
+      return OK;
+    } else {
+      palette.preparation.search.push_back(move(directory));
+      return OK;
     }
   }
 }

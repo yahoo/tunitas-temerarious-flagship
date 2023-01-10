@@ -54,6 +54,7 @@
 
 : ${with_nonstd_boost:=no}
 : ${with_nonstd_gcc:=no}
+: ${with_nonstd_fmt:=/exp/fmt}
 : ${with_nonstd_cppunit:=no}
 
 SCOLD_UNIVERSE=( \
@@ -64,6 +65,7 @@ SCOLD_UNIVERSE=( \
     module-cbor \
     module-cli-core/v2 \
     module-cli-shell/v2 \
+    module-fmt \
     module-langu \
     module-json \
     module-html \
@@ -94,22 +96,33 @@ USEFUL_UNIVERSE=( \
   apache-httpd-api \
   apache-httpd-mod \
   microhttpd++ \
-  nomlons \
+  nommlons \
 )
+# see https://en.wikipedia.org/wiki/Category:Rivers_of_San_Mateo_County,_California
 TUNITAS_UNIVERSE=( \
     temerarious-flagship/v2/TEMERARIOUS \
     basics/v2/BASICS \
     apanolio \
+    bellvale \
+    bloomquist \
     bogess \
+    butano \
     butano/v1 \
     calera \
+    dearborn \
     denniston \
+    elliot \
+    finney \
     gazos \
     grabtown \
+    harrington \
     honsinger \
-    keyson \
+    keyston \
     kingston \
+    ladera \
     lobitos \
+    mindego \
+    mitchell \
     montara \
     nuff \
     pescadero \
@@ -120,8 +133,11 @@ TUNITAS_UNIVERSE=( \
     rheem \
     rockaway \
     scarpet \
+    tarwater \
     walker \
-    )
+    whittemore \
+    woodruff \
+)
 function trace() {
     if ((TRACE)) ; then
         echo "TRACE $@"
@@ -198,7 +214,6 @@ function load_series() {
         eval trace "$with=\$$with"
     done
 }
-set -xv
 load_series /build/scold SCOLD ${SCOLD_UNIVERSE[@]}
 load_series /build/useful USEFUL ${USEFUL_UNIVERSE[@]}
 load_series /build/tunitas TUNITAS ${TUNITAS_UNIVERSE[@]}
@@ -206,9 +221,14 @@ load_series /build/tunitas TUNITAS ${TUNITAS_UNIVERSE[@]}
 # some aliased behaviors
 : ${with_module_leveldb:=${with_module_level?}}
 : ${with_microhttpd:=${with_microhttpd__?}}
-: ${with_tunitas_basics:=${with_basics?}}
-: ${with_tunitas_butano:=${with_butano?}}
-: ${with_tunitas_lobitos:=${with_lobitos?}}
+
+for spec in ${TUNITAS_UNIVERSE[@]} ; do
+    name=${spec%%/*}
+    case $name in
+        ( temerarious-flagship ) continue ;;
+        ( * )  eval ": \${with_tunitas_${name}:=\${with_${name}?}}" ;;
+    esac
+done
 
 : ${with_hypogeal_twilight:=${with_worktrees?}/hypogeal-twilight/v0.${HYPOGEAL:-${SCOLD:-${NEARBY:-${TAG?}}}}}
 source ${with_hypogeal_twilight?}/maintenance/fragment.module-cli-core.sh || exit ${EX_SOFTWARE:-70}

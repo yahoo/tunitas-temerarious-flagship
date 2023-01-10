@@ -10,6 +10,7 @@ namespace tunitas::flagship::temerarious::parser {
 }
 #endiv
 #divert <ipp>
+#import std.isspace
 namespace tunitas::flagship::temerarious {
   auto parser::trim(View span) -> View {
     auto forward = [](View candidate) -> View {

@@ -1,0 +1,28 @@
+// This is -*- c++ -*- nearly C++2a with Modules TS but in the S.C.O.L.D. stylings that are so popular these days.
+// Copyright Yahoo Inc, 2022.
+// Licensed under the terms of the Apache-2.0 license.
+// For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+// For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+#divert <fpp>
+//
+// Usage:
+//
+//   auto palette = Experience{...somehow...};
+//   notice(palette) << "...something something something\n";
+//
+#include <hpp/app.definitions.main.Experience>
+#endiv
+#divert <hpp>
+#import std.ostream
+namespace app::definitions::package_main::body {
+  inline auto notice(Experience const &) -> Experience::Notice;
+  template<typename TYPE> auto operator<<(Experience::Notice const &, TYPE const &) -> std::ostream &;
+  struct Experience::Notice : public Base { using Base::Base; };
+}
+#endiv
+#divert <ipp>
+namespace app::definitions::package_main {
+  auto body::notice(Experience const &y) -> Experience::Notice { return {y}; }
+  template<typename TYPE> auto body::operator<<(Experience::Notice const &e, TYPE const &t) -> std::ostream & { return e.palette.outbound << e.palette.program << ": notice, " << t; }
+}
+#endiv

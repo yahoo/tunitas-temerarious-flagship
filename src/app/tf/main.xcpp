@@ -6,10 +6,10 @@
 #divert <fpp>
 namespace app::tf {
   namespace package_main {
-    namespace interface { }
-    namespace body { using namespace interface; }
+    namespace body::exported { }
+    namespace interface = body::exported;
   }
-  inline namespace interface_main { using namespace package_main::interface; }
+  using namespace package_main::interface;
 }
 #import app.controllability.Through
 #import app.controllability.Controllability
@@ -27,11 +27,9 @@ namespace app::tf {
 #import tunitas.string.Storage
 #import autotools.autoconf.Config.tunitas.flagship.temerarious.CONFIG
 namespace app::tf::package_main {
-  namespace interface {
-    using Argv = tunitas::application::options::c::Argv;
-    using Exit = tunitas::application::exits::Code;
-    using app::controllability::Controllability;
-  }
+  using Argv = tunitas::application::options::c::Argv;
+  using Exit = tunitas::application::exits::Code;
+  using app::controllability::Controllability;
   namespace body {
     inline namespace constants { using namespace tunitas::application::exits::constants; } 
     namespace version = tunitas::flagship::temerarious::version;
@@ -49,26 +47,23 @@ namespace app::tf::package_main {
 }
 #endiv
 #divert <hpp>
-namespace app::tf {
-  namespace interface_main {
+namespace app::tf::package_main::body {
+  namespace exported {
     inline auto main(int, char *[]) -> Exit;
     inline auto main(Argv) -> Exit;
     auto main(Controllability const &, Argv) -> Exit;
   }
-  namespace package_main::body {
-    auto reexec_arguments(Program const &, Argv) -> Tuple<Dispensation, Exit, Vector, Optional<Filepath>>;
-    auto reexec_path(Program const &, Optional<Filepath> libexec, Argv, Filepath first) -> Filepath;
-    auto guess_actual_installed_prefix(Argv) -> Optional<Filepath>;
-  }
+  auto reexec_arguments(Program const &, Argv) -> Tuple<Dispensation, Exit, Vector, Optional<Filepath>>;
+  auto reexec_path(Program const &, Optional<Filepath> libexec, Argv, Filepath first) -> Filepath;
+  auto guess_actual_installed_prefix(Argv) -> Optional<Filepath>;
 }
 #endiv
 #divert <ipp>
 #import std.exception
 #import std.clog
-namespace app::tf {
-  namespace interface_main { using namespace package_main::body; } // the body sees the interface too
-  auto interface_main::main(int cc, char *vv[]) -> Exit { return main(Argv(cc, vv)); }
-  auto interface_main::main(Argv av) -> Exit try {
+namespace app::tf::package_main {
+  auto interface::main(int cc, char *vv[]) -> Exit { return main(Argv(cc, vv)); }
+  auto interface::main(Argv av) -> Exit try {
     return main(Controllability{}, av);
   } catch (std::exception const &e) {
     std::clog << "error: unexpected exception " << e.what() << '\n';
@@ -82,8 +77,8 @@ namespace app::tf {
 #import c.rest
 #import tunitas.flagship.temerarious.version.Generator
 #import sys.posix.exec
-namespace app::tf {
-  auto interface_main::main(Controllability const &ctl, Argv av) -> Exit try {
+namespace app::tf::package_main {
+  auto interface::main(Controllability const &ctl, Argv av) -> Exit try {
     auto program = Program{av.front()};
     auto [dispensation, exit, vv, libexec] = reexec_arguments(program, av);
     if (testing(ctl) <= Through::OPTIONS) { throw exception::Testing{program}; }
@@ -111,93 +106,98 @@ namespace app::tf {
     e.stream() << e.what() << '\n';
     return e.exit();
   }
-  namespace package_main {
-    auto body::reexec_arguments(Program const &program, Argv av) -> Tuple<Dispensation, Exit, Vector, Optional<Filepath>> {
-      if (av.size() < 2) {
-        std::clog << program << ": error, a command is required\n";
+  auto body::reexec_arguments(Program const &program, Argv av) -> Tuple<Dispensation, Exit, Vector, Optional<Filepath>> {
+    if (av.size() < 2) {
+      std::clog << program << ": error, a command is required\n";
+      return {Dispensation::FAIL, USAGE, {}, {}};
+    }
+    auto vv = c::rest(av);
+    auto libexec = Optional<Filepath>{};
+    while (vv.size()) {
+      std::string first = vv.front();
+      if (first.empty()) {
+        std::clog << program << ": error, the <subprogram> cannot be empty\n";
         return {Dispensation::FAIL, USAGE, {}, {}};
+      } else if ("--usage"s == first || "--help"s == first || "-h"s == first) {
+        return {Dispensation::USAGE, OK, {}, {}};
+      } else if ("--version"s == first || "-V"s == first) {
+        return {Dispensation::VERSION, OK, {}, { }};
+      } else if (auto lead="--prefix="s; lead == first.substr(0, lead.size())) {
+        // not bothering to check for empty ... it will get "checked" later by execve(2) failing
+        auto candidate = first.substr(lead.size());
+        if (candidate.empty()) { candidate = "."; }
+        libexec = Filepath{move(candidate)} / Filepath{"libexec"} / Filepath{Config::package_name()};
+        vv = c::rest(vv);
+      } else if (auto lead="--libexec="s; lead == first.substr(0, lead.size())) {
+        auto candidate = first.substr(lead.size());
+        if (candidate.empty()) { candidate = "."; }
+        libexec = move(candidate);
+        vv = c::rest(vv);
+      } else if ('-' == first.front()) {
+        std::clog << program << ": error, invalid option (use --usage to explore)\n";
+        return {Dispensation::FAIL, USAGE, {}, {}};
+      } else {
+        // a word ... we are done.
+        break;
       }
-      auto vv = c::rest(av);
-      auto libexec = Optional<Filepath>{};
-      while (vv.size()) {
-        std::string first = vv.front();
-        if (first.empty()) {
-          std::clog << program << ": error, the <subprogram> cannot be empty\n";
-          return {Dispensation::FAIL, USAGE, {}, {}};
-        } else if ("--usage"s == first || "--help"s == first || "-h"s == first) {
-          return {Dispensation::USAGE, OK, {}, {}};
-        } else if ("--version"s == first || "-V"s == first) {
-          return {Dispensation::VERSION, OK, {}, { }};
-        } else if (auto lead="--prefix="s; lead == first.substr(0, lead.size())) {
-          // not bothering to check for empty ... it will get "checked" later by execve(2) failing
-          auto candidate = first.substr(lead.size());
-          if (candidate.empty()) { candidate = "."; }
-          libexec = Filepath{move(candidate)} / Filepath{Config::package_name()};
-          vv = c::rest(vv);
-        } else if (auto lead="--libexec="s; lead == first.substr(0, lead.size())) {
-          auto candidate = first.substr(lead.size());
-          if (candidate.empty()) { candidate = "."; }
-          libexec = move(candidate);
-          vv = c::rest(vv);
-        } else if ('-' == first.front()) {
-          std::clog << program << ": error, invalid option (use --usage to explore)\n";
-          return {Dispensation::FAIL, USAGE, {}, {}};
-        } else {
-          // a word ... we are done.
-          break;
-        }
-      }
-      return {Dispensation::PROCESS, {}, vv, move(libexec)};;
     }
-    auto body::reexec_path(Program const &, Optional<Filepath> libexec, Argv av, Filepath first) -> Filepath {
-      // the first arument (Program) is unused because there are no error messages herein; but there could be (couldn't there?)
-      auto redir = [&]() -> Filepath {
-                     // If we can find it then take what is *actually( at hand
-                     // Else fall back onto the configure-time path as-built.
-                     if (libexec) {
-                       return *libexec;
-                     } else if (auto guessed=guess_actual_installed_prefix(av); guessed) {
-                       return *guessed / Filepath{"libexec"} / Filepath{Config::package_name()};
-                     } else {
-                       return Config::package_applibexecdir();
-                     }
-                   }();
-      auto subcommand = [first]{
-                          auto duhfault = first.filename();
-                          if ("ls"s == duhfault) {
-                            duhfault = "eles"s; // because "eles" cannot be called "ls" lest that conflict with /bin/ls which MUST NOT ever be shaddowed
-                          }
-                          return duhfault;
-                        }();
-      return redir / subcommand;
+    return {Dispensation::PROCESS, {}, vv, move(libexec)};;
+  }
+  auto body::reexec_path(Program const &, Optional<Filepath> libexec, Argv av, Filepath first) -> Filepath {
+    // the first arument (Program) is unused because there are no error messages herein; but there could be (couldn't there?)
+    auto redir = [&]() -> Filepath {
+                   // If we can find it then take what is *actually( at hand
+                   // Else fall back onto the configure-time path as-built.
+                   if (libexec) {
+                     return *libexec;
+                   } else if (auto guessed=guess_actual_installed_prefix(av); guessed) {
+                     return *guessed / Filepath{"libexec"} / Filepath{Config::package_name()};
+                   } else {
+                     return Config::package_applibexecdir();
+                   }
+                 }();
+    auto subcommand = [first]{
+                        auto duhfault = first.filename();
+                        if ("ls"s == duhfault) {
+                          duhfault = "eles"s; // because "eles" cannot be called "ls" lest that conflict with /bin/ls which MUST NOT ever be shaddowed
+                        }
+                        return duhfault;
+                      }();
+    return redir / subcommand;
+  }
+  auto body::guess_actual_installed_prefix(Argv av) -> Optional<Filepath> {
+    //
+    // WATCHOUT - libtool in or out of development
+    //
+    // When installed or when linked with -no-install, the second form applies; else the 1st
+    //
+    //      /---------------------------------------- third parent path
+    //      |       /-------------------------------  second parent path
+    //      |       |   /---------------------------  first parent path
+    //      |       |   |
+    //      v       v   v
+    // /opt/tunitas/bin/.libs/lt-tf
+    //
+    //      /---------------------------------------- second parent path
+    //      |       /-------------------------------  first parent path
+    //      |       |
+    //      |       |
+    //      v       v
+    // /opt/tunitas/bin/tf
+    //
+    auto debin = Filepath{av.front()}.parent_path();
+    if (".libs"s == debin.filename()) {
+      debin = debin.parent_path();
     }
-    auto body::guess_actual_installed_prefix(Argv av) -> Optional<Filepath> {
-      //
-      // WATCHOUT - libtool in or out of development
-      //
-      // When installed or when linked with -no-install, the second form applies; else the 1st
-      //
-      //      /---------------------------------------- third  parent path
-      //      |       /-------------------------------  second  parent path
-      //      |       |   /---------------------------  first parent path
-      //      |       |   |
-      //      v       v   v
-      // /opt/tunitas/bin/.libs/lt-tf
-      //
-      //      /---------------------------------------- second  parent path
-      //      |       /-------------------------------  first  parent path
-      //      |       |
-      //      |       |
-      //      v       v
+    if (debin.empty()) {
+      return {};
+    } else {
+      //              bin/tf <---- here we synthesize the '.'
+      //            ./bin/tf
       // /opt/tunitas/bin/tf
-      //
-      auto debin = Filepath{av.front()}.parent_path();
-      if (".libs"s == debin.filename()) {
-        debin = debin.parent_path();
-      }
       auto guess = debin.parent_path();
       if (guess.empty()) {
-        return {};
+        return ".";
       } else {
         return guess;
       }
