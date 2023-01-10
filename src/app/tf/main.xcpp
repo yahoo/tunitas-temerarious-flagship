@@ -47,6 +47,7 @@ namespace app::tf::package_main {
 }
 #endiv
 #divert <hpp>
+#import langu.ish.perl.split
 namespace app::tf::package_main::body {
   namespace exported {
     inline auto main(int, char *[]) -> Exit;
@@ -56,6 +57,9 @@ namespace app::tf::package_main::body {
   auto reexec_arguments(Program const &, Argv) -> Tuple<Dispensation, Exit, Vector, Optional<Filepath>>;
   auto reexec_path(Program const &, Optional<Filepath> libexec, Argv, Filepath first) -> Filepath;
   auto guess_actual_installed_prefix(Argv) -> Optional<Filepath>;
+  auto guess_actual_installed_bindir_from_PATH(Filepath exe) -> Optional<Filepath>;
+  inline auto const NOELIDE = langu::ish::perl::Elide{};
+  inline auto debin(Filepath) -> Filepath;
 }
 #endiv
 #divert <ipp>
@@ -69,14 +73,29 @@ namespace app::tf::package_main {
     std::clog << "error: unexpected exception " << e.what() << '\n';
     return SOFTWARE;
   }
+  auto body::debin(Filepath bindir) -> Filepath {
+    //
+    //              bin/tf <---- here we synthesize the '.'
+    //            ./bin/tf
+    // /opt/tunitas/bin/tf
+    //
+    if (auto trimmed = bindir.parent_path(); trimmed.empty()) {
+      return ".";
+    } else {
+      return trimmed;
+    }
+  }
 }
 #endiv
 #divert <cpp>
 #import app.tf.usage.Message
 #import app.exception.Testing
 #import c.rest
-#import tunitas.flagship.temerarious.version.Generator
+#import langu.ish.perl.split
 #import sys.posix.exec
+#import sys.posix.executable
+#import sys.posix.getenv
+#import tunitas.flagship.temerarious.version.Generator
 namespace app::tf::package_main {
   auto interface::main(Controllability const &ctl, Argv av) -> Exit try {
     auto program = Program{av.front()};
@@ -167,7 +186,10 @@ namespace app::tf::package_main {
   }
   auto body::guess_actual_installed_prefix(Argv av) -> Optional<Filepath> {
     //
-    // WATCHOUT - libtool in or out of development
+    // Design: the shell may or MAY NOT deliver a full path to the running executable
+    // In the eventuality that it does, we're good; else we have to go guessing based on PATH and hope that what we find is "the same thing"
+    // 
+    // WATCHOUT - libtool in or out of development; the ".libs" and the "lt-" are latent in the UX but present to our machinations.
     //
     // When installed or when linked with -no-install, the second form applies; else the 1st
     //
@@ -185,23 +207,36 @@ namespace app::tf::package_main {
     //      v       v
     // /opt/tunitas/bin/tf
     //
-    auto debin = Filepath{av.front()}.parent_path();
-    if (".libs"s == debin.filename()) {
-      debin = debin.parent_path();
+    std::cerr << "trace " << av.front() << '\n';
+    auto exe = Filepath{av.front()};
+    auto binnie = exe.parent_path();
+    if (".libs"s == binnie.filename()) {
+      binnie = binnie.parent_path();
     }
-    if (debin.empty()) {
-      return {};
-    } else {
-      //              bin/tf <---- here we synthesize the '.'
-      //            ./bin/tf
-      // /opt/tunitas/bin/tf
-      auto guess = debin.parent_path();
-      if (guess.empty()) {
-        return ".";
+    if (binnie.empty()) {
+      if (auto guessed=guess_actual_installed_bindir_from_PATH(move(exe)); guessed) {
+        return debin(*guessed);
       } else {
-        return guess;
+        return {};
+      }
+    } else {
+      return debin(binnie.parent_path());
+    }
+  }
+  auto body::guess_actual_installed_bindir_from_PATH(Filepath exe) -> Optional<Filepath> {
+    if (auto got=sys::posix::getenv("PATH"); good(got)) {
+      for (auto path=langu::ish::perl::split<std::vector<String>>(':', move(got).value(), NOELIDE); Filepath bindir : path) {
+        if (bindir.empty()) {
+          bindir = ".";
+        }
+        auto candidate = bindir / exe;
+    std::cerr << "trace " << candidate << '\n';
+        if (sys::posix::executable(candidate)) {
+          return bindir;
+        }
       }
     }
+    return {};
   }
 }
 #endiv
