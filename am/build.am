@@ -60,7 +60,7 @@ else
 # Find this makefile fragment before proceeding.
 # It allows make to treat "sys.o" as a C++ header in #import, rather than a compiler output.
 #
-$(warning Missing "support" for import sys.o with the '.o' suffix)
+$(warning Missing "support" for import sys.o with the '.o' suffix from $(module_sys_datadir)/mk/sys.o.DUMMIES.mk)
 endif
 endif
 endif

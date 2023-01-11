@@ -14,12 +14,10 @@ dnl
 dnl autoreconf --force --verbose --install
 dnl autoreconf -vfi
 dnl
-AC_INIT([temerarious-flagship], [2.0.3], [tunitas@tunitas.technology])
-dnl and yes there are other flagships and other toolings (packages-named "flagship" and packages named "tooling")
+AC_INIT([temerarious-flagship], [2.1.1], [tunitas@yahooinc.com])
+dnl and yes there are other flagships and other toolings (packages so honored as the "flagship" and packages made grubby as "tooling")
 TF_INIT(AC_PACKAGE_NAME, AC_PACKAGE_VERSION, AC_PACKAGE_BUGREPORT)
-
-dnl See the AUTOMAKE_OPTIONS in the Makefile.am
-AM_SILENT_RULES([yes])
+AM_SILENT_RULES([yes]) dnl See the AUTOMAKE_OPTIONS in the Makefile.am
 
 AC_CONFIG_SRCDIR([src/app/namespace.xcpp])
 AC_CONFIG_MACRO_DIR([m4])
@@ -60,8 +58,8 @@ TF_WITH_MODULE([rigging]) dnl TESTING_AREAS only
 TF_WITH_MODULE([cppunit]) dnl TESTING_AREAS only and not needed when using module-rigging >= 2.0
 TF_WITH_NONSTD([cppunit]) dnl ibidem
 
-TF_WITH_STD([scold])
-TF_WITH_STD([tunitas])
+TF_WITH_OPT([scold])
+TF_WITH_OPT([tunitas])
 
 LT_PREREQ([2.4.2])
 AM_PROG_AR dnl must be first

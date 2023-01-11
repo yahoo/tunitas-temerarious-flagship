@@ -5,9 +5,12 @@ dnl For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerari
 dnl For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
 
 dnl
+dnl TF_WITH_MODULE(name-dashes)
 dnl TF_WITH_MODULE(name-dashes, name-underscores, description)
+dnl
+dnl TF_WITH_MODULE_ALIASED(name-dashes1, name-dashes2, ...)
+dnl
 dnl TF_WITH_NONSTD(name-dashes, name-underscores, description)
-dnl TF_WITH_STD(name-dashes, name-underscores, description)
 dnl TF_WITH_SUBSYSTEM(name-dashes, name-underscores, description)
 dnl
 dnl TF_WITH_STD_TUNITAS             (no arguments)
@@ -19,17 +22,6 @@ dnl TF_DEFAULT_STD_VALUES           (no arguments)
 dnl
 
 dnl ----------------------------------------------------------------------------------------------------
-
-dnl
-dnl TF_DEFAULT_STD_VALUES            (no arguments)
-dnl
-AC_DEFUN([TF_DEFAULT_STD_VALUES], [
-    ifdef([HGTW_DEFAULT_STD_VALUES], dnl prefer the modern stylings, avoid the warning messages of the old
-          [AC_REQUIRE([HGTW_DEFAULT_STD_VALUES])],
-          [AC_REQUIRE([SCOLD_DEFAULT_STD_VALUES])])
-    default_std_tunitas_prefix=/opt/tunitas
-    : default_std_EXAMPLE_prefix=$default_default_prefix
-])
 
 dnl
 dnl TF_WITH_MODULE(name-dashes)
@@ -66,6 +58,14 @@ AC_DEFUN([TFinternal_WITH_MODULE], [
           [SCOLD_WITH_MODULE([module-$1], [$2], [$3])])
 ])
  
+dnl
+dnl TF_WITH_MODULE_ALIASED(name-dashes-1, name-dashes-2)
+dnl TF_WITH_MODULE_ALIASED(name-dashes-1, name-dashes-2, name-dashes-3)
+dnl TF_WITH_MODULE_ALIASED(name-dashes-1, name-dashes-2, name-dashes-3, name-dashes-4)
+dnl TF_WITH_MODULE_ALIASED(name-dashes-1, name-dashes-2, name-dashes-3, name-dashes-4, name-dashes-5)
+dnl
+AC_DEFUN([TF_WITH_MODULE_ALIASED], [HT_WITH_MODULE_ALIASED([$1], [$2], [$3], [$4], [$5])])
+
 dnl
 dnl TF_WITH_TEMERARIOUS_FLAGSHIP
 dnl
@@ -143,45 +143,6 @@ AC_DEFUN([TF_WITH_NONSTD], [
 ]) 
 AC_DEFUN([TFinternal_WITH_NONSTD], [
     ifdef([HGTW_WITH_NONSTD], [HGTW_WITH_NONSTD([$1], [$2], [$3])], [SCOLD_WITH_NONSTD([$1], [$2], [$3])])
-])
-
-dnl
-dnl TF_WITH_STD_TUNITAS      (no arguments)
-dnl
-dnl The preferred form, as zero-argument so it can be used in AC_REQUIRE
-dnl
-AC_DEFUN([TF_WITH_STD_TUNITAS], [
-    TF_WITH_STD([tunitas], [tunitas], [The Standard Tunitas Area])
-])
-dnl
-dnl TF_WITH_STD_SCOLD      (no arguments)
-dnl
-dnl The preferred form, as zero-argument so it can be used in AC_REQUIRE
-dnl
-AC_DEFUN([TF_WITH_STD_SCOLD], [    
-    TF_WITH_STD([scold], [scold], [The Standard S.C.O.L.D. Area])
-])
-
-dnl
-dnl TF_WITH_STD(subsystem)
-dnl $1 - subsystem, e.g. scold, tunitas, state-space, hyperledger, hyperledger/fabric, hyperledger/sawtooth, hyperledger/iroha, etc.
-dnl
-dnl Usage:
-dnl
-dnl   TF_WITH_STD([scold])
-dnl
-AC_DEFUN([TF_WITH_STD], [    
-    AC_REQUIRE([TF_DEFAULT_STD_VALUES])
-    TFinternal_WITH_STD([$1],
-                        ifelse([$2], [],
-                               m4_bpatsubst([$1], m4_changequote([{], [}]){[^a-zA-Z0-9_]}m4_changequote({[}, {]}), [_]),
-                               [$2]),
-                        ifelse([$3], [], [The Standard $1 Area], [$3]))
-])
-AC_DEFUN([TFinternal_WITH_STD], [
-    ifdef([HGTW_WITH_STD],
-          [HGTW_WITH_STD([$1], [$2], [$3])],
-          [SCOLD_WITH_STD([$1], [$2], [$3])])
 ])
 
 dnl

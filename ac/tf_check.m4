@@ -161,7 +161,8 @@ AC_DEFUN([TFinternal_CHECK_PACKAGES_CANNOT_PROCEED], [
     AC_REQUIRE([TF_WITH_STD_SCOLD])
     AC_REQUIRE([TF_WITH_STD_TUNITAS])
     __CPPFLAGS="$CPPFLAGS"
-    dnl Reminder: this will not work out well if you are using the development options to specify locations other than --with-std-tunitas=DIR and --with-std-scold=DIR
+    dnl [[FIXTHIS]] this does not work out well in development where the headers are expected to be discovered in the search path (there is yet no search path)
+    dnl If you are using the development options to specify locations other than --with-std-tunitas=DIR and --with-std-scold=DIR
     dnl e.g. if you have a special feature in /build/tunitas/basics and you use --with-tunitas-basics=/build/tunitas/basics
     CPPFLAGS="${std_tunitas_prefix:+-I$std_tunitas_prefix/modules -I$std_tunitas_prefix/include} ${std_scold_prefix:+-Istd_scold_prefix/modules -I$std_scold_prefix/include}"
     AC_CHECK_HEADERS([$1],

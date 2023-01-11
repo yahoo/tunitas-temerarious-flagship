@@ -6,16 +6,18 @@
 #
 ac_INSTALLABLE_FILES = \
   ac/tf_init.m4 \
-  ac/tf_submodules.m4 \
+  ac/tf_check.m4 \
+  ac/tf_check_leveldb.m4 \
+  ac/tf_compatibility.m4 \
+  ac/tf_enable.m4 \
   ac/tf_finalize.m4 \
   ac/tf_msg.m4 \
-  ac/tf_prog.m4 \
-  ac/tf_check_leveldb.m4 \
   ac/tf_package.m4 \
-  ac/tf_enable.m4 \
-  ac/tf_check.m4 \
+  ac/tf_prog.m4 \
+  ac/tf_submodules.m4 \
   ac/tf_tiers.m4 \
   ac/tf_with.m4 \
+  ac/tf_with_opt.m4 \
   $(end)
 #
 ac_INSTALLED_FILES = $(addprefix $(pkgdatadir)/,$(ac_INSTALLABLE_FILES))
