@@ -111,7 +111,7 @@ AC_DEFUN([TFinternal_WITH_SUBSYSTEM], [
 						   [$2]),
 					    ifelse([$3], [], [Subsystem $1 Development Area], [$3]),
 					    dnl ${std_tunitas_prefix} may be empty|undefined if --without-std-tunitas
-					    [${submodules_metadir:+$submodules_metadir/$1} ${external_metadir:+$external_metadir/$1} ${std_tunitas_prefix?} ${prefix?}])
+					    [${submodules_metadir:+$submodules_metadir/$1} ${external_metadir:+$external_metadir/$1} ${opt_tunitas_prefix?} ${prefix?}])
     ], [ifdef([SCOLD_WITH_AMBIENT_COMPONENT], [
         dnl hypogeal-twilight 0.42
 	SCOLD_WITH_AMBIENT_COMPONENT([$1],
@@ -159,7 +159,7 @@ AC_DEFUN([TF_WITH_TEMERARIOUS_FLAGSHIP], [
     AC_REQUIRE([TF_COMPONENT_METADIRECTORY_TIERS])
     AC_REQUIRE([TF_WITH_HYPOGEAL_TWILIGHT])
     SCOLD_WITH_AMBIENT_COMPONENT([temerarious-flagship], [temerarious_flagship], [Tunitas autotools build scaffolding],
-                                 [${submodules_metadir:+$submodules_metadir/$1} ${external_metadir:+$external_metadir/$1} ${std_tunitas_prefix} ${prefix}])
+                                 [${submodules_metadir:+$submodules_metadir/$1} ${external_metadir:+$external_metadir/$1} ${opt_tunitas_prefix?} ${prefix}])
     if test unset != "${temerarious_flagship_prefix:-unset}"; then
         # You are already using temerarious-flagship, so why did you want to say --without-temerarious-flagship?
         temerarious_flagship_datadir='$(temerarious_flagship_datarootdir)'

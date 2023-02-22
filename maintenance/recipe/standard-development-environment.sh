@@ -1,4 +1,4 @@
-# this must be sourced not executed (see the usage: examples below)
+# This must be sourced not executed (see the usage: examples below)
 # Copyright Yahoo Inc.
 # Licensed under the terms of the Apache-2.0 license.
 # For terms, see the LICENSE file at https://github.com/yahoo/tunitas-basics/blob/master/LICENSE
