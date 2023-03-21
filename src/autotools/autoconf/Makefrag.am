@@ -22,20 +22,20 @@
 #
 include $(hypogeal_twilight_datadir)/mk/autotools/autoconf/definitions.mk
 $(if $(htGC),$(ok),$(error htGC was not defined by .../definitions.mk))
-$(if $(scold_noinst_modulesdir),$(ok),$(error scold_noinst_modulesdir was not defined by .../compile.mk))
-$(if $(scold_noinst_cxxdir),$(ok),$(error scold_noinst_cxxdir was not defined by .../compile.mk))
+$(if $(tf_modulesdir),$(ok),$(error tf_modulesdir was not defined by .../compile.mk))
+$(if $(tf_cxxdir),$(ok),$(error tf_cxxdir was not defined by .../compile.mk))
 
 $(if $(autotools_autoconf_IMPORT),$(ok),$(error autotools_autoconf_IMPORT is not defined in noinst/lib/libautomake-autoconf.am))
 autotools_autoconf_SUBCONFIGasDOTS = autotools.autoconf.Config.$(autotools_autoconf_IMPORT).CONFIG
 autotools_autoconf_SUBCONFIGasSLASHES = $(subst .,/,$(autotools_autoconf_SUBCONFIGasDOTS))
 #
 autotools_autoconf_SUBSOURCE.config.h ?= config.h # MUST match the value given in configure.ac AC_CONFIG_HEADRES([config.h])
-autotools_autoconf_SUBSOURCE.fpp       = $(scold_noinst_modulesdir)/fpp/$(autotools_autoconf_SUBCONFIGasDOTS)
-autotools_autoconf_SUBSOURCE.hpp       = $(scold_noinst_modulesdir)/hpp/$(autotools_autoconf_SUBCONFIGasDOTS)
-autotools_autoconf_SUBSOURCE.ipp       = $(scold_noinst_modulesdir)/ipp/$(autotools_autoconf_SUBCONFIGasDOTS)
-autotools_autoconf_SUBSOURCE.tpp       = $(scold_noinst_modulesdir)/$(autotools_autoconf_SUBCONFIGasDOTS)
-autotools_autoconf_SUBSOURCE.cpp       = $(scold_noinst_cxxdir)/$(autotools_autoconf_SUBCONFIGasSLASHES).cpp
-autotools_autoconf_SUBSOURCE.xcpp      = $(scold_noinst_cxxdir)/$(autotools_autoconf_SUBCONFIGasSLASHES).xcpp
+autotools_autoconf_SUBSOURCE.fpp  = $(tf_modulesdir)/fpp/$(autotools_autoconf_SUBCONFIGasDOTS)
+autotools_autoconf_SUBSOURCE.hpp  = $(tf_modulesdir)/hpp/$(autotools_autoconf_SUBCONFIGasDOTS)
+autotools_autoconf_SUBSOURCE.ipp  = $(tf_modulesdir)/ipp/$(autotools_autoconf_SUBCONFIGasDOTS)
+autotools_autoconf_SUBSOURCE.tpp  = $(tf_modulesdir)/$(autotools_autoconf_SUBCONFIGasDOTS)
+autotools_autoconf_SUBSOURCE.cpp  = $(tf_cxxdir)/$(autotools_autoconf_SUBCONFIGasSLASHES).cpp
+autotools_autoconf_SUBSOURCE.xcpp = $(tf_cxxdir)/$(autotools_autoconf_SUBCONFIGasSLASHES).xcpp
 #
 autotools_autoconf_TAG ?= \
   $(addsuffix ::CONFIG, \

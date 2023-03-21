@@ -1,4 +1,0 @@
-# This is a automake -*- Makefile -*- fragment of a GNU Makefile
-# it is needed for this test, but does nothing else
-default:
-@src_something_GNUmakefrag@ # WATCHOUT - the deprecated SCOLD_INDIRECT_GNUmakefrag(...) looks for this token

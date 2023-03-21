@@ -1,3 +1,0 @@
-#!/bin/sh
-source ${0%/*}/../library/rigging.sh || exit 255
-autotools-local-preconfigure --top-level --dry-run

@@ -1,0 +1,30 @@
+# This is a GNU -*- Makefile -*- which is managed by automake.
+# Copyright Yahoo Inc.
+# Licensed under the terms of the Apache-2.0 license.
+# For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
+# For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
+
+# more install rules arrive from from @temerarious_flagship_datadir@/am/install.am
+# 
+modulesdir = $(prefix)/modules
+install-data-local: __install-modules
+
+modules_INSTALLABLE_FILES_HANDCODED = $(none)
+modules_INSTALLABLE_FILES_GENERATED = \
+  $(noinst_lib_libtunitas_flagship_temerarious_la_MODULES) \
+  $(noinst_lib_libautotools_autoconf_tunitas_flagship_temerarious_la_MODULES) \
+  $(noinst_lib_libstd_tunitas_flagship_temerarious_la_MODULES) \
+  $(end)
+$(if $(DEBUGGING_CONDITION), \
+  $(info DEBUG modules_INSTALLABLE_FILES_HANDCODED=$(modules_INSTALLABLE_FILES_HANDCODED)) \
+  $(info DEBUG modules_INSTALLABLE_FILES_GENERATED=$(modules_INSTALLABLE_FILES_GENERATED)))
+
+modules_INSTALLED_FILES_HANDCODED = $(addprefix $(modulesdir)/, $(patsubst modules/%, %, $(modules_INSTALLABLE_FILES_HANDCODED)))
+modules_INSTALLED_FILES_GENERATED = $(addprefix $(modulesdir)/, $(patsubst obj/modules/%, %, $(modules_INSTALLABLE_FILES_GENERATED)))
+
+__install-modules : $(modules_INSTALLED_FILES_HANDCODED)
+$(modules_INSTALLED_FILES_HANDCODED) : $(DESTDIR)$(modulesdir)/% : modules/%
+	install -m 444 $< $@
+__install-modules : $(modules_INSTALLED_FILES_GENERATED)
+$(modules_INSTALLED_FILES_GENERATED) : $(DESTDIR)$(modulesdir)/% : obj/modules/%
+	install -m 444 $< $@

@@ -1,8 +1,0 @@
-#!/bin/sh
-source ${0%/*}/rigging.sh || exit 70
-(
-    # see option.usage.t nearby for the --usage variant
-    ${exe?} --help
-) >& $output
-difference ${golden?} ${output?}
-successful

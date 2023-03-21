@@ -1,9 +1,0 @@
-#!/bin/sh
-# nothing to do, move on to ./configure, nearby
-exit 0
-#
-# Preparing the Build (see the README, nearby)
-# Usage:
-#
-#   ./buildconf && ./configure --prefix=/exp/local && make && make check && make install && echo OK
-#

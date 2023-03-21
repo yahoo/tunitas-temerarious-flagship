@@ -1,4 +1,0 @@
-tests_unit_fragment_TESTS = \
-  tests/unit/fragment/cases.test \
-  $(end)
-

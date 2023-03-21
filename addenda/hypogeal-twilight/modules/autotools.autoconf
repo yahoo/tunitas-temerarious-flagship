@@ -1,6 +1,0 @@
-// -*- c++ -*- hand-coded
-#pragma once
-#include <autotools>
-namespace autotools {
-  namespace autoconf { }
-}

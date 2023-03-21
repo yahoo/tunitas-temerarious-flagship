@@ -1,15 +1,43 @@
 The NEWS file contains a high-level summary of the changes in the release.
-Whereas semantic versioning is used, a new minor release number is necesasry when new fatures are added.
+Whereas semantic versioning is used, a new minor release number is necessary when new features are added.
 
 The <strike>markup</strike> markdown document preparation language used herein is more like MediaWiki, less like Markdown (whatever that standard is).  You should be able to see this file <strike>pasted</strike> performed directly into https://wiki.tunitas.technology with reasonable results.
 
-= Version 1.4-Series =
+= Version 2-series =
+
+This is the current development (on default, trunk, main, master).
+
+The file mk/sys.o.DUMMIES.mk.mk is used during build to prevent gnu make from rebuilding the module-header "sys.o" which announces namespace sys::o.
+It is inconvenient that make will rebuild this file using default compilation rules (and fail) thereby destroying other nearby imputed sources.
+
+The tf meta command is added.  It will hook into other subcommands.
+Use 'tf list' to see the currently-available subcommands.
+
+A general enfreshening for expected use in (minimally) C++20.
+
+== Version v2.2 ==
+
+* TF_CHECK_GMP_CXX added to support gmp-c++ in the build
+
+== Version v2.1 ==
+
+* s/std/opt/ in various variable names to remind that these variables announce paths in /opt
+* TF_WITH_OPT
+* TF_WITH_OPT_TUNITAS
+* TF_PREVENT and TF_REDIRECT
+* Other modernizations in the build scheme.
+
+= Version 1-series =
+
+The 1-series in maintenance mode now.
+
+== Version 1.4-Series ==
 
 * TF_CHECK_LEVELDB added
 * TF_WITH_NONSTD_LEVELDB added
-* NEWS added
-* ChangeLog deprecated
+* NEWS added (this file)
+* ChangeLog deprecated, instead rely on the git log directly.
 
 = Version 1.3.4 =
 
-See the ChangeLog, nearby.
+Information was maintained in the top-level ChangeLog of that era.

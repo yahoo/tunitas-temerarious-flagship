@@ -6,8 +6,8 @@ noinst_lib_libautotools_autoconf_tunitas_flagship_temerarious_la_CXXFLAGS = $(PA
 noinst_lib_libautotools_autoconf_tunitas_flagship_temerarious_la_LDFLAGS = $(PACKAGE_LDFLAGS_SET)
 noinst_lib_libautotools_autoconf_tunitas_flagship_temerarious_la_LIBADD = 
 noinst_lib_libautotools_autoconf_tunitas_flagship_temerarious_la_MODULES = $(call HT_SOURCEStoMODULES,$(noinst_lib_libautotools_autoconf_tunitas_flagship_temerarious_la_SOURCES))
-noinst_lib_libautotools_autoconf_tunitas_flagship_temerarious_la_SOURCES = noinst/obj/src/autotools/autoconf/Config/tunitas/flagship/temerarious/CONFIG.cpp
-noinst_lib_libautotools_autoconf_tunitas_flagship_temerarious_la_DEPENDS = $(scold_noinst_mkdir)/libautotools-autoconf+tunitas-flagship-temerarious.mk
+noinst_lib_libautotools_autoconf_tunitas_flagship_temerarious_la_SOURCES = obj/src/autotools/autoconf/Config/tunitas/flagship/temerarious/CONFIG.cpp
+noinst_lib_libautotools_autoconf_tunitas_flagship_temerarious_la_DEPENDS = $(tf_mkdir)/libautotools-autoconf+tunitas-flagship-temerarious.mk
 #
 autotools_autoconf_IMPORT = tunitas.flagship.temerarious
 include src/autotools/autoconf/Makefrag.am
@@ -16,11 +16,29 @@ $(noinst_lib_libautotools_autoconf_tunitas_flagship_temerarious_la_SOURCES) : DI
 $(noinst_lib_libautotools_autoconf_tunitas_flagship_temerarious_la_SOURCES) : DC_FLAGS+=$(DISCOFLAGS)
 $(noinst_lib_libautotools_autoconf_tunitas_flagship_temerarious_la_SOURCES) : bbDC_FLAGS+=$(DISCOFLAGS)
 #
-$(noinst_lib_libautotools_autoconf_tunitas_flagship_temerarious_la_SOURCES) : disco_objdir=$(tf_noinst_objdir)
-$(noinst_lib_libautotools_autoconf_tunitas_flagship_temerarious_la_SOURCES) : disco_srcdir=$(tf_noinst_cxx_srcdir)
-$(noinst_lib_libautotools_autoconf_tunitas_flagship_temerarious_la_SOURCES) : scold_objdir=$(disco_objdir)# [[REMOVEWHEN]] temerarious-flagship >= 2.0
-$(noinst_lib_libautotools_autoconf_tunitas_flagship_temerarious_la_SOURCES) : scold_srcdir=$(disco_srcdir)# [[REMOVEWHEN]] temerarious-flagship >= 2.0
-$(noinst_lib_libautotools_autoconf_tunitas_flagship_temerarious_la_SOURCES) : noinst/obj/src/%.cpp : noinst/obj/src/%.xcpp
+# debug by setting DISCOFLAGS=--verbose to see where $(DISCO) splatters the derived files.
+# likely: the srcdir is set wrong so the files get put in obj/src/obj/src/...something...something...dark-side.
+# To Wit:
+#   V=1 D=1 DISCOFLAGS=--verbose enable_dependency_tracking=no ./maintenance/nearby 
+#
+# You're looking for consistent settings as:
+#
+#   ...searchpath...
+#   --modulesdir-variable='$(scold_cxx_modulesdir)' \
+#   --objdir-directory=obj/src --objdir-variable='$(tf_cxx_srcdir)' \
+#   --srcdir-directory=obj/src --srcdir-variable='$(tf_cxx_srcdir)' \ <------------------ $(tf_cxx_srcdir) is the correct one here, $(tf_srcdir) is incorrect here
+#   ...more...
+#
+# NOT ---> disco_objdir=$(tf_noinst_objdir) disco_srcdir=$(tf_noinst_cxx_srcdir) <--- NOT (because we want to install these modules)
+# NOT ---> $(noinst_lib_libautotools_autoconf_tunitas_flagship_temerarious_la_SOURCES) : disco_objdir=$(tf_objdir)
+# to revert ensure that disco_objdir=$(tf_noinst_objdir)
+# to revert ensure that disco_srcdir=$(tf_noinst_cxx_srcdir)
+#
+# REMOVED ---> $(noinst_lib_libautotools_autoconf_tunitas_flagship_temerarious_la_SOURCES) : scold_objdir=$(disco_objdir)# [[REMOVEWHEN]] temerarious-flagship >= 2.0
+# REMOVED ---> $(noinst_lib_libautotools_autoconf_tunitas_flagship_temerarious_la_SOURCES) : scold_srcdir=$(disco_srcdir)# [[REMOVEWHEN]] temerarious-flagship >= 2.0
+#
+$(noinst_lib_libautotools_autoconf_tunitas_flagship_temerarious_la_SOURCES) : disco_srcdir=$(tf_cxx_srcdir)
+$(noinst_lib_libautotools_autoconf_tunitas_flagship_temerarious_la_SOURCES) : obj/src/%.cpp : obj/src/%.xcpp
 	$(HT_V_COLD) $(call HT_XCPP2CPP, $<)
 	@test -e $@
 $(noinst_lib_libautotools_autoconf_tunitas_flagship_temerarious_la_DEPENDS): $(noinst_lib_libautotools_autoconf_tunitas_flagship_temerarious_la_SOURCES)
@@ -29,3 +47,11 @@ $(noinst_lib_libautotools_autoconf_tunitas_flagship_temerarious_la_DEPENDS):
 	@test -e $@
 include $(noinst_lib_libautotools_autoconf_tunitas_flagship_temerarious_la_DEPENDS)
 clean-dependencies:: ; rm -f $(noinst_lib_libautotools_autoconf_tunitas_flagship_temerarious_la_DEPENDS)
+
+$(if $(DEBUGGING_CONDITION), \
+$(warning TRACE $(autotools_autoconf_SUBSOURCE.xcpp) : $(autotools_autoconf_SUBSOURCE.config.h)) \
+$(warning TRACE $(if $(wildcard $(autotools_autoconf_SUBSOURCE.xcpp)),present,absent) : $(if $(wildcard $(autotools_autoconf_SUBSOURCE.config.h)), present, absent)) \
+$(warning TRACE $(noinst_lib_libautotools_autoconf_tunitas_flagship_temerarious_la_SOURCES) : obj/src/%.cpp : obj/src/%.xcpp) \
+$(warning TRACE $(noinst_lib_libautotools_autoconf_tunitas_flagship_temerarious_la_DEPENDS): $(noinst_lib_libautotools_autoconf_tunitas_flagship_temerarious_la_SOURCES)) \
+$(warning TRACE include $(noinst_lib_libautotools_autoconf_tunitas_flagship_temerarious_la_DEPENDS)) \
+$(end))

@@ -1,8 +1,0 @@
-// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
-#divert <fpp>
-namespace scold {
-  namespace submodule {
-    // The submodule with the three directories { modulesdir, objdir, srcdir }
-  }
-}
-#endiv

@@ -1,8 +1,0 @@
-#!/bin/sh
-source ${0%/*}/../library/rigging.sh || exit 255
-make_outdir
-good ${boilerplate_exe?} \
-    --mk-directory=${outdir?} \
-    --without-vernacular-doggerel \
-    --with-hypogeal-twilight=../library/installation \
-    ${end}

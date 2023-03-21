@@ -1,9 +1,0 @@
-tests_remonstrate_TESTS = \
-  tests/remonstrate/usage.test \
-  tests/remonstrate/version.test \
-  tests/remonstrate/example00.test \
-  tests/remonstrate/example01.test \
-  tests/remonstrate/example02.test \
-  tests/remonstrate/example03.test \
-  tests/remonstrate/example04.test \
-  $(end)

@@ -1,4 +1,0 @@
-#!/bin/bash --norc
-prefix=/exp/scold \
-enable_static_executables=yes \
-exec ${0%/*}/nearby

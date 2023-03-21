@@ -1,9 +1,0 @@
-# usage: source ${topdir:-???}/tests/config.sh || exit 70
-incendiary_sophist_prefix=@incendiary_sophist_prefix@
-: ${incendiary_sophist_prefix?}
-incendiary_sophist_libdir=@incendiary_sophist_libdir@
-: ${incendiary_sophist_libdir?}
-incendiary_sophist_libexecdir=@incendiary_sophist_libexecdir@
-: ${incendiary_sophist_libexecdir?}
-incendiary_sophist_riggingdir=${incendiary_sophist_libdir?}/rigging
-

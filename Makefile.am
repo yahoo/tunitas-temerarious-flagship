@@ -9,7 +9,7 @@
 AUTOMAKE_OPTIONS = no-define subdir-objects foreign
 ACLOCAL_AMFLAGS = -I m4
 AM_MAKEFLAGS= \
-  MAKEFLAGS='$(MAKEFLAGS)' \
+  DO_NOT_REPASS_MAKEFLAGS='$(MAKEFLAGS)' \
   CPPFLAGS='$(CPPFLAGS)' \
   CXXFLAGS='$(CXXFLAGS)' \
   LDFLAGS='$(LDFLAGS)' \
@@ -49,8 +49,8 @@ TESTING_AREAS = \
   $(end)
 INSTALLATION_AREAS = \
   $(nonstd_gcc_prefix) \
-  $(std_scold_prefix) \
-  $(std_tunitas_prefix) \
+  $(opt_scold_prefix) \
+  $(opt_tunitas_prefix) \
   $(deprecated_INSTALLATION_AREAS) \
   $(end)
 
@@ -63,7 +63,6 @@ include check/lib/libtests.am
 include libexec/temerarious-flagship/roff.am
 include libexec/temerarious-flagship/thunks.am # which recursively includes at least: echo help list ls usage version
 include lib/libtunitas-flagship-temerarious.am
-include noinst/lib/libaddenda+nonstd.am
 include noinst/lib/libapp.am
 include noinst/lib/libapp-roff.am
 include noinst/lib/libapp-tf.am
@@ -71,18 +70,11 @@ include noinst/lib/libautotools-autoconf+tunitas-flagship-temerarious.am
 include noinst/lib/libstd+tunitas-flagship-temerarious.am
 include noinst/lib/libtunitas-flagship-temerarious.am
 
-# install rules arrive from from @temerarious_flagship_datadir@/am/install.am
-INSTALL_MODULES = \
-  $(noinst_lib_libtunitas_flagship_temerarious_la_MODULES) \
-  $(noinst_lib_libautotools_autoconf_tunitas_flagship_temerarious_la_MODULES) \
-  $(noinst_lib_libstd_tunitas_flagship_temerarious_la_MODULES) \
-  $(end)
-$(if $(DEBUGGING_CONDITION),$(info DEBUG INSTALL_MODULES=$(INSTALL_MODULES)))
-
 include ac/Makefrag.am
 include am/Makefrag.am
 include mk/Makefrag.am
 include bc/Makefrag.am
+include modules/Makefrag.am
 
 bin_PROGRAMS = bin/tf
 libexec_temerarious_flagshipdir = $(libexecdir)/temerarious-flagship
@@ -97,7 +89,6 @@ libexec_temerarious_flagship_PROGRAMS = \
   $(end)
 lib_LTLIBRARIES = lib/libtunitas-flagship-temerarious.la
 noinst_LTLIBRARIES = \
-  noinst/lib/libaddenda+nonstd.la \
   noinst/lib/libautotools-autoconf+tunitas-flagship-temerarious.la \
   noinst/lib/libstd+tunitas-flagship-temerarious.la \
   noinst/lib/libtunitas-flagship-temerarious.la \

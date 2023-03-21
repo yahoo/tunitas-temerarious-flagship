@@ -1,8 +1,0 @@
-#!/bin/sh
-source ${0%/*}/framework.sh || exit 1
-testdir=t99
-mkdir ${testdir}/{f,h,i}pp
-unit /scold
-e=$?
-rmdir ${testdir}/{f,h,i}pp
-exit $e

@@ -1,4 +1,0 @@
-#!/bin/sh
-source ${0%/*}/../library/rigging.sh || exit 255
-: make_outdir ... this will create ./mk at .../vernacular-doggerel/tests/unit/mk
-good ${boilerplate_exe?}

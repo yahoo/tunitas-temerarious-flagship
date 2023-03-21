@@ -1,3 +1,0 @@
-#!/bin/sh
-source ${0%/*}/../library/rigging.sh || exit 255
-fail ${boilerplate_exe?} --package_spec --dry-run-mode

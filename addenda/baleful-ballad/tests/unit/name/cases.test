@@ -1,4 +1,0 @@
-#!/bin/sh
-source ${0%/*}/framework.sh || exit 1
-unit /name
-

@@ -1,8 +1,0 @@
-// -*- c++ -*- C++23 with S.C.O.L.D. stylings; For terms, see the LICENSE file at the top of the repository.
-#divert <fpp>
-namespace want {
-  namespace doppel {
-    // nothing (yet)
-  }
-}
-#endiv

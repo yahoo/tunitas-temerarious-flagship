@@ -62,7 +62,7 @@ TF_WITH_OPT([scold])
 TF_WITH_OPT([tunitas])
 
 AC_PREREQ([2.71])
-LT_PREREQ([2.4.2])
+LT_PREREQ([2.4.7])
 LT_INIT
 AC_LANG([C++])
 AC_PROG_CC

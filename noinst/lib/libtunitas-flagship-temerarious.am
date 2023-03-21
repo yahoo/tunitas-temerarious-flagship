@@ -8,7 +8,6 @@ noinst_lib_libtunitas_flagship_temerarious_la_CPPFLAGS = $(PACKAGE_CPPFLAGS_SET)
 noinst_lib_libtunitas_flagship_temerarious_la_CXXFLAGS = $(PACKAGE_CXXFLAGS_SET)
 noinst_lib_libtunitas_flagship_temerarious_la_LDFLAGS = $(PACKAGE_LDFLAGS_SET)
 noinst_lib_libtunitas_flagship_temerarious_la_LIBADD = \
-  noinst/lib/libaddenda+nonstd.la \
   noinst/lib/libautotools-autoconf+tunitas-flagship-temerarious.la \
   noinst/lib/libstd+tunitas-flagship-temerarious.la \
   -ltunitas \

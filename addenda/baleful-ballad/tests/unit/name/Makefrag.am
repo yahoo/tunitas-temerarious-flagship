@@ -1,4 +1,0 @@
-tests_unit_name_TESTS = \
-  tests/unit/name/cases.test \
-  $(end)
-

@@ -1,4 +1,0 @@
-#!/bin/sh
-source ${0%/*}/rigging.sh || exit 70
-unit ${path?}
-

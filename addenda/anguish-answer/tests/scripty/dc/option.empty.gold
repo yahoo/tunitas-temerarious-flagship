@@ -1,5 +1,0 @@
-lt-dc: error, the sources area is unset; use --srcdir=DIRECTORY
-lt-dc: error, the objects area is unset; use --objdir=DIRECTORY 
-lt-dc: error, the modules area is unset; use --modulesdir=DIRECTORY 
-lt-dc: error, could not parse the options
-lt-dc: bad options
