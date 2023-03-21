@@ -64,6 +64,7 @@ $(warning Missing "support" for import sys.o with the '.o' suffix from $(module_
 endif
 endif
 endif
+#
 ifneq "0" "$(words $(wildcard $(hypogeal_twilight_datadir)/am/compile.am))"
 # current as of hypogeal-twilight >= 0.45.0-0.devel (mainline, Epoch:0)
 # WATCHOUT because this idiom MAY NOT be in the "ahead release" series Epoch:2 viz hypogeal-twilight >= 2:0.45

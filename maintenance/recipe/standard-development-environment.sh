@@ -123,49 +123,80 @@
     #
     # Guard against inadvertent command-line UX faux pas:
     #
-    # Guard against microhttpd (inadvertent) vs microhttpd++ (correct)
-    #
-    if [[ -n ${with_microhttpd} ]] ; then
-        __deprecated=with_microhttpd
-        __preferred=with_microhttpd__
-        __displayed=microhttpd++
-        echo "${0##*/}: warning, '${__deprecated?}' should be '${__preferred?} (${__displayed?})"
-        echo "${0##*/}: notice, assigning ${__deprecated?}=${with_microhttpd?} into '${__preferred?} for ${__displayed})"
-        : ${with_microhttpd__:=${with_microhttpd?}}
-    fi 1>&2
-    #
-    # Guard against level (inadvertent) vs leveldb (correct)
-    #
-    if [[ -n ${with_nonstd_level} ]] ; then
-        __deprecated=with_nonstd_level
-        __preferred=with_nonstd_leveldb
-        __displayed=nonstd-leveldb
-        echo "${0##*/}: warning, '${__deprecated?}' should be '${__preferred?} (${__displayed?})"
-        echo "${0##*/}: notice, assigning ${__deprecated?}=${with_nonstd_level?} into '${__preferred?} for ${__displayed})"
-        : ${with_nonstd_leveldb:=${with_nonstd_level?}}
-    fi 1>&2
-    #
-    # Guard against mysql (inadvertent) vs mysql++ (correct)
-    #
-    if [[ -n ${with_nonstd_mysql} ]] ; then
-        __deprecated=with_nonstd_mysql
-        __preferred=with_nonstd_mysql__
-        __displayed=nonstd-mysql++
-        echo "${0##*/}: warning, '${__deprecated?}' should be '${__preferred?} (${__displayed?})"
-        echo "${0##*/}: notice, assigning ${__deprecated?}=${with_nonstd_mysql?} into '${__preferred?} for ${__displayed})"
-        : ${with_nonstd_mysql__:=${with_nonstd_mysql?}}
-    fi 1>&2
-    #
-    # Guard against pgsql (inadvertent) vs pgsql++ (correct)
-    #
-    if [[ -n ${with_nonstd_pgsql} ]] ; then
-        __deprecated=with_nonstd_pgsql
-        __preferred=with_nonstd_pgsql__
-        __displayed=nonstd-pgsql++
-        echo "${0##*/}: warning, '${__deprecated?}' should be '${__preferred?} (${__displayed?})"
-        echo "${0##*/}: notice, assigning ${__deprecated?}=${with_nonstd_pgsql?} into '${__preferred?} for ${__displayed})"
-        : ${with_nonstd_pgsql__:=${with_nonstd_pgsql?}}
-    fi 1>&2
+    {
+        # Guard against gmp, gmpxx, gmpcxx, gmp_cxx (inadvertent) vs gmp_c__ (correct for gmp-c++)
+        #
+        __preferred=with_gmp_c__
+        __displayed=gmp-c++
+        if [[ -n ${with_gmp} ]] ; then
+            __deprecated=with_gmp
+            echo "${0##*/}: warning, '${__deprecated?}' should be '${__preferred?} (${__displayed?})"
+            echo "${0##*/}: notice, assigning ${__deprecated?}=${with_gmp?} into '${__preferred?} for ${__displayed})"
+            : ${with_gmp_c__:=${with_gmp?}}
+        fi 1>&2
+        if [[ -n ${with_gmpxx} ]] ; then
+            __deprecated=with_gmpxx
+            echo "${0##*/}: warning, '${__deprecated?}' should be '${__preferred?} (${__displayed?})"
+            echo "${0##*/}: notice, assigning ${__deprecated?}=${with_gmpxx?} into '${__preferred?} for ${__displayed})"
+            : ${with_gmp_c__:=${with_gmpxx?}}
+        fi 1>&2
+        if [[ -n ${with_gmpcxx} ]] ; then
+            __deprecated=with_gmpcxx
+            echo "${0##*/}: warning, '${__deprecated?}' should be '${__preferred?} (${__displayed?})"
+            echo "${0##*/}: notice, assigning ${__deprecated?}=${with_gmpcxx?} into '${__preferred?} for ${__displayed})"
+            : ${with_gmp_c__:=${with_gmpcxx?}}
+        fi 1>&2
+        if [[ -n ${with_gmp_cxx} ]] ; then
+            __deprecated=with_gmp_cxx
+            echo "${0##*/}: warning, '${__deprecated?}' should be '${__preferred?} (${__displayed?})"
+            echo "${0##*/}: notice, assigning ${__deprecated?}=${with_gmp_cxx?} into '${__preferred?} for ${__displayed})"
+            : ${with_gmp_c__:=${with_gmp_cxx?}}
+        fi 1>&2
+    }; {
+        # Guard against microhttpd (inadvertent) vs microhttpd__ (correct for microhttpd++)
+        #
+        if [[ -n ${with_microhttpd} ]] ; then
+            __deprecated=with_microhttpd
+            __preferred=with_microhttpd__
+            __displayed=microhttpd++
+            echo "${0##*/}: warning, '${__deprecated?}' should be '${__preferred?} (${__displayed?})"
+            echo "${0##*/}: notice, assigning ${__deprecated?}=${with_microhttpd?} into '${__preferred?} for ${__displayed})"
+            : ${with_microhttpd__:=${with_microhttpd?}}
+        fi 1>&2
+    }; {
+        # Guard against level (inadvertent) vs leveldb (correct)
+        #
+        if [[ -n ${with_nonstd_level} ]] ; then
+            __deprecated=with_nonstd_level
+            __preferred=with_nonstd_leveldb
+            __displayed=nonstd-leveldb
+            echo "${0##*/}: warning, '${__deprecated?}' should be '${__preferred?} (${__displayed?})"
+            echo "${0##*/}: notice, assigning ${__deprecated?}=${with_nonstd_level?} into '${__preferred?} for ${__displayed})"
+            : ${with_nonstd_leveldb:=${with_nonstd_level?}}
+        fi 1>&2
+    }; {
+        # Guard against mysql (inadvertent) vs mysql__ (correct for mysql++)
+        #
+        if [[ -n ${with_nonstd_mysql} ]] ; then
+            __deprecated=with_nonstd_mysql
+            __preferred=with_nonstd_mysql__
+            __displayed=nonstd-mysql++
+            echo "${0##*/}: warning, '${__deprecated?}' should be '${__preferred?} (${__displayed?})"
+            echo "${0##*/}: notice, assigning ${__deprecated?}=${with_nonstd_mysql?} into '${__preferred?} for ${__displayed})"
+            : ${with_nonstd_mysql__:=${with_nonstd_mysql?}}
+        fi 1>&2
+    }; {
+        # Guard against pgsql (inadvertent) vs pgsql__ (correct for pgsql++)
+        #
+        if [[ -n ${with_nonstd_pgsql} ]] ; then
+            __deprecated=with_nonstd_pgsql
+            __preferred=with_nonstd_pgsql__
+            __displayed=nonstd-pgsql++
+            echo "${0##*/}: warning, '${__deprecated?}' should be '${__preferred?} (${__displayed?})"
+            echo "${0##*/}: notice, assigning ${__deprecated?}=${with_nonstd_pgsql?} into '${__preferred?} for ${__displayed})"
+            : ${with_nonstd_pgsql__:=${with_nonstd_pgsql?}}
+        fi 1>&2
+    }
 }
 # [[experimental]] or dubious or very new
 {
@@ -245,6 +276,7 @@ fi
 : ${with_nonstd_curlpp:=no} # ....... else /opt/nonstd/curl # ....... OPTIONAL nowadays
 : ${with_nonstd_cryptopp:=no} # ..... else /opt/nonstd/cryptopp # ... OPTIONAL nowadays
 : ${with_nonstd_fmt:=no} # .......... else /opt/nonstd/fmt # ........ OPTIONAL nowadays
+: ${with_nonstd_gmp_c__:=no} # ...... else /opt/nonstd/gmp # ........ OPTIONAL nowadays
 : ${with_nonstd_jsoncpp:=no} # ...... else /opt/nonstd/jsoncpp # .... OPTIONAL nowadays
 : ${with_nonstd_leveldb:=no} # ...... else /opt/nonstd/leveldb # .... OPTIONAL nowadays
 : ${with_nonstd_mysql__:=no} # ...... else /opt/nonstd/mysql++ # .... OPTIONAL nowadays
@@ -320,6 +352,7 @@ function standard_idiomatic_build_recipe() {
         ${with_nonstd_curlpp:+--with-nonstd-curlpp=$with_nonstd_curlpp} \
         ${with_module_fmt:+--with-module-fmt=$with_module_fmt} \
         ${with_nonstd_fmt:+--with-nonstd-fmt=$with_nonstd_fmt} \
+        ${with_nonstd_gmp_c__:+--with-nonstd-gmp-c++=$with_nonstd_gmp_c__} \
         ${with_module_half:+--with-module-half=$with_module_half} \
         ${with_nonstd_half:+--with-nonstd-half=$with_nonstd_half} \
         ${with_module_json:+--with-module-json=$with_module_json} \
