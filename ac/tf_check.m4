@@ -1,5 +1,5 @@
 dnl This is a GNU -*- autoconf -*- specification that is processed by Autoconf.
-dnl Yahoo Inc. 2021
+dnl Copyright Yahoo Inc.
 dnl Licensed under the terms of the Apache-2.0 license.
 dnl For terms, see the LICENSE file at https://github.com/yahoo/tunitas-temerarious-flagship/blob/master/LICENSE
 dnl For terms, see the LICENSE file at https://git.tunitas.technology/all/build/temerarious-flagship/tree/LICENSE
@@ -20,11 +20,13 @@ dnl Some basic well-understood checkification.
 dnl
 
 AC_DEFUN([TF_CHECK_GCC], [
-  ifdef([HGTW_ENABLE_GCC], dnl prefer this newer one
-        [HGTW_ENABLE_GCC],
-        [ifdef([SCOLD_ENABLE_GCC],
-               [SCOLD_ENABLE_GCC],
-               [TF_MSG_WARNING([[TF]_[ENABLE]_[GCC] is not implemented, ignoring it])])])
+  ifdef([HT_ENABLE_GCC], dnl prefer this newer one
+        [HT_ENABLE_GCC],
+        [ifdef([HGTW_ENABLE_GCC], dnl prefer this newer one
+              [HGTW_ENABLE_GCC],
+              [ifdef([SCOLD_ENABLE_GCC],
+                     [SCOLD_ENABLE_GCC],
+                     [TF_MSG_WARNING([[TF]_[ENABLE]_[GCC] is not implemented, ignoring it])])])])
 ])
 
 dnl
@@ -41,16 +43,21 @@ dnl and so on
 dnl but Apache HTTPd is special because it comes with many different clusters of toolflags
 dnl [[FIXTHIS]] document apapche
 dnl
-AC_DEFUN([TF_CHECK_APACHE_HTTPD], [ifdef([HGTW_CHECK_APACHE_HTTPD], [HGTW_CHECK_APACHE_HTTPD], [SCOLD_CHECK_APACHE_HTTPD])])
-AC_DEFUN([TF_CHECK_BOOST],        [ifdef([HGTW_CHECK_BOOST],        [HGTW_CHECK_BOOST],        [SCOLD_CHECK_BOOST])])
-AC_DEFUN([TF_CHECK_CPPUNIT],      [ifdef([HGTW_CHECK_CPPUNIT],      [HGTW_CHECK_CPPUNIT],      [SCOLD_CHECK_CPPUNIT])])
-AC_DEFUN([TF_CHECK_JSONCPP],      [ifdef([HGTW_CHECK_JSONCPP],      [HGTW_CHECK_JSONCPP],      [SCOLD_CHECK_JSONCPP])])
-AC_DEFUN([TF_CHECK_MYSQLPP],      [ifdef([HGTW_CHECK_MYSQLPP],      [HGTW_CHECK_MYSQLPP],      [SCOLD_CHECK_MYSQLPP])])
-AC_DEFUN([TF_CHECK_SQLITE],       [ifdef([HGTW_CHECK_SQLITE],       [HGTW_CHECK_SQLITE],       [SCOLD_CHECK_SQLITE])])
-AC_DEFUN([TF_CHECK_UUID],         [ifdef([HGTW_CHECK_UUID],         [HGTW_CHECK_UUID],         [SCOLD_CHECK_UUID])])
+AC_DEFUN([TF_CHECK_APACHE_HTTPD], [ifdef([HT_CHECK_APACHE_HTTPD], [HT_CHECK_APACHE_HTTPD], [ifdef([HGTW_CHECK_APACHE_HTTPD], [HGTW_CHECK_APACHE_HTTPD], [SCOLD_CHECK_APACHE_HTTPD])])])
+AC_DEFUN([TF_CHECK_BOOST],        [ifdef([HT_CHECK_BOOST],        [HT_CHECK_BOOST],        [ifdef([HGTW_CHECK_BOOST],        [HGTW_CHECK_BOOST],        [SCOLD_CHECK_BOOST])])])
+AC_DEFUN([TF_CHECK_CPPUNIT],      [ifdef([HT_CHECK_CPPUNIT],      [HT_CHECK_CPPUNIT],      [ifdef([HGTW_CHECK_CPPUNIT],      [HGTW_CHECK_CPPUNIT],      [SCOLD_CHECK_CPPUNIT])])])
+AC_DEFUN([TF_CHECK_GMP_CXX],      [ifdef([HT_CHECK_GMP_CXX],      [HT_CHECK_GMP_CXX],      [ifdef([HGTW_CHECK_GMP_CXX],      [HGTW_CHECK_GMP_CXX],      [SCOLD_CHECK_GMP_CXX])])])
+AC_DEFUN([TF_CHECK_HALF],         [ifdef([HT_CHECK_HALF],         [HT_CHECK_HALF],         [ifdef([HGTW_CHECK_HALF],         [HGTW_CHECK_HALF],         [SCOLD_CHECK_HALF])])])
+AC_DEFUN([TF_CHECK_JSONCPP],      [ifdef([HT_CHECK_JSONCPP],      [HT_CHECK_JSONCPP],      [ifdef([HGTW_CHECK_JSONCPP],      [HGTW_CHECK_JSONCPP],      [SCOLD_CHECK_JSONCPP])])])
+AC_DEFUN([TF_CHECK_MYSQLPP],      [ifdef([HT_CHECK_MYSQLPP],      [HT_CHECK_MYSQLPP],      [ifdef([HGTW_CHECK_MYSQLPP],      [HGTW_CHECK_MYSQLPP],      [SCOLD_CHECK_MYSQLPP])])])
+AC_DEFUN([TF_CHECK_SQLITE],       [ifdef([HT_CHECK_SQLITE],       [HT_CHECK_SQLITE],       [ifdef([HGTW_CHECK_SQLITE],       [HGTW_CHECK_SQLITE],       [SCOLD_CHECK_SQLITE])])])
+AC_DEFUN([TF_CHECK_UUID],         [ifdef([HT_CHECK_UUID],         [HT_CHECK_UUID],         [ifdef([HGTW_CHECK_UUID],         [HGTW_CHECK_UUID],         [SCOLD_CHECK_UUID])])])
 
 dnl
-dnl TF_CHECK_STD_FILESYSTEM  sets up -lstdc++fs, needed since gcc5
+dnl TF_CHECK_STD_FILESYSTEM  sets up -lstdc++fs
+dnl
+dnl needed since gcc5
+dnl no longer needed since gcc??
 dnl
 dnl Usage:
 dnl
@@ -62,7 +69,9 @@ dnl   Makefile_COMPILER_CXXFLAGS_SET = @CXXFLAGS_gcc@ @CXXFLAGS_gdb@
 dnl   Makefile_COMPILER_LDFLAGS_SET  =  @LDFLAGS_gcc@  @LDFLAGS_gdb@ @libstd_filesystem@ <------------- this
 dnl
 AC_DEFUN([TF_CHECK_STD_FILESYSTEM], [
-   ifdef([HGTW_CHECK_STD_FILESYSTEM], [
+   ifdef([HT_CHECK_STD_FILESYSTEM], [
+        HT_CHECK_STD_FILESYSTEM
+   ], [ifdef([HGTW_CHECK_STD_FILESYSTEM], [
         HGTW_CHECK_STD_FILESYSTEM
    ], [
        # Any reasonable and recent version of gcc needs this
@@ -70,7 +79,7 @@ AC_DEFUN([TF_CHECK_STD_FILESYSTEM], [
        #   /usr/lib/gcc/x86_64-redhat-linux/8/libstdc++fs.a
        #   /usr/lib/gcc/x86_64-redhat-linux/8/32/libstdc++fs.a
        AC_SUBST([libstd_filesystem], [-lstdc++fs])
-    ])
+  ])])
 ])
 
 ########################################
@@ -79,7 +88,7 @@ AC_DEFUN([TF_CHECK_STD_FILESYSTEM], [
 # USE -----> libuuid-devel has uuid.pc
 # USE -----> libuuid-devel-2.24.2-1.fc20.x86_64
 #
-# AVOID ---> uuid-devel does not
+# AVOID ---> uuid-devel does not have uuid.pc
 # AVOID ---> uuid-devel-1.6.2-21.fc20.x86_64
 #
 # WATCHOUT - package 'libuuid' has pkgconfig named 'uuid.pc' (not named 'libuuid.pc' as with many other libraries)
